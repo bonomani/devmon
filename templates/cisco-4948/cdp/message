@@ -1,0 +1,3 @@
+TABLE:
+Local Port|Remote Device|Remote Device Port|Platform|VTP Domain|Native VLAN|Duplex
+{cdpCacheDeviceLocalPort}|{cdpCacheDeviceId}|{cdpCacheDevicePort}|{cdpCachePlatform}|{cdpCacheVTPMgmtDomain}|{cdpCacheNativeVLAN}|{cdpCacheDuplex}

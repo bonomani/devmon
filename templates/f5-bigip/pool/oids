@@ -1,0 +1,19 @@
+PoolName : .1.3.6.1.4.1.3375.2.2.5.1.2.1.1 : branch
+PoolLbMode : .1.3.6.1.4.1.3375.2.2.5.1.2.1.2 : branch
+PoolActiveMemberCnt : .1.3.6.1.4.1.3375.2.2.5.1.2.1.8 : branch
+PoolMonitorRule : .1.3.6.1.4.1.3375.2.2.5.1.2.1.17 : branch
+PoolStatusReason : .1.3.6.1.4.1.3375.2.2.5.1.2.1.21 : branch
+PoolStatServerCurConns : .1.3.6.1.4.1.3375.2.2.5.2.3.1.15 : branch
+
+PoolMemberPoolName 	: .1.3.6.1.4.1.3375.2.2.5.3.2.1.1 : branch
+PoolMemberAddr 		: .1.3.6.1.4.1.3375.2.2.5.3.2.1.3 : branch
+PoolMemberPort		: .1.3.6.1.4.1.3375.2.2.5.3.2.1.4 : branch
+PoolMemberStatusReason	: .1.3.6.1.4.1.3375.2.2.5.3.2.1.18 : branch
+
+NodeAddrAddr                    : .1.3.6.1.4.1.3375.2.2.4.1.2.1.2 : branch
+NodeAddrPoolMemberRefCount      : .1.3.6.1.4.1.3375.2.2.4.1.2.1.11 : branch
+NodeAddrScreenName              : .1.3.6.1.4.1.3375.2.2.4.1.2.1.12 : branch
+NodeAddrStatusReason            : .1.3.6.1.4.1.3375.2.2.4.1.2.1.16 : branch
+NodeAddrStatServerCurConns      : .1.3.6.1.4.1.3375.2.2.4.2.3.1.9 : branch
+
+

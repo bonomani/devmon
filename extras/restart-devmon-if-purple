@@ -1,0 +1,47 @@
+#!/bin/bash
+if [ "$BB" == "" ]
+then
+	echo "This script must be run under a Hobbit or Xymon environment" >&2
+	echo "e.g. by: bbcmd $0" >&2
+	exit 1
+fi
+if [ "$BBDISPLAYS" != "" ]
+then
+	BBDISP=${BBDISPLAYS#,*}
+fi
+COLOR=$($BB $BBDISP "hobbitdboard host=$HOSTNAME test=dm" | cut -d'|' -f3)
+
+if [ "`id -u`" -eq 0 ]
+then
+	DEVMON="/etc/init.d/devmon"
+	PKILL="pkill"
+else
+	DEVMON="sudo /etc/init.d/devmon"
+	PKILL="sudo pkill"
+fi
+
+if [ "$COLOR" == "purple" ]
+then
+	LOGSAVE=/var/log/devmon/failures/devmon-failure-`date +%Y-%m-%d-%H:%M:%S`.log
+	echo "Devmon is purple, saving last 200 lines of log to $LOGSAVE"
+	tail -n200 /var/log/devmon/devmon.log > $LOGSAVE
+	$DEVMON stop
+	NUM=$(pgrep -u devmon|wc -l)
+	if [ "$NUM" -ne 0 ]
+	then 
+		echo "Devmon failed to stop cleanly, terminating manually"
+		$PKILL -u devmon
+		sleep 5
+	fi
+	NUM=$(pgrep -u devmon|wc -l)
+	if [ "$NUM" -ne 0 ]
+	then 
+		echo "Devmon failed to terminate cleanly, killing manually"
+		$PKILL -9 -u devmon
+	fi
+	$DEVMON start
+else
+	[ "$DEBUG" == 1 ] && echo "Devmon isn't purple, it is $COLOR"
+	exit 0
+fi
+

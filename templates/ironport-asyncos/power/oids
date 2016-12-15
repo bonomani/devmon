@@ -1,0 +1,3 @@
+powerSupplyStatus	: .1.3.6.1.4.1.15497.1.1.1.8.1.2	: branch
+powerSupplyRedundancy	: .1.3.6.1.4.1.15497.1.1.1.8.1.3	: branch
+powerSupplyName		: .1.3.6.1.4.1.15497.1.1.1.8.1.4	: branch

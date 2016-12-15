@@ -1,0 +1,4 @@
+ifName		: .1.3.6.1.2.1.2.2.1.2		: branch
+ifBps		: .1.3.6.1.2.1.2.2.1.5		: branch
+ifAdminStatNum	: .1.3.6.1.2.1.2.2.1.7		: branch
+ifOperStatNum	: .1.3.6.1.2.1.2.2.1.8		: branch

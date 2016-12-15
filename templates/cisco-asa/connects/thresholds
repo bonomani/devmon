@@ -1,0 +1,3 @@
+cur_conn : red          : >400000       : Number of connections very high: {cur_conn}
+cur_conn : yellow       : >100000       : Number of connections is high: {cur_conn}
+cur_conn : green        : 0              : Number of connections is normal: {cur_conn}

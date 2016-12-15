@@ -1,0 +1,14 @@
+This template was created by Eric Schwimmer.
+
+NOTE: This does not imply any support responsibilities, liabiltiy in
+case of this template or devmon causing phsyical, monetary or emotional
+damanges, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 
+
+This template is very similar to compaq-server, except it doesn't try and
+enumerate spare phyiscal drives (which fails if they are not present, causing
+all the test to fail), and doesn't try and check the controller status (which
+doesn't work for me on newer hpasm versions). Use this test on servers which
+don't have any hot spares available in the SmartArry configuration.
+
+$Id: README 104 2008-12-08 22:04:34Z buchanmilne $

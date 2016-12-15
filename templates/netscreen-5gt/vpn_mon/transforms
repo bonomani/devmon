@@ -1,0 +1,3 @@
+nsVpnMonTunnelTypeTxt:  SWITCH	: {nsVpnMonTunnelType} 0=reserved,1=isakmp,2=ipsec-ah,3=ipsec-esp,4=ipcomp
+nsVpnMonP1StateTxt: SWITCH 	: {nsVpnMonP1State} 0=inactive,1=active
+nsVpnMonP2StateTxt: SWITCH 	: {nsVpnMonP2State} 0=inactive,1=active

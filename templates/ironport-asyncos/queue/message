@@ -1,0 +1,3 @@
+{queueAvailabilityStatustxt.color} Queue Status {queueAvailabilityStatustxt}
+Queue utilization: {perCentQueueUtilization}
+Work Queue Messages: {workQueueMessages}

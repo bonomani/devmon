@@ -1,0 +1,2 @@
+diskIODevice : alarm : .+
+diskIODevice : ignore : loop.*|ram.*

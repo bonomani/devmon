@@ -1,0 +1,7 @@
+
+Updates
+TABLE: noalarmsmsg,
+Service|Number of updates|Number of failed updates
+{updateServiceName}|{updates}|{updateFailures}
+
+

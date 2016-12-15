@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: asr1000
+snmpver	: 2
+sysdesc : Cisco IOS Software.*IOS-XE Software

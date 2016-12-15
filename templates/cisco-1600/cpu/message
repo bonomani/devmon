@@ -1,0 +1,10 @@
+
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{sysUpTimeSecs.color}: Last reboot due to {sysReloadReason}
+{CPUTotal5Min.color}: CPU usage: {CPUTotal5Min}%
+
+System description:
+{sysDescr}
+<!--
+<br>CPU 5 min average: {CPUTotal5Min}
+-->

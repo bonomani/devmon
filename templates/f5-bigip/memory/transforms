@@ -1,0 +1,3 @@
+MemUsed_T	: MATH : {MemUsed} / 1000
+MemTotal_T	: MATH : {MemTotal} / 1000
+MemPercent       : MATH         :  ( {MemUsed} x 100 )  / {MemTotal}

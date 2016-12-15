@@ -1,0 +1,3 @@
+upsInputVoltage	: red		: 0			: UPS input voltage lost.
+upsInputVoltage	: red		: >255			: UPS input voltage is extremely high. ({upsInputVoltage})
+upsInputVoltage	: yellow	: >250     		: UPS input voltage is abnormal ({upsInputVoltage})

@@ -1,0 +1,27 @@
+memModulesStatusModuleName      : .1.3.6.1.4.1.318.1.1.10.4.1.2.1.2.0 : leaf
+memModulesStatusModuleLocation  : .1.3.6.1.4.1.318.1.1.10.4.1.2.1.3.0 : leaf
+memModulesStatusModelNumber     : .1.3.6.1.4.1.318.1.1.10.4.1.2.1.4.0 : leaf
+memModulesStatusSerialNumber    : .1.3.6.1.4.1.318.1.1.10.4.1.2.1.5.0 : leaf
+memModulesStatusFirmwareRev     : .1.3.6.1.4.1.318.1.1.10.4.1.2.1.6.0 : leaf
+memModulesStatusHardwareRev     : .1.3.6.1.4.1.318.1.1.10.4.1.2.1.7.0 : leaf
+memSensorsStatusSysTempUnits    : .1.3.6.1.4.1.318.1.1.10.4.2.1.0 : leaf
+memSensorsStatusModuleNumber    : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.1     : branch
+memSensorsStatusSensorNumber    : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.2     : branch
+memSensorsStatusSensorName      : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.3     : branch
+memSensorsStatusSensorLocation  : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.4     : branch
+memSensorsTemperature   : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.5     : branch
+memSensorsHumidity      : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.6     : branch
+memSensorsCommStatus    : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.7     : branch
+memSensorsAlarmStatus   : .1.3.6.1.4.1.318.1.1.10.4.2.3.1.8     : branch
+memSensorsTempMaxThresh : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.6     : branch
+memSensorsTempHighThresh        : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.7     : branch
+memSensorsTempLowThresh : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.8     : branch
+memSensorsTempMinThresh : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.9     : branch
+memSensorsHumidityMaxThresh     : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.19    : branch
+memSensorsHumidityHighThresh    : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.20    : branch
+memSensorsHumidityLowThresh     : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.21    : branch
+memSensorsHumidityMinThresh     : .1.3.6.1.4.1.318.1.1.10.4.2.5.1.22    : branch
+
+#upsEnvTemp	: .1.3.6.1.4.1.318.1.1.10.2.3.2.1.4.1	: leaf
+#upsEnvTempUnits	: .1.3.6.1.4.1.318.1.1.10.2.3.2.1.5.1	: leaf
+#upsEnvHumidity	: .1.3.6.1.4.1.318.1.1.10.2.3.2.1.6.1	: leaf

@@ -1,0 +1,6 @@
+vendor	: cisco
+model	: 4948
+snmpver	: 2
+sysdesc : Catalyst 4000
+#SNMPv2-MIB::sysObjectID.0 = OID: CISCO-PRODUCTS-MIB::catalyst4948
+#.1.3.6.1.2.1.1.2.0 = OID: .1.3.6.1.4.1.9.1.626

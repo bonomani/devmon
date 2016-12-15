@@ -1,0 +1,3 @@
+Memory		Used	Total	Percentage
+Physical	{MemSizeUsed}kB	{MemSize}kB	{MemPerUse}% {MemPerUse.color}
+

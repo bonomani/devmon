@@ -1,0 +1,7 @@
+logFaultTolTxt	: SWITCH	: {logDrvFaultTol} 2=None,3=Mirroring,4=Data guard,5=Distributed data guard,6=Advanced data guard
+logStatTxt	: SWITCH        : {logDrvStatus} 2=OK,3=Failed,4=Unconfigured,5=Recovering,6=Read rebuild,7=Rebuilding,8=Wrong drive,9=Bad connect,10=Overheating,11=Shutdown,12=Expanding,13=Not available,14=Queued for expansion
+logSprIdTxt	: UNPACK	: {logDrvSprIds} C* ","
+logPhysIdTxt	: UNPACK	: {logDrvPhysIds} C* ","
+
+phyStatTxt	: SWITCH	: {phyDrvStatus} 1=Other,2=OK,3=Failed,4=Predictive Failure
+phyDrvSpdTxt	: SWITCH	: {phyDrvSpeed} 1=Other,2=7200 rpm,3=10k rpm,4=15k rpm

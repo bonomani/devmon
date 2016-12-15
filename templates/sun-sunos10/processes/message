@@ -1,0 +1,5 @@
+# We need to collect values from multiple pids of the same process name
+# before the graphs will be useful
+TABLE:rrd(DS:ds0:hrSWRunPerfCPU:COUNTER; DS:ds1:hrSWRunPerfMem:GAUGE)
+Name|PID|CPU|Mem (kB)
+{hrSWRunName}|{hrSWRunIndex}|{hrSWRunPerfCPU}|{hrSWRunPerfMem}

@@ -1,0 +1,8 @@
+
+# Switch our numeric values to their textual equivalents
+upsOutStat	: SWITCH	: {upsOutStatNum} 1=Online,2=On battery
+upsBattRep	: SWITCH	: {upsBattRepNum} 0=Battery OK,1=Battery needs replacing
+
+# Do numeric translations
+upsVoltIn	: MATH		: {upsVoltInNum} / 10
+upsVoltOut	: MATH		: {upsVoltOutNum} / 10

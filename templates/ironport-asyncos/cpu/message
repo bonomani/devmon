@@ -1,0 +1,7 @@
+{perCentCPUUtilization.color}: CPU usage: {perCentCPUUtilization}%
+
+System description:
+{sysdescr}
+<!--
+<br>CPU 5 min average: {perCentCPUUtilization}
+-->

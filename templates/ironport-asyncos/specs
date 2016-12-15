@@ -1,0 +1,6 @@
+vendor	: ironport
+model	: asyncos
+snmpver	: 2
+#IronPort Model X1050, AsyncOS Version: 6.1.0-306, Build Date: 2008-05-05, Serial #: XXXXXXXXXXXX-XXXXXXX
+#IronPort Appliance
+sysdesc : IronPort.*(AsyncOS|Appliance)

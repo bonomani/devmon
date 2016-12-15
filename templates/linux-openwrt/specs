@@ -1,0 +1,4 @@
+vendor	: linux
+model	: openwrt
+snmpver	: 2
+sysdesc : OpenWrt

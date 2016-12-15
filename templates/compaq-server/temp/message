@@ -1,0 +1,6 @@
+
+Thermal sensors:
+TABLE: noalarmsmsg,rrd(DS:ds0:cpqHeTemperatureCelsius:GAUGE; DS:ds1:cpqHeTemperatureThreshold:GAUGE)
+ID|Sensor Location|Temp|Threshold|Condition|Threshold Type
+{cpqHeTemperatureIndex}|{cpqHeTemperatureLocaleTxt}|{cpqHeTemperatureCelsius}|{cpqHeTemperatureThreshold}|{cpqHeTemperatureConditionTxt.color}{cpqHeTemperatureConditionTxt}|{cpqHeTemperatureThresholdTxt}
+

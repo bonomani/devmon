@@ -1,0 +1,2 @@
+ifName : alarm  : .+
+ifName : ignore : Nu.+|Vl.+|VLAN.+

@@ -1,0 +1,6 @@
+upsOutputPercentLoad	: red		: 90			: UPS load is very high - phase {upsOutPhaseIndex} = {upsOutputPercentLoad}%
+upsOutputPercentLoad	: yellow	: 70			: UPS load is high - phase {upsOutPhaseIndex} = {upsOutputPercentLoad}%
+
+upsOutputSourceTxt	: red		: Off|Bypass
+upsOutputSourceTxt	: yellow	: Battery|Booster|Reducer|Other
+upsOutputSourceTxt	: green		: None|Normal

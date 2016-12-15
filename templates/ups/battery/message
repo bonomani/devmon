@@ -1,0 +1,8 @@
+{upsBattStat.errors}
+
+Battery Status:      {upsBattStat.color}{upsBattStat}
+
+UPS Run Statistics
+TABLE: noalarmsmsg,rrd(name:battery; pri:upsBattIDX; DS:runrem:upsEstimatedMinutesRemaining:GAUGE; DS:batcap:upsEstimatedChargeRemaining:GAUGE; DS:battime:upsSecondsOnBattery:GAUGE; DS:volts:upsBatteryVoltageTxt:GAUGE; DS:amps:upsBatteryCurrent:GAUGE; DS:temp:upsBatteryTemperature:GAUGE; )
+Runtime Remaining|Battery Capacity|Time on battery|Battery Volts|Amps|Temp
+{upsEstimatedMinutesRemaining.errors}{upsEstimatedMinutesRemaining.color}{upsEstimatedMinutesRemaining} minutes (red={upsEstimatedMinutesRemaining.thresh:red}m)|{upsEstimatedChargeRemaining}%|{upsSecondsOnBattery.errors}{upsSecondsOnBattery.color}{upsSecondsOnBattery} secs|{upsBatteryVoltageTxt} v|{upsBatteryCurrent} A|{upsBatteryTemperature} (C)

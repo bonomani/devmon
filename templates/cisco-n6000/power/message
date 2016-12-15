@@ -1,0 +1,3 @@
+TABLE:
+Name|Model|Serial|cefcFRUPowerAdminStatus|cefcFRUPowerOperStatus|cefcFRUCurrent
+{cefcFRUentPhysicalName}|<!--{cefcFRUentPhysicalClassTxt}--> {cefcFRUentPhysicalModelName}|{cefcFRUentPhysicalSerialNum}|{cefcFRUPowerStatus.color}{cefcFRUPowerStatus}{cefcFRUPowerStatus.errors} ({cefcFRUPowerAdminStatusTxt})|{cefcFRUPowerOperStatusTxt} ({cefcFRUPowerOperStatus})|{cefcFRUCurrent}

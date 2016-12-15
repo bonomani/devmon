@@ -1,0 +1,5 @@
+BGP Local AS: {bgpLocalAs}
+
+TABLE:
+Peer IP|Identifier|Remote AS|Peer Status|Negotiated Version
+{bgpPeerPeerRemoteAddr}|{bgpPeerIdentifier}|{bgpPeerPeerRemoteAS}|{bgpPeerStatus.color} {bgpPeerStatus}{bgpPeerStatus.errors}|{bgpPeerNegotiatedVersion}

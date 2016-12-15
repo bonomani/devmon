@@ -1,0 +1,10 @@
+#http://im14c.servadmin.com/cgi-bin/getmib3.cgi?i=1&n=CPQHLTH-MIB&r=compaq&f=Compaq-Health.mib&v=v1&t=tbl&o=cpqHeEventLogTable
+cpqHeEventLogEntryNumber: 1.3.6.1.4.1.232.6.2.11.3.1.1 : 	branch
+cpqHeEventLogEntrySeverity: 1.3.6.1.4.1.232.6.2.11.3.1.2 :	branch
+cpqHeEventLogEntryClass: 1.3.6.1.4.1.232.6.2.11.3.1.3 :		branch
+cpqHeEventLogEntryCode: 1.3.6.1.4.1.232.6.2.11.3.1.4 :		branch
+cpqHeEventLogEntryCount: 1.3.6.1.4.1.232.6.2.11.3.1.5 :		branch
+cpqHeEventLogInitialTime: 1.3.6.1.4.1.232.6.2.11.3.1.6 :	branch
+cpqHeEventLogUpdateTime: 1.3.6.1.4.1.232.6.2.11.3.1.7 :		branch
+cpqHeEventLogErrorDesc: 1.3.6.1.4.1.232.6.2.11.3.1.8 :		branch
+cpqHeEventLogFreeFormData: 1.3.6.1.4.1.232.6.2.11.3.1.9 : 	branch

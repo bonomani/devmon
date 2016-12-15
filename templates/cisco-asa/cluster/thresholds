@@ -1,0 +1,6 @@
+second_txt       : red           : Error
+second_txt       : yellow        : Active
+second_txt       : green         : Standby
+first_txt        : red           : Error
+first_txt        : yellow        : Standby
+first_txt        : green         : Active

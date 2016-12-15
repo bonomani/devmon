@@ -1,0 +1,3 @@
+TABLE:
+Process | Hours Running | CPU | Memory KB | Proc Status
+{proc} | {hrrun} | {cpu} | {mem} | {procswitch}

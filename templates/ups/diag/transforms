@@ -1,0 +1,13 @@
+# Switch our numeric values to their textual equivalents
+upsTestResultsSummaryTxt        : SWITCH        : {upsTestResultsSummary} 1=donePass,2=doneWarning,3=doneError,4=aborted,5=inProgress,6=noTestsInitiated
+upsConfigAudibleStatusTxt : SWITCH        : {upsConfigAudibleStatus} 1=disabled,2=enabled,3=muted
+#upsAlarmDescrIDX : INDEX  : {upsAlarmDescr}
+#upsAlarmDescrID	 : REGSUB : {upsAlarmDescr} /^.*\.(\d+)$/$1/
+#upsAlarmDescrTxt : SWITCH : {upsAlarmDescrID} 1=Battery Bad,2=On Battery,3=Low Battery,4=Depleted Battery,5=Temperature Bad,6=Input Bad,7=Output Bad,8=Output Overload,9=On Bypass,10=Bypass Bad,11=Ouput Off as Requested,12=UPS Off as Requested,13=Charger Failed,14=UPS Output Off,15=UPS System Off,16=Fan Failure,17=Fuse Failure,18=General Fault,19=Diagnostic Test Failed,20=Communications Lost,21=Awaiting Power,22=Shutdown Pending,23=Shutdown Imminent,24=Test in Progress
+#upsAlarmTimeTxt : ELAPSED  : {upsAlarmTime}
+
+upsTestIdID	 : REGSUB : {upsTestId} /^.*\.(\d+)$/$1/
+upsTestIdTxt : SWITCH : {upsTestIdID} 1=No Tests Initiated,2=Abort Test in Progress,3=General Systems Test,4=Quick Battery Test,5=Deep Battery Calibration
+upsTestResultsSummaryTxt        : SWITCH        : {upsTestResultsSummary} 1=Done Pass,2=Done Warning,3=Done Error,4=Aborted,5=In Progress,6=No Tests Initiated
+upsTestStartTimeTxt : ELAPSED  : {upsTestStartTime}
+upsTestElapsedTimeTxt : ELAPSED  : {upsTestElapsedTime}

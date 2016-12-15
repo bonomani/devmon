@@ -1,0 +1,19 @@
+towerStatusTxt  : SWITCH        : {towerStatus} 0=normal,1=noComm,2=fanFail,3=overTemp
+infeedCapabInt  : UNPACK        : {infeedCapabilities} C1
+infeedCapaOnSense    : MATH     : ({infeedCapabInt} & 128) / 128 : 0
+infeedCapaLoadSense  : MATH     : ({infeedCapabInt} & 64) / 64 : 0
+infeedCapaPowerCont  : MATH     : ({infeedCapabInt} & 32) / 32 : 0
+infeedCapaFailSafe   : MATH     : ({infeedCapabInt} & 16) / 16 : 0
+infeedCapaDefOff     : MATH     : ({infeedCapabInt} & 8) / 8 : 0
+infeedCapaVoltSense  : MATH     : ({infeedCapabInt} & 4) / 4 : 0
+infeedCapaPowerSense : MATH     : ({infeedCapabInt} & 2) / 2 : 0
+
+infeedStatusTxt : SWITCH        : {infeedStatus} 0=off,1=on,2=offWait,3=onWait,4=offError,5=onError,6=noComm
+infeedLoadStatusTxt     : SWITCH        : {infeedLoadStatus} 0=normal,1=notOn,2=reading,3=loadLow,4=loadHigh,5=overLoad,6=readError,7=noComm
+infeedLoadValueAmps : MATH      : {infeedLoadValue} / 100 : 2
+infeedLoadHighThreshAmps : MATH      : {infeedLoadHighThresh} / 100 : 2
+outletStatusTxt : SWITCH        : {outletStatus} 0=off,1=on,2=offWait,3=onWait,4=offError,5=onError,6=noComm,7=reading,8=offFuse,9=onFuse
+outletLoadStatusTxt     : SWITCH        : {outletLoadStatus} 0=normal,1=notOn,2=reading,3=loadLow,4=loadHigh,5=overLoad,6=readError,7=noComm
+outletControlStateTxt   : SWITCH        : {outletControlState} 0=idleOff,1=idleOn,2=wakeOff,3=wakeOn,4=off,5=on,6=lockedOff,7=lockedOn,8=reboot,9=shutdown,10=pendOn,11=pendOff,12=minimumOff,13=minimumOn,14=eventOff,15=eventOn,16=eventReboot,17=eventShutdown
+outletControlActionTxt  : SWITCH        : {outletControlAction} 0=none,1=on,2=off,3=reboot
+

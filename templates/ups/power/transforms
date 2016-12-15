@@ -1,0 +1,9 @@
+upsOutPhaseIndex 	: INDEX	: {upsOutputVoltage}
+upsOutputPowerkW	: MATH	: {upsOutputPower} / 1000 : 1
+upsOutputCurrentA	: MATH	: {upsOutputCurrent} / 10 : 1
+upsConfigOutputFreqHz	: MATH	: {upsConfigOutputFreq} / 10 : 1
+upsConfigOutputkVA   	: MATH	: {upsConfigOutputVA} / 1000 : 1
+upsConfigOutputPowerkW	: MATH	: {upsConfigOutputPower} / 1000 : 1
+
+# Switch our numeric values to their textual equivalents
+upsOutputSourceTxt : SWITCH : {upsOutputSource} 1=Other,2=None,3=Normal,4=Bypass,5=Battery,6=Booster,7=Reducer

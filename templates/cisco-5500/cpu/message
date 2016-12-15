@@ -1,0 +1,8 @@
+
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{CPUTotal5Min.color}: CPU usage: {CPUTotal5Min}%
+
+System description:
+{sysDescr}
+<!-- DEVMON to RRD <br>CPU 5 min average: {CPUTotal5Min}
+-->

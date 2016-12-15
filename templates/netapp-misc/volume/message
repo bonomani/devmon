@@ -1,0 +1,4 @@
+<b>Volumes</b>
+TABLE:
+File System|Total Size|Used|% Used
+{dfFileSys}|{dfGBytesTotal}GB|{dfGBytesUsed}GB|{dfPercent.color}{dfPercent}%{dfPercent.errors}

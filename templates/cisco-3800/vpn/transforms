@@ -1,0 +1,16 @@
+cipsStaticCryptomapPeerp1B : SUBSTR :{cipsStaticCryptomapPeerB} 0 1
+cipsStaticCryptomapPeerp2B : SUBSTR :{cipsStaticCryptomapPeerB} 1 1
+cipsStaticCryptomapPeerp3B : SUBSTR :{cipsStaticCryptomapPeerB} 2 1
+cipsStaticCryptomapPeerp4B : SUBSTR :{cipsStaticCryptomapPeerB} 3 1
+
+cipsStaticCryptomapPeerp1H : UNPACK : {cipsStaticCryptomapPeerp1B} H2
+cipsStaticCryptomapPeerp2H : UNPACK : {cipsStaticCryptomapPeerp2B} H2
+cipsStaticCryptomapPeerp3H : UNPACK : {cipsStaticCryptomapPeerp3B} H2
+cipsStaticCryptomapPeerp4H : UNPACK : {cipsStaticCryptomapPeerp4B} H2
+
+cipsStaticCryptomapPeerp1 : CONVERT : {cipsStaticCryptomapPeerp1H} hex
+cipsStaticCryptomapPeerp2 : CONVERT : {cipsStaticCryptomapPeerp2H} hex
+cipsStaticCryptomapPeerp3 : CONVERT : {cipsStaticCryptomapPeerp3H} hex
+cipsStaticCryptomapPeerp4 : CONVERT : {cipsStaticCryptomapPeerp4H} hex
+
+cipsStaticCryptomapPeer : REGSUB : {cipsStaticCryptomapPeerB} /.*/{cipsStaticCryptomapPeerp1}.{cipsStaticCryptomapPeerp2}.{cipsStaticCryptomapPeerp3}.{cipsStaticCryptomapPeerp4}/

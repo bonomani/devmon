@@ -1,0 +1,16 @@
+Sentry PDU
+Version:  {systemVersion}
+NIC ser#: {systemNICSerialNumber}
+Location: {systemLocation}
+Towers:   {systemTowerCount}
+EnvMon:   {systemEnvMonCount}
+
+Towers
+TABLE: noalarmsmsg
+ID|Name|Status|Infeeds#
+{towerID}|{towerName}|{towerStatusTxt.color}{towerStatusTxt}|{towerInfeedCount}
+
+Infeeds
+TABLE: noalarmsmsg,rrd(name:current; pri:infeedID; DS:current:infeedLoadValue:GAUGE; )
+ID|Name|Sts|LoadSts|Load|Hi Thresh|# Outlets|OnSense|LoadSense|PwrCtrl|FailSafe|DfltOff|VSense|PwrSense
+{infeedID}|{infeedName}|{infeedStatusTxt.color}{infeedStatusTxt}|{infeedLoadStatusTxt.color}{infeedLoadStatusTxt}|{infeedLoadValueAmps} A|{infeedLoadHighThreshAmps} A|{infeedOutletCount}|{infeedCapaOnSense}|{infeedCapaLoadSense}|{infeedCapaPowerCont}|{infeedCapaFailSafe}|{infeedCapaDefOff}|{infeedCapaVoltSense}|{infeedCapaPowerSense}

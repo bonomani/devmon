@@ -1,0 +1,24 @@
+adpAdapterNumber	: 1.3.6.1.4.1.3582.1.1.1.1.1	: branch
+biosVersion		: 1.3.6.1.4.1.3582.1.1.1.1.4	: branch
+dramSizeInMB		: 1.3.6.1.4.1.3582.1.1.1.1.5	: branch
+firmwareVersion		: 1.3.6.1.4.1.3582.1.1.1.1.3	: branch
+
+ldAdapterNumber		: 1.3.6.1.4.1.3582.1.1.2.1.1	: branch
+logicalDriveNumber	: 1.3.6.1.4.1.3582.1.1.2.1.2	: branch
+status			: 1.3.6.1.4.1.3582.1.1.2.1.3	: branch
+sizeInMB		: 1.3.6.1.4.1.3582.1.1.2.1.4	: branch
+raidLevel		: 1.3.6.1.4.1.3582.1.1.2.1.5	: branch
+stripeSize		: 1.3.6.1.4.1.3582.1.1.2.1.6	: branch
+checkConsistencyOrInitializeProgress	: 1.3.6.1.4.1.3582.1.1.2.1.13	: branch
+
+
+physAdapterNumber	: 1.3.6.1.4.1.3582.1.1.3.1.1	: branch
+physChannel		: 1.3.6.1.4.1.3582.1.1.3.1.2	: branch
+targetID		: 1.3.6.1.4.1.3582.1.1.3.1.3	: branch
+state			: 1.3.6.1.4.1.3582.1.1.3.1.4	: branch
+arrayPosition		: 1.3.6.1.4.1.3582.1.1.3.1.5	: branch
+sizeMB			: 1.3.6.1.4.1.3582.1.1.3.1.6	: branch
+phyinquiryString	: 1.3.6.1.4.1.3582.1.1.3.1.8	: branch
+rebuildProgress		: 1.3.6.1.4.1.3582.1.1.3.1.12	: branch
+mediumErrors		: 1.3.6.1.4.1.3582.1.1.3.1.13	: branch
+

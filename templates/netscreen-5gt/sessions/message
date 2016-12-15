@@ -1,0 +1,9 @@
+
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{nsResSessAllocate.color}: number of active sessions: {nsResSessAllocate}
+
+System description:
+{sysDescr}
+<!--
+<br>number of sessions : {nsResSessAllocate}
+-->

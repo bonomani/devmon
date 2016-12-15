@@ -1,0 +1,3 @@
+ConfigsyncState  : yellow  : 1 - Local config modified, recommend configsync to peer
+FailoverIsOk_T_T : yellow : NOK : The cluster is not in optimal configuration.
+

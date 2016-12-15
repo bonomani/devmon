@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 7206
+snmpver	: 2
+sysdesc : 7200

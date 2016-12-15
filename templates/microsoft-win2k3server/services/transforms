@@ -1,0 +1,1 @@
+procswitch        : SWITCH        : {procstatus} 1=running,2=Waiting_for_resource,3=notRunnable,4=notloaded

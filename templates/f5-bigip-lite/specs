@@ -1,0 +1,4 @@
+vendor	: f5
+model	: bigip-lite
+snmpver	: 2
+sysdesc : BIG\-IP

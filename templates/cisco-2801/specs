@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 2801
+snmpver	: 2
+sysdesc : C2801

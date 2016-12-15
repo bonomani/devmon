@@ -1,0 +1,4 @@
+ciscoEnvMonTemperatureStateTxt	: green		: normal
+ciscoEnvMonTemperatureStateTxt	: yellow	: warning|shutdown|notFunctioning
+ciscoEnvMonTemperatureStateTxt	: red		: critical
+ciscoEnvMonTemperatureStateTxt	: clear		: nonPresent

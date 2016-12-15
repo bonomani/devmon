@@ -1,0 +1,1 @@
+DummyPri: REGSUB : {memoryAvailableKBytes} /^.*$/0/

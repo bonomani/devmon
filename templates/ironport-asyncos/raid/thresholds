@@ -1,0 +1,3 @@
+raidStatustxt	: green		: driveHealthy	: Drive is healthy
+raidStatustxt	: yellow	: driveRebuild	: Drive is being rebuilt
+raidStatustxt	: red		: driveFailure	: Drive has failed

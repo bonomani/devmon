@@ -1,0 +1,15 @@
+UPS status:
+
+Vendor:              {upsIdentManufacturer}
+Model/version:       {upsIdentModel} / {upsIdentUPSSoftwareVersion}
+Agent Software:      {upsIdentAgentSoftwareVersion}
+Ident Name:          {upsIdentName}
+Attached devices:    {upsIdentAttachedDevices}
+
+Alarms Present:    {upsAlarmsPresent.color}{upsAlarmsPresent} (see msgs test for details)
+Audible Alarm Status: {upsConfigAudibleStatusTxt}
+UPS Test Status:    {upsTestIdTxt}
+
+Spin Lock: {upsTestSpinLock}
+Test Result: {upsTestResultsSummaryTxt} - {upsTestResultsDetail}
+Start:  {upsTestStartTimeTxt}     Elapsed: {upsTestElapsedTimeTxt}

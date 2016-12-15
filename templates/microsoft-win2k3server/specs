@@ -1,0 +1,4 @@
+vendor	: microsoft
+model	: windowsserver
+snmpver	: 2
+sysdesc : Windows Version 5.2

@@ -1,0 +1,7 @@
+Free memory:       {mem_free} bytes ({mem_free_per}%)
+Used memory:       {mem_used} bytes ({mem_used_per}%)
+-------------     ----------------
+Total memory:      {mem_total} bytes (100%)
+
+<!-- DEVMON to RRD Physical {mem_used_per}%
+-->

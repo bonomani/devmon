@@ -1,0 +1,2 @@
+qrPercentUsed	: red		: 99 : {qrVPathName} - CRITICAL ({qrPercentUsed}%)
+qrPercentUsed	: yellow	: 96 : {qrVPathName} - WARNING ({qrPercentUsed}%)

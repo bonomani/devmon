@@ -1,0 +1,33 @@
+
+Connection statistics:
+
+Active connections:
+
+Active client connections      : {clientCurCon}
+Active server connections      : {serverCurCon}
+Active pva client connections  : {pvaClientCurCon}
+Active pva server connections  : {pvaServerCurCon}
+Active ssl native connections  : {sslNativeCurCon}
+Active ssl compat connections  : {sslCompatCurCon}
+Total active connections       : {totCurCon}
+
+New Connections:
+New client connections/sec     : {clientNewCon}
+New server connections/sec     : {serverNewCon}
+New pva client connections/sec : {pvaClientNewCon}
+New pva server connections/sec : {pvaServerNewCon}
+New ssl native connections/sec : {sslNativeNewCon} 
+New ssl compat connections/sec : {sslCompatNewCon}
+Total new connections          : {totNewCon}
+
+Throughput:
+Client bits in/sec             : {clientBpsIn}
+Client bits out/sec            : {clientBpsOut}
+Server bits in/sec             : {serverBpsIn}
+Server bits out/sec            : {serverBpsOut}
+
+Http connections:
+Total http requests            : {httpReqs}
+Http requests/sec              : {httpReqsPerSec}
+<!-- DEVMON to RRD connections: {totCurCon}
+-->

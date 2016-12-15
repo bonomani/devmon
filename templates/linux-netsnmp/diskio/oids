@@ -1,0 +1,14 @@
+diskIOIndex : 1.3.6.1.4.1.2021.13.15.1.1.1 : branch
+diskIODevice : 1.3.6.1.4.1.2021.13.15.1.1.2 : branch
+# The number of bytes read from this device since boot:
+#diskIONRead : : branch
+# The number of bytes written to this device since boot:
+#diskIONWritten : : branch
+# The number of read accesses from this device since boot:
+diskIOReads : 1.3.6.1.4.1.2021.13.15.1.1.5 : branch
+# The number of write accesses to this device since boot:
+diskIOWrites : 1.3.6.1.4.1.2021.13.15.1.1.6 : branch
+# The number of bytes read from this device since boot - 64bit
+diskIONReadX : 1.3.6.1.4.1.2021.13.15.1.1.12 : branch
+# The number of bytes written to this device since boot - 64bit
+diskIONWrittenX : 1.3.6.1.4.1.2021.13.15.1.1.13 : branch

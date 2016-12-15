@@ -1,0 +1,8 @@
+UPS input status:
+Line bads: {upsInputLineBads}
+Input configuration: {upsInputNumLines} lines of {upsConfigInputVoltage} V AC @ {upsConfigInputFreqHz} Hz
+
+UPS Input
+TABLE: noalarmsmsg,rrd(pri:upsInPhaseIndex; DS:freq:upsInputFrequencyHz:GAUGE; DS:volts:upsInputVoltage:GAUGE; DS:current:upsInputCurrent:GAUGE; DS:power:upsInputTruePower:GAUGE; )
+Phase|Freq|Volts|Amps|Power
+{upsInPhaseIndex}|{upsInputFrequencyHz} Hz|{upsInputVoltage.color}{upsInputVoltage.errors}{upsInputVoltage}v|{upsInputCurrentA}A|{upsInputTruePower}W

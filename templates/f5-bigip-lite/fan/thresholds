@@ -1,0 +1,6 @@
+CpuTemperature : red 	: >=80	: CPU Temperature is very high {CpuTemperature}
+CpuTemperature : yellow	: 70	: CPU Temperature is high {CpuTemperature}
+CpuTemperature : green	: 20	: CPU Temperature is high {CpuTemperature}
+
+ChassisTempTemperature	: red		: >=80	: Chassis Temp Temperature is very high : {ChassisTempTemperature}
+ChassisTempTemperature	: yellow	: 70	: Chassis Temp Temperature is high : {ChassisTempTemperature}

@@ -1,0 +1,2 @@
+lDiskCurrDiskQLen		: yellow	: >50	: Queue length very high
+lDiskCurrDiskQLen		: green	: >30	: Queue length high

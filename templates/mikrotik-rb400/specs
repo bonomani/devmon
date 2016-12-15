@@ -1,0 +1,4 @@
+vendor	: mikrotik
+model	: rb400
+snmpver	: 2
+sysdesc : RouterBoard 400 Series

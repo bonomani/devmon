@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 3548
+snmpver	: 2
+sysdesc : C3548

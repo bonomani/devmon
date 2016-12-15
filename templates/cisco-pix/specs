@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: pix
+snmpver	: 1
+sysdesc : Cisco PIX Firewall

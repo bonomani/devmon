@@ -1,0 +1,5 @@
+lmSensors Temperatures
+
+TABLE:rrd(DS:ds0:lmTempSensorsValueC:GAUGE;)
+Sensor ID|Sensor Name|Sensor Value
+{lmTempSensorsIndex}|{lmTempSensorsDevice}|{lmTempSensorsValueC}

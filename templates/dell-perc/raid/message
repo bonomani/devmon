@@ -1,0 +1,15 @@
+
+Controllers
+TABLE: noalarmsmsg
+ID|BIOS Version|Cache|Firmware Version
+{adpAdapterNumber}|{biosVersion}|{dramSizeInMB}MB|{firmwareVersion}
+
+Logical drive status:
+TABLE: noalarmsmsg
+ID|On Controller|Raid Level|Size|Status|Progress
+{logicalDriveNumber}|{ldAdapterNumber}|{raidLevel}|{sizeInMB}mb|{statusText.color}{statusText}|{checkConsistencyOrInitializeProgress}
+
+Physical drive status:
+TABLE: noalarmsmsg
+Adapter-Channel-Target|Array Position|Size|State|phyinquiryString|Progress
+{physAdapterNumber}-{physChannel}-{targetID}|{arrayPosition}|{sizeMB}mb|{stateText.color}{stateText}|{phyinquiryString}|{rebuildProgress}

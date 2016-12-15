@@ -1,0 +1,4 @@
+vs_ip_T : UNPACK : {vs_ip} CCCC "."
+vs_enable_T : SWITCH : {vs_enable} 0 = disable, 1 = enable
+vs_avail_T : SWITCH : {vs_avail} 0 = none, 1 = green, 2 = yellow, 3 = red, 4 = blue
+vs_enable2_T : SWITCH : {vs_enable2} 0 = none, 1 = enable, 2 = disable, 3 = disabledbyparent

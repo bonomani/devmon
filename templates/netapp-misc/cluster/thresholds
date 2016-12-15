@@ -1,0 +1,12 @@
+State			: red 	 : 1|3 : Critical Cluster Status
+State			: yellow : 4   : Cluster Partner Takeover
+Settings		: red 	 : 3   : Takeover disabled
+Settings		: red 	 : 4   : Takeover by Partner disabled
+InterconnectStatus	: yellow : 3   : Partial Failure
+InterconnectStatus	: red 	 : 2   : Interconnect down or not present
+CannotTakeoverCause	: yellow : 3   : Disabled by Operator
+CannotTakeoverCause	: yellow : 5   : Disabled by Partner
+CannotTakeoverCause	: red 	 : 2   : unknown Reason
+CannotTakeoverCause	: red 	 : 4   : Interconnect Offline
+CannotTakeoverCause	: red 	 : 6   : Takeover failed
+PartnerStatus		: red 	 : 1|3 : Partner may be dead or down

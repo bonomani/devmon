@@ -1,0 +1,5 @@
+
+Thermal sensors:
+TABLE: noalarmsmsg,rrd(DS:ds0:ciscoEnvMonTemperatureStatusValue:GAUGE; DS:ds1:ciscoEnvMonTemperatureThreshold:GAUGE)
+ID|Sensor Location|Temp|Threshold|Condition
+{ciscoEnvMonTemperatureId}|{ciscoEnvMonTemperatureStatusDescr}|{ciscoEnvMonTemperatureStatusValue}|{ciscoEnvMonTemperatureThreshold}|{ciscoEnvMonTemperatureState.color}{ciscoEnvMonTemperatureStateTxt}

@@ -1,0 +1,4 @@
+upsAlarmDescrIDX : INDEX  : {upsAlarmDescr}
+upsAlarmDescrID	 : REGSUB : {upsAlarmDescr} /^.*\.(\d+)$/$1/
+upsAlarmDescrTxt : SWITCH : {upsAlarmDescrID} 1=Battery Bad,2=On Battery,3=Low Battery,4=Depleted Battery,5=Temperature Bad,6=Input Bad,7=Output Bad,8=Output Overload,9=On Bypass,10=Bypass Bad,11=Ouput Off as Requested,12=UPS Off as Requested,13=Charger Failed,14=UPS Output Off,15=UPS System Off,16=Fan Failure,17=Fuse Failure,18=General Fault,19=Diagnostic Test Failed,20=Communications Lost,21=Awaiting Power,22=Shutdown Pending,23=Shutdown Imminent,24=Test in Progress
+upsAlarmTimeTxt : ELAPSED  : {upsAlarmTime}

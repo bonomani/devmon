@@ -1,0 +1,16 @@
+# Create a human-readable ifc speed
+ifSpeed		: SPEED		: {ifBps}
+# Get bit speed delta (so we dont have to provide custom delta limit)
+ifInOps  	: DELTA		: {ifInOctets}
+ifOutOps 	: DELTA		: {ifOutOctets}
+# Convert our octets delta into bits per second
+ifInBps		: MATH		: {ifInOps} x 8
+ifOutBps	: MATH		: {ifOutOps} x 8
+# Make some easily readable speed variables
+ifInSpeed	: SPEED		: {ifInBps}
+ifOutSpeed	: SPEED		: {ifOutBps}
+# Now determine our percentage load, based on traffic and ifc speed
+ifInLoad	: MATH		: ({ifInBps} / {ifBps}) x 100
+ifOutLoad	: MATH		: ({ifOutBps} / {ifBps}) x 100
+# Create an alias in a bracketed box, or nothing if alias is blank
+ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/

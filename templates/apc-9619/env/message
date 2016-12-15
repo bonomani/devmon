@@ -1,0 +1,8 @@
+
+{upsEnvTempF.errors}
+{upsEnvHumidity.errors}
+
+Environment status:
+
+Temperature:  {upsEnvTempF} F (yellow={upsEnvTempF.thresh:yellow}F red={upsEnvTempF.thresh:red}F) [{upsEnvTempC} C]
+Humidity:     {upsEnvHmdVal.msg} (yellow={upsEnvHmdVal.thresh:yellow}% red={upsEnvHmdVal.thresh:red}%)

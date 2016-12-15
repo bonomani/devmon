@@ -1,0 +1,10 @@
+# Physical
+stateText	: green			: Ready|Online|HotSpare|NonDisk
+stateText	: yellow		: Rebuild
+stateText	: red			: Failed
+
+#Logical
+statusText	: green			: Optimal
+statusText	: yellow		: Degraded|Initialize|CheckConsistency
+statusText	: green			: Offline
+

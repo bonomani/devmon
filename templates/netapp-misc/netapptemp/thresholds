@@ -1,0 +1,4 @@
+overTemperature			: yellow : yes	: Warning temperature high
+
+currentTemp			: yellow : 40C (104F), 53C (127F), 53C (127F)
+currentTemp			: red	 : 50C (122F), 63C (145F), 63C (145F)

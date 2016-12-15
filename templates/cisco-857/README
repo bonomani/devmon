@@ -1,0 +1,13 @@
+This template was created by using the original cisco-asa template by Lacroix Francois.
+
+Di0 reports speed 56000 which results in many alerts of exceeded traffic even
+if the link is at 100Mbps).
+
+A few minor tests were removed from the original as they did not work completely)
+i.e. serial, cluster, & connects
+
+
+NOTE: This does not imply any support responsibilities, liabiltiy in
+case of this template or devmon causing phsyical, monetary or emotional
+damanges, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 

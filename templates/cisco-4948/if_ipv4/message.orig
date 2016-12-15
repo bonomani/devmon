@@ -1,0 +1,4 @@
+
+TABLE:
+Ifc name|IP|Netmask|Broadcast
+{ifName}{ifAliasBox}|{ipAdEntAddr}|{ipAdEntNetMask}|{ipAdEntBcastAddr}

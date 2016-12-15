@@ -1,0 +1,4 @@
+policyName		: .1.3.6.1.4.1.3224.10.1.1.24	: branch
+policyId		: .1.3.6.1.4.1.3224.10.1.1.1	: branch
+policyStatus		: .1.3.6.1.4.1.3224.10.1.1.23	: branch
+policyBps		: .1.3.6.1.4.1.3224.10.2.1.6	: branch

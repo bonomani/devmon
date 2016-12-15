@@ -1,0 +1,8 @@
+<b>Discards:</b>
+Note: 
+Error rates are per second.
+Load percentages are based on error/bit ratio.
+TABLE:rrd(DS:ds0:ifInDiscards:COUNTER; DS:ds1:ifOutDiscards:COUNTER)
+Ifc name|Discards in|Discard rate in|Discard load in|Discards out|Discard rate out|Discard load out
+{ifName}{ifAliasBox}|{ifInDiscards}|{ifInDps}|{ifInDscPct.color}{ifInDscPct}%{ifInDscPct.errors}|{ifOutDiscards}|{ifOutDps}|{ifOutDscPct.color}{ifOutDscPct}%{ifOutDscPct.errors}
+

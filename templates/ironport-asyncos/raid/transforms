@@ -1,0 +1,1 @@
+raidStatustxt	: SWITCH	: {raidStatus} 1=driveHealthy,2=driveFailure,3=driveRebuild

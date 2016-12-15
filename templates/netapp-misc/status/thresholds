@@ -1,0 +1,16 @@
+miscGlobalStatus		: yellow: 1|2 : {miscGlobalStatusMessage}
+miscGlobalStatus		: red	: 5|6	: {miscGlobalStatusMessage}
+
+envFailedFanCount		: red	: >0	: {envFailedFanMessage}
+
+envFailedPowerSupplyCount	: red	: >0	: {envFailedPowerSupplyMessage}
+
+diskFailedCount			: red	: >0	: {diskFailedMessage}
+
+overTemperature			: yellow : yes	: Warning temperature high
+
+currentTemp			: yellow : 40C (104F), 53C (127F), 53C (127F)
+currentTemp			: red	 : 50C (122F), 63C (145F), 63C (145F)
+
+nvramBatteryStatus		: yellow : 2|5|7 : Warning NVRAM Battery Problem
+nvramBatteryStatus		: red	: 3|4|6	: Critical NVRAM Battery Problem

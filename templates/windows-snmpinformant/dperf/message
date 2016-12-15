@@ -1,0 +1,6 @@
+
+Disk I/O Measures:
+TABLE: noalarmsmsg,rrd(pri:lDiskInstanceTxt;DS:qlen:lDiskCurrDiskQLen:GAUGE; DS:bps:lDiskDiskBPS:GAUGE; DS:rbps:lDiskDiskRBPS:GAUGE; DS:wbps:lDiskDiskWBPS:GAUGE;)
+ID|Queue Length|Total Bytes/s|Read Bytes/s|Write Bytes/s
+{lDiskInstance}|{lDiskCurrDiskQLen.color}{lDiskCurrDiskQLen}|{lDiskDiskBPS}|{lDiskDiskRBPS}|{lDiskDiskWBPS}
+

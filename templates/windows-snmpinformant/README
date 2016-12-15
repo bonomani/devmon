@@ -1,0 +1,186 @@
+This template was created by David Baldwin
+
+NOTE: This does not imply any support responsibilities, liability in
+case of this template or devmon causing physical, monetary or emotional
+damages, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 
+
+Windows CPU, disk IO and memory pool alocation performance data collection
+and trending for SNMP-Informant (free edition)
+
+Requires installation of Windows SNMP service and SNMP-Informant
+
+http://www.snmp-informant.com/
+http://www.wtcs.org/informant/Free/Free-overview.htm
+
+RRD data collection for cperf, dperf and mperf must be setup
+If using integrated devmon, add to TEST2RRD line:
+cperf=devmon,dperf=devmon,mperf=devmon
+
+Also add to GRAPHS line to appear on trends page:
+dperf::1,dperfqlen,cperf,mperf
+
+Otherwise ensure being processed by --extra-script option
+
+Add to hobbitgraph.cfg:
+
+[cperf]
+        FNPATTERN cperf.(_Total).rrd
+        TITLE CPU Performance
+        YAXIS Percent
+        -u 100
+        DEF:dpc@RRDIDX@=@RRDFN@:dpc:AVERAGE
+        DEF:int@RRDIDX@=@RRDFN@:int:AVERAGE
+        DEF:priv@RRDIDX@=@RRDFN@:priv:AVERAGE
+        DEF:proc@RRDIDX@=@RRDFN@:proc:AVERAGE
+        DEF:user@RRDIDX@=@RRDFN@:user:AVERAGE
+        AREA:dpc@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:dpc@RRDIDX@:LAST:DPC         \: %5.1lf (cur)
+        GPRINT:dpc@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:dpc@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:dpc@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        STACK:int@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:int@RRDIDX@:LAST:Interrupt   \: %5.1lf (cur)
+        GPRINT:int@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:int@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:int@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        STACK:priv@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:priv@RRDIDX@:LAST:Privileged \: %5.1lf (cur)
+        GPRINT:priv@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:priv@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:priv@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        STACK:proc@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:proc@RRDIDX@:LAST:Processor  \: %5.1lf (cur)
+        GPRINT:proc@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:proc@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:proc@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        STACK:user@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:user@RRDIDX@:LAST:User       \: %5.1lf (cur)
+        GPRINT:user@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:user@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:user@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+
+[dperf]
+        FNPATTERN dperf.(.+).rrd
+        TITLE Disk Performance
+        YAXIS Bytes / sec
+        DEF:qlen@RRDIDX@=@RRDFN@:qlen:AVERAGE
+        DEF:bps@RRDIDX@=@RRDFN@:bps:AVERAGE
+        DEF:rbps@RRDIDX@=@RRDFN@:rbps:AVERAGE
+        DEF:wbps@RRDIDX@=@RRDFN@:wbps:AVERAGE
+        LINE2:qlen@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:qlen@RRDIDX@:LAST:QLen  \: %5.1lf (cur)
+        GPRINT:qlen@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:qlen@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:qlen@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        LINE2:bps@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:bps@RRDIDX@:LAST:TotalBPS    \: %5.1lf (cur)
+        GPRINT:bps@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:bps@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:bps@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        LINE2:rbps@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:rbps@RRDIDX@:LAST:ReadBPS    \: %5.1lf (cur)
+        GPRINT:rbps@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:rbps@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:rbps@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+        LINE2:wbps@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:wbps@RRDIDX@:LAST:WriteBPS    \: %5.1lf (cur)
+        GPRINT:wbps@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:wbps@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:wbps@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+
+[dperfqlen]
+        FNPATTERN dperf.(.+).rrd
+        TITLE Disk Load
+        YAXIS Queue Length
+        DEF:qlen@RRDIDX@=@RRDFN@:qlen:AVERAGE
+        LINE2:qlen@RRDIDX@#@COLOR@:@RRDPARAM@ Queue Length
+        GPRINT:qlen@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:qlen@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:qlen@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:qlen@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+
+[mperf]
+        FNPATTERN mperf.(.+).rrd
+        TITLE Memory Usage
+        YAXIS MBytes
+        -h 150  # default height is 100 - increase to 150
+        -X 0 # don't scale y-axis to k, m etc
+        DEF:avail@RRDIDX@=@RRDFN@:avail:AVERAGE
+        CDEF:mavail@RRDIDX@=avail@RRDIDX@,1024,/
+        DEF:commit@RRDIDX@=@RRDFN@:commit:AVERAGE
+        CDEF:mcommit@RRDIDX@=commit@RRDIDX@,1024,/
+        DEF:poolpgres@RRDIDX@=@RRDFN@:poolpgres:AVERAGE
+        CDEF:mpoolpgres@RRDIDX@=poolpgres@RRDIDX@,1024,/
+        DEF:poolpg@RRDIDX@=@RRDFN@:poolpg:AVERAGE
+        CDEF:mpoolpg@RRDIDX@=poolpg@RRDIDX@,1024,/
+        DEF:poolnon@RRDIDX@=@RRDFN@:poolnon:AVERAGE
+        CDEF:mpoolnon@RRDIDX@=poolnon@RRDIDX@,1024,/
+        DEF:cache@RRDIDX@=@RRDFN@:cache:AVERAGE
+        CDEF:mcache@RRDIDX@=cache@RRDIDX@,1024,/
+        DEF:cacheres@RRDIDX@=@RRDFN@:cacheres:AVERAGE
+        CDEF:mcacheres@RRDIDX@=cacheres@RRDIDX@,1024,/
+        DEF:coderes@RRDIDX@=@RRDFN@:coderes:AVERAGE
+        CDEF:mcoderes@RRDIDX@=coderes@RRDIDX@,1024,/
+        DEF:codetot@RRDIDX@=@RRDFN@:codetot:AVERAGE
+        CDEF:mcodetot@RRDIDX@=codetot@RRDIDX@,1024,/
+        DEF:drvres@RRDIDX@=@RRDFN@:drvres:AVERAGE
+        CDEF:mdrvres@RRDIDX@=drvres@RRDIDX@,1024,/
+        DEF:drvtot@RRDIDX@=@RRDFN@:drvtot:AVERAGE
+        CDEF:mdrvtot@RRDIDX@=drvtot@RRDIDX@,1024,/
+        LINE2:mavail@RRDIDX@#@COLOR@:Available   \:
+        GPRINT:mavail@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mavail@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mavail@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mavail@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mcommit@RRDIDX@#@COLOR@:Committed   \:
+        GPRINT:mcommit@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mcommit@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mcommit@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mcommit@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mpoolpgres@RRDIDX@#@COLOR@:Pool Pg Res \:
+        GPRINT:mpoolpgres@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mpoolpgres@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mpoolpgres@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mpoolpgres@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mpoolpg@RRDIDX@#@COLOR@:Pool Paged  \:
+        GPRINT:mpoolpg@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mpoolpg@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mpoolpg@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mpoolpg@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mpoolnon@RRDIDX@#@COLOR@:Pool Nonpag \:
+        GPRINT:mpoolnon@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mpoolnon@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mpoolnon@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mpoolnon@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mcache@RRDIDX@#@COLOR@:Cache       \:
+        GPRINT:mcache@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mcache@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mcache@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mcache@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mcacheres@RRDIDX@#@COLOR@:Cache Resid \:
+        GPRINT:mcacheres@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mcacheres@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mcacheres@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mcacheres@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mcoderes@RRDIDX@#@COLOR@:Code Res    \:
+        GPRINT:mcoderes@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mcoderes@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mcoderes@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mcoderes@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mcodetot@RRDIDX@#@COLOR@:Code Tot    \:
+        GPRINT:mcodetot@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mcodetot@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mcodetot@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mcodetot@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mdrvres@RRDIDX@#@COLOR@:Driver Res  \:
+        GPRINT:mdrvres@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mdrvres@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mdrvres@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mdrvres@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+        LINE2:mdrvtot@RRDIDX@#@COLOR@:Driver Tot  \:
+        GPRINT:mdrvtot@RRDIDX@:LAST: %5.0lf (cur)
+        GPRINT:mdrvtot@RRDIDX@:MAX: \: %5.0lf (max)
+        GPRINT:mdrvtot@RRDIDX@:MIN: \: %5.0lf (min)
+        GPRINT:mdrvtot@RRDIDX@:AVERAGE: \: %5.0lf (avg)\n
+

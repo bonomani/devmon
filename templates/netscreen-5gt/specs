@@ -1,0 +1,4 @@
+vendor	: juniper
+model	: ns5gt
+snmpver	: 2
+sysdesc : NetScreen-5GT

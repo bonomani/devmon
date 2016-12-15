@@ -1,0 +1,8 @@
+TABLE:
+VIP name | VIP ip/port | VIP proto| Pool | State | Current Connection | Maximun Connection 
+{vs_name} | {vs_ip_T} / {vs_port} | {vs_proto} | {vs_pool} | {vs_reason}  | {vs_curcon} | {vs_maxcon}
+
+TABLE:
+VIP name | persistance
+#{vs_name_persist} | {vs_persist}
+persist

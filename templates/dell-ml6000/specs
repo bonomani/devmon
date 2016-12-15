@@ -1,0 +1,4 @@
+vendor	: dell
+model	: ml6000
+snmpver	: 2
+sysdesc : Linux

@@ -1,0 +1,8 @@
+CpuTemperature : .1.3.6.1.4.1.3375.2.1.3.1.2.1.2 : branch
+CpuNumber : .1.3.6.1.4.1.3375.2.1.3.1.2.1.1 : branch
+ChassisFanStatus : .1.3.6.1.4.1.3375.2.1.3.2.1.2.1.2 : branch
+ChassisFanNumber : .1.3.6.1.4.1.3375.2.1.3.2.1.2.1.1 : branch
+ChassisPowerSupplyStatus : .1.3.6.1.4.1.3375.2.1.3.2.2.2.1.2 : branch
+ChassisPowerNumber : .1.3.6.1.4.1.3375.2.1.3.2.2.2.1.1 : branch
+ChassisTempTemperature : .1.3.6.1.4.1.3375.2.1.3.2.3.2.1.2 : branch
+ChassisSondeNumber : .1.3.6.1.4.1.3375.2.1.3.2.3.2.1.1 : branch

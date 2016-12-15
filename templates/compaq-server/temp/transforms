@@ -1,0 +1,4 @@
+cpqHeTemperatureLocaleTxt:	SWITCH	:	{cpqHeTemperatureLocale} 1=Other,2=Uknown,3=System,4=SytemBoard,5=ioBoard,6=cpu,7=memory,8=Storage,9=removableMedia,10=powerSupply,11=ambient,12=chassis,13=bridgeCard
+cpqHeTemperatureThresholdTxt:	SWITCH	:	{cpqHeTemperatureThresholdType} 1=Other,5=Blowout,9=Caution,15=Critical
+cpqHeTemperatureConditionTxt:	SWITCH	:	{cpqHeTemperatureCondition} 1=Other,2=OK,3=Degraded,4=Failed
+cpqHeTemperatureCelsiusFake:	SWITCH	:	{cpqHeTemperatureCelsius} < 28 = OK, 28 - 32 = WARN, > 32 = CRIT

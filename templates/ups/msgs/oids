@@ -1,0 +1,3 @@
+upsAlarmsPresent        : .1.3.6.1.2.1.33.1.6.1.0 : leaf
+upsAlarmDescr   : .1.3.6.1.2.1.33.1.6.2.1.2     : branch
+upsAlarmTime    : .1.3.6.1.2.1.33.1.6.2.1.3     : branch

@@ -1,0 +1,5 @@
+perCentMemoryUtilization        : yellow        : 75    : Memory load is high
+perCentMemoryUtilization        : red           : 95    : Memory load is very high
+memoryAvailabilityStatustxt	: green		: memoryAvailable	: Sufficient Memory Available
+memoryAvailabilityStatustxt	: yellow	: memoryShortage	: Memory shortage
+memoryAvailabilityStatustxt	: red		: memoryFull		: Memory Full

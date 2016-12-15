@@ -1,0 +1,3 @@
+powerSupplyStatusTxt: green		: OK	: Power Supply OK
+powerSupplyStatusTxt: yellow		: Non-critical	: Power Supply OK
+powerSupplyStatusTxt: red		: Critical	: Power Supply Failed

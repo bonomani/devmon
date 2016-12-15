@@ -1,0 +1,26 @@
+libraryGlobalStatusTxt  : SWITCH        : {libraryGlobalStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+overallPhDriveReadinessStatusTxt        : SWITCH        : {overallPhDriveReadinessStatus} 1=online,2=onlinePending,3=offline,4=offlinePending,5=shutdownPending
+phDriveStateTxt : SWITCH        : {phDriveState} 1=online,2=onlinePending,3=offline,4=offlinePending,5=shutdownPending
+phDriveRasStatusTxt     : SWITCH        : {phDriveRasStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+phDriveNeedsCleaningTxt : SWITCH        : {phDriveNeedsCleaning} 1=required,2=notRequired,3=immediate
+phDriveInterfaceTypeTxt : SWITCH        : {phDriveInterfaceType} 1=scsi,2=fibreChannel,3=sas,4=iscsi
+powerStatusTxt  : SWITCH        : {powerStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+coolingStatusTxt        : SWITCH        : {coolingStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+controlStatusTxt        : SWITCH        : {controlStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+connectivityStatusTxt   : SWITCH        : {connectivityStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+roboticsStatusTxt       : SWITCH        : {roboticsStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+mediaStatusTxt  : SWITCH        : {mediaStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+driveStatusTxt  : SWITCH        : {driveStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+operatorActionRequestTxt        : SWITCH        : {operatorActionRequest} 1=yes,2=no
+logicalLibraryStateTxt  : SWITCH        : {logicalLibraryState} 1=online,2=onlinePending,3=offline,4=offlinePending,5=shutdownPending
+physicalLibraryStateTxt : SWITCH        : {physicalLibraryState} 1=online,2=onlinePending,3=offline,4=offlinePending,5=shutdownPending
+aggregatedMainDoorStatusTxt     : SWITCH        : {aggregatedMainDoorStatus} 1=open,2=closed,3=unknown
+aggregatedIEDoorStatusTxt       : SWITCH        : {aggregatedIEDoorStatus} 1=opened,2=closedAndLocked,3=closedAndUnLocked
+robotStateTxt   : SWITCH        : {robotState} 1=ready,2=notReady
+fcPortTypeTxt   : SWITCH        : {fcPortType} 1=nPort,2=nlPort,3=fPort,4=flPort,5=unknown
+fcPortWWNodeNameTxt : REGSUB : {fcPortWWNodeName} /^0x(..)(..)(..)(..)\.(..)(..)(..)(..)/$1:$2:$3:$4:$5:$6:$7:$8/
+fcPortWWPortNameTxt : REGSUB : {fcPortWWPortName} /^0x(..)(..)(..)(..)\.(..)(..)(..)(..)/$1:$2:$3:$4:$5:$6:$7:$8/
+fcPortLoopIdModeTxt     : SWITCH        : {fcPortLoopIdMode} 1=soft,2=hard
+fcPortNegotiatedSpeedTxt        : SWITCH        : {fcPortNegotiatedSpeed} 1=auto,2=1 Gbps,3=2 Gbps,4=4 Gbps
+fcPortRasStatusTxt      : SWITCH        : {fcPortRasStatus} 1=good,2=failed,3=degraded,4=warning,5=informational,6=unknown,7=invalid
+

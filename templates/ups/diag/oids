@@ -1,0 +1,16 @@
+upsIdentManufacturer    : .1.3.6.1.2.1.33.1.1.1.0 : leaf
+upsIdentModel   : .1.3.6.1.2.1.33.1.1.2.0 : leaf
+upsIdentUPSSoftwareVersion      : .1.3.6.1.2.1.33.1.1.3.0 : leaf
+upsIdentAgentSoftwareVersion    : .1.3.6.1.2.1.33.1.1.4.0 : leaf
+upsIdentName    : .1.3.6.1.2.1.33.1.1.5.0 : leaf
+upsIdentAttachedDevices : .1.3.6.1.2.1.33.1.1.6.0 : leaf
+upsAlarmsPresent        : .1.3.6.1.2.1.33.1.6.1.0 : leaf
+#upsAlarmDescr   : .1.3.6.1.2.1.33.1.6.2.1.2     : branch
+#upsAlarmTime    : .1.3.6.1.2.1.33.1.6.2.1.3     : branch
+upsConfigAudibleStatus  : .1.3.6.1.2.1.33.1.9.8.0 : leaf
+upsTestId       : .1.3.6.1.2.1.33.1.7.1.0 : leaf
+upsTestSpinLock : .1.3.6.1.2.1.33.1.7.2.0 : leaf
+upsTestResultsSummary   : .1.3.6.1.2.1.33.1.7.3.0 : leaf
+upsTestResultsDetail    : .1.3.6.1.2.1.33.1.7.4.0 : leaf
+upsTestStartTime        : .1.3.6.1.2.1.33.1.7.5.0 : leaf
+upsTestElapsedTime      : .1.3.6.1.2.1.33.1.7.6.0 : leaf

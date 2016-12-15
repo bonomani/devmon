@@ -1,0 +1,13 @@
+cdpCacheDeviceLocalPortIndexTwoDig : INDEX : {cdpCacheDevicePort}
+cdpCacheDeviceLocalPortIndex : REGSUB : {cdpCacheDeviceLocalPortIndexTwoDig} /\d+\.(\d+)$/$1/
+cdpCacheDeviceLocalPort : CHAIN : {cdpCacheDeviceLocalPortIndex} {ifName} 
+
+cdpCacheAddressp1H : SUBSTR :{cdpCacheAddress} 0 2
+cdpCacheAddressp2H : SUBSTR :{cdpCacheAddress} 2 2
+cdpCacheAddressp3H : SUBSTR :{cdpCacheAddress} 4 2
+cdpCacheAddressp4H : SUBSTR :{cdpCacheAddress} 6 2
+
+cdpCacheAddressp1 : CONVERT : {cdpCacheAddressp1H} hex
+cdpCacheAddressp2 : CONVERT : {cdpCacheAddressp2H} hex
+cdpCacheAddressp3 : CONVERT : {cdpCacheAddressp3H} hex
+cdpCacheAddressp4 : CONVERT : {cdpCacheAddressp4H} hex

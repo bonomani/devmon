@@ -1,0 +1,6 @@
+RAID Events : {raidEvents}
+
+Physical drive status:
+TABLE: noalarmsmsg
+Drive name|Status
+{raidID}|{raidStatustxt.color} {raidStatustxt.msg}

@@ -1,0 +1,3 @@
+TABLE:
+Policy Id|Policy Name|Policy Bps|Policy status 
+{policyId}|{policyName}|{policyBps}|{policyStatus.color}{policyStatusTxt}{policyStatus.errors}

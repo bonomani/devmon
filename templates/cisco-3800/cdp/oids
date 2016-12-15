@@ -1,0 +1,26 @@
+#cdpCacheIfIndex			: .1.3.6.1.4.1.9.9.23.1.2.1.1.1		: branch
+#cdpCacheDeviceIndex		: .1.3.6.1.4.1.9.9.23.1.2.1.1.2		: branch
+cdpCacheAddressType		: .1.3.6.1.4.1.9.9.23.1.2.1.1.3		: branch
+cdpCacheAddress			: .1.3.6.1.4.1.9.9.23.1.2.1.1.4		: branch
+cdpCacheVersion			: .1.3.6.1.4.1.9.9.23.1.2.1.1.5		: branch
+cdpCacheDeviceId		: .1.3.6.1.4.1.9.9.23.1.2.1.1.6		: branch
+cdpCacheDevicePort		: .1.3.6.1.4.1.9.9.23.1.2.1.1.7		: branch
+cdpCachePlatform		: .1.3.6.1.4.1.9.9.23.1.2.1.1.8		: branch
+#cdpCacheCapabilities		: .1.3.6.1.4.1.9.9.23.1.2.1.1.9		: branch
+cdpCacheVTPMgmtDomain		: .1.3.6.1.4.1.9.9.23.1.2.1.1.10	: branch
+cdpCacheNativeVLAN		: .1.3.6.1.4.1.9.9.23.1.2.1.1.11	: branch
+cdpCacheDuplex			: .1.3.6.1.4.1.9.9.23.1.2.1.1.12	: branch
+#cdpCacheApplianceID		: .1.3.6.1.4.1.9.9.23.1.2.1.1.13	: branch
+#cdpCacheVlanID			: .1.3.6.1.4.1.9.9.23.1.2.1.1.14	: branch
+#cdpCachePowerConsumption	 : .1.3.6.1.4.1.9.9.23.1.2.1.1.15	: branch
+#cdpCacheMTU			: .1.3.6.1.4.1.9.9.23.1.2.1.1.16	: branch
+#cdpCacheSysName			: .1.3.6.1.4.1.9.9.23.1.2.1.1.17	: branch
+#cdpCacheSysObjectID		: .1.3.6.1.4.1.9.9.23.1.2.1.1.18	: branch
+#cdpCachePrimaryMgmtAddrType	: .1.3.6.1.4.1.9.9.23.1.2.1.1.19	: branch
+#cdpCachePrimaryMgmtAddr		: .1.3.6.1.4.1.9.9.23.1.2.1.1.20	: branch
+#cdpCacheSecondaryMgmtAddrType	: .1.3.6.1.4.1.9.9.23.1.2.1.1.21	: branch
+#cdpCacheSecondaryMgmtAddr	: .1.3.6.1.4.1.9.9.23.1.2.1.1.22	: branch
+#cdpCachePhysLocation		: .1.3.6.1.4.1.9.9.23.1.2.1.1.23	: branch
+#cdpCacheLastChange		: .1.3.6.1.4.1.9.9.23.1.2.1.1.24	: branch
+
+ifName		: .1.3.6.1.2.1.31.1.1.1.1	: branch

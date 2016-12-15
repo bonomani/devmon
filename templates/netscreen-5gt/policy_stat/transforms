@@ -1,0 +1,2 @@
+policyStatusTxt	: SWITCH	: {policyStatus} 0=inactive,1=inuse,2=hidden
+policySpeed	: SPEED		: {policyBps}

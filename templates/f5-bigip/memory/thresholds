@@ -1,0 +1,3 @@
+MemPercent : red	: >90	: Memory is very low
+MemPercent : yellow	: >=80	: Memory is low
+MemPercent : green	:	: Memory is OK

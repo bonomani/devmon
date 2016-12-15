@@ -1,0 +1,11 @@
+{miscGlobalStatus.color}{miscGlobalStatusMessage}
+
+{envFailedFanCount.color}{envFailedFanMessage}
+{envFailedPowerSupplyCount.color}{envFailedPowerSupplyMessage}
+{diskFailedCount.color}{diskFailedMessage}
+
+{overTemperature.color}High temperature: {overTemperature}
+
+{currentTemp.color}Temperature sensor: {currentTemp}
+
+{nvramBatteryStatus.color}nvram Battery Status: {battStatus}

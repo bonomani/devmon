@@ -1,0 +1,12 @@
+TABLE:
+Pool name | LB mode | Pool Active Member Cnt| Pool Monitor Rule | PoolStatusReason | PoolStatServerCurConns 
+{PoolName} | {PoolLbMode_T} | {PoolActiveMemberCnt} | {PoolMonitorRule} | {PoolStatusReason} | {PoolStatServerCurConns}
+
+TABLE:
+PoolMemberPoolName | PoolMemberAddr |  PoolMemberPort | PoolMemberStatusReason
+{PoolMemberPoolName} | {PoolMemberAddr_T} | {PoolMemberPort} | {PoolMemberStatusReason}
+
+TABLE:
+NodeAddrAddr | NodeAddrPoolMemberRefCount | NodeAddrScreenName | NodeAddrStatusReason | NodeAddrStatServerCurConns
+{NodeAddrAddr_T} | {NodeAddrPoolMemberRefCount} | {NodeAddrScreenName} | {NodeAddrStatusReason} | {NodeAddrStatServerCurConns}
+

@@ -1,0 +1,4 @@
+MemSize : MATH	: {MemBlocks} x {MemBlockSize} / 1024 : 0
+MemSizeUsed : MATH	: {MemBlocksUsed} x {MemBlockSize} / 1024 : 0
+MemAvail : MATH	: {MemSize} - {MemSizeUsed} : 0
+MemPerUse : MATH	: ({MemSizeUsed} x 100) / {MemSize} : 0

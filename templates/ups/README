@@ -1,0 +1,68 @@
+This template was created by David Baldwin
+
+NOTE: This does not imply any support responsibilities, liability in
+case of this template or devmon causing physical, monetary or emotional
+damages, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 
+
+RRD data collection for battery, power and powerin must be setup
+If using integrated devmon, add to TEST2RRD line:
+battery=devmon,power=devmon,powerin=devmon
+
+Otherwise ensure being processed by --extra-script option
+
+Add to hobbitgraph.cfg:
+
+[power]
+        FNPATTERN power\.(.+).rrd
+        TITLE Power Monitoring
+        YAXIS Percent Load
+        -l 0
+        DEF:load@RRDIDX@=@RRDFN@:load:AVERAGE
+        LINE2:load@RRDIDX@#@COLOR@:@RRDPARAM@ Output Load
+        GPRINT:load@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:load@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:load@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:load@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+
+[powerin]
+        FNPATTERN powerin.(.+).rrd
+        TITLE Power Monitoring
+        YAXIS Volts
+        DEF:volts@RRDIDX@=@RRDFN@:volts:AVERAGE
+        LINE2:volts@RRDIDX@#@COLOR@:@RRDPARAM@ Input Voltage
+        GPRINT:volts@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:volts@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:volts@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:volts@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+
+[battery]
+        FNPATTERN battery.(.+).rrd
+        TITLE Battery Status
+        YAXIS
+        DEF:runremm@RRDIDX@=@RRDFN@:runrem:AVERAGE
+        DEF:batcap@RRDIDX@=@RRDFN@:batcap:AVERAGE
+        DEF:sbattime@RRDIDX@=@RRDFN@:battime:AVERAGE
+        CDEF:battime@RRDIDX@=sbattime@RRDIDX@,60,/
+        DEF:temp@RRDIDX@=@RRDFN@:temp:AVERAGE
+        LINE2:runremm@RRDIDX@#@COLOR@:Runtime Remaining (min)
+        GPRINT:runremm@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:runremm@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:runremm@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:runremm@RRDIDX@:AVERAGE: \: %5.1lf (ave)\n
+        LINE2:batcap@RRDIDX@#@COLOR@:Battery Capacity (%)
+        GPRINT:batcap@RRDIDX@:LAST:    \: %5.1lf (cur)
+        GPRINT:batcap@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:batcap@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:batcap@RRDIDX@:AVERAGE: \: %5.1lf (ave)\n
+        LINE2:battime@RRDIDX@#@COLOR@:Time on battery (min)
+        GPRINT:battime@RRDIDX@:LAST:   \: %5.1lf (cur)
+        GPRINT:battime@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:battime@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:battime@RRDIDX@:AVERAGE: \: %5.1lf (ave)\n
+        LINE2:temp@RRDIDX@#@COLOR@:Battery temperature (C)
+        GPRINT:temp@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:temp@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:temp@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:battime@RRDIDX@:AVERAGE: \: %5.1lf (ave)\n
+

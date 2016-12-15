@@ -1,0 +1,6 @@
+DiskNameFixed : REGSUB : {DiskName} /([^ ]*):.*/$1/
+DiskSize : MATH	: {DiskBlocks} x {DiskBlockSize} / 1024 : 0
+DiskSizeUsed : MATH	: {DiskBlocksUsed} x {DiskBlockSize} / 1024 : 0
+DiskAvail : MATH	: {DiskSize} - {DiskSizeUsed} : 0
+DiskPerUse : MATH	: ({DiskSizeUsed} x 100) / {DiskSize} : 0
+hrStorageTypeName : SWITCH : {hrStorageType} 1.3.6.1.2.1.25.2.1.4=FIXED,1.3.6.1.2.1.25.2.1.2=Virtual,1.3.6.1.2.1.25.2.1.3=PhysicalMem,1.3.6.1.2.1.25.2.1.7=REMOVABLE

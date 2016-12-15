@@ -1,0 +1,3 @@
+degreesCelsius		: green 	: >0	: Temperature OK
+degreesCelsius		: yellow	: >30	: Temperature high
+degreesCelsius		: red		: >50	: Temperature very high

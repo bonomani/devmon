@@ -1,0 +1,4 @@
+#STATUS: up: load={hrProcessorLoad1}
+TABLE:rrd(DS:ds0:hrProcessorLoad:GAUGE;)
+Processor|Load
+{hrProcessorIndex}|{hrProcessorLoad}%

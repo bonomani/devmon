@@ -1,0 +1,1 @@
+memoryAvailabilityStatustxt : SWITCH	: {memoryAvailabilityStatus} 1=memoryAvailable,2=memoryShortage,3=memoryFull

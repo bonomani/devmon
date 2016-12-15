@@ -1,0 +1,206 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides: devmon
+# Should-Start: $network
+# Should-Stop: $network
+# Default-Start: 345
+# Short-Description: Starts the Devmon SNMP data collector for Xymon/Hobbit
+# Description: This startup script launches Devmon SNMP collector for Xymon/Hobbit
+### END INIT INFO
+#
+# chkconfig: 2345 90 10
+# description: An snmp data collector for the hobbit & BigBrother network
+#              monitoring suites
+# processname: devmon
+# pidfile: /var/run/devmon/devmon.pid
+# config: /usr/local/devmon/devmon.cfg
+
+# source function library
+. /etc/init.d/functions
+
+RETVAL=0
+PIDFILE=/var/run/devmon/devmon.pid
+KILLDELAY=5
+ARGS=""
+#RUNASUSER=devmon
+[ -e /etc/sysconfig/devmon ] && . /etc/sysconfig/devmon
+
+prog="/usr/local/devmon/devmon"
+if [ -e ~xymon/server/bin/xymoncmd ]
+then prog="~xymon/server/bin/xymoncmd $prog"
+elif [ -e ~xymon/client/bin/xymoncmd ]
+then prog="~xymon/client/bin/xymoncmd $prog"
+elif [ -e ~hobbit/client/bin/bbcmd ]
+then prog="~hobbit/client/bin/bbcmd $prog"
+elif [ -e ~xymon/client/bin/bbcmd ]
+then prog="~xymon/client/bin/bbcmd $prog"
+elif [ -e ~bb/etc/bbdef.sh ]
+then . ~bb/etc/bbdef.sh
+fi
+
+start() {
+	echo -n $"Starting Devmon: "
+
+ 	daemon ${RUNASUSER:+--user=$RUNASUSER} $prog "$ARGS"
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/devmon
+}
+
+stop() {
+	echo -n $"Stopping Devmon: "
+	# Try killproc with the options we need sending sig 0, if it fails
+	# with a pidof error, we need the internal killproc which
+	# is a copy of the killproc that has the options we need
+	# otherwise we use the killproc we have
+
+	if killproc -p $PIDFILE -d $KILLDELAY devmon -0 >/dev/null 2>/dev/null
+	then killproc -p $PIDFILE -d $KILLDELAY devmon
+	else internal_killproc -p $PIDFILE -d $KILLDELAY devmon
+	fi
+	RETVAL=$?
+	echo
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/devmon
+}
+
+rotate () {
+	if killproc -p $PIDFILE -d $KILLDELAY devmon -0 >/dev/null 2>/dev/null
+	then killproc -p $PIDFILE -d $KILLDELAY devmon -HUP >/dev/null
+	else internal_killproc -p $PIDFILE -d $KILLDELAY devmon -HUP >/dev/null
+	fi
+	RETVAL=$?
+}
+
+# __proc_pids {program} [pidfile]
+# Set $pid to pids from /var/run* for {program}.  $pid should be declared
+# local in the caller.
+# Returns LSB exit code for the 'status' action.
+__pids_var_run() {
+        local base=${1##*/}
+        local pid_file=${2:-/var/run/$base.pid}
+
+        pid=
+        if [ -f "$pid_file" ] ; then
+                local line p
+                read line < "$pid_file"
+                for p in $line ; do
+                        [ -z "${p//[0-9]/}" -a -d "/proc/$p" ] && pid="$pid $p"
+                done
+                if [ -n "$pid" ]; then
+                        return 0
+                fi
+                return 1 # "Program is dead and /var/run pid file exists"
+        fi
+        return 3 # "Program is not running"
+}
+
+internal_killproc() {
+	local RC killlevel= base pid pid_file= delay
+
+	RC=0; delay=3
+	# Test syntax.
+	if [ "$#" -eq 0 ]; then
+		echo $"Usage: internal_killproc [-p pidfile] [ -d delay] {program} [-signal]"
+		return 1
+	fi
+	if [ "$1" = "-p" ]; then
+		pid_file=$2
+		shift 2
+	fi
+	if [ "$1" = "-d" ]; then
+		delay=$2
+		shift 2
+	fi
+        
+
+	# check for second arg to be kill level
+	[ -n "${2:-}" ] && killlevel=$2
+
+        # Save basename.
+        base=${1##*/}
+
+        # Find pid.
+	__pids_var_run "$1" "$pid_file"
+	if [ -z "$pid_file" -a -z "$pid" ]; then
+		pid="$(__pids_pidof "$1")"
+	fi
+
+        # Kill it.
+        if [ -n "$pid" ] ; then
+                [ "$BOOTUP" = "verbose" -a -z "${LSB:-}" ] && echo -n "$base "
+		if [ -z "$killlevel" ] ; then
+		       if checkpid $pid 2>&1; then
+			   # TERM first, then KILL if not dead
+			   kill -TERM $pid >/dev/null 2>&1
+			   usleep 100000
+			   if checkpid $pid && sleep 1 &&
+			      checkpid $pid && sleep $delay &&
+			      checkpid $pid ; then
+                                kill -KILL $pid >/dev/null 2>&1
+				usleep 100000
+			   fi
+		        fi
+			checkpid $pid
+			RC=$?
+			[ "$RC" -eq 0 ] && failure $"$base shutdown" || success $"$base shutdown"
+			RC=$((! $RC))
+		# use specified level only
+		else
+		        if checkpid $pid; then
+	                	kill $killlevel $pid >/dev/null 2>&1
+				RC=$?
+				[ "$RC" -eq 0 ] && success $"$base $killlevel" || failure $"$base $killlevel"
+			elif [ -n "${LSB:-}" ]; then
+				RC=7 # Program is not running
+			fi
+		fi
+	else
+		if [ -n "${LSB:-}" -a -n "$killlevel" ]; then
+			RC=7 # Program is not running
+		else
+			failure $"$base shutdown"
+			RC=0
+		fi
+	fi
+
+        # Remove pid file if any.
+	if [ -z "$killlevel" ]; then
+            rm -f "${pid_file:-/var/run/$base.pid}"
+	fi
+	return $RC
+}
+
+case "$1" in
+  start)
+	start
+	RETVAL=$?
+	;;
+  stop)
+	stop
+	RETVAL=$?
+	;;
+  restart)
+	stop
+	start
+	RETVAL=$?
+	;;
+  reload|readbbhosts)
+	sh -c "$prog $ARGS --readbbhosts"
+	RETVAL=$?
+	;;
+  rotate)
+	if status -p $PIDFILE devmon >/dev/null
+	then rotate
+	fi
+	RETVAL=$?
+	;;
+  status)
+	status -p $PIDFILE devmon
+	RETVAL=$?
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|[reload|readbbhosts]|rotate|status}"
+	exit 1
+esac
+
+exit $RETVAL

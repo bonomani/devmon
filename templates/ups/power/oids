@@ -1,0 +1,11 @@
+upsOutputSource         : .1.3.6.1.2.1.33.1.4.1.0 : leaf
+upsOutputFrequency      : .1.3.6.1.2.1.33.1.4.2.0 : leaf
+upsOutputNumLines       : .1.3.6.1.2.1.33.1.4.3.0 : leaf
+upsOutputVoltage        : .1.3.6.1.2.1.33.1.4.4.1.2     : branch
+upsOutputCurrent        : .1.3.6.1.2.1.33.1.4.4.1.3     : branch
+upsOutputPower          : .1.3.6.1.2.1.33.1.4.4.1.4     : branch
+upsOutputPercentLoad    : .1.3.6.1.2.1.33.1.4.4.1.5     : branch
+upsConfigOutputVoltage  : .1.3.6.1.2.1.33.1.9.3.0       : leaf
+upsConfigOutputFreq     : .1.3.6.1.2.1.33.1.9.4.0       : leaf
+upsConfigOutputVA       : .1.3.6.1.2.1.33.1.9.5.0       : leaf
+upsConfigOutputPower    : .1.3.6.1.2.1.33.1.9.6.0       : leaf

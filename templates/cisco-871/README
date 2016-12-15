@@ -1,0 +1,9 @@
+This template was taken by an original created by Lacroix Francois for cisco-asa.
+
+A few minor tests were removed from the original as they did not work completely)
+i.e. serial, cluster, & connects 
+
+NOTE: This does not imply any support responsibilities, liabiltiy in
+case of this template or devmon causing phsyical, monetary or emotional
+damanges, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 

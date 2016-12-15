@@ -1,0 +1,10 @@
+dfSystemProductName     : .1.3.6.1.4.1.116.5.11.1.2.1.1 : branch
+dfSystemMicroRevision   : .1.3.6.1.4.1.116.5.11.1.2.1.2 : branch
+dfSystemSerialNumber    : .1.3.6.1.4.1.116.5.11.1.2.1.3 : branch
+dfRegressionStatus      : .1.3.6.1.4.1.116.5.11.1.2.2.1 : branch
+dfPortID        : .1.3.6.1.4.1.116.5.11.1.2.6.1.1.2     : branch
+dfPortKind      : .1.3.6.1.4.1.116.5.11.1.2.6.1.1.3     : branch
+dfPortFibreTopology     : .1.3.6.1.4.1.116.5.11.1.2.6.1.1.6     : branch
+dfPortControlStatus     : .1.3.6.1.4.1.116.5.11.1.2.6.1.1.7     : branch
+dfPortDisplayName       : .1.3.6.1.4.1.116.5.11.1.2.6.1.1.8     : branch
+dfPortWWN       : .1.3.6.1.4.1.116.5.11.1.2.6.1.1.9     : branch

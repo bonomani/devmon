@@ -1,0 +1,6 @@
+#!/bin/bash
+cp -f hobbit-4.2.0-devmon.patch hobbit-4.2.0-devmon-complete.patch
+> do_devmon.c.orig
+diff -u do_devmon.c.orig do_devmon.c |perl -pe 's,^(---|\+\+\+) ,${1} hobbit-4.2.0/hobbitd/rrd/,g' >> hobbit-4.2.0-devmon-complete.patch
+
+

@@ -1,0 +1,1 @@
+alarmStatusTxt  : SWITCH        : {alarmStatus} 0=disable,1=enable

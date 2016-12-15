@@ -1,0 +1,6 @@
+UPS Alarms ({upsAlarmsPresent.color}{upsAlarmsPresent} alarms)
+{upsAlarmsPresent.errors}
+
+TABLE: noalarmsmsg
+Alarm|Time
+{upsAlarmDescrTxt}|{upsAlarmTimeTxt}

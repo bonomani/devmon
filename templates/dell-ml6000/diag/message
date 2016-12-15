@@ -1,0 +1,26 @@
+Name: {libraryName}  Description: {libraryDescription}
+Vendor: {libraryVendor}  Model: {libraryModel}
+Serial: {librarySerialNumber}
+Firmware Rev: {libraryFirmwareVersion}
+
+<table border=1 cellpadding=5><tr>
+<td>Status</td><td>Physical Drives</td><td>Power</td><td>Cooling</td><td>Control</td><td>Connectivity</td><td>Robotics</td><td>Media</td><td>Drives</td><td>Operator</td>
+</tr><tr>
+<td>{libraryGlobalStatusTxt.color}{libraryGlobalStatusTxt}</td><td>{overallPhDriveReadinessStatusTxt.color}{overallPhDriveReadinessStatusTxt}</td><td>{powerStatusTxt.color}{powerStatusTxt}</td><td>{coolingStatusTxt.color}{coolingStatusTxt}</td><td>{controlStatusTxt.color}{controlStatusTxt}</td><td>{connectivityStatusTxt.color}{connectivityStatusTxt}</td><td>{roboticsStatusTxt.color}{roboticsStatusTxt}</td><td>{mediaStatusTxt.color}{mediaStatusTxt}</td><td>{driveStatusTxt.color}{driveStatusTxt}</td><td>{operatorActionRequestTxt.color}{operatorActionRequestTxt}</td>
+</tr></table>
+
+<table border=1 cellpadding=5><tr>
+<td>Phys Library</td><td>Main Door</td><td>IE Door</td><td>Lib Slots</td><td>IE Slots</td><td>Robot</td>
+</tr><tr>
+<td>{physicalLibraryStateTxt.color}{physicalLibraryStateTxt}</td><td>{aggregatedMainDoorStatusTxt.color}{aggregatedMainDoorStatusTxt}</td><td>{aggregatedIEDoorStatusTxt.color}{aggregatedIEDoorStatusTxt}</td><td>{numStorageSlots}</td><td>{numIESlots}</td><td>{robotStateTxt.color}{robotStateTxt}</td>
+</tr></table>
+
+Physical Drives ({numPhDrives}):
+TABLE:noalarmsmsg,rrd(pri:phDriveSerialNumber; DS:loads:phDriveLoads:GAUGE; DS:loadops:phDriveLoads:COUNTER;)
+State|Ser No|Model|Vendor|Type|Loc|FW Rev|Lib Name|RAS Sts|Clean|IfType|Loads
+{phDriveStateTxt.color}{phDriveStateTxt}|{phDriveSerialNumber}|{phDriveModel}|{phDriveVendor}|{phDriveType}|{phDriveLocation}|{phDriveFirmwareVersion}|{phDriveLogicalLibraryName}|{phDriveRasStatusTxt.color}{phDriveRasStatusTxt}|{phDriveNeedsCleaningTxt.color}{phDriveNeedsCleaningTxt}|{phDriveInterfaceTypeTxt}|{phDriveLoads}
+
+FC Ports
+TABLE:noalarmsmsg
+Drv S/N|Type|WWNN|WWPN|LoopID|LMode|Speed|FrameSz
+{fcPortDriveSerialNumber}|{fcPortTypeTxt}|{fcPortWWNodeNameTxt}|{fcPortWWPortNameTxt}|{fcPortLoopId}|{fcPortLoopIdModeTxt}|{fcPortNegotiatedSpeedTxt}|{fcPortFrameSize}

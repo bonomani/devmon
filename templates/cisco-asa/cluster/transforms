@@ -1,0 +1,2 @@
+first_txt      : SWITCH        : {first} 9=Active,10=Standby,4=Error
+second_txt     : SWITCH        : {second} 9=Active,10=Standby,4=Error

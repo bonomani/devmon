@@ -1,0 +1,96 @@
+--- hobbit-4.2.0/lib/hobbitrrd.c.devmon	2008-01-22 06:22:11.000000000 +0200
++++ hobbit-4.2.0/lib/hobbitrrd.c	2008-01-25 06:09:27.000000000 +0200
+@@ -221,6 +221,9 @@ static char *hobbit_graph_text(char *hos
+ 	else if ((service != NULL) && (strcmp(graphdef->hobbitrrdname, "ncv") == 0)) {
+ 		sprintf(rrdservicename, "ncv:%s", service);
+ 	}
++	else if ((service != NULL) && (strcmp(graphdef->hobbitrrdname, "devmon") == 0)) {
++		sprintf(rrdservicename, "devmon:%s", service);
++	}
+ 	else {
+ 		strcpy(rrdservicename, graphdef->hobbitrrdname);
+ 	}
+--- hobbit-4.2.0/lib/htmllog.c.devmon	2008-01-22 06:22:11.000000000 +0200
++++ hobbit-4.2.0/lib/htmllog.c	2008-01-31 07:28:40.000000000 +0200
+@@ -318,7 +318,9 @@ void generate_html_log(char *hostname, c
+ 	}
+ 	if (rrd && graph) {
+ 		char *p, *multikey;
+-		if (multigraphs == NULL) multigraphs = ",disk,inode,qtree,";
++		int found_rrd = 1;
++		if (!strncmp(rrd->hobbitrrdname,"devmon",6)) found_rrd=0;
++		if (multigraphs == NULL) multigraphs = ",disk,inode,qtree,if_load,";
+ 
+ 		/* 
+ 		 * Some reports (disk) use the number of lines as a rough measure for how many
+@@ -347,6 +349,13 @@ void generate_html_log(char *hostname, c
+ 						/* We found something that is not blank, so one more line */
+ 						if (!netwarediskreport) linecount++;
+ 					}
++					if (strlen(p) > 10 &&  *p == '<' ) {
++						/* Check if this is a devmon RRD header, reset the linecount to -2, as we will see a DS line and a Devmon banner*/
++						if(!strncmp(p, "<!--DEVMON",10)) {
++						       	linecount = -2;
++							found_rrd=1;
++						}
++					}
+ 					/* Then skip forward to the EOLN */
+ 					p = strchr(p, '\n');
+ 				}
+@@ -357,8 +366,11 @@
+ 		}
+ 		xfree(multikey);
+ 
++		/* Avoid graph icons if a specific host has no rrd data */
++		if (found_rrd ==1 ) {
+ 		fprintf(output, "<!-- linecount=%d -->\n", linecount);
+ 		fprintf(output, "%s\n", hobbit_graph_data(hostname, displayname, service, color, graph, linecount, HG_WITHOUT_STALE_RRDS, HG_PLAIN_LINK));
++		}
+ 	}
+ 
+ 	if (histlocation == HIST_BOTTOM) {
+--- hobbit-4.2.0/hobbitd/etcfiles/hobbitserver.cfg.DIST.devmon	2006-08-09 22:10:07.000000000 +0200
++++ hobbit-4.2.0/hobbitd/etcfiles/hobbitserver.cfg.DIST	2008-01-31 07:33:52.000000000 +0200
+@@ -132,11 +132,11 @@ RRDWIDTH="576"		# The RRD's contain 576 
+ #
+ # This is also used by the bb-hostsvc.cgi script to determine if the detailed
+ # status view of a test should include a graph.
+-TEST2RRD="cpu=la,disk,inode,qtree,memory,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines"
++TEST2RRD="cpu=la,disk,inode,qtree,memory,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,if_load=devmon,temp=devmon"
+ 
+ # This defines which RRD files to include on the "trends" column webpage,
+ # and the order in which they appear.
+-GRAPHS="la,disk,inode,qtree,files,processes,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1,ports,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines"
++GRAPHS="la,disk,inode,qtree,files,processes,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1,ports,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,devmon::1,if_load::1,temp"
+ 
+ # These two settings can be used to restrict what filesystems are being
+ # tracked (i.e. have their utilisation graphed) by Hobbit.
+--- hobbit-4.2.0/hobbitd/do_rrd.c.devmon	2006-08-09 22:10:05.000000000 +0200
++++ hobbit-4.2.0/hobbitd/do_rrd.c	2008-01-25 06:23:58.000000000 +0200
+@@ -309,6 +309,7 @@ static int pickdata(char *buf, pcre *exp
+ #include "rrd/do_external.c"
+ #include "rrd/do_filesizes.c"
+ #include "rrd/do_counts.c"
++#include "rrd/do_devmon.c"
+ 
+ #ifdef USE_BEA2
+ #include "rrd/do_bea2.c"
+@@ -368,6 +369,7 @@ void update_rrd(char *hostname, char *te
+ 	else if (strcmp(id, "proccounts") == 0)  res = do_counts_rrd("processes", hostname, testname, msg, tstamp);
+ 	else if (strcmp(id, "portcounts") == 0)  res = do_counts_rrd("ports", hostname, testname, msg, tstamp);
+ 	else if (strcmp(id, "linecounts") == 0)  res = do_derives_rrd("lines", hostname, testname, msg, tstamp);
++	else if (strcmp(id, "devmon") == 0)        res = do_devmon_rrd(hostname, testname, msg, tstamp);
+ 
+ #ifdef DO_ORCA
+ 	else if (strcmp(id, "orca") == 0)        res = do_orca_rrd(hostname, testname, msg, tstamp);
+--- hobbit-4.2.0/web/hobbitsvc.c~       2006-08-09 22:10:13.000000000 +0200
++++ hobbit-4.2.0/web/hobbitsvc.c        2008-02-04 13:09:56.000000000 +0200
+@@ -30,7 +30,7 @@ static char rcsid[] = "$Id: hobbitsvc.c,
+ /* Commandline params */
+ static enum { SRC_HOBBITD, SRC_HISTLOGS, SRC_CLIENTLOGS } source = SRC_HOBBITD;
+ static int wantserviceid = 1;
+-static char *multigraphs = ",disk,inode,qtree,";
++static char *multigraphs = ",disk,inode,qtree,if_load,";
+
+ /* CGI params */
+ static char *hostname = NULL;

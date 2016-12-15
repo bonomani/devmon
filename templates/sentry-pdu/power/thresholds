@@ -1,0 +1,22 @@
+towerStatusTxt  : green  : normal     :
+towerStatusTxt  : yellow : noComm       :
+towerStatusTxt  : red    : fanFail|overTemp      :
+infeedStatusTxt : green  : on     :
+infeedStatusTxt : yellow : off|offWait|onWait|offError|onError|noComm        :
+infeedStatusTxt : red    :      :
+infeedLoadStatusTxt     : green  : normal     :
+infeedLoadStatusTxt     : yellow : notOn|reading|loadLow|loadHigh|overLoad|readError|noComm      :
+infeedLoadStatusTxt     : red    :      :
+outletStatusTxt : green  : on     :
+outletStatusTxt : yellow : off|offWait|onWait|offError|onError|noComm|reading|offFuse|onFuse :
+outletStatusTxt : red    :      :
+outletLoadStatusTxt     : green  : normal     :
+outletLoadStatusTxt     : yellow : notOn|reading|loadLow|loadHigh|overLoad|readError|noComm      :
+outletLoadStatusTxt     : red    :      :
+outletControlStateTxt   : green  : on|lockedOff|lockedOn   :
+outletControlStateTxt   : yellow : idleOff|idleOn|wakeOff|wakeOn|off|reboot|shutdown|pendOn|pendOff|minimumOff|minimumOn|eventOff|eventOn|eventReboot|eventShutdown      :
+outletControlStateTxt   : red    :      :
+outletControlActionTxt  : green  : on     :
+outletControlActionTxt  : yellow : none|off|reboot   :
+outletControlActionTxt  : red    :      :
+

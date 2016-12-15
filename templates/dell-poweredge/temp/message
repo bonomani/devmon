@@ -1,0 +1,5 @@
+
+Thermal sensors:
+TABLE: noalarmsmsg,rrd(DS:ds0:temperatureProbeReadingCelsius:GAUGE; DS:ds1:temperatureProbeLowerCriticalThresholdCelsius:GAUGE)
+ID|Sensor Location|Temp|Threshold|Condition
+{temperatureProbeIndex}|{temperatureProbeLocationName}|{temperatureProbeReadingCelsius}|{temperatureProbeLowerCriticalThreshold}|{temperatureProbeStatusTxt.color}{temperatureProbeStatusTxt}

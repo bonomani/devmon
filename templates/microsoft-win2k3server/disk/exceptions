@@ -1,0 +1,4 @@
+DiskNameFixed : alarm  : .*
+DiskNameFixed : ignore : Virtual.*|Physical.*|E.*
+hrStorageTypeName : alarm : FIXED
+hrStorageTypeName : ignore : Removable

@@ -1,0 +1,28 @@
+cntrlIndex	: 1.3.6.1.4.1.232.3.2.2.1.1.1	: branch
+cntrlModel	: 1.3.6.1.4.1.232.3.2.2.1.1.2	: branch
+cntrlFwRev	: 1.3.6.1.4.1.232.3.2.2.1.1.3	: branch
+cntrlCondition	: 1.3.6.1.4.1.232.3.2.2.1.1.6	: branch
+cntrlStatus	: 1.3.6.1.4.1.232.3.2.2.1.1.12	: branch
+
+logDrvCntIndex	: 1.3.6.1.4.1.232.3.2.3.1.1.1	: branch
+logDrvIndex	: 1.3.6.1.4.1.232.3.2.3.1.1.2	: branch
+logDrvFaultTol  : 1.3.6.1.4.1.232.3.2.3.1.1.3	: branch
+logDrvStatus	: 1.3.6.1.4.1.232.3.2.3.1.1.4	: branch
+logDrvSprIds    : 1.3.6.1.4.1.232.3.2.3.1.1.8	: branch
+logDrvSize	: 1.3.6.1.4.1.232.3.2.3.1.1.9	: branch
+logDrvPhysIds   : 1.3.6.1.4.1.232.3.2.3.1.1.10  : branch
+logDrvName	: 1.3.6.1.4.1.232.3.2.3.1.1.14	: branch
+
+phyDrvCntIndex	: 1.3.6.1.4.1.232.3.2.5.1.1.1	: branch
+phyDrvIndex	: 1.3.6.1.4.1.232.3.2.5.1.1.2	: branch
+phyDrvModel	: 1.3.6.1.4.1.232.3.2.5.1.1.3	: branch
+phyDrvFwRev	: 1.3.6.1.4.1.232.3.2.5.1.1.4	: branch
+phyDrvBay	: 1.3.6.1.4.1.232.3.2.5.1.1.5	: branch
+phyDrvStatus	: 1.3.6.1.4.1.232.3.2.5.1.1.6	: branch
+phyDrvSize	: 1.3.6.1.4.1.232.3.2.5.1.1.45	: branch
+phyDrvSpeed	: 1.3.6.1.4.1.232.3.2.5.1.1.59	: branch
+
+sprDrvCntIndex	: 1.3.6.1.4.1.232.3.2.4.1.1.1	: branch
+sprDrvIndex	: 1.3.6.1.4.1.232.3.2.4.1.1.2	: branch
+sprDrvStatus	: 1.3.6.1.4.1.232.3.2.4.1.1.3	: branch
+

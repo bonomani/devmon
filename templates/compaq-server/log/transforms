@@ -1,0 +1,26 @@
+cpqHeEventLogEntrySeverityTxt:	SWITCH  : {cpqHeEventLogEntrySeverity} 2=Informational,3=infoWithAlert,6=Repaired,9=Caution,15=Critical
+cpqHeEventLogEntryClassTxt:	SWITCH	: {cpqHeEventLogEntryClass} 11=Power
+#cpqHeEventLogInitialYHex:	
+cpqHeEventLogInitialTimeTxt:	UNPACK	: {cpqHeEventLogInitialTime} H12
+cpqHeEventLogInitialYHex:	SUBSTR	: {cpqHeEventLogInitialTimeTxt} 0 4
+cpqHeEventLogInitialMHex:	SUBSTR	: {cpqHeEventLogInitialTimeTxt} 4 2
+cpqHeEventLogInitialDHex:	SUBSTR	: {cpqHeEventLogInitialTimeTxt} 6 2
+cpqHeEventLogInitialHHex:	SUBSTR	: {cpqHeEventLogInitialTimeTxt} 8 2
+cpqHeEventLogInitialmHex:	SUBSTR	: {cpqHeEventLogInitialTimeTxt} 10 2
+cpqHeEventLogInitialY:		CONVERT	: {cpqHeEventLogInitialYHex} hex
+cpqHeEventLogInitialM:		CONVERT	: {cpqHeEventLogInitialMHex} hex
+cpqHeEventLogInitialD:		CONVERT	: {cpqHeEventLogInitialDHex} hex
+cpqHeEventLogInitialH:		CONVERT	: {cpqHeEventLogInitialHHex} hex
+cpqHeEventLogInitialm:		CONVERT	: {cpqHeEventLogInitialmHex} hex
+
+cpqHeEventLogUpdateTimeTxt:	UNPACK	: {cpqHeEventLogUpdateTime} H12
+cpqHeEventLogUpdateYHex:	SUBSTR	: {cpqHeEventLogUpdateTimeTxt} 0 4
+cpqHeEventLogUpdateMHex:	SUBSTR	: {cpqHeEventLogUpdateTimeTxt} 4 2
+cpqHeEventLogUpdateDHex:	SUBSTR	: {cpqHeEventLogUpdateTimeTxt} 6 2
+cpqHeEventLogUpdateHHex:	SUBSTR	: {cpqHeEventLogUpdateTimeTxt} 8 2
+cpqHeEventLogUpdatemHex:	SUBSTR	: {cpqHeEventLogUpdateTimeTxt} 10 2
+cpqHeEventLogUpdateY:		CONVERT	: {cpqHeEventLogUpdateYHex} hex
+cpqHeEventLogUpdateM:		CONVERT	: {cpqHeEventLogUpdateMHex} hex
+cpqHeEventLogUpdateD:		CONVERT	: {cpqHeEventLogUpdateDHex} hex
+cpqHeEventLogUpdateH:		CONVERT	: {cpqHeEventLogUpdateHHex} hex
+cpqHeEventLogUpdatem:		CONVERT	: {cpqHeEventLogUpdatemHex} hex

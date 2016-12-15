@@ -1,0 +1,8 @@
+
+nsResSessAllocate	: red		: >2000	: very high number of sesssions: {nsResSessAllocate}%
+nsResSessAllocate	: yellow	: >1800	: high number of sesssions: {nsResSessAllocate}%
+nsResSessAllocate	: green		:	: number of sessions is nominal: {nsResSessAllocate}%
+
+sysUpTimeSecs	: red		: <600  : Device rebooted recently. System uptime: {UpTimeTxt}
+sysUpTimeSecs	: yellow	: <5000 : Device rebooted recently. System uptime: {UpTimeTxt}
+sysUpTimeSecs	: green		:	: System uptime: {UpTimeTxt}

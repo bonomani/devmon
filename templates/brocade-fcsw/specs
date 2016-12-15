@@ -1,0 +1,4 @@
+vendor	: brocade
+model	: fcsw
+snmpver	: 2
+sysdesc : Fibre Channel Switch

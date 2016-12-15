@@ -1,0 +1,4 @@
+ifInLoad	: yellow	: 75	: {ifName} load is high
+ifInLoad	: red		: 95	: {ifName} load is very high
+ifOutLoad	: yellow	: 75	: {ifName} load is high
+ifOutLoad	: red		: 95	: {ifName} load is very high

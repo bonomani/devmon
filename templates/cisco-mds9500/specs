@@ -1,0 +1,4 @@
+vendor: cisco
+model: mds9500
+sysdesc: Cisco.*SAN-OS.*m9500
+snmpver: 2

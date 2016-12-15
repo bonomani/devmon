@@ -1,0 +1,2 @@
+AmbientTemp     : red           : 39    : Ambient temperature ({AmbientTemp} C) is above CRITICAL level (30 C, 102 F)
+AmbientTemp     : yellow        : 30    : Ambient temperature ({AmbientTemp} C) is above WARNING level (27 C, 86 F)

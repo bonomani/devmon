@@ -1,0 +1,4 @@
+vendor	: falconstor
+model	: ipstor
+snmpver	: 2
+sysdesc : Linux

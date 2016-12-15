@@ -1,0 +1,8 @@
+cpqHeTemperatureConditionTxt	: green		: OK	: Temperature OK
+cpqHeTemperatureConditionTxt	: yellow	: Degraded|Other	: Temperature degraded or other state
+cpqHeTemperatureConditionTxt	: red		: Failed : Temperature threshold exceeded
+cpqHeTemperatureCelsius		: yellow	: >50	: Temperature very high
+cpqHeTemperatureCelsius		: green	: >30	: Temperature high
+cpqHeTemperatureCelsiusFake	: green		: OK	: Normal
+cpqHeTemperatureCelsiusFake	: yellow	: WARN	: Warning
+cpqHeTemperatureCelsiusFake	: red		: CRIT	: Critical

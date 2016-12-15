@@ -1,0 +1,4 @@
+qrPercentUsed	: MATH		: {qrVKBytesUsed} / {qrVKBytesLimit} x 100
+qrTypeDescr	: SWITCH 	: {qrVType} 1=User,2=Group,3=Tree,4=UserDefault,5=GroupDefault,6=Unknown
+qrVGBytesLimit	: MATH		: {qrVKBytesLimit} / 1048576
+qrVGBytesUsed	: MATH		: {qrVKBytesUsed} / 1048576

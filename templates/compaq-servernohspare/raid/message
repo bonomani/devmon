@@ -1,0 +1,10 @@
+
+Logical drive status:
+TABLE: noalarmsmsg
+ID|Controller|Fault Tolerance|Size|OS name|Pysical IDs|Spare IDs|Status
+{logDrvIndex}|{logDrvCntIndex}|{logFaultTolTxt}|{logDrvSize}mb|{logDrvName}&nbsp;|{logPhysIdTxt}&nbsp;|{logSprIdTxt}&nbsp;|{logStatTxt.color}{logStatTxt}
+
+Physical drive status:
+TABLE: noalarmsmsg
+ID|Controller|Bay|Model|Firmware Rev|Speed|Size|Serial|Status
+{phyDrvIndex}|{phyDrvCntIndex}|{phyDrvBay}|{phyDrvModel}|{phyDrvFwRev}|{phyDrvSpdTxt}|{phyDrvSize}mb|{phyDrvSerial}|{phyStatTxt.color}{phyStatTxt}

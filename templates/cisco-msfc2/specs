@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: MSFC2
+snmpver	: 2
+sysdesc : MSFC2

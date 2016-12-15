@@ -1,0 +1,3 @@
+TABLE:rrd(DS:ds0:diskIOReads:COUNTER; DS:ds1:diskIOWrites:COUNTER; DS:ds2:diskIONReadX:COUNTER; DS:ds3:diskIONWrittenX:COUNTER)
+Device|Read Ops|Write Ops|Bytes Read|Bytes Written
+{diskIODevice}|{diskIOReads}|{diskIOWrites}|{diskIONReadX}|{diskIONWrittenX}

@@ -1,0 +1,3 @@
+#globalStatus 	: SWITCH : {miscGlobalStatus} 	1=other, 2=unknown, 3=ok, 4=non critical, 5=critical, 6=nonRecoverable
+overTemperature : SWITCH : {envOverTemperature} 1=no, 2=yes
+battStatus 	: SWITCH : {nvramBatteryStatus} 1=ok, 2=partially Discharged, 3=fully Discharged, 4=not Present, 5=nearEndOfLife, 6=atEndOfLife, 7=unknown

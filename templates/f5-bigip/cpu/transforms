@@ -1,0 +1,9 @@
+sysUpTimeSecs   : MATH          : {sysUpTime} / 100
+UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
+
+CpuUser         : DELTA         : {ssCpuRawUser}
+CpuNice         : DELTA         : {ssCpuRawNice}
+CpuSystem       : DELTA         : {ssCpuRawSystem}
+CpuIdle         : DELTA         : {ssCpuRawIdle}
+
+

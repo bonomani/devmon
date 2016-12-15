@@ -1,0 +1,3 @@
+ipAdEntIfName : CHAIN : {ipAdEntIfIndex} {ifName}
+ipAdEntIfAlias : CHAIN : {ipAdEntIfIndex} {ifAlias}
+ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/

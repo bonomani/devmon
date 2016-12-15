@@ -1,0 +1,2 @@
+powerSupplyStatustxt:		SWITCH	: {powerSupplyStatus} 1=powerSupplyNotInstalled,2=powerSupplyHealthy,3=powerSupplyNoAC,4=powerSupplyFaulty
+powerSupplyRedundancytxt:	SWITCH	: {powerSupplyRedundancy} 1=powerSupplyRedundancyOK,2=powerSupplyRedundancyLost

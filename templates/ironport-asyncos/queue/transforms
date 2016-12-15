@@ -1,0 +1,1 @@
+queueAvailabilityStatustxt : SWITCH : {queueAvailabilityStatus} 1=queueSpaceAvailable,2=queueSpaceShortage,3=queueFull

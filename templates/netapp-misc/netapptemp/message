@@ -1,0 +1,3 @@
+{overTemperature.color}High temperature: {overTemperature}
+
+{currentTemp.color}Temperature sensor: {currentTemp}

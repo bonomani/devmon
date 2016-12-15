@@ -1,0 +1,15 @@
+
+Controllers
+TABLE: noalarmsmsg
+ID|Slot|Type|Firmware|Cache|Phys Drv|Log Drv|Status
+{controllerNumber}|{controllerPCISlot}|{controllerVendor} {controllerName}|{controllerFWVersion}|{controllerCacheSizeInMB}MB|{controllerPhysicalDeviceCount}|{controllerLogicalDeviceCount}|{controllerRollUpStatusTxt.color}{controllerRollUpStatusTxt}
+
+Logical drive status:
+TABLE: noalarmsmsg
+ID|Name|Fault Tolerance|Size|OS name|Pysical IDs|Spare IDs|Status
+{virtualDiskNumber}|{virtualDiskName}|{virtualDiskLayoutTxt}|{virtualDiskLengthInMB}mb|{virtualDiskDeviceName}|&nbsp;|&nbsp;|{virtualDiskRollUpStatusTxt.color}{virtualDiskRollUpStatusTxt}
+
+Physical drive status:
+TABLE: noalarmsmsg
+ID Controller:Bay|Model|Firmware Rev|Speed|Size|Serial|Status
+{arrayDiskNumber} {arrayDiskName}|{arrayDiskVendor} {arrayDiskProductID}|{arrayDiskRevision}|&nbsp;|{arrayDiskLengthInMB}mb|{arrayDiskSerialNo}|{arrayDiskRollUpStatusTxt.color}{arrayDiskRollUpStatusTxt}

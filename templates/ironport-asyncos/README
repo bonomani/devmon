@@ -1,0 +1,27 @@
+This template was created by Buchan Milne
+
+NOTE: This does not imply any support responsibilities, liabiltiy in
+case of this template or devmon causing phsyical, monetary or emotional
+damanges, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 
+
+At present, the template supports the following tests:
+cpu	-   Should result in CPU (% utilisation, not load average) graphs
+fans	-   At present, no alerting, just lists fan speed, graph support may 
+	    come
+keys	-   By default warns 2 weeks before keys expire, critical 1 day before 
+	    keys expire. Warning threshold has been tested and works
+memory	-   Should result in graphs by default, should warn/alert if utilisation
+	    hits threshold set on device
+power	  - Warns if power supply missing, critical if power supply is fauly or
+	    if AC power is not connected to the power supply - not tested
+queue	  - Intended for NCV-based graphs of Queue utilisation and Work Queue
+	    messages - I've never seen Queue utilisation be anything but 0
+raid	  - Should warn if a physical drive is rebuilding, or be critical if
+	    a physical drive has failed - not tested
+resources - Intended for NCV graphs of disk io, open files, and mail transfer
+	    threads
+temp	  - Should warn at 30 deg celsius, alert at 50, should be a devmon
+	    temp graph, but it may be hitting a devmon bug
+updates   - Lists number of updates received for each service, and number of
+	    failed updates. May get a graph? Thresholds? Alerts?

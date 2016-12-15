@@ -1,0 +1,4 @@
+vendor	: Network Appliances
+model	: NetApp v1.0
+snmpver	: 1
+sysdesc : NetApp

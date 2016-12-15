@@ -1,0 +1,4 @@
+vendor	: f5
+model	: bigip
+snmpver	: 2
+sysdesc : bigip

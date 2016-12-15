@@ -1,0 +1,15 @@
+memSensorsTemperature : red : >{memSensorsTempMaxThresh} : Temperature is very high - over {memSensorsTempMaxThresh}
+#memSensorsTemperature : red : <{memSensorsTempMinThresh} : Temperature is very low - under {memSensorsTempMinThresh}
+memSensorsTemperature : yellow : >{memSensorsTempHighThresh} : Temperature is over {memSensorsTempHighThresh}
+#memSensorsTemperature : yellow : <{memSensorsTempLowThresh} : Temperature is below {memSensorsTempLowThresh}
+memSensorsHumidity : red : >{memSensorsHumidityMaxThresh} : Humidity is very high - over {memSensorsHumidityMaxThresh}
+#memSensorsHumidity : red : <{memSensorsHumidityMinThresh} : Humidity is very low - under {memSensorsHumidityMinThresh}
+memSensorsHumidity : yellow : >{memSensorsHumidityHighThresh} : Humidity is over {memSensorsHumidityHighThresh}
+#memSensorsHumidity : yellow : <{memSensorsHumidityLowThresh} : Humidity is below {memSensorsHumidityLowThresh}
+#upsEnvTempF	: red		: 105			: Temperature is very high.
+#upsEnvTempF	: yellow	: 99			: Temperature is high.
+#upsEnvHumidity	: red		: 80			: Humidity is very high.
+#upsEnvHumidity	: yellow	: 50			: Humidity is high.
+# Stupid APCs for some reasons return -1 for most humidity tests...
+#upsEnvHmdVal	: red		: <0			: n/a
+#upsEnvHmdVal	: green		: >=0			: {upsEnvHumidity}%

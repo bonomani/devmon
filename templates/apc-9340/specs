@@ -1,0 +1,4 @@
+vendor	: apc
+model	: 9340
+snmpver	: 1
+sysdesc : MN:AP9340

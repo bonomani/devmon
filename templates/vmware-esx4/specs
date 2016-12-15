@@ -1,0 +1,4 @@
+vendor	: vmware
+model	: esx4
+snmpver	: 2
+sysdesc : VMware ESX 4

@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 6506
+snmpver	: 2
+sysdesc : c6sup|\ss72033_rp|s222_rp|C6506

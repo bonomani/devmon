@@ -1,0 +1,8 @@
+upsBattStat	: red		: Battery low		: Battery time remaining is low.
+upsBattStat	: red		: Battery depleted	: Battery is depleted
+upsBattStat	: yellow	: Unknown		: Battery status is unknown.
+
+upsSecondsOnBattery	: yellow	: >100			: UPS on battery for {upsSecondsOnBattery} seconds.
+upsSecondsOnBattery	: red		: >300			: UPS on battery for {upsSecondsOnBattery} seconds.
+upsEstimatedMinutesRemaining	: yellow	: <25			: UPS has less than 25 minutes (estimated {upsEstimatedMinutesRemaining}) runtime remaining.
+upsEstimatedMinutesRemaining	: red		: <15			: UPS has less than 15 minutes (estimated {upsEstimatedMinutesRemaining}) runtime remaining.

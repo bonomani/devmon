@@ -1,0 +1,4 @@
+vendor	: juniper
+model	: ns208
+snmpver	: 2
+sysdesc : NetScreen-208

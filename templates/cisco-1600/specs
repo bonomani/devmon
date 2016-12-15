@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 1600
+snmpver	: 2
+sysdesc : C1600

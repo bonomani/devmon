@@ -1,0 +1,5 @@
+vendor	: compaq
+model	: servernohspare
+snmpver	: 2
+#sysdesc : linux|Linux
+sysdesc : Compaq Standard Equipment Agent for Linux

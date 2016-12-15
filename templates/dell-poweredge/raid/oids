@@ -1,0 +1,39 @@
+controllerNumber	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.1	: branch
+controllerName		: 1.3.6.1.4.1.674.10893.1.20.130.1.1.2	: branch
+controllerVendor	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.3	: branch
+controllerType		: 1.3.6.1.4.1.674.10893.1.20.130.1.1.4	: branch
+controllerState		: 1.3.6.1.4.1.674.10893.1.20.130.1.1.5	: branch
+controllerRebuildRateInPercent	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.7	: branch
+controllerFWVersion	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.8	: branch
+controllerCacheSizeInMB	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.9	: branch
+controllerCacheSizeInBytes	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.10	: branch
+controllerPhysicalDeviceCount	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.11	: branch
+controllerLogicalDeviceCount	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.12	: branch
+#controllerC0BatteryState	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.25	: branch
+controllerRollUpStatus	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.37	: branch
+controllerPCISlot	: 1.3.6.1.4.1.674.10893.1.20.130.1.1.42	: branch
+
+arrayDiskNumber	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.1	: branch
+arrayDiskName	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.2	: branch
+arrayDiskVendor	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.3	: branch
+arrayDiskState	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.4	: branch
+arrayDiskProductID	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.6	: branch
+arrayDiskSerialNo	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.7	: branch
+arrayDiskRevision	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.8	: branch
+arrayDiskLengthInMB	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.11	: branch
+arrayDiskFreeSpaceInMB	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.19	: branch
+arrayDiskBusType	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.21	: branch
+arrayDiskRollUpStatus	: 1.3.6.1.4.1.674.10893.1.20.130.4.1.23	: branch
+
+
+virtualDiskNumber	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.1	: branch
+virtualDiskName	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.2	: branch
+virtualDiskDeviceName: 1.3.6.1.4.1.674.10893.1.20.140.1.1.3	: branch
+virtualDiskState: 1.3.6.1.4.1.674.10893.1.20.140.1.1.4	: branch
+virtualDiskLengthInMB	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.6	: branch
+virtualDiskWritePolicy	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.10	: branch
+virtualDiskReadPolicy	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.11	: branch
+virtualDiskLayout	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.13	: branch
+virtualDiskCurStripeSizeInMB	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.14	: branch
+virtualDiskCurStripeSizeInBytes	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.15	: branch
+virtualDiskRollUpStatus	: 1.3.6.1.4.1.674.10893.1.20.140.1.1.19	: branch

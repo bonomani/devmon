@@ -1,0 +1,14 @@
+SAN Clients:
+TABLE:plain,noalarmsmsg
+ID  Name
+{sanClientID}|{sanClientName}
+
+SAN Resources:
+TABLE:noalarmsmsg
+ID|Name|Alloc Type|Size|Config|MirrSync|ReplDev|ReplSched|SnapStat
+{sanResourceID}|{sanResourceName}|{srAllocationType}|{srTotalSize}|{srConfigStatus}|{srMirrorSyncStatus.errors}{srMirrorSyncStatus.color}{srMirrorSyncStatus}|{srReplicaDevice}|{srReplicatingSchedule}|{srSnapshotCopyStatus}
+
+SAN Physical Allocation Layout:
+TABLE:noalarmsmsg
+ID|Res Name|SRID|SRName|SRType|Adp#|SCSI|LUN|FrstSect|LastSect|Size|FC Client|SAN Res|Access|Conn
+{physicalAllocLayoutIndex}|{srpaSANResourceName}|{srpaSANResourceID}|{srpaName}|{srpaType}|{srpaAdapterNo}|{srpaScsiID}|{srpaLun}|{srpaFirstSector}|{srpaLastSector}|{srpaSize}|{srFCName} ({srFCClientNo})|{srFCSANResourceName} ({srFCSANResourceID})|{srFCAccess}|{srFCConnAccess}

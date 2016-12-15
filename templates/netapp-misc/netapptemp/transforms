@@ -1,0 +1,1 @@
+overTemperature : SWITCH : {envOverTemperature} 1=no, 2=yes

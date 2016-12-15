@@ -1,0 +1,129 @@
+
+Devmon, version 0.3.1-beta1
+=====================================================================
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.  Please see the file named
+  'COPYING' that was included with the distrubition for more details.
+
+ Thanks!
+---------------------------------------
+  First off, let me thank, in no particular order, the people
+  that have helped make Devmon what it is today:
+
+    Henrik Stoerner
+    Steve Aiello
+    Dan Vande More
+    Craig Boyce
+
+
+ What is Devmon?
+---------------------------------------
+
+  Devmon is a Perl script that can monitor a large number of
+  remote devices and report problems back to a display server
+  running either the BigBrother or Hobbit monitoring software.
+
+
+ How does Devmon work?
+---------------------------------------
+
+  Devmon uses SNMP (Simple Network Management Protocol) to
+  obtain the necessary information from remote hosts.  Right
+  now, Devmon only supports SNMP versions 1 and 2c (v3 support
+  might be added at a later date).
+
+  Devmon determines which hosts to query based on information
+  from the display server's bb-hosts file, which allows you
+  to manage all of your monitoring facilities from a single file.
+
+  Devmon can either run in a single-node configuration, a
+  single machine does all of the work and reports back to the
+  test server (Devmon can even be run ON the test server, for
+  small networks), or Devmon can be run in a multi-node cluster.
+
+  A multi-node Devmon installation is considerably more 
+  powerful than a single-node one, as it allows you to query
+  more hosts on a more timely basis, and it gives you automatic
+  load balancing, node failure failover and scalability.  The
+  downside, though, is that it is more complicated than a single
+  node server, as it requires you to maintain a MySQL server,
+  which is what the multi-node cluster uses as a backend for
+  data storage.
+
+
+ What are Devmon's prerequisites?
+---------------------------------------
+
+  In order for Devmon to do anything useful, you will need
+  a machine capable of running the Perl interpreter, which
+  is used to execute the Devmon code.  
+
+  In addition, you will need a machine (either the same machine 
+  running Devmon, or a different one) runing either the Hobbit/Xymon 
+  or BigBrother monitoring program, which displays the messages
+  that Devmon generates.  
+
+  Finally, you will need your to have your Hobbit/Xymon or BigBrother 
+  program set up to monitor at least  one host that Devmon has 
+  a template for.   Only then will Devmon be able to poll a 
+  remote host and display the results.  For more information on 
+  Devmon's template system, please consult the TEMPLATES file
+  located in the docs directory.
+  
+
+ How do I install Devmon?
+---------------------------------------
+
+  Detailed instructions are available in the docs/INSTALLATION
+  file.  A single-node installation merely requires you to untar
+  the Devmon tarball to a suitable location, modify the config
+  file appropriately, and start the Devmon daemon.  
+
+  A multi-node installation requires you to do all of the above
+  on each node in the cluster, as well as set up a MySQL database
+  to facilitate communication between nodes.
+
+
+ What are Devmon templates?
+--------------------------------------
+
+  Devmon can monitor a virtually unlimited number of different 
+  device types, by allowing a user to define a template for
+  each test to be conducted on a particular device type.
+  For instance, a 'cpu' test on a Cisco 2950 switch is its own 
+  template, while a 'if_load' test on the same switch is an
+  entirely different template.  For more on template creation
+  and modification, please see the docs/TEMPLATES file.
+
+
+ What kind of devices can Devmon monitor?
+--------------------------------------
+
+  Basically, any device that supports SNMP v1 or v2c can be
+  monitored by Devmon.  Provided that you can determine which
+  SNMP OIDs (Object IDentifiers) you want to monitor on that
+  device, you can create your own Devmon template (provided
+  that a template of the same type doesnt already exist)
+  and Devmon will take care of the rest!
+
+
+ What type of hardware/software does Devmon require?
+--------------------------------------
+
+  To date, Devmon has been tested and is known to work
+  on Linux and FreeBSD.  Devmon might also run on other
+  operating systems with little or no modification, if 
+  you succeed at adapting Devmon to a new OS, please drop
+  the author a line and let him know of your success.
+
+  As for hardware, the requirements are entirely up
+  to how fast you want your collector to be able to run.
+  Obviously the machine needs to run an OS that can
+  run the Perl binary;  but theoretically you could run
+  Devmon on a 386 with 8MB of memory.
+
+
+$Id: README 190 2011-01-14 13:32:06Z buchanmilne $

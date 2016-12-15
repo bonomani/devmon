@@ -1,0 +1,4 @@
+# Physical
+stateText:	SWITCH : {state} 1=Ready,3=Online,4=Failed,5=Rebuild,6=HotSpare,20=NonDisk
+# Logical
+statusText:	SWITCH : {status} 0=Offline,1=Degraded,2=Optimal,3=Initialize,4=CheckConsistency

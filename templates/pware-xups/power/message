@@ -1,0 +1,18 @@
+
+{upsBattStat.errors}
+{upsLoadOut.errors}
+{upsBattTest.errors}
+
+UPS status:
+
+Vendor:              powerware
+Model:               {upsModel}
+
+Battery status:      {upsBattStat}
+Runtime Remaining:   {upsBattTime} minutes
+UPS Load:            {upsLoadOut}%
+
+Input voltage:       {upsVoltIn}v
+Output volate:       {upsVoltOut}v
+
+Battery test:        {upsBattTest}

@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 2970
+snmpver	: 2
+sysdesc : C2970

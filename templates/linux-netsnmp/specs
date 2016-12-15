@@ -1,0 +1,4 @@
+vendor	: linux
+model	: netsnmp
+snmpver	: 2
+sysdesc : Linux

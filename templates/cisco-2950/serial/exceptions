@@ -1,0 +1,2 @@
+entPhysicalDescr : ignore : Nu.+|Vl.+|Gi.+|1000BaseSX|.+Ethernet|FastEthernet.+
+entPhysicalDescr : alarm : ProvidedByVincentMalguy

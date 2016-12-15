@@ -1,0 +1,2 @@
+dfPercent : red 	: 100 : {dfFileSys} - CRITICAL ({dfPercent}%)
+dfPercent : yellow 	: 99.8 : {dfFileSys} - WARNING ({dfPercent}%)

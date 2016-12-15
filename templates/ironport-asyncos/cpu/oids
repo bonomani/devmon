@@ -1,0 +1,2 @@
+sysdescr:	.1.3.6.1.2.1.1.1.0	: leaf
+perCentCPUUtilization    : .1.3.6.1.4.1.15497.1.1.1.2.0      : leaf

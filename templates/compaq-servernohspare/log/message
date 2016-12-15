@@ -1,0 +1,13 @@
+<center><h3>Integrated Management Log</h3></center>
+
+Log entries should be cleared from the iLO web interface.
+<br>
+Note that clearing the IML form the host with (e.g) this command on the server:
+hpasmcli -s "clear iml"
+will result in the tests for this device turning purple. In this case, 
+empty the log in the iLO web interface (as it leaves one informational error 
+message in the IML).
+
+TABLE: noalarmsmsg
+Severity|Class|Last Update|Initial Update|Count|Description
+{cpqHeEventLogEntrySeverityTxt.color}{cpqHeEventLogEntrySeverityTxt}|{cpqHeEventLogEntryClassTxt}|{cpqHeEventLogUpdateY}-{cpqHeEventLogUpdateM}-{cpqHeEventLogUpdateD} {cpqHeEventLogUpdateH}:{cpqHeEventLogUpdatem}|{cpqHeEventLogInitialY}-{cpqHeEventLogInitialM}-{cpqHeEventLogInitialD} {cpqHeEventLogInitialH}:{cpqHeEventLogInitialm}|{cpqHeEventLogEntryCount}|{cpqHeEventLogErrorDesc}

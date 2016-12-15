@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: asa
+snmpver	: 2
+sysdesc : Cisco.*Security.Appliance.*7.*|Cisco.Firewall.*Module.Version.3 

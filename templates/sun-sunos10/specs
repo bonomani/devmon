@@ -1,0 +1,4 @@
+vendor	: sun
+model	: sunos10
+snmpver	: 2
+sysdesc : SunOS .+ 5.10

@@ -1,0 +1,5 @@
+
+Keys
+TABLE: noalarmsmsg
+Key|Validity|Perpetual?|Expiry
+{keyDescription}|{keyExpirySeconds.color}{keyExpirySeconds.msg}|{keyIsPerpetual.msg} ({keyIsPerpetual})|{keySecondsUntilExpire.msg} ({keySecondsUntilExpire}s)

@@ -1,0 +1,6 @@
+bgpPeerStateTxt : green : established : BGP Session established
+bgpPeerStateTxt : yellow : 
+bgpPeerStateTxt: red : idle|connect|active|opensent|openconfirm : BGP Session to {bgpPeerPeerRemoteAddr} AS {bgpPeerPeerRemoteAS} not established
+
+bgpPeerAdminStatusTxt : green : stop : BGP Peering disabled
+bgpPeerAdminStatusTxt : red : start : BGP Peering to {bgpPeerPeerRemoteAddr} AS {bgpPeerPeerRemoteAS} enabled but not established

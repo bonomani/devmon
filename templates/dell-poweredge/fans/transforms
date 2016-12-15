@@ -1,0 +1,1 @@
+coolingDeviceStatusTxt	:	SWITCH	: {coolingDeviceStatus} 1=Other,2=Unknown,3=OK,4=NonCriticalUpper,5=CriticalUpper,6=nonRecoverableUpper,7=nonCriticalLower,8=criticalLower,9=nonRecoverableLower,10=Failed

@@ -1,0 +1,11 @@
+
+Vendor:                       Aruba
+Model:                        {modelName}
+
+Control CPU load:             {controlCpu}
+Fast path network CPU load:   {networkCpuFast}
+Slow path network CPU load:   {networkCpuSlow}
+
+Memory total:                 {memTotal} Kb
+Memory used:                  {memUsed} Kb
+Memory free:                  {memFree} Kb

@@ -1,0 +1,5 @@
+
+Fans
+TABLE: noalarmsmsg
+Location|Fan Speed
+{fanName}|{fanRPMs}

@@ -1,0 +1,3 @@
+TABLE:
+vpn name|tunnel type|local gw IP|remote gw IP|Phase1 status|Phase2 status|bytes in|bytes out
+{nsVpnMonVpnName}|{nsVpnMonTunnelTypeTxt}|{nsVpnMonMyGwIp}|{nsVpnMonRmtGwIp}|{nsVpnMonP1State.color} {nsVpnMonP1StateTxt}|{nsVpnMonP2State.color} {nsVpnMonP2StateTxt}|{nsVpnMonBytesIn}|{nsVpnMonBytesOut}

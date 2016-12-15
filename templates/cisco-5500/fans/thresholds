@@ -1,0 +1,5 @@
+FanStatus	: red		: majorFault
+FanStatus	: yellow	: other|minorFault
+FanStatus	: green		: ok
+chassisTempAlarm_T       : red           : critical
+chassisTempAlarm_T        : green         : on|off

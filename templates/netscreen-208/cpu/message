@@ -1,0 +1,9 @@
+load={nsResCpuLast5Min}%
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{nsResCpuLast5Min.color}: CPU usage: {nsResCpuLast5Min}%
+
+System description:
+{sysDescr}
+<!--
+<br>CPU 5 min average: {nsResCpuLast5Min}
+-->

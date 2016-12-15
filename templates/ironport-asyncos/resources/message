@@ -1,0 +1,11 @@
+Resource utilisation
+
+Percent disk I/O utilization {perCentDiskIOUtilization}%
+Open Files {openFilesOrSockets}
+Mail Transfer Threads {mailTransferThreads}
+
+<!-- 
+diskio : {perCentDiskIOUtilization}
+openfiles : {openFilesOrSockets}
+mailthreads : {mailTransferThreads}
+-->

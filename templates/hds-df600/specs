@@ -1,0 +1,5 @@
+vendor	: hds
+model	: df600
+snmpver	: 1
+#sysdesc : linux|Linux
+sysdesc : HITACHI  DF600F

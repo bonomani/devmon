@@ -1,0 +1,5 @@
+<b>Quotas</b>
+TABLE:
+Quota|Type|Total Size|Used|% Used
+{qrVPathName}|{qrTypeDescr}|{qrVGBytesLimit}GB|{qrVGBytesUsed}GB|{qrPercentUsed.color}{qrPercentUsed}%{qrPercentUsed.errors}
+

@@ -1,0 +1,3 @@
+dfPercent	: MATH	: {dfKBytesUsed}/{dfKBytesTotal} x 100
+dfGBytesTotal	: MATH 	: {dfKBytesTotal} / 1048576
+dfGBytesUsed	: MATH 	: {dfKBytesUsed} / 1048576

@@ -1,0 +1,5 @@
+
+Fans
+TABLE: noalarmsmsg
+ID|Sensor Location|Fan Speed|Max Speed|Status
+{coolingDeviceIndex}|{coolingDeviceLocationName}|{coolingDeviceReading}|{coolingDeviceUpperCriticalThreshold}|{coolingDeviceStatusTxt.color}{coolingDeviceStatusTxt}

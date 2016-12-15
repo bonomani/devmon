@@ -1,0 +1,4 @@
+nsVpnMonP1StateTxt	: green		: active   : phase1 active
+nsVpnMonP1StateTxt	: yellow	: inactive : phase1 inactive
+nsVpnMonP2StateTxt	: green		: active   : phase2 active
+nsVpnMonP2StateTxt	: yellow	: inactive : phase2 inactive

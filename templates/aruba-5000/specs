@@ -1,0 +1,4 @@
+vendor	: aruba
+model	: 5000
+snmpver	: 2
+sysdesc : Aruba5000

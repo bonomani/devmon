@@ -1,0 +1,15 @@
+TABLE: noalarmsmsg
+Name|SystemRev|Serial Num|StatusCode
+{dfSystemProductName}|{dfSystemMicroRevision}|{dfSystemSerialNumber}|{dfRegressionStatus}
+
+Controller status:
+TABLE: noalarmsmsg
+#Drive|Spare
+#{dfRegressionStatusDrv.color}|{dfRegressionStatusSpr.color}
+Drive|Spare|DataDrv|Encl|Warn|Ctrlr|UPS|Loop|Path|Batt|PSU|AC|BK|Fan|Cache|SATASp|SATADr|SATAEnc|HostCon
+{dfRegressionStatusDrv.color}|{dfRegressionStatusSpr.color}|{dfRegressionStatusDDrv.color}|{dfRegressionStatusENC.color}|{dfRegressionStatusWarn.color}|{dfRegressionStatusCtl.color}|{dfRegressionStatusUPS.color}|{dfRegressionStatusLoop.color}|{dfRegressionStatusPath.color}|{dfRegressionStatusBatt.color}|{dfRegressionStatusPSU.color}|{dfRegressionStatusAC.color}|{dfRegressionStatusBK.color}|{dfRegressionStatusFan.color}|{dfRegressionStatusCache.color}|{dfRegressionStatusSATAS.color}|{dfRegressionStatusSATAD.color}|{dfRegressionStatusSENC.color}|{dfRegressionStatusHostC.color}
+
+Port status:
+TABLE: noalarmsmsg
+ID|Kind|FibreTopol|CtlStatus|Disp Name|WWN
+{dfPortID}|{dfPortKind}|{dfPortFibreTopologyTxt}|{dfPortControlStatus}|{dfPortDisplayName}|{dfPortWWNAddr}

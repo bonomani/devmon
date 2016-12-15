@@ -1,0 +1,5 @@
+
+Fans
+TABLE: noalarmsmsg
+ID|Sensor Location|Fan Present|Condition|Redundant?|Redundant Partner
+{cpqHeFltTolFanIndex}|{cpqHeFltTolFanLocaleTxt}|{cpqHeFltTolFanPresentTxt}|{cpqHeFltTolFanConditionTxt.color}{cpqHeFltTolFanConditionTxt}|{cpqHeFltTolFanRedundantTxt}|{cpqHeFltTolFanRedundantPartner}

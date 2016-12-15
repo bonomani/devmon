@@ -1,0 +1,3 @@
+coolingDeviceStatusTxt		: green		: OK	: Fan OK
+coolingDeviceStatusTxt		: yellow	: Other|Unknown|NonCriticalUpper|nonCriticalLower	: Fan Unknown or non critical
+coolingDeviceStatusTxt		: red		: CriticalUpper|nonRecoverableUpper|nonRecoverableLower|Failed: Fan failed or critical

@@ -1,0 +1,12 @@
+{upsOutputSourceTxt.errors}
+
+UPS Output Source:   {upsOutputSourceTxt.color}{upsOutputSourceTxt}
+
+Output rating: {upsConfigOutputVoltage} volts @ {upsConfigOutputFreqHz} Hz
+Output capacity: {upsConfigOutputkVA} kVA / {upsConfigOutputPowerkW} kW
+Number of lines: {upsOutputNumLines}
+
+UPS Output
+TABLE: noalarmsmsg,rrd(pri:upsOutPhaseIndex; DS:load:upsOutputPercentLoad:GAUGE; DS:volts:upsOutputVoltage:GAUGE; DS:current:upsOutputCurrent:GAUGE; DS:power:upsOutputPower:GAUGE; )
+Phase|% Load|Volts|Amps|Power
+{upsOutPhaseIndex}|{upsOutputPercentLoad.color}{upsOutputPercentLoad.errors}{upsOutputPercentLoad}%|{upsOutputVoltage} v|{upsOutputCurrentA} A|{upsOutputPowerkW} kW

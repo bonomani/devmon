@@ -1,0 +1,3 @@
+TABLE:
+Ifc name|Ifc speed|Ifc status
+{ifName}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}

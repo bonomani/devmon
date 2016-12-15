@@ -1,0 +1,160 @@
+
+ DESIGNING A ROBUST MULTINODE CLUSTER
+======================================================================
+
+    There are a number of considerations you need to make when creating
+  a multi-node devmon cluster.  The first, and most important, is:
+
+
+ How fast do you want to poll your hosts?
+--------------------------------------------------------------------- 
+
+    Speed will probably be the driving reason why most people will
+  resort to using a multi-node cluster.  A single machine, regardless
+  of its processor speed or network connection, will only be able
+  to poll so many devices before it exceeds what you deem to be
+  an acceptable poll interval (We prefer to poll once per 60 seconds).
+
+    If you are absolutely die-hard about polling under a certain
+  interval, I would recommend creating a cluster in which all of
+  the machines had an average poll-time of half your acceptable
+  poll interval.  This way, you could lose up to have the machines
+  in your cluster, and still stay under the poll time (hopefully).
+
+    Our Devmon cluster consists of seven nodes, poll a total of
+  ~800 devices, with an average of 720 tests per node.  Each
+  node takes ~45 seconds to complete its polling cycle.  Our nodes
+  are all P4 2.00GHz systems, running Fedora Core 4 (Hyperthreading
+  disabled).  So, if you wanted to poll 2000 devices on similar
+  hardware, in 60 seconds or less, I would recommend having at
+  least 15 nodes.
+
+ 
+ What type of hardware do I need to run Devmon?
+---------------------------------------------------------------------
+
+    Well, if you aren't concerned about speed, Devmon will run on just
+  about anything, as long as it is capable of running the Perl
+  interpreter.  That being said, the main bottleneck for the poll 
+  nodes is processor speed (although network latency comes in a close
+  second).  Devmon benefits from the fastest CPUs available, and
+  can take advantage of multiple processors.  So if you are hell-bent
+  on speed, throw a couple of 3+ GHz, 2-way servers into your 
+  devmon cluster, and see how it runs.
+
+    That being said, Devmon assumes that all of the polling nodes in
+  your cluster are running similar (if not identical) hardware.  So
+  they will split the tests evenly amongst themselves, and if you
+  have a 386 in a cluster with a bunch of p4s, the 386 is going to
+  take much, much longer to finish its polling cycles.
+
+    Since RAID, hdd speed and general system redundancy are not an
+  issue in a devmon cluster (the cluster itself provides redundancy),
+  we have found that the best price-point per node is to use high-end
+  desktop machines for the polling devices.  This gives you the best
+  bang-for-your buck processor wise, without taxing your budget with
+  things that Devmon wont need (RAID, SCSI, dual power supplies, etc).
+
+    Now the machine running your database, that is another issue
+  all together.  This machine is the backbone of your Devmon cluster;
+  if it explodes, you lose everything (making your MySQL server
+  a redundant cluster is covered below).   Your DB machines is what
+  devmon uses for all coordination between the nodes, so it needs
+  to be as fast as possible.  Processor speed isn't as much an 
+  issue here as hdd access speeds, network latency, and memory
+  capacity.  For a larger database, I would suggest a DB machine
+  with RAID 01/10 (not RAID 5, which causes performance problems
+  for a DB machine) running (in order of preferrence), SAS, 
+  SCSI or SATA disks.  I'd recommend a minimum of 1 GB of memory,
+  the more the better.
+
+    As for operating systems, I can't claim to have run the
+  multi-node version of Devmon on anything other than Linux.  MySQL
+  can run on Mac OS X, Solaris, and FreeBSD (although BSD, at this
+  time, is not supported by the MySQL developers).  The Devmon nodes
+  themselves can run on just about any OS capable of running Perl,
+  but the database, at the moment, should probably run on Linux. 
+
+
+ How does the cluster operate?
+---------------------------------------------------------------------
+
+  Here's a small diagram that describes your typical Devmon cluster:
+
+     +-----------+      +--------------+      +-----------------+ 
+     |           |<---->|   Node #1    |----->|                 |
+     |           |      +--------------+      |                 |
+     |           |      +--------------+      |     Display     | 
+     |  Database |<---->|   Node #2    |----->|     Server      |
+     |           |      +--------------+      |                 |
+     |           |      +--------------+      |   +-------------+      
+     |           |<---->|   Node #3    |----->|   | readbbhosts | 
+     +-----------+      +--------------+      +-----------------+
+           ^                                            |
+           ---------------------------------------------+   
+
+  So, you can see the bi-directional traffic that goes on between
+  the nodes and the database server (test/device assignments, load
+  balancing, heartbeats, etc), the unidirectional traffic between
+  the nodes and the display server (test messages), and the
+  unidirectional flow between the display server at the database
+  (the devmon --readbbhosts cron job, which adds and deletes
+  devices from the Devmon database, based on what it sees in the
+  bb-hosts file on the display server).
+
+
+ How do I make my database (and thus my cluster) fully redundant?
+---------------------------------------------------------------------
+
+  MySQL 4.1 introduced a new feature, called MySQL clustering, that
+  can make a MySQL cluster completely redundant.  It has only gotten
+  better since its introduction, and its fairly robust these days.
+
+  Anyways, it involves splitting a MySQL database into three separate
+  process groups:  the management process, the storage node processes, 
+  and the database processes.  More documentation on the nitty-gritty
+  of the MySQL cluster architecture is available on the MySQL
+  website.
+
+  My recommended "fully redundant" MySQL/Devmon architecture would
+  involve having a dedicated low-end box for the MySQL management
+  process (it doesn't even have to be on all the time, but it is
+  necessary for bring new storage and database nodes online), 
+  two beefy RAID servers for the storage node processes, and then 
+  running individual MySQL servers on each of your devmon nodes.
+
+  The end product might look something like this:
+
+ +-------+                +----- Node 1------+
+ |Manager|--              |        |         |
+ +-------+ |    ----------| MySQL < > Devmon |----------
+           |    |         |        |         |         |
+           |    |         +------------------+         |
+           |    |                                      |
+           |    |                                      |
+   +----------------+     +----- Node 2------+         |
+   |                |     |        |         |        +----------------+
+   | Storage Node 1 |-----| MySQL < > Devmon |--------|                |
+   |                |     |        |         |        |                |
+   +----------------+     +------------------+        |                |
+           |                                          |     Display    |
+           |                                          |     Server     |
+   +----------------+     +----- Node 3------+        |                |
+   |                |     |        |         |        |                |
+   | Storage Node 2 |-----| MySQL < > Devmon |--------|                |
+   |                |     |        |         |        +----------------+
+   +----------------+     +------------------+         |
+                |                                      |
+                |                                      |
+                |         +----- Node 1------+         |
+                |         |        |         |         |
+                ----------| MySQL < > Devmon |----------
+                          |        |         |
+                          +------------------+
+
+  I'll leave the details of the cluster as an exercise to the reader,
+  but hopefully this little bit of information is enough to get you
+  on the right track.  For more information on MySQL and MySQL
+  clustering, please visit the MySQL website, http://www.mysql.com.
+
+$Id: MULTINODE 95 2008-12-07 19:58:38Z buchanmilne $

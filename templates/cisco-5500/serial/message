@@ -1,0 +1,4 @@
+TABLE:
+Physical Descr | Hardware Rev | Firmware Rev | Software Rev |  System serial number | Model Name |  module Status
+{PhysicalDescr} | {PhysicalHardwareRev} | {PhysicalFirmwareRev} | {PhysicalSoftwareRev} | {PhysicalSerialNum} | {PhysicalModelName} | {moduleStatus_T.color}{moduleStatus_T}
+

@@ -1,0 +1,3 @@
+TABLE:
+Cluster Name|Cluster Status|Quorate|Nodes|Avail Nodes|Down Nodes|Services|Running Services|Stopped Services|Failed Services
+{rhcClusterName}|{rhcClusterStatusCode} {rhcClusterStatusDesc}|{rhcClusterQuorate}{rhcClusterQuorate.color} {rhcClusterVotes}/{rhcClusterVotesNeededForQuorum}|{rhcClusterNodesNum}|{rhcClusterAvailNodesNum}|{rhcClusterUnavailNodesNum}{rhcClusterUnavailNodesNum.color}|{rhcClusterServicesNum}|{rhcClusterRunningServicesNum}|{rhcClusterStoppedServicesNum}{rhcClusterStoppedServicesNum.color}|{rhcClusterFailedServicesNum}{rhcClusterFailedServicesNum.color}

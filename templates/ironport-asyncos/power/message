@@ -1,0 +1,7 @@
+
+Power supplies:
+TABLE: noalarmsmsg,
+Power Supply|Power Supply Status|Redundancy
+{powerSupplyName}|{powerSupplyStatustxt.color}{powerSupplyStatustxt}|{powerSupplyRedundancytxt.color}{powerSupplyRedundancytxt}
+
+

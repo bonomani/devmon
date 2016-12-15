@@ -1,0 +1,377 @@
+
+MONITORING HOSTS WITH DEVMON
+=====================================================================
+
+
+ Devmon tags in the bb-hosts file
+---------------------------------------------------------------------
+
+    Once Devmon is installed and running, and you have a cron 
+  job running Devmon with the --readbbhosts flag periodically, 
+  you can begin monitoring remote hosts by adding the devmon
+  tag to their entry in your bb-hosts file.
+
+    A example of a typical entry in your bb-hosts file for
+  a host being monitored by devmon might look like:
+
+    10.0.0.1        myrouter # badconn:1:1:2 NAME:"My router" DEVMON
+
+    In this case, the 'DEVMON' tag is what tells Devmon that it should
+  monitor this host.  If this Devmon has not monitored this host
+  in the past, it will attempt to auto-discover the devices vendor
+  and model type, which will then tell Devmon which test templates it
+  should run against this device.  Unless otherwise specified,
+  Devmon will run all tests available for a given vendor & model.
+
+    For example, Devmon comes, by default, with eight templates
+  for a Cisco 2950 switch (these being cpu, power, fans, if_col,
+  if_dsc, if_err, if_load & if_stat).  If you have a 2950 switch in 
+  your bb-hosts file and add a DEVMON tag to it, Devmon will 
+  auto-discover it as a Cisco 2950, and run all eight test templates
+  against that switch, and report the results back to the display
+  server.
+
+  For more info on templates, please see the docs/TEMPLATES file.
+
+
+
+ Using options with a Devmon tag
+---------------------------------------------------------------------
+
+    There are a number of options that you can supply to Devmon via
+  the bb-hosts tag.  They are:
+
+    cid()     : Specifies that this device uses a SNMP Community ID 
+                other than the ones specified in the SNMPCIDS 
+                variable in the devmon.cfg file
+
+    ip()      : Define a custom IP address for this device
+                (other than the primary address in bb-hosts -
+                 useful for hosts with multiple interfaces)
+
+    port()    : Define a custom UDP SNMP port for this device
+                (other than the default port of 161)
+
+    model()   : Set the vendor and model of this device, instead of
+                having to rely on autodetection for it (SNMP cid
+                will still be autodetected, however)
+
+    tests()   : Specifies that Devmon should only run certain tests
+                against this device
+
+    thresh()  : Overrides the default thresholds for a single OID
+                on a single test.
+
+    except()  : Overrides the default exceptions for one or more
+                tests performed on this device.
+
+
+  All of the above options are case sensitive, so 'CID()' wont work
+  if you use it. If you do use any of the options, they need to 
+  immediately follow the Devmon tag, separated by only a colon
+  (no whitespace!).  If you use multiple options, they should
+  be separated by commas.  For instance:
+
+    DEVMON:cid(mysnmpid)
+      and
+    DEVMON:tests(cpu,power)
+      and
+    DEVMON:tests(cpu,power),port(1161)
+      and
+    DEVMON:tests(power,fans,cpu),cid(testcid)
+      and
+    DEVMON:tests(cpu),thresh(cpu;CPUTotal5Min;y:50;r:90)
+
+  are all valid uses of the Devmon tag.  These, however:
+
+    DEVMON:
+      or
+    DEVMON: tests(power)
+      or
+    DEVMON:tests (power)
+
+  are all invalid, due to an superfluous colon in the first
+  example, and unnecessary whitespace in the other two.
+
+
+
+ Devmon tag option examples
+---------------------------------------------------------------------
+
+  Examples on how to use Devmon tag options are as follows:
+
+    cid() 
+
+      Assuming that you had set your SNMPCIDS variable in your
+      devmon.cfg file to 'snmpcid1,snmpcid2', and you had a
+      host that only responded to a SNMP cid 'uniqueID', you could 
+      modify the Devmon tag for this host with this option:
+
+        badconn:1:1:2 DEVMON:cid(uniqueID)
+
+
+
+    ip()
+
+      If, for some reason, the device you are attempting to poll does
+      not answer on the primary IP address in bb-hosts, you can define 
+      a custom IP address to query the device with - for UDP protocols
+      like SNMP the source address in the reply packet may not match
+      the address in the bb-hosts file:
+
+10.0.0.10 multihomehost # conn=worst,10.0.0.11 DEVMON:ip(10.0.0.11)
+
+
+
+    port()
+
+      If, for some reason, the device you are attempting to poll does
+      not answer on the standard SNMP UDP port (161), you can define 
+      a custom UDP port to query the device with (TCP SNMP is not supported
+      by devmon at this time):
+
+        DEVMON:port(5161)
+
+
+
+    model()
+
+      Use this option to override the autodetection of the vendor and
+      model when doing the initial autodiscovery.  The arguments for
+      this option should be the vendor and model, separated by a 
+      semicolon:
+
+        DEVMON:model(cisco;2950)
+
+
+
+    tests()
+
+      If you only want to run a certain subset of the tests provided 
+      by a devices templates, you can use the tests tag like so:
+
+        DEVMON:tests(cpu,if_err)
+
+      This will cause Devmon to only run the cpu and if_err tests for
+      this host.
+
+
+
+    thresh()
+
+      Useful for changing the default thresholds specified by
+      a device's templates, the thresh() option requires you to specify
+      the test, oid, and threshold values that you want to override.
+      These values should be encased in the option parentheses,
+      semicolon delimited, and in the following order:
+
+        test;object-identifier;color_definition1;color_definition2;etc...
+
+      You can override one, some, or all of the color thresholds
+      on a particular test.  The color definitions should start
+      with a single letter (signifying the color to be redefined,
+      'r' is red, 'y' is yellow, 'g' is green), followed by an equals
+      sign and the new value of the color threshold.  So, redefining
+      the red and yellow thresholds for test 'foo', object id 'bar',
+      to '95' and '60', respectively, would look like:
+
+        DEVMON:thresh(foo;bar;r:95;y:60)
+
+      If you wanted to redefine the green threshold as well:
+  
+        DEVMON:thresh(foo;bar;r:95;y:60;g:10)
+
+      You can string together threshold redefinitions for multiple 
+      test/oids in a a single thresh option, by separating them with
+      with commas:
+
+        DEVMON:thresh(foo;opt1;r:80,foo;opt2;r:90)
+        
+      Some examples of practical uses:
+
+      Changing the 'output load' of a APC UPS:
+
+        DEVMON:thresh(power;upsLoadOut;y:75;r:90)
+      
+      Changing the collision thresholds on a Cisco switch:
+
+        DEVMON:thresh(if_col;ifOutColPct;y:90;r:98)
+
+      Threshold overrides can be used on either non-repeater type oids
+      (i.e the output load on a ups) or repeater type oids (such as
+      the collisions percent or interface load on all of the interfaces
+      on a switch).
+
+      If you are having trouble finding the particular oid to override,
+      try looking in the test template directory of the vendor/model
+      of your device.  The 'messages' file should contain the name of
+      the you want to override, and the 'thresholds' file should
+      contain the default values of the oid.  For more information, 
+      please see the docs/TEMPLATES file.
+
+      Keep in mind that Devmon attempts to match thresholds in order
+      from highest severity to lowest severity (the severity list
+      being: red->yellow->clear->green).  If more than one threshold
+      matches, the highest is considered to be the most accurate.
+
+      Numeric vs Non-numeric thresholds:
+      ---------------------------------
+
+      One important thing to note about thresholds is that they
+      are lumped into one of two categories: numeric and non-numeric.
+
+      Numeric thresholds should consist of only numbers, possibly
+      preceded by one of the following logical math operators:
+        >    (greater than)
+        <    (less than)
+        >=   (greater than or equal to)
+        <=   (less than or equal to)
+        =    (equal to)
+
+      If no math operator is defined in the threshold, Devmon assumes
+      that it is a 'greater than' type threshold.  That is, if the 
+      value obtained via SNMP is greater than this threshold value, the
+      the threshold is considered to be met and devmon will deal with
+      it accordingly.
+
+      Some examples of numeric thresholds:
+
+       Set the yellow and red collision thresholds to greater than
+       40 and 80 %, respectively.  Note that the red threshold has
+       a greater than symbol and the yellow doesn't, but they are
+       effectively the same:
+
+         DEVMON:thresh(if_col;ifOutColCt;y:40;r:>80)
+ 
+       Set the red collision threshold to greater than or equal to 75%
+       Note that this does not modify the templates default yellow value:
+
+         DEVMON:thresh(if_col;ifOutColPct;r:>=75)
+      
+       Set the red uptime threshold on a switch to less than or equal to
+       5 minutes (300 seconds) (uptime is measured in the cpu test):
+        
+         DEVMON:thresh(cpu;sysUpTimeSecs;r:<=300)
+
+
+       If a threshold value contains even one non-numeric character 
+       (other than the math operators illustrated above), it is 
+       considered a non-numeric threshold.  Non-numeric thresholds are 
+       treated as regular expressions, and devmon tries to match
+       them against the value of the data contained in the oid that
+       the threshold is applied against.
+
+       For example, to cause an APC UPS to throw a red alarm only
+       when its output status is 'On battery' (the template default
+       is 'On battery', 'Off', or 'Bypass'), use the following options:
+
+         DEVMON:thresh(power;upsOutStat;r:On battery)
+
+       Regular expressions in threshold matches are non-anchored, 
+       which means they can match any substring of the compared data.
+       So, the following DEVMON definition:
+
+         DEVMON:thresh(power;upsFailCause;y:voltage)
+
+       Would mean the following values would cause a yellow alarm: 
+         High line voltage
+           and
+         Small momentary voltage sag
+           and
+         Small momentary voltage spike
+           ...etc.   
+
+       So be careful how you define your thresholds, as you could 
+       match more than you intend to!  If you want to make sure your
+       pattern matches explicitly, precede it with a '^' and terminate
+       it with a '$', ie:
+
+         DEVMON:thresh(power;upsFailCause;y:^High line voltage$)
+
+       This would cause the yellow alarm to be raised only when
+       the 'upsFailCause' oid matches 'High line voltage' exactly.
+
+       Note that since these are regular expressions, you can perform
+       all sorts of complicated pattern matching.  For more detailed
+       information on regular expressions, consider visiting this 
+       website:
+         http://www.regular-expressions.info/
+
+       ... or purchasing the book 'Mastering Regular Expressions',
+       by Jeffrey E. F. Friedl, published by O'Reilly Press.
+       
+
+     
+     except()
+
+       Used for overriding the default exceptions of a devices 
+       templates, the except() option is only useful for repeater type 
+       oids.   Also, it is only valid for the first oid in a repeater 
+       table (the 'primary' oid).  
+
+       There are four exception types, with corresponding option
+       abbreviations: 
+
+         The 'only' exception (abbreviated as 'o'), which causes only 
+         rows with a matching primary oid to be displayed.
+
+         The 'ignore' exception (abbreviated as 'i'), which causes
+         only rows with a NON-matching primary oid to be displayed.
+
+         The 'alarm on' exception (abbreviated as 'ao').  This 
+         exception doesn't effect what rows are displayed, but
+         rather causes only rows with a matching primary oid to
+         be capable of generating alarms (that is all other rows,
+         regardless of their status, will be considered 'green'.
+
+         The 'no alarm' exception (abbreviated as 'na').  The 
+         inverse of the alarm on exception, this allows only
+         rows that have a NON-matching primary oid to be able
+         to generate alarms.
+
+       Like the non-numeric thresholds described above, exception 
+       values are regular expressions.  Exceptions differ, however,
+       in that they are anchored, which means that they must match 
+       your oid value exactly.  This means if you have an oid
+       with a 
+
+       So, an example: You have a template set up to monitor ifc 
+       status (test name: if_stat), and in your repeater oid
+       table your primary oid is the interface name (ifName).
+       Your template is set up by default to display all interfaces, 
+       but to only alarm on Gigabit interfaces. However, on a 
+       particular switch, you want to alarm only on Fast Ethernet 
+       interfaces 48 and 49.  You could accomplish this with the 
+       follow bb-hosts entry:
+
+         DEVMON:except(if_stat;ifName;ao:Fa0/48|Fa0/49)
+
+       Since exceptions are regular expressions, you could have
+       have used a regexp shortcut, like so:
+
+         DEVMON:except(if_stat;ifName;ao:Fa0/4[8-9])
+
+       Exceptions can also be applied across multiple tests, using
+       the 'all' test type.  This is handy if you have multiple
+       tests that use the same primary oid for their tables, and
+       you want to make sure that only a particular primary oid
+       generated values for all of the tests (the if_* series
+       of tests comes immediately to mind).  
+
+       So, for instance, if you had a switch that was running
+       the if_err, if_stat and if_load tests, and you wanted
+       to make sure that Devmon only alarmed on Gigabit
+       interfaces 0/1 and 0/2, you could use the following:
+
+         DEVMON:except(all;ifName;ao:Gi0/[1-2])
+
+       One last example; if you had a switch and you didn't
+       want to display any of the Vlan, Null or Loopback
+       interfaces, you could use a DEVMON tag like this:
+
+         DEVMON:except(all;ifName;i:Vl.*|Lo.*|Nu.*)
+
+       For more in-depth information on templates, please
+       see the docs/TEMPLATES file.
+
+$Id: USING 158 2009-11-02 06:50:45Z dbaldwin $

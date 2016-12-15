@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 857
+snmpver	: 2
+sysdesc : C850

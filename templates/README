@@ -1,0 +1,7 @@
+
+If you found this directory empty when you were expecting it to be otherwise,
+this is due to a decision made to seperate the template code and the main
+devmon code into two discreet packages.
+
+You can now download the templates seperately from the devmon home page:
+https://sourceforge.net/projects/devmon/

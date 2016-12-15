@@ -1,0 +1,2 @@
+lmTempSensorsValueC : yellow : > 48 : Temperature is warm
+lmTempSensorsValueC : red : > 53 : Temperature is critical

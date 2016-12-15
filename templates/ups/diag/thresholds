@@ -1,0 +1,4 @@
+upsAlarmsPresent : red		: >0			: Alarms present
+
+upsTestResultsSummaryTxt : red     : Error              : UPS Test Error - {upsTestResultsDetail}
+upsTestResultsSummaryTxt : yellow  : Warning            : UPS Test Warning - {upsTestResultsDetail}

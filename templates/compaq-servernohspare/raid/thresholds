@@ -1,0 +1,7 @@
+logStatTxt	: green		: OK|Expanding|Queued for expansion : Normal
+logStatTxt	: yellow	: Unconfigured|Recovering|Read rebuild|Rebuilding|Not available	: Recovering
+logStatTxt	: red		: Failed|Wrong drive|Bad connect|Overheating|Shutdown	: Logical drive has failed
+
+phyStatTxt	: green		: OK	: Normal
+phyStatTxt	: yellow	: Other	: Unknown failure
+phyStatTxt	: red		: Failed|Predictive Failure : Physical drive has failed

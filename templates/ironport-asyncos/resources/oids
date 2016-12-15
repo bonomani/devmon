@@ -1,0 +1,3 @@
+perCentDiskIOUtilization : .1.3.6.1.4.1.15497.1.1.1.3.0		: leaf
+openFilesOrSockets	: .1.3.6.1.4.1.15497.1.1.1.19.0	: leaf
+mailTransferThreads	: .1.3.6.1.4.1.15497.1.1.1.20.0	: leaf

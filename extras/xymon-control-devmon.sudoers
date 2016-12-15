@@ -1,0 +1,1 @@
+xymon ALL=NOPASSWD: /usr/bin/pkill *-u devmon,/etc/init.d/devmon *

@@ -1,0 +1,10 @@
+rhcClusterUnavailNodesNum : yellow : >=1 : Not all cluster nodes are available
+rhcClusterUnavailNodesNum : red : >=2 : Not all cluster nodes are available
+
+rhcClusterQuorate : green : =1 : Cluster is quorate
+rhcClusterQuorate : red : <1 : Cluster is not quorate!
+
+rhcClusterStoppedServicesNum: yellow : >=1 : Not all cluster services are running
+rhcClusterStoppedServicesNum: red : >=2 : Multiple cluster services are stopped
+
+rhcClusterFailedServicesNum : red : >=1 : Cluster services have failed

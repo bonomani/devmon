@@ -1,0 +1,4 @@
+cpqHeEventLogEntrySeverityTxt: green	: Informational : Informational message
+cpqHeEventLogEntrySeverityTxt: yellow	: Caution 	: Caution message
+cpqHeEventLogEntrySeverityTxt: green	: Repaired	: Repaired message
+cpqHeEventLogEntrySeverityTxt: red	: Critical	: Critical message

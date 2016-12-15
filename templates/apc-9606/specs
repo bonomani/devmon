@@ -1,0 +1,4 @@
+vendor	: apc
+model	: 9609
+snmpver	: 1
+sysdesc : MN: AP9606

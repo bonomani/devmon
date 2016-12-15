@@ -1,0 +1,6 @@
+# Create thresholds for all the error rate counters
+# oid name	: color		: limit	: Error message
+ifInErrPct	: yellow	: 5	: {ifName} - High input error rate ({ifInErrPct}%)
+ifInErrPct	: red		: 10	: {ifName} - Very high input error rate ({ifInErrPct}%)
+ifOutErrPct	: yellow	: 5	: {ifName} - High output error rate ({ifOutErrPct}%)
+ifOutErrPct	: red		: 10	: {ifName} - Very high output error rate ({ifOutErrPct}%)

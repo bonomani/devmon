@@ -1,0 +1,5 @@
+cpqHeFltTolPowerSupplyPresentTxt:	SWITCH	: {cpqHeFltTolPowerSupplyPresent} 1=other,2=absent,3=present
+cpqHeFltTolPowerSupplyConditionTxt: 	SWITCH	: {cpqHeFltTolPowerSupplyCondition} 1=Other,2=OK,3=Degraded,4=Failed
+cpqHeFltTolPowerSupplyStatusTxt	: 	SWITCH	: {cpqHeFltTolPowerSupplyStatus} 1=noError,2=generalFailure,3=bistFailure,4=fanFailure,5=tempFailure,6=interlockOpen,7=epromFailed,8=vrefFailed,9=dacFailed,10=ramTestFailed,11=voltageChannelFailed,12=orringdiodeFailed,13=brownOut,14=giveupOnStartup,15=nvramInvalid,16=calibrationTableInvalid
+cpqHeFltTolPowerSupplyRedundantTxt:	SWITCH	: {cpqHeFltTolPowerSupplyRedundant} 1=Other,2=notRedundant,3=Redundant
+cpqHeFltTolPowerSupplyHotPlugTxt:		SWITCH	: {cpqHeFltTolPowerSupplyHotPlug} 1=Other,2=nonHotPluggable,3=hotPluggable

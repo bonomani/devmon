@@ -1,0 +1,3 @@
+ifname : ignore : NV0|Vt1|Vl+|Di.+|Nu.+|ATM+|Tu+|Vi+
+ifName : alarm : .+
+

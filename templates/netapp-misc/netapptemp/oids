@@ -1,0 +1,2 @@
+envOverTemperature:		.1.3.6.1.4.1.789.1.2.4.1.0	: leaf
+currentTemp:			.1.3.6.1.4.1.789.1.21.1.2.1.25.1	: leaf

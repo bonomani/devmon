@@ -1,0 +1,48 @@
+cacheUptime : 1.3.6.1.4.1.3495.1.1.3.0 : leaf
+cacheSoftware : 1.3.6.1.4.1.3495.1.2.2.0 : leaf
+cacheVersionId : 1.3.6.1.4.1.3495.1.2.3.0 : leaf
+cacheMemMaxSize : 1.3.6.1.4.1.3495.1.2.5.1.0 : leaf
+cacheSwapMaxSize : 1.3.6.1.4.1.3495.1.2.5.2.0 : leaf
+cacheSwapHighWM : 1.3.6.1.4.1.3495.1.2.5.3.0 : leaf
+cacheSwapLowWM : 1.3.6.1.4.1.3495.1.2.5.4.0 : leaf
+cacheUniqName : 1.3.6.1.4.1.3495.1.2.6.0 : leaf
+cacheSysPageFaults : 1.3.6.1.4.1.3495.1.3.1.1.0 : leaf
+cacheSysNumReads : 1.3.6.1.4.1.3495.1.3.1.2.0 : leaf
+cacheMemUsage : 1.3.6.1.4.1.3495.1.3.1.3.0 : leaf
+cacheCpuTime : 1.3.6.1.4.1.3495.1.3.1.4.0 : leaf
+cacheCpuUsage : 1.3.6.1.4.1.3495.1.3.1.5.0 : leaf
+cacheMaxResSize : 1.3.6.1.4.1.3495.1.3.1.6.0 : leaf
+cacheNumObjCount : 1.3.6.1.4.1.3495.1.3.1.7.0 : leaf
+cacheCurrentLRUExpiration : 1.3.6.1.4.1.3495.1.3.1.8.0 : leaf
+cacheCurrentUnlinkRequests : 1.3.6.1.4.1.3495.1.3.1.9.0 : leaf
+cacheCurrentUnusedFDescrCnt : 1.3.6.1.4.1.3495.1.3.1.10.0 : leaf
+cacheCurrentResFileDescrCnt : 1.3.6.1.4.1.3495.1.3.1.11.0 : leaf
+cacheCurrentFileDescrCnt : 1.3.6.1.4.1.3495.1.3.1.12.0 : leaf
+cacheCurrentFileDescrMax : 1.3.6.1.4.1.3495.1.3.1.13.0 : leaf
+cacheProtoClientHttpRequests : 1.3.6.1.4.1.3495.1.3.2.1.1.0 : leaf
+cacheHttpHits : 1.3.6.1.4.1.3495.1.3.2.1.2.0 : leaf
+cacheHttpErrors : 1.3.6.1.4.1.3495.1.3.2.1.3.0 : leaf
+cacheHttpInKb : 1.3.6.1.4.1.3495.1.3.2.1.4.0 : leaf
+cacheHttpOutKb : 1.3.6.1.4.1.3495.1.3.2.1.5.0 : leaf
+cacheClients : 1.3.6.1.4.1.3495.1.3.2.1.15.0 : leaf
+cacheIpEntries : 1.3.6.1.4.1.3495.1.4.1.1.0 : leaf
+cacheIpRequests : 1.3.6.1.4.1.3495.1.4.1.2.0 : leaf
+cacheIpHits : 1.3.6.1.4.1.3495.1.4.1.3.0 : leaf
+cacheIpPendingHits : 1.3.6.1.4.1.3495.1.4.1.4.0 : leaf
+cacheIpNegativeHits : 1.3.6.1.4.1.3495.1.4.1.5.0 : leaf
+cacheBlockingGetHostByName : 1.3.6.1.4.1.3495.1.4.1.6.0 : leaf
+cacheAttemptReleaseLckEntries : 1.3.6.1.4.1.3495.1.4.1.7.0 : leaf
+
+cacheFqdnEntries : 1.3.6.1.4.1.3495.1.4.2.1.0 : leaf
+cacheFqdnRequests : 1.3.6.1.4.1.3495.1.4.2.2.0 : leaf
+cacheFqdnHits : 1.3.6.1.4.1.3495.1.4.2.3.0 : leaf
+cacheFqdnPendingHits : 1.3.6.1.4.1.3495.1.4.2.4.0 : leaf
+cacheFqdnNegativeHits : 1.3.6.1.4.1.3495.1.4.2.5.0 : leaf
+cacheFqdnMisses : 1.3.6.1.4.1.3495.1.4.2.6.0 : leaf
+cacheBlockingGetHostByAddr : 1.3.6.1.4.1.3495.1.4.2.7.0 : leaf
+cacheDnsRequests : 1.3.6.1.4.1.3495.1.4.3.1.0 : leaf
+cacheDnsReplies : 1.3.6.1.4.1.3495.1.4.3.2.0 : leaf
+cacheDnsNumberServers : 1.3.6.1.4.1.3495.1.4.3.3.0 : leaf
+
+
+

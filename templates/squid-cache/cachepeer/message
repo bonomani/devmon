@@ -1,0 +1,3 @@
+TABLE:rrd(DS:fetches:cachePeerFetches:COUNTER;DS:ignored:cachePeerIgnored:COUNTER)
+Peer|IP|Port|Type|State|Fetches|Ignored
+{cachePeerName}|{cachePeerAddr}|{cachePeerPortHttp}|{cachePeerType}|{cachePeerState}|{cachePeerFetches}|{cachePeerIgnored}

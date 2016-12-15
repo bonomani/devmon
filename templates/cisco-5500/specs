@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 5500
+snmpver	: 2
+sysdesc : C5505

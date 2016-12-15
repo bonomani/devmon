@@ -1,0 +1,4 @@
+powerSupplyStatustxt	: green		: powerSupplyHealthy	: The power supply is healthy
+powerSupplyStatustxt	: yellow	: powerSupplyNotInstalled	: No power supply is installed in this location
+powerSupplyStatustxt	: red		: powerSupplyNoAC	: The power supply is not connected to AC power
+powerSupplyStatustxt	: red		: powerSupplyFaulty	: The power supply is faulty

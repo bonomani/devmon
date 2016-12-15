@@ -1,0 +1,4 @@
+Memory		Used	Total	Percentage
+Physical	{MemSizeUsed}kB	{MemSize}kB	{MemPerUse}% {MemPerUse.color}
+Swap		{SwapSizeUsed}kB	{SwapSize}kB	{SwapPerUse}% {SwapPerUse.color}
+

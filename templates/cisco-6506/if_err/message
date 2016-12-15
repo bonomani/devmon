@@ -1,0 +1,12 @@
+<b>Errors:</b>
+Input errors:  yellow={ifInErrPct.thresh:yellow}%, red={ifInErrPct.thresh:red}%
+Output errors: yellow={ifOutErrPct.thresh:yellow}%, red={ifOutErrPct.thresh:red}%
+
+TABLE:
+Ifc name|Errors in|Packet In|Error rate in|Error load in|Errors out|Packet Out|Error rate out|Error load out
+{ifName}{ifAliasBox}|{ifInEps}|{ifInPps}|{ifInErrPct}|{ifInErrPct.color}{ifInErrPct}%{ifInErrPct.errors}|{ifOutEps}|{ifOutPps}|{ifOutErrPct}|{ifOutErrPct.color}{ifOutErrPct}%{ifOutErrPct.errors}
+
+Note:
+Error rates are per second, averaged over a 60 second interval.
+Load percentages are based on error/bit ratio.
+

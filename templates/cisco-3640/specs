@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 3640
+snmpver	: 2
+sysdesc : C3640|C3620

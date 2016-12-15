@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 1700
+snmpver	: 2
+sysdesc : C1700

@@ -1,0 +1,11 @@
+Unit name: {memModulesStatusModuleName}
+Location:  {memModulesStatusModuleLocation}
+Model number: {memModulesStatusModelNumber}
+Serial number: {memModulesStatusSerialNumber}
+Firmware Rev: {memModulesStatusFirmwareRev}  Hardware Rev: {memModulesStatusHardwareRev}
+
+Environment status:
+
+TABLE: noalarmsmsg,rrd(pri:memSensorsStatusSensorName; DS:temp:memSensorsTemperature:GAUGE; DS:humidity:memSensorsHumidity:GAUGE; )
+Sensor|Name|Location|Temp|Humidity|Comm Status|Alarm|Errors
+{memSensorsStatusSensorNumber}|{memSensorsStatusSensorName}|{memSensorsStatusSensorLocation}|{memSensorsTemperature.color}{memSensorsTemperature} {TempUnits}|{memSensorsHumidity.color}{memSensorsHumidity} %|{memSensorsCommStatusTxt}|{memSensorsAlarmStatusTxt}|{memSensorsTemperature.errors} {memSensorsHumidity.errors}

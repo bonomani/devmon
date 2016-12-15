@@ -1,0 +1,4 @@
+vendor	: dell
+model	: perc
+snmpver	: 2
+sysdesc : Linux

@@ -1,0 +1,4 @@
+ifAdminStatTxt	: green		: admin down					: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
+ifAdminStatTxt	: yellow	: testing					: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
+ifAdminStatTxt	: red		: up						: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
+ifElapChangeD	: yellow	: <600						: Interface {ifName}{ifAliasBox} is {ifOperStatTxt}

@@ -1,0 +1,6 @@
+{PartnerStatus.color}Partner {cfPartnerName}  : {PartnerStatus}
+{Settings.color}Cluster Takeover  : {Settings}
+{State.color}Status            : {State}
+{InterconnectStatus.color}Interconnect      : {InterconnectStatus}
+{CannotTakeoverCause.color}Takeover possible : {CannotTakeoverCause}
+

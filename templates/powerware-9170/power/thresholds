@@ -1,0 +1,4 @@
+upsLoadOut	: red		: 70			: UPS load is high.
+upsLoadOut	: yellow	: 90			: UPS load is very high.
+upsOutStat	: red		: On battery		: {upsOutStat}
+upsBattRep	: red		: replacing		: {upsBattRep}

@@ -1,0 +1,27 @@
+This template was created by David Baldwin
+
+NOTE: This does not imply any support responsibilities, liability in
+case of this template or devmon causing physical, monetary or emotional
+damages, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 
+
+DELL ML6000 tape library status
+
+RRD data collection for diag must be setup
+If using integrated devmon, add to TEST2RRD line:
+diag=devmon
+
+Otherwise ensure being processed by --extra-script option
+
+Add to hobbitgraph.cfg:
+
+[diag]
+        FNPATTERN diag.(.+).rrd
+        TITLE Tape Loads
+        YAXIS Load Operations
+        DEF:p@RRDIDX@=@RRDFN@:loads:AVERAGE
+        LINE2:p@RRDIDX@#@COLOR@:@RRDPARAM@
+        GPRINT:p@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:p@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:p@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:p@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n

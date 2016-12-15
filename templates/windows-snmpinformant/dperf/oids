@@ -1,0 +1,5 @@
+lDiskInstance	   : 1.3.6.1.4.1.9600.1.1.1.1.1	: branch
+lDiskCurrDiskQLen  : 1.3.6.1.4.1.9600.1.1.1.1.13	: branch
+lDiskDiskBPS	   : 1.3.6.1.4.1.9600.1.1.1.1.14	: branch
+lDiskDiskRBPS	   : 1.3.6.1.4.1.9600.1.1.1.1.15	: branch
+lDiskDiskWBPS	   : 1.3.6.1.4.1.9600.1.1.1.1.18	: branch

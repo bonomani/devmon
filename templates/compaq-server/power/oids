@@ -1,0 +1,17 @@
+cpqHeFltTolPwrSupplyChassis: 1.3.6.1.4.1.232.6.2.9.3.1.1 	: branch
+cpqHeFltTolPowerSupplyBay: 1.3.6.1.4.1.232.6.2.9.3.1.2		: branch
+cpqHeFltTolPowerSupplyPresent: 1.3.6.1.4.1.232.6.2.9.3.1.3	: branch
+cpqHeFltTolPowerSupplyCondition: 1.3.6.1.4.1.232.6.2.9.3.1.4	: branch
+cpqHeFltTolPowerSupplyStatus: 1.3.6.1.4.1.232.6.2.9.3.1.5	: branch
+cpqHeFltTolPowerSupplyMainVoltage: 1.3.6.1.4.1.232.6.2.9.3.1.6	: branch
+cpqHeFltTolPowerSupplyCapacityUsed: 1.3.6.1.4.1.232.6.2.9.3.1.7 : branch
+cpqHeFltTolPowerSupplyCapacityMaximum: 1.3.6.1.4.1.232.6.2.9.3.1.8 : branch
+cpqHeFltTolPowerSupplyRedundant: 1.3.6.1.4.1.232.6.2.9.3.1.9	: branch
+cpqHeFltTolPowerSupplyModel: 1.3.6.1.4.1.232.6.2.9.3.1.10	: branch
+cpqHeFltTolPowerSupplySerialNumber: 1.3.6.1.4.1.232.6.2.9.3.1.11 : branch
+cpqHeFltTolPowerSupplyAutoRev: 1.3.6.1.4.1.232.6.2.9.3.1.12	: branch
+cpqHeFltTolPowerSupplyHotPlug: 1.3.6.1.4.1.232.6.2.9.3.1.13	: branch
+cpqHeFltTolPowerSupplyFirmwareRev: 1.3.6.1.4.1.232.6.2.9.3.1.14	: branch
+cpqHeFltTolPowerSupplyHwLocation: 1.3.6.1.4.1.232.6.2.9.3.1.15	: branch
+#cpqHeFltTolPowerSupplySparePartNum: 1.3.6.1.4.1.232.6.2.9.3.1.16 : branch
+

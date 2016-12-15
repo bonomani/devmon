@@ -1,0 +1,234 @@
+
+Devmon changelog.  Contributors of specific features/patches are listed
+in parenthesis next to the respective entry.
+
+Devmon v0.3.1-beta1 :: Released 2009-01-23
+ Changes since 0.3.0
+  - Fix loading non-standard ports from the config file
+  - Fix segfault in hobbitd_rrd caused by do_devmon.c and data with spaces in 
+     repeater names
+  - Fix multiple custom threshholds and exceptions on the same test
+  - Send messages to BB/Hobbit/Xymon in debug mode (--debug)
+     For the previous behaviour (messages printed to stdout in debug
+     and not sent to BB/Hobbit/Xymon), use '--debug -p'
+  - Improve error handling, by opening log file immediately after forking, and
+     returning non-zero exit codes when exiting due to error (e.g. log_fatal)
+  - Fix thresh usage in options example in "USING" documentation
+  - Add INDEX transform
+  - Ensure repeaters created by CHAIN transform are tagged as such (so they can 
+     be primary OID)
+  - Close and re-open log files on HUP
+  - Init script changes
+    -Merge Mandriva init script changes:
+     -run as non-root (optional, set RUNASUSER= in /etc/sysconfig/devmon)
+     -use reload (or readbbhosts) argument to run --readbbhosts
+     -fix return codes
+    -Use better killproc (internal_killproc) on platforms without a killproc that
+      takes a pid file option (makes stopping devmon more reliable)
+    -Add a rotate function/argument
+  - Strip spaces off names of repeaters before creating rrd section of message
+  - Set a timeout on the socket to hobbit (hardcoded to 10s for now)
+  - Use Hobbit/BB environment variables if present
+  - Adjust init script to run devmon under Hobbit or BB environment
+  - Honour Hobbit BBLOCATION / NET tag 
+  - Handle line continuations in bb-hosts file (W.J.M. Nelis)
+  - Support BBDATEFORMAT (should provide better dates in Hobbit/BB status messages
+     by default if BBDATEFORMAT is set in hobbitserver.cfg) (W.J.M Nelis)
+  - Add new STATUS: key for message file, which allows extending the first
+     line of the status message
+  - Filters in hobbitdboard are regex's, anchor the conn text (Simeon Berkley)
+
+Devmon v0.3.0 :: Released 2008-04-03
+ Changes since 0.3.0-rc1
+  - Ensure that send_msgs returns when display server is inaccessible.
+    This change fixes the "Devmon turns purple" issue (Buchan Milne)
+  - Fix Hobbit-only dont-poll-if-down feature (Buchan Milne)
+  - Distribute a more complete patch for hobbit that includes do_devmon.c
+
+ Changes since 0.3.0-beta2
+  Changed:
+  - Ignore hidden template directories (e.g. .svn) (Francois Lacroix)
+  - Add negated regexp threshold (Nathan Hand)
+  - Poll each leaf separately (Francois Lacroix)
+  - Add 'plain' table option, allowing unformatted repeaters
+  - Ignore rows which have empty values for one of the repeaters (to avoid
+      some of the sub-interfaces on Cisco ATM interfaces making the page clear)
+  - Template changes
+     Tests for fans, power, temp, log added to compaq-server (Buchan Milne)
+     Add ciscocpu.pl-compatible lines to cpu message files for cisco
+       devices to get cpu graphs from Hobbit
+     Alarm/graph on any device name that is not explicitly ignored (so Fa.+ 
+       works on 6509, S.+ works on 7600 using 6509 template etc.)
+     Add temp test for cisco-6509
+  
+  Added:
+  - Documentation on graphing (Francois Lacroix and Buchan Milne)
+  - Hobbit rrd collector module for devmon (do_devmon.c) (Buchan Milne)
+  - Perl extra-script equivalent (Francois Lacroix and Buchan Milne)
+  - Patch for Hobbit, to enable devmon rrd collector, ensure devmon graphs
+      work better by default (use multigraphs for if_load, avoid extra broken
+      graphs etc.)
+  - Hobbit graph definitions for some devmon RRD-enabled tests (if_load,if_dsc,
+      temp) and one for the connects test (for NCV)
+  - New Templates:
+     dell-poweredge for Dell PowerEdge servers running OMSA (Buchan Milne)
+     ibm-rsa2 for IBM Remote Server Adapters (Simeon Berkley)
+     apc-9617 (Simeon Berkley)
+     f5-bigip-lite and f5-bigip (Francois Lacroix)
+     cisco-asa for ASA or PIX with IOS 7.x, or FWSM 3.x (Francois Lacroix)
+     cisco-pix for PIX 6.x (Buchan Milne)
+     linux-openwrt, to demonstrate use of 'plain' option (Buchan Milne)
+     cisco-4500, cisco-msfc2, cisco-5500, cisco-6506, cisco-2811,
+       cisco-3640 (Francois Lacroix)
+     dell-perc for older Dell PowerEdge servers running percsnmp (Buchan Milne)
+
+  Bugfixes:
+  - Fix numeric thresholds on branch OIDs (Francois Lacroix)
+  - Allow FQDN in NODENAME, and use unstripped FQDN by default (so dm
+      test for devmon node works where hostname is FQDN) (Buchan Milne)
+
+
+ Changes since 0.2.2
+
+  Changed:
+  - If you specify a non-absolute path to a config file (using -c)
+    and the file doesn't exist in the current working dir, devmon
+    will look in its own directory for the file.
+  - Moved default location for PID file to /var/run/devmon.pid
+  - Moved templates to their own distribution file and added several
+    community-created templates (with proper kudos noted in each template)
+  - Changed UNPACK transform type to support more complicated
+    (and powerful) unpack expressions, and separator characters.
+  - Changed the way numeric primary keys are sorted in tables
+    to allow numeric ascending sorts for multi-level leaves.
+  - Changed the docs/INSTALLATION to clarify how DEVMON operates.
+  - Removed the .rrd OID flag and replaced it with an RRD table
+    option.
+  - Recoded most translation subroutines to optimize performance
+  - Added more debug output, and defined the --debug flag in the help output
+
+  Added:
+  - Added a timeout watchdog for all transforms, set at 5 seconds.
+  - Added ability to specify SNMP port that a particular device uses
+  - Added bi-directional communication with the hobbit server, allowing
+    the client to avoid testing against devices which hobbit
+    recognizes as unreachable (i.e. a red 'conn' test).
+  - Added CHAIN transform, which allows you to chain OIDs together
+  - Added ability to display template threshold values in devmon output
+
+  Bugfixes:
+  - Fixed DBHOST config file entry so that it allows non
+    alpha-numeric characters (which was preventing people from using
+    FQDN hostnames).
+  - Fixed cisco 3500 templates to correctly translate ifc speed
+  - Fixed REGSUB transform to work leaf OIDs (Gaetan Frenoy)
+  
+Devmon v0.2.2 :: Released 05/18/2006
+
+  Changed:
+  - Fixed cisco templates that had an uneccesary ifSpeed entry
+    in the oids file (which was causing the ifSpeed SPEED transform
+    to behave erratically).
+  - Fixed the TSWITCH transform so Devmon recognizes it correctly.
+  - Implemented a workaround for snmp oids that contain
+    extended information in the OID variable (i.e. Windows DHCP
+    server embeds the subnet address in the SNMP OID).
+    This should get rid of any 'xxx is non-numeric in sort' errors.
+  - Fixed the MATH transform so that doesnt misinterpret
+    some numbers as a divide by zero condition and returning 0.
+
+Devmon v0.2.1    :: Not released
+
+Devmon v0.2 beta :: Released 05/09/2006
+
+  Changed:
+  - Changed the way the TABLE: message directive is read.
+    Options can now be added to the TABLE line to alter the
+    default way that Devmon handles table data. 
+    Example: TABLE: noalarmsmsg,border=0,pad=10
+  - Removed NONHTMLTABLE directive and replaced it with the 'nonhtml'
+    TABLE option.
+  - Removed the colon from the data input portion of the 
+    DELTA transform, which delineated the source OID alias
+    and the optional upper limit (replaced it with whitespace,
+    to make it more consistent with other transform variables).
+  - Removed the (yy:mm:dd) text from the ELAPSED transform.  If you
+    want to see this text, specify it explicitly in your message file
+  - Changed SWITCH block to give it more functionality.  Existing
+    SWITCH transforms should be compatible with this new version.
+    Please see the docs/TEMPLATES files for the new version.
+  - Various code optimizations, which will hopefully make the
+    test logic a little faster.
+  - Introduced the ability to do line continuation in a transform
+    file via a backslash (\) at the end of a line, thus making
+    transform files a little more readable when viewed in a 
+    80 column terminal
+  - Modified the if_load and if_stat threshold files to include
+    the interface name and alias when reporting errors
+  - Changed the way tests handle duplicate OID aliaes (i.e. ifInOps
+    is used in if_stat, if_load, if_err, etc).  Now tests on the 
+    same devices that share an oid name with another tests will 
+    only perform the transform on that alias once. This has important
+    implications if you use the same OID alias across multiple tests;
+    please read 'oids' and 'transform' file sections in the 
+    docs/TEMPLATE file for more information.
+
+  Added:
+  - TSWITCH transform: similar to SWITCH transform except it can
+    inhert threshold results from dependent OID aliases.
+  - SUBSTR transform: get a substring of the specific oid
+    (faster and more efficient than doing a REGSUB)
+  - UNPACK transform: unpack oid data stored in binary form
+  - CONVERT transform: convert either hex or octal to a
+    decimal integer
+  - AND transform: returns a value of 1 if ALL oids passed to
+    it are non-zero.
+  - OR transform: returns a value of 1 if ANY oids passed to
+    it are non-zero.
+
+  - 'border' TABLE option: change html table border value
+  - 'pad' TABLE option: change html table cellpadding value
+  - 'nonhtml' TABLE option: prints table in NCV format
+  - 'noalarmsmsg' TABLE option:  prevents display of "Alarming on" text
+    for a TABLE entry.
+  - 'alarmsonbottom' TABLE option: prints "Alarming on" text at bottom
+    of TABLE data, as opposed to the top.
+  - Cisco 2801 template
+
+  Bug fixes:
+  - Fixed cisco CPU tests to alarm properly on reboot
+  - Fixed the command line config override (Steve Aiello)
+  - Fixed problem with non-HTML tables (Dan Vande More)
+
+Devmon v0.1.2 beta :: Not released
+
+  Added:
+  - Support for non-HTML(NCV) type tables
+  - Support for embedding RRD data in HTML tables
+
+  Bug fixes:
+  - Worked around a bug in older versions of Storable.pm that would cause 
+    devmon to crash when using 64bit counters
+  - Fixed the order of alarm applications; now alarms by default
+
+Devmon v0.1.1 beta :: Released 02/28/2006
+
+  Added:
+  
+  - Ability to resolve IPs from DNS for hosts in bb-hosts /w an IP of 0.0.0.0
+  - Added -c command line param to override default devmon.cfg location
+  - Added model() option to read_bb_hosts to override autodetection
+  - Added upper limit option for DELTA transforms
+  
+  Bug fixes:
+  - TEMPLATES: Changed if_load transform files to properly report % load 
+    (Johann Eggers)
+  - Fixed DELTA transform issues with 32 and 64bit counter wraps
+  - Fixed 'inappropriate ioctl for device' error when forking
+    (Craig Boyce & Steve Aiello)
+  - Fixed extremely high polltimes when not polling any devices
+
+
+Devmon v0.1 beta   :: Released 02/23/2006
+
+   Initial release

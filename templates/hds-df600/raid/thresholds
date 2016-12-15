@@ -1,0 +1,39 @@
+dfRegressionStatusDrv   : green  : 0    :
+dfRegressionStatusDrv   : red    : >0   : Drive Error
+dfRegressionStatusSpr   : green  : 0    :
+dfRegressionStatusSpr   : red    : >0   : Spare Drive Error
+dfRegressionStatusDDrv  : green  : 0    :
+dfRegressionStatusDDrv  : red    : >0   : Data Drive Error
+dfRegressionStatusENC   : green  : 0    :
+dfRegressionStatusENC   : red    : >0   : Enclosure Error
+dfRegressionStatusWarn  : green  : 0    :
+dfRegressionStatusWarn  : red    : >0   : Warning
+dfRegressionStatusCtl   : green  : 0    :
+dfRegressionStatusCtl   : red    : >0   : Controller Error
+dfRegressionStatusUPS   : green  : 0    :
+dfRegressionStatusUPS   : red    : >0   : UPS Error
+dfRegressionStatusLoop  : green  : 0    :
+dfRegressionStatusLoop  : red    : >0   : Loop Error
+dfRegressionStatusPath  : green  : 0    :
+dfRegressionStatusPath  : red    : >0   : Path Error
+dfRegressionStatusBatt  : green  : 0    :
+dfRegressionStatusBatt  : red    : >0   : Battery Error
+dfRegressionStatusPSU   : green  : 0    :
+dfRegressionStatusPSU   : red    : >0   : Power Supply Error
+dfRegressionStatusAC    : green  : 0    :
+dfRegressionStatusAC    : red    : >0   : AC Error
+dfRegressionStatusBK    : green  : 0    :
+dfRegressionStatusBK    : red    : >0   : BK Error
+dfRegressionStatusFan   : green  : 0    :
+dfRegressionStatusFan   : red    : >0   : Fan Error
+dfRegressionStatusCache : green  : 0    :
+dfRegressionStatusCache : red    : >0   : Cache Memory Error
+dfRegressionStatusSATAS : green  : 0    :
+dfRegressionStatusSATAS : red    : >0   : SATA Spare Drive Error
+dfRegressionStatusSATAD : green  : 0    :
+dfRegressionStatusSATAD : red    : >0   : SATA Data Drive Error
+dfRegressionStatusSENC  : green  : 0    :
+dfRegressionStatusSENC  : red    : >0   : SATA Enclosure Error
+dfRegressionStatusHostC : green  : 0    :
+dfRegressionStatusHostC : red    : >0   : HostConnector Error
+

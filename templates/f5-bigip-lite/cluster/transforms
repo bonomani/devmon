@@ -1,0 +1,8 @@
+FailoverActiveMode_T : SWITCH : {FailoverActiveMode} 0 = Actif/Stanby, 1 = Actif/Actif
+FailoverForceActive_T : SWITCH : {FailoverForceActive} 0 = No, 1 = Yes
+FailoverForceStandby_T : SWITCH : {FailoverForceStandby} 0 = No, 1 = Yes
+FailoverIsRedundant_T : SWITCH : {FailoverIsRedundant}  0 = No, 1 = Yes
+FailoverUnitMask_T : SWITCH : {FailoverUnitMask} 0 = STANDBY, 3 = ACTIVE
+FailoverChangeStat : DELTA : {FailoverUnitMask}
+FailoverIsOk_T : MATH : {FailoverUnitMask} + {FailoverForceActive}
+FailoverIsOk_T_T : SWITCH : {FailoverIsOk_T} 2 = NOK, 3 = OK, 0 = OK, 4 = OK

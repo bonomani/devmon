@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 3800
+snmpver	: 2
+sysdesc : Cisco IOS Software.*3800 Software

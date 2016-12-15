@@ -1,0 +1,6 @@
+cpqHeFltTolPowerSupplyPresentTxt: green		: OK	: Power Supply OK
+cpqHeFltTolPowerSupplyPresentTxt: yellow	: Degraded|Other	: Power supply is degraded or other failure
+cpqHeFltTolPowerSupplyPresentTxt: red		: Failed	: The Power supply has failed
+cpqHeFltTolPowerSupplyConditionTxt: green	: OK	: Power Supply OK
+cpqHeFltTolPowerSupplyConditionTxt: yellow	: Degraded|Other	: The Power Supply Condition has degraded
+cpqHeFltTolPowerSupplyConditionTxt: red		: Failed	: The Power Supply Condition has failed

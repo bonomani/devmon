@@ -1,0 +1,6 @@
+keyIsPerpetual		: red		: >= 2		: Key is not perpetual
+keyIsPerpetual		: green		: = 1		: Key is perpetual
+
+keySecondsUntilExpire	: green		: > 1209600	: Key valid for more than 2 weeks
+keySecondsUntilExpire	: yellow	: < 1209600	: Key valid for less than 2 weeks
+keySecondsUntilExpire	: red		: < 86400	: Key valid for less than 1 day

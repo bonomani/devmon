@@ -1,0 +1,2 @@
+power unit1 : {PsuDescr_T} is {PsuStatus.color}{PsuStatus}
+power unit2 : {PsuDescr2_T} is {PsuStatus2.color}{PsuStatus2}

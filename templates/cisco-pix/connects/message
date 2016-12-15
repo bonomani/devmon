@@ -1,0 +1,9 @@
+{cur_conn.errors}
+Thresholds for connections {cur_conn.thresh:yellow} (yellow), {cur_conn.thresh:red} (red)
+Number of connections currently in use by the entire firewall
+Connections: {cur_conn}
+Highest number of connections in use at any one time since system startup
+MaxConnections: {used_conn}
+
+<!-- DEVMON to RRD connections: {cur_conn}
+-->

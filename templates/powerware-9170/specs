@@ -1,0 +1,4 @@
+vendor	: powerware
+model	: 9170
+snmpver	: 1
+sysdesc : BestLink

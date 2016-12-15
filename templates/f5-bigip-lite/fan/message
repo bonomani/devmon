@@ -1,0 +1,16 @@
+
+TABLE:rrd(DS:CpuTemp:CpuTemperature:GAUGE)
+Cpu Number|Cpu Temperature
+{CpuNumber}|{CpuTemperature.color} {CpuTemperature}
+
+TABLE:
+Chassis Fan Number|Chassis Fan Status
+{ChassisFanNumber}|{ChassisFanStatus_T.color}{ChassisFanStatus_T}
+
+TABLE:
+Chassis Sonde Number|Chassis Temp Temperature
+{ChassisSondeNumber}|{ChassisTempTemperature.color}{ChassisTempTemperature}
+
+TABLE:
+Chassis Power Number|Chassis Power Supply Status
+{ChassisPowerNumber}|{ChassisPowerSupplyStatus_T.color}{ChassisPowerSupplyStatus_T}

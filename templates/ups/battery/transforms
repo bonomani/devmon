@@ -1,0 +1,5 @@
+upsBatteryVoltageTxt	: MATH	: {upsBatteryVoltage} / 10 : 1
+upsBattIDX : INDEX  : {upsBatteryVoltage}
+
+# Switch our numeric values to their textual equivalents
+upsBattStat 	: SWITCH : {upsBatteryStatus} 1=Unknown,2=Battery OK,3=Battery low,4=Battery depleted

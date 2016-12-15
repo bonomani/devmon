@@ -1,0 +1,7 @@
+
+# Switch our numeric values to their textual equivalents
+upsBattStat	: SWITCH	: {upsBattStatNum} 1=Charging,2=Discharging,3=Floating,4=Resting
+upsBattTest	: SWITCH	: {upsBattTestNum} 1=Unknown,2=Passed,3=Failed,4=In progress,5=Not supported,6=Inhibited,7=Scheduled
+
+# Calculate runtime remaining in minutes
+upsBattTime	: MATH		: {upsBattTimeSecs} / 60

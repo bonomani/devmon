@@ -1,0 +1,4 @@
+CPU Measures:
+TABLE: noalarmsmsg,rrd(DS:dpc:cpuPercentDPCTime:GAUGE; DS:int:cpuPercentInterruptTime:GAUGE; DS:priv:cpuPercentPrivilegedTime:GAUGE; DS:proc:cpuPercentProcessorTime:GAUGE; DS:user:cpuPercentUserTime:GAUGE;)
+ID|DPC|Interrupt|Privileged|Processor|User
+{cpuInstance}|{cpuPercentDPCTime}|{cpuPercentInterruptTime}|{cpuPercentPrivilegedTime}|{cpuPercentProcessorTime}|{cpuPercentUserTime}

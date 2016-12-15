@@ -1,0 +1,6 @@
+severity = 1
+[ControlStructures::ProhobitPostfixControls]
+allow = if
+
+#[Miscellanea::RequireRcsKeywords]
+#keywords = Revision URL Date Author Id

@@ -1,0 +1,4 @@
+vendor: redhat
+model: cluster
+snmpver: 2c
+sysdesc: Cluster

@@ -1,0 +1,20 @@
+# Convert our total ifc octets(bytes) into bits
+clientBitsIn	: MATH		: {clientBytesIn} x 8
+serverBitsIn	: MATH		: {serverBytesIn} x 8
+clientBitsOut	: MATH		: {clientBytesOut} x 8
+serverBitsOut	: MATH		: {serverBytesOut} x 8
+# Perform delta transforms
+clientNewCon	: DELTA		: {clientTotCon}
+serverNewCon	: DELTA		: {serverTotCon}
+pvaClientNewCon	: DELTA		: {pvaClientTotCon}
+pvaServerNewCon	: DELTA		: {pvaServerTotCon}
+sslNativeNewCon	: DELTA		: {sslNativeTotCon}
+sslCompatNewCon : DELTA		: {sslCompatTotCon}
+clientBpsIn	: DELTA		: {clientBitsIn}
+clientBpsOut	: DELTA		: {clientBitsOut}
+serverBpsIn	: DELTA		: {serverBitsIn}
+serverBpsOut	: DELTA		: {serverBitsOut}
+httpReqsPerSec	: DELTA		: {httpReqs}
+# Get total connects
+totCurCon	: MATH		: {clientCurCon} + {serverCurCon} + {pvaClientCurCon} + {pvaServerCurCon} + {sslNativeCurCon} + {sslCompatCurCon} : 0
+totNewCon	: MATH		: {clientNewCon} + {serverNewCon} + {pvaClientNewCon} + {pvaServerNewCon} + {sslNativeNewCon} + {sslCompatNewCon} : 0

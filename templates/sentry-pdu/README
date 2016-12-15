@@ -1,0 +1,32 @@
+This template was created by David Baldwin
+
+NOTE: This does not imply any support responsibilities, liabiltiy in
+case of this template or devmon causing phsyical, monetary or emotional
+damanges, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 
+
+Support for Sentry switched PDU
+
+RRD data collection for power must be setup
+If using integrated devmon, add to TEST2RRD line:
+power=devmon
+
+Otherwise ensure being processed by --extra-script option
+
+Also add to GRAPHS: power
+
+Graph definition:
+
+[current]
+        FNPATTERN current.(.+).rrd
+        TITLE Current Monitoring
+        YAXIS Amps
+        DEF:craw@RRDIDX@=@RRDFN@:current:AVERAGE
+        CDEF:current@RRDIDX@=craw@RRDIDX@,100,/
+        LINE2:current@RRDIDX@#@COLOR@:@RRDPARAM@ Input Current
+        GPRINT:current@RRDIDX@:LAST: \: %5.1lf (cur)
+        GPRINT:current@RRDIDX@:MAX: \: %5.1lf (max)
+        GPRINT:current@RRDIDX@:MIN: \: %5.1lf (min)
+        GPRINT:current@RRDIDX@:AVERAGE: \: %5.1lf (avg)\n
+
+

@@ -1,0 +1,4 @@
+upsLoadOut	: red		: 70			: UPS load is high.
+upsLoadOut	: yellow	: 90			: UPS load is very high.
+upsBattStat	: red		: Discharging		: Ups is on battery.
+upsBattTest	: red		: Failed		: Battery needs replacing.

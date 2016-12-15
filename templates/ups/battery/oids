@@ -1,0 +1,7 @@
+upsBatteryStatus        : .1.3.6.1.2.1.33.1.2.1.0 : leaf
+upsSecondsOnBattery     : .1.3.6.1.2.1.33.1.2.2 : branch
+upsEstimatedMinutesRemaining    : .1.3.6.1.2.1.33.1.2.3 : branch
+upsEstimatedChargeRemaining     : .1.3.6.1.2.1.33.1.2.4 : branch
+upsBatteryVoltage       : .1.3.6.1.2.1.33.1.2.5 : branch
+upsBatteryCurrent       : .1.3.6.1.2.1.33.1.2.6 : branch
+upsBatteryTemperature   : .1.3.6.1.2.1.33.1.2.7 : branch

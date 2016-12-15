@@ -1,0 +1,4 @@
+vendor	: windows
+model	: snmpinf
+snmpver	: 2
+sysdesc : Windows

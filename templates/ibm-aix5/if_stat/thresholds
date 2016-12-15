@@ -1,0 +1,6 @@
+ifAdminStatTxt	: green		: admin down					: Interface {ifName} is {ifAdminStatTxt}
+ifAdminStatTxt	: yellow	: testing					: Interface {ifName} is {ifAdminStatTxt}
+ifAdminStatTxt	: red		: up						: Interface {ifName} is {ifAdminStatTxt}
+ifOperStatTxt	: green		: up 						: Interface {ifName} is {ifOperStatTxt}
+ifOperStatTxt	: yellow	: dormant|testing|yellow|not present|layer down : Interface {ifName} is {ifOperStatTxt}
+ifOperStatTxt	: red		: down                                          : Interface {ifName} is {ifOperStatTxt}

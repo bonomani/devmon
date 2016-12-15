@@ -1,0 +1,8 @@
+upsModel	: .1.3.6.1.4.1.2947.1.1.1.0	: leaf
+upsOutStatNum	: .1.3.6.1.4.1.2947.1.2.1.0	: leaf
+upsLoadOut	: .1.3.6.1.4.1.2947.1.4.16.1.0	: leaf
+upsBattTime	: .1.3.6.1.4.1.2947.1.2.3.0	: leaf
+upsBattRepNum	: .1.3.6.1.4.1.2947.1.8.4.7.0	: leaf
+upsVoltInNum	: .1.3.6.1.4.1.2947.1.3.7.1.0	: leaf
+upsVoltOutNum	: .1.3.6.1.4.1.2947.1.4.10.1.0	: leaf
+upsBattRepDate	: .1.3.6.1.4.1.2947.1.2.7.0	: leaf

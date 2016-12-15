@@ -1,0 +1,2 @@
+fan chassis is {FanStatus.color}{FanStatus}
+Temperature is {chassisTempAlarm_T.color}{chassisTempAlarm_T}

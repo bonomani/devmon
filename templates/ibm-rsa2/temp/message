@@ -1,0 +1,5 @@
+{AmbientTemp.errors}
+
+Temperature (F)
+-----------
+ambient:	{DispAmbientTemp}

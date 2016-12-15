@@ -1,0 +1,2 @@
+perCentDiskIOUtilization	: yellow        : 75    : Memory load is high
+perCentDiskIOUtilization	: red           : 95    : Memory load is very high

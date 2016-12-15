@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 871
+snmpver	: 2
+sysdesc : C870

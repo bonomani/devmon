@@ -1,0 +1,6 @@
+vendor	: cisco
+model	: n6000
+snmpver	: 2
+sysdesc : Cisco NX-OS.*n6000.*
+#Cisco NX-OS(tm) n6000, Software (n6000-uk9), Version 7.0(5)N1(1), RELEASE SOFTWARE Copyright (c) 2002-2012 by Cisco Systems, Inc. Device Manager Version 6.0(2)N1(1),  Compiled 10/29/2014 22:00:00
+#SNMPv2-MIB::sysObjectID.0 = OID: SNMPv2-SMI::enterprises.9.12.3.1.3.1410

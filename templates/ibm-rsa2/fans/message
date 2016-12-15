@@ -1,0 +1,25 @@
+{Fan1.errors}
+{Fan2.errors}
+{Fan3.errors}
+{Fan4.errors}
+{Fan5.errors}
+{Fan6.errors}
+{Fan7.errors}
+{Fan8.errors}
+{Fan9.errors}
+{Fan10.errors}
+
+Fan health state
+
+Fan speed (%)
+----------------
+ Fan1: {Fan1}
+ Fan2: {Fan2}
+ Fan3: {Fan3}
+ Fan4: {Fan4}
+ Fan5: {Fan5}
+ Fan6: {Fan6}
+ Fan7: {Fan7}
+ Fan8: {Fan8}
+ Fan9: {Fan9}
+Fan10: {Fan10}

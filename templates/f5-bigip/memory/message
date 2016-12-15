@@ -1,0 +1,8 @@
+Memory utilizations:
+
+Used    : {MemUsed_T}
+Total    : {MemTotal_T}
+Percentage  : {MemPercent}% {MemPercent.color}
+
+
+<!-- DEVMON to RRD <br>Memory 5 min average: {MemUsed_T} -->

@@ -1,0 +1,4 @@
+cpqHeFltTolFanConditionTxt	: green		: OK 		: Fan OK
+cpqHeFltTolFanConditionTxt	: clear		: Other		: Fan state unknown
+cpqHeFltTolFanConditionTxt	: yellow	: Degraded	: Fan Degraded or other problem
+cpqHeFltTolFanConditionTxt	: red		: Failed	: Fan has failed

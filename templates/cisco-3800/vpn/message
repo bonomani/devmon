@@ -1,0 +1,3 @@
+TABLE:
+Description|Type|Peer|Number of Peers
+{cipsStaticCryptomapDescr}|{cipsStaticCryptomapType}|{cipsStaticCryptomapPeer}|{cipsStaticCryptomapNumPeers}

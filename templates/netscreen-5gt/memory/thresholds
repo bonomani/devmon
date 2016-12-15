@@ -1,0 +1,2 @@
+mem_used_per        : yellow        : 70    : Memory load is high ({mem_used_per}%)
+mem_used_per        : red           : 80    : Memory load is very high ({mem_used_per}%)

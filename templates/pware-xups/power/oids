@@ -1,0 +1,7 @@
+upsModel	: .1.3.6.1.4.1.534.1.1.2	: leaf
+upsLoadOut	: .1.3.6.1.4.1.534.1.4.1	: leaf
+upsBattTimeSecs	: .1.3.6.1.4.1.534.1.2.1	: leaf
+upsVoltIn	: .1.3.6.1.4.1.534.1.4.4.1.2.1	: leaf
+upsVoltOut	: .1.3.6.1.4.1.534.1.3.4.1.2.1	: leaf
+upsBattTestNum	: .1.3.6.1.4.1.534.1.8.2        : leaf
+upsBattStatNum	: .1.3.6.1.4.1.534.1.2.5	: leaf

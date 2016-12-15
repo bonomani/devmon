@@ -1,0 +1,4 @@
+vendor	: powerware
+model	: xups
+snmpver	: 1
+sysdesc : ConnectUPS

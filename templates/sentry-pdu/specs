@@ -1,0 +1,4 @@
+vendor	: sentry
+model	: pdu
+snmpver	: 2c
+sysdesc : Sentry Switched CDU

@@ -1,0 +1,6 @@
+
+Memory Measures (KB):
+TABLE: noalarmsmsg,rrd(pri:DummyPri; DS:avail:memoryAvailableKBytes:GAUGE; DS:commit:memoryCommittedKBytes:GAUGE; DS:poolpgres:memoryPoolPagedResidentKBytes:GAUGE; DS:poolpg:memoryPoolPagedKBytes:GAUGE; DS:poolnon:memoryPoolNonpagedKBytes:GAUGE; DS:cache:memoryCacheKBytes:GAUGE; DS:cacheres:memorySystemCacheResidentKBytes:GAUGE; DS:coderes:memorySystemCodeResidentKBytes:GAUGE; DS:codetot:memorySystemCodeTotalKBytes:GAUGE; DS:drvres:memorySystemDriverResidentKBytes:GAUGE; DS:drvtot:memorySystemDriverTotalKBytes:GAUGE; )
+Avail|Commited|Pool Paged Resid|Pool Pg|Pool Nonpaged|Cache|Sys Cache Res|Sys Code Res|Sys Code Tot|Sys Driver Res|Sys Driver Tot
+{memoryAvailableKBytes}|{memoryCommittedKBytes}|{memoryPoolPagedResidentKBytes}|{memoryPoolPagedKBytes}|{memoryPoolNonpagedKBytes}|{memoryCacheKBytes}|{memorySystemCacheResidentKBytes}|{memorySystemCodeResidentKBytes}|{memorySystemCodeTotalKBytes}|{memorySystemDriverResidentKBytes}|{memorySystemDriverTotalKBytes}
+

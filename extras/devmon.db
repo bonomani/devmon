@@ -1,0 +1,305 @@
+-- MySQL dump 10.9
+--
+-- Host: devmon1    Database: devmon_test
+-- ------------------------------------------------------
+-- Server version	4.1.13-Max-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `custom_excepts`
+--
+
+DROP TABLE IF EXISTS `custom_excepts`;
+CREATE TABLE `custom_excepts` (
+  `host` text NOT NULL,
+  `test` text NOT NULL,
+  `oid` text NOT NULL,
+  `type` text NOT NULL,
+  `data` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `custom_excepts`
+--
+
+
+/*!40000 ALTER TABLE `custom_excepts` DISABLE KEYS */;
+LOCK TABLES `custom_excepts` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `custom_excepts` ENABLE KEYS */;
+
+--
+-- Table structure for table `custom_threshs`
+--
+
+DROP TABLE IF EXISTS `custom_threshs`;
+CREATE TABLE `custom_threshs` (
+  `host` text NOT NULL,
+  `test` text NOT NULL,
+  `oid` text NOT NULL,
+  `color` text NOT NULL,
+  `val` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `custom_threshs`
+--
+
+
+/*!40000 ALTER TABLE `custom_threshs` DISABLE KEYS */;
+LOCK TABLES `custom_threshs` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `custom_threshs` ENABLE KEYS */;
+
+--
+-- Table structure for table `devices`
+--
+
+DROP TABLE IF EXISTS `devices`;
+CREATE TABLE `devices` (
+  `name` text NOT NULL,
+  `ip` tinytext NOT NULL,
+  `vendor` text NOT NULL,
+  `model` text NOT NULL,
+  `tests` text NOT NULL,
+  `cid` text NOT NULL,
+  `owner` tinyint(4) NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `devices`
+--
+
+
+/*!40000 ALTER TABLE `devices` DISABLE KEYS */;
+LOCK TABLES `devices` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `devices` ENABLE KEYS */;
+
+--
+-- Table structure for table `global_config`
+--
+
+DROP TABLE IF EXISTS `global_config`;
+CREATE TABLE `global_config` (
+  `name` varchar(30) NOT NULL default '',
+  `val` text NOT NULL,
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `global_config`
+--
+
+
+/*!40000 ALTER TABLE `global_config` DISABLE KEYS */;
+LOCK TABLES `global_config` WRITE;
+INSERT INTO `global_config` VALUES ('bbtype','hobbit'),('cleartime','180'),('cycletime','60'),('deadtime','300'),('dispport','1984'),('dispserv','localhost'),('maxpolltime','30'),('msgsize','8096'),('msgsleep','10'),('numforks','10'),('snmptimeout','2'),('snmptries','5');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `global_config` ENABLE KEYS */;
+
+--
+-- Table structure for table `nodes`
+--
+
+DROP TABLE IF EXISTS `nodes`;
+CREATE TABLE `nodes` (
+  `name` varchar(25) NOT NULL default '',
+  `node_num` int(11) NOT NULL default '0',
+  `active` char(1) NOT NULL default 'n',
+  `heartbeat` int(10) unsigned default NULL,
+  `need_tests` int(11) NOT NULL default '0',
+  `read_temps` char(1) NOT NULL default 'n',
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `node_num` (`node_num`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `nodes`
+--
+
+
+/*!40000 ALTER TABLE `nodes` DISABLE KEYS */;
+LOCK TABLES `nodes` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `nodes` ENABLE KEYS */;
+
+--
+-- Table structure for table `template_exceptions`
+--
+
+DROP TABLE IF EXISTS `template_exceptions`;
+CREATE TABLE `template_exceptions` (
+  `test_id` smallint(5) unsigned NOT NULL default '0',
+  `oid` text NOT NULL,
+  `type` text NOT NULL,
+  `data` text NOT NULL,
+  KEY `id_oid_index` (`test_id`,`oid`(10))
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `template_exceptions`
+--
+
+
+/*!40000 ALTER TABLE `template_exceptions` DISABLE KEYS */;
+LOCK TABLES `template_exceptions` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `template_exceptions` ENABLE KEYS */;
+
+--
+-- Table structure for table `template_messages`
+--
+
+DROP TABLE IF EXISTS `template_messages`;
+CREATE TABLE `template_messages` (
+  `test_id` smallint(5) unsigned NOT NULL default '0',
+  `msg` text NOT NULL,
+  UNIQUE KEY `id` (`test_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `template_messages`
+--
+
+
+/*!40000 ALTER TABLE `template_messages` DISABLE KEYS */;
+LOCK TABLES `template_messages` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `template_messages` ENABLE KEYS */;
+
+--
+-- Table structure for table `template_models`
+--
+
+DROP TABLE IF EXISTS `template_models`;
+CREATE TABLE `template_models` (
+  `id` smallint(5) unsigned NOT NULL default '0',
+  `vendor` text NOT NULL,
+  `model` text NOT NULL,
+  `snmpver` tinyint(3) unsigned NOT NULL default '2',
+  `sysdesc` text NOT NULL,
+  UNIQUE KEY `id` (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `template_models`
+--
+
+
+/*!40000 ALTER TABLE `template_models` DISABLE KEYS */;
+LOCK TABLES `template_models` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `template_models` ENABLE KEYS */;
+
+--
+-- Table structure for table `template_oids`
+--
+
+DROP TABLE IF EXISTS `template_oids`;
+CREATE TABLE `template_oids` (
+  `test_id` smallint(5) unsigned NOT NULL default '0',
+  `name` text NOT NULL,
+  `num` text,
+  `repeat` tinyint(3) unsigned default NULL,
+  `t_type` text,
+  `t_data` text,
+  KEY `id_name_index` (`test_id`,`name`(10))
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `template_oids`
+--
+
+
+/*!40000 ALTER TABLE `template_oids` DISABLE KEYS */;
+LOCK TABLES `template_oids` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `template_oids` ENABLE KEYS */;
+
+--
+-- Table structure for table `template_tests`
+--
+
+DROP TABLE IF EXISTS `template_tests`;
+CREATE TABLE `template_tests` (
+  `id` smallint(5) unsigned NOT NULL default '0',
+  `mod_id` smallint(5) unsigned NOT NULL default '0',
+  `test` text NOT NULL,
+  UNIQUE KEY `id` (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `template_tests`
+--
+
+
+/*!40000 ALTER TABLE `template_tests` DISABLE KEYS */;
+LOCK TABLES `template_tests` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `template_tests` ENABLE KEYS */;
+
+--
+-- Table structure for table `template_thresholds`
+--
+
+DROP TABLE IF EXISTS `template_thresholds`;
+CREATE TABLE `template_thresholds` (
+  `test_id` smallint(5) unsigned NOT NULL default '0',
+  `oid` text NOT NULL,
+  `color` text NOT NULL,
+  `thresh` text NOT NULL,
+  `msg` text,
+  KEY `id_oid_index` (`test_id`,`oid`(10))
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `template_thresholds`
+--
+
+
+/*!40000 ALTER TABLE `template_thresholds` DISABLE KEYS */;
+LOCK TABLES `template_thresholds` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `template_thresholds` ENABLE KEYS */;
+
+--
+-- Table structure for table `test_data`
+--
+
+DROP TABLE IF EXISTS `test_data`;
+CREATE TABLE `test_data` (
+  `host` varchar(60) NOT NULL default '',
+  `ifc` varchar(35) default NULL,
+  `test` varchar(20) NOT NULL default '',
+  `time` int(11) NOT NULL default '0',
+  `val` text NOT NULL,
+  UNIQUE KEY `host` (`host`,`ifc`,`test`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `test_data`
+--
+
+
+/*!40000 ALTER TABLE `test_data` DISABLE KEYS */;
+LOCK TABLES `test_data` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `test_data` ENABLE KEYS */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+

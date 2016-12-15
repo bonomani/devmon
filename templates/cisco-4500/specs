@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 4500
+snmpver	: 2
+sysdesc : 4500

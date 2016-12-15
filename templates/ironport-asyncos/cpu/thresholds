@@ -1,0 +1,3 @@
+perCentCPUUtilization    : red           : >80   : CPU utilization is very high: {perCentCPUUtilization}%
+perCentCPUUtilization    : yellow        : >60   : CPU utilization is high: {perCentCPUUtilization}%
+perCentCPUUtilization    : green         :       : CPU utilization is nominal: {perCentCPUUtilization}%

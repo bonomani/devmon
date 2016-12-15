@@ -1,0 +1,34 @@
+Server: {serverName} - {isServerOrClient} - {loginMachineName}
+Ver: {serverVersion}
+OS: {osVersion}    kernel: {kernelVersion}
+
+Processors:
+TABLE:plain,noalarmsmsg
+No  Info
+{processorNo}| {processorInfo}
+
+Memory: {memory}   Swap: {swap}
+
+Failover:
+TABLE:noalarmsmsg
+No|Name|Value
+{foIndex}|{foName}|{foValue}
+
+Fibre Channel:
+TABLE:noalarmsmsg
+No|WWPN|Mode
+{fcIndex}|{fcWWPN}|{fcMode}
+
+Options:
+NAS:   {nasOption}  FC:     {fibreChannelOption}   Repl:     {replicationOption}    SyncMirr: {syncMirroringOption}
+sanIP: {sanIPOption}   TmMark: {timemarkOption}  ZrImpact: {zeroimpactOption}
+
+Adapters: {numOfAdapters}
+TABLE:plain,noalarmsmsg
+ID No  Info
+{adapterIndex}|{adapterNumber}|{adapterInfo}
+
+Devices: {numOfDevicesL}
+TABLE:noalarmsmsg
+No|Type|Vendor|Product|FW Rev|Adap #|SCSI ID|LUN|Size|Config Status
+{deviceNo}|{deviceType}|{vendorID}|{productID}|{firmwareRev}|{adapterNo}|{scsiID}|{lun}|{totalSize}|{configStatus}

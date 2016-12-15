@@ -1,0 +1,10 @@
+Fan1  : SUBSTR           : {Fan1Speed} 0 6
+Fan2  : SUBSTR           : {Fan2Speed} 0 6
+Fan3  : SUBSTR           : {Fan3Speed} 0 6
+Fan4  : SUBSTR           : {Fan4Speed} 0 6
+Fan5  : SUBSTR           : {Fan5Speed} 0 6
+Fan6  : SUBSTR           : {Fan6Speed} 0 6
+Fan7  : SUBSTR           : {Fan7Speed} 0 6
+Fan8  : SUBSTR           : {Fan8Speed} 0 6
+Fan9  : SUBSTR           : {Fan9Speed} 0 6
+Fan10 : SUBSTR           : {Fan10Speed} 0 6

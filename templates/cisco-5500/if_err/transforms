@@ -1,0 +1,12 @@
+# Get bit speed delta (so we dont have to provide custom delta limit)
+ifInOps         : DELTA         : {ifInOctets}
+ifOutOps        : DELTA         : {ifOutOctets}
+# Convert our octets delta into bits per second
+ifInBps         : MATH          : {ifInOps} x 8
+ifOutBps        : MATH          : {ifOutOps} x 8
+# Do delta transform on all error counters
+ifInEps		: DELTA		: {ifInErrors}
+ifOutEps	: DELTA		: {ifOutErrors}
+# Perform error to traffic percentage calculations
+ifInErrPct	: MATH		: ({ifInEps} / {ifInBps}) x 100
+ifOutErrPct	: MATH		: ({ifOutEps} / {ifOutBps}) x 100

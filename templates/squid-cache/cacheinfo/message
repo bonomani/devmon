@@ -1,0 +1,44 @@
+Cache running {cacheSoftware} version {cacheVersionId} on {cacheUniqName}
+<!--
+cacheUptime : {cacheUptime}
+cacheMemMaxSize : {cacheMemMaxSize}
+cacheSwapMaxSize : {cacheSwapMaxSize}
+cacheSwapHighWM : {cacheSwapHighWM}
+cacheSwapLowWM : {cacheSwapLowWM}
+cacheSysPageFaults : {cacheSysPageFaults}
+cacheSysNumReads : {cacheSysNumReads}
+cacheMemUsage : {cacheMemUsage}
+cacheCpuTime : {cacheCpuTime}
+cacheCpuUsage : {cacheCpuUsage}
+cacheMaxResSize : {cacheMaxResSize}
+cacheNumObjCount : {cacheNumObjCount}
+cacheCurrentLRUExpiration : {cacheCurrentLRUExpiration}
+cacheCurrentUnlinkRequests : {cacheCurrentUnlinkRequests}
+cacheCurrentUnusedFDescrCnt : {cacheCurrentUnusedFDescrCnt}
+cacheCurrentResFileDescrCnt : {cacheCurrentResFileDescrCnt}
+cacheCurrentFileDescrCnt : {cacheCurrentFileDescrCnt}
+cacheCurrentFileDescrMax : {cacheCurrentFileDescrMax}
+cacheProtoClientHttpRequests : {cacheProtoClientHttpRequests}
+cacheHttpHits : {cacheHttpHits}
+cacheHttpErrors : {cacheHttpErrors}
+cacheHttpInKb : {cacheHttpInKb}
+cacheHttpOutKb : {cacheHttpOutKb}
+cacheClients : {cacheClients}
+cacheIpEntries : {cacheIpEntries}
+cacheIpRequests : {cacheIpRequests}
+cacheIpHits : {cacheIpHits}
+cacheIpPendingHits : {cacheIpPendingHits}
+cacheIpNegativeHits : {cacheIpNegativeHits}
+cacheBlockingGetHostByName : {cacheBlockingGetHostByName}
+cacheAttemptReleaseLckEntries : {cacheAttemptReleaseLckEntries}
+cacheFqdnEntries : {cacheFqdnEntries}
+cacheFqdnRequests : {cacheFqdnRequests}
+cacheFqdnHits : {cacheFqdnHits}
+cacheFqdnPendingHits : {cacheFqdnPendingHits}
+cacheFqdnNegativeHits : {cacheFqdnNegativeHits}
+cacheFqdnMisses : {cacheFqdnMisses}
+cacheBlockingGetHostByAddr : {cacheBlockingGetHostByAddr}
+cacheDnsRequests : {cacheDnsRequests}
+cacheDnsReplies : {cacheDnsReplies}
+cacheDnsNumberServers : {cacheDnsNumberServers}
+-->

@@ -1,0 +1,3 @@
+TABLE:plain,noalarmsmsg
+Filesystem 1024-blocks Used Available Capacity Mounted Summary
+{DiskNameFixed} {DiskSize} {DiskSizeUsed} {DiskAvail} {DiskPerUse}% /{hrStorageTypeName}/{DiskNameFixed} {DiskSize}\{DiskSizeUsed}{DiskPerUse.color}

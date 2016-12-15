@@ -1,0 +1,7 @@
+hrSWRunIndex : 		1.3.6.1.2.1.25.4.2.1.1 : branch
+hrSWRunName : 		1.3.6.1.2.1.25.4.2.1.2 : branch
+#hrSWRunID : 		1.3.6.1.2.1.25.4.2.1.3 : branch
+#hrSWRunParameters :	1.3.6.1.2.1.25.4.2.1.5 : branch
+#hrSWRunStatus :	1.3.6.1.2.1.25.4.2.1.7
+hrSWRunPerfCPU : 	1.3.6.1.2.1.25.5.1.1.1 : branch
+hrSWRunPerfMem :	1.3.6.1.2.1.25.5.1.1.2 : branch

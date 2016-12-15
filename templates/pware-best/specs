@@ -1,0 +1,4 @@
+vendor	: powerware
+model	: bestlink
+snmpver	: 1
+sysdesc : BestLink

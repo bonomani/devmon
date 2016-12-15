@@ -1,0 +1,4 @@
+vendor	: ibm
+model	: rsa2
+snmpver	: 1
+sysdesc : Remote Supervisor Adapter

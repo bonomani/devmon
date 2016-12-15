@@ -1,0 +1,6 @@
+PsuStatus	: red		: majorFault
+PsuStatus	: yellow	: other|minorFault
+PsuStatus	: green		: ok
+PsuStatus2       : red           : majorFault
+PsuStatus2       : yellow        : other|minorFault
+PsuStatus2       : green         : ok

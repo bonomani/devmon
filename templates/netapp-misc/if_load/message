@@ -1,0 +1,5 @@
+
+Interface error rates:
+TABLE:
+Ifc name|Ifc Speed|Rate in (load %)|Rate out (load %)
+{ifDescr}|{ifSpeed}|{ifInLoad.color}{ifInSpeed} ({ifInLoad}%)|{ifOutLoad.color}{ifOutSpeed} ({ifOutLoad}%)

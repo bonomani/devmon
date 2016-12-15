@@ -1,0 +1,11 @@
+configuration syncronisation state : {ConfigsyncState.color} {ConfigsyncState}
+
+Failover Active Mode : {FailoverActiveMode_T}
+Failover Force Active : {FailoverForceActive_T}
+Failover Force Standby : {FailoverForceStandby_T}
+Failover Is Redundant : {FailoverIsRedundant_T} 
+Is configuration OK  : {FailoverIsOk_T_T.color} {FailoverIsOk_T_T}
+
+Failover ID of the unit : {FailoverUnitId}
+
+<center>THIS MEMBER IS {FailoverUnitMask_T} since {FailoverChangeStat}</center>

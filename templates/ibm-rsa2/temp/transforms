@@ -1,0 +1,3 @@
+AmbientTemp	: SUBSTR	:  {SystemAmbientTemp} 2 5
+CAmbientTemp	: SUBSTR	:  {AmbientTemp} 0 2
+DispAmbientTemp	: MATH		:  (((9 x {CAmbientTemp}) / 5) + 32)

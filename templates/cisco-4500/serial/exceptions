@@ -1,0 +1,2 @@
+entPhysicalDescr : ignore : Nu.+|Vl.+|Gi.+|.+Ethernet.+|.+chassis.+|Chassis.+|.+Container|.+Sensor|.+backplane|Container.+
+entPhysicalDescr : alarm : Nothingtoworryabout

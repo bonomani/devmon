@@ -1,0 +1,4 @@
+
+TABLE:noalarmsmsg
+Index|Interface Desc|IP|Netmask|Broadcast
+{ipAdEntIfIndex}||{ipAdEntAddr}|{ipAdEntNetMask}|{ipAdEntBcastAddr}

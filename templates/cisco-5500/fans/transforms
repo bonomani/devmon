@@ -1,0 +1,2 @@
+FanStatus : SWITCH : {FanState}  1=other,2=ok,3=minorFault,4=majorFault
+chassisTempAlarm_T	: SWITCH : {chassisTempAlarm} 1=off,2=on,3=critical

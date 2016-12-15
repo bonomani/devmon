@@ -1,0 +1,13 @@
+cntrlModTxt	: SWITCH	: {cntrlModel} 1=Other,2=IDA,3=IDA Expansion,4=IDA-2,5=SMART,6=SMART-2/E,7=SMART-2/P,8=SMART-2SL,9=Smart 3100ES,10=Smart 3200,11=SMART-2DH,12=Smart Array 221,13=Smart Array 4250ES,14=Smart Array 4200,15=Integrated Smart Array,16=Smart Array 431,17=Smart Array 5300,18=RAID LC2,19=Smart Array 5i,20=Smary Array 532,21=Smart Array 5312,22=Smart Array 641,23=Smart Array 642,24=Smart Array 6400,25=Smart Array 6400EM,26=Smart Array 6i,27=Generic Smart Array,29=Smart Array P600,30=Smart Array P400,31=Smart Array E200,32=Smart Array E200i,33=Smart Array P400i,34=Smart Array P800
+cntrlCondTxt	: SWITCH        : {cntrlCondition} 1=Other,2=OK,3=Degraded,4=Failed
+cntrlStatTxt	: SWITCH	: {cntrlStatus} 1=Other,2=OK,3=General failure,4=Cable problem,5=Powered off
+
+logFaultTolTxt	: SWITCH	: {logDrvFaultTol} 2=None,3=Mirroring,4=Data guard,5=Distributed data guard,6=Advanced data guard
+logStatTxt	: SWITCH        : {logDrvStatus} 2=OK,3=Failed,4=Unconfigured,5=Recovering,6=Read rebuild,7=Rebuilding,8=Wrong drive,9=Bad connect,10=Overheating,11=Shutdown,12=Expanding,13=Not available,14=Queued for expansion
+logSprIdTxt	: UNPACK	: {logDrvSprIds} C* ","
+logPhysIdTxt	: UNPACK	: {logDrvPhysIds} C* ","
+
+phyStatTxt	: SWITCH	: {phyDrvStatus} 1=Other,2=OK,3=Failed,4=Predictive Failure
+phyDrvSpdTxt	: SWITCH	: {phyDrvSpeed} 1=Other,2=7200 rpm,3=10k rpm,4=15k rpm
+
+sprStatTxt	: SWITCH	: {sprDrvStatus} 3=Failed,4=Inactive,5=Building,6=Active

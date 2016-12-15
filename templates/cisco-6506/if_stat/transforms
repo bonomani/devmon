@@ -1,0 +1,8 @@
+ifAdminStatTxt	: SWITCH	: {ifAdminStatNum} 1=up,2=admin down,3=testing
+ifOperStatTxt	: SWITCH	: {ifOperStatNum} 1=up,2=down,3=testing,4=unknown,5=dormant,6=not present,7=lower layer down
+ifStat 		: BEST		: {ifAdminStatTxt},{ifOperStatTxt}
+ifSpeed		: SPEED		: {ifBps}
+ifAliasBox	: REGSUB	: {ifAlias} /(\S+.*)/ [$1]/
+ifElapChange    : MATH		: {sysUpTime} - {ifLastChange}
+ifElapChangeD	: MATH		: {ifElapChange}  / 100
+ifSinceChange  : ELAPSED       : {ifElapChangeD}

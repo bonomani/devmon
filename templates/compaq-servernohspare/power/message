@@ -1,0 +1,7 @@
+
+Power supplies:
+TABLE: noalarmsmsg,
+Power Supply Bay|Power Supply Present|Condition|Redundant?|Hotpluggable?
+{cpqHeFltTolPowerSupplyBay}|{cpqHeFltTolPowerSupplyPresentTxt}|{cpqHeFltTolPowerSupplyConditionTxt.color}{cpqHeFltTolPowerSupplyConditionTxt}|{cpqHeFltTolPowerSupplyRedundantTxt}|{cpqHeFltTolPowerSupplyHotPlugTxt}
+
+

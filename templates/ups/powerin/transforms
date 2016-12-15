@@ -1,0 +1,4 @@
+upsInPhaseIndex 	: INDEX	: {upsInputFrequency}
+upsInputFrequencyHz	: MATH	: {upsInputFrequency} / 10 : 1
+upsInputCurrentA	: MATH	: {upsInputCurrent} / 10 : 1
+upsConfigInputFreqHz	: MATH  : {upsConfigInputFreq} / 10 : 1

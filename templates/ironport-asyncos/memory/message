@@ -1,0 +1,5 @@
+{perCentMemoryUtilization.color} Used memory: ({perCentMemoryUtilization}%)
+{memoryAvailabilityStatustxt.color} Memory status: {memoryAvailabilityStatustxt}
+
+<!-- DEVMON to RRD Physical {perCentMemoryUtilization}%
+-->

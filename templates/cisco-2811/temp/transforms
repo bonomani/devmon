@@ -1,0 +1,2 @@
+ciscoEnvMonTemperatureStateTxt	: SWITCH : {ciscoEnvMonTemperatureState} 1=normal,2=warning,3=critical,4=shutdown,5=nonPresent,6=notFunctioning
+ciscoEnvMonTemperatureId	: REGSUB : {ciscoEnvMonTemperatureStatusDescr} /(\S+) (\S+) (\S+)( \((.*)\))?(( (\S+))?)( \(.*\))? temp.*/$1$2$3$8/
