@@ -270,13 +270,23 @@ require Exporter;
               $trans_data->{'dep_oid'} = $dep_oid;
 
               for my $val_pair (split /\s*,\s*/, $switch_data) {
-                if( $val_pair =~ /^\s*(\S+.*?)\s*=\s*(.+?)\s*$/) {
+                if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) { 
+                  my ($if, $then) = ($1, $2);
+                  my $type = '';
+                  if($if =~ /^'(.+)'$/) {$type = 'str'; $if = $1}
+                  elsif($if =~ /^"(.+)"$/) {$type = 'reg'; $if = $1}
+                  $cases->{++$case_num}{'if'} = $if;
+                  $cases->{$case_num}{'type'} = $type;
+                  $cases->{$case_num}{'then'} = $then;
+
+		} 
+		elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
                   my ($if, $then) = ($1, $2);
                   my $type = '';
                   if($if =~ /^\d+$/) {$type = 'num'}
-                  elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/) 
+                  elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'gt'; $if = $1}
-                  elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/) 
+                  elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'gte'; $if = $1}
                   elsif($if =~ /^<\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'lt'; $if = $1}
@@ -285,9 +295,7 @@ require Exporter;
                   elsif
                     ($if =~ /^([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'rng'; $if = "$1-$2"}
- 
-                  elsif($if =~ /^'(.+)'$/) {$type = 'str'; $if = $1}
-                  elsif($if =~ /^"(.+)"$/) {$type = 'reg'; $if = $1}
+
                   elsif($if =~ /^default$/i) {$default = $then; next}
                   $cases->{++$case_num}{'if'} = $if;
                   $cases->{$case_num}{'type'} = $type;
@@ -608,8 +616,11 @@ require Exporter;
           $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
           my $temp2 = '';
           for my $val (split /\s*,\s*/, $temp) {
-            my ($if, $then) = ($1, $2) 
-              if $val =~ s/^\s*(\S+.*?)\s*=\s*(.+?)\s*$//; 
+	    my ($if, $then);
+            ($if, $then) = ($1, $2) if $val =~ s/^\s*(["'].*["'])\s*=\s*(.*?)\s*$//; 
+            if (!defined($if)) {
+	       ($if, $then) = ($1, $2) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
+            } 
             do_log("Bad SWITCH value pair ($val) at $trans_file, line $l_num",0)
               and next if !defined $if;
             my $type;
@@ -637,8 +648,11 @@ require Exporter;
           $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
           my $temp2 = '';
           for my $val (split /\s*,\s*/, $temp) {
-            my ($if, $then) = ($1, $2) 
-              if $val =~ s/^\s*(\S+.*?)\s*=\s*(.+?)\s*$//; 
+            my ($if, $then);
+            ($if, $then) = ($1, $2) if $val =~ s/^\s*(["'].*["'])\s*=\s*(.*?)\s*$//;
+            if (!defined($if)) {
+               ($if, $then) = ($1, $2) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
+            }
             do_log("Bad TSWITCH value pair ($val) at $trans_file, " .
                    "line $l_num",0) and next if !defined $if;
             my $type;
