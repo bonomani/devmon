@@ -616,7 +616,7 @@ require Exporter;
           $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
           my $temp2 = '';
           for my $val (split /\s*,\s*/, $temp) {
-	    my ($if, $then);
+            my ($if, $then);
             ($if, $then) = ($1, $2) if $val =~ s/^\s*(["'].*["'])\s*=\s*(.*?)\s*$//; 
             if (!defined($if)) {
 	       ($if, $then) = ($1, $2) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
