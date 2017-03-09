@@ -919,6 +919,88 @@ require Exporter;
     }
   }
 
+ # Do String translations ###############################################
+  sub trans_str {
+    my ($device, $oids, $oid, $thr) = @_;
+    my $oid_h = \%{$oids->{$oid}};
+    my $expr  = $oid_h->{'trans_data'};
+
+   # Extract all our our parent oids from the expression, first
+    my @dep_oids = $expr =~ /\{(.+?)\}/g;
+
+   # Validate our dependencies
+   # validate_deps($device, $oids, $oid, \@dep_oids, '^[-+]?\d+(\.\d+)?$')
+    validate_deps($device, $oids, $oid, \@dep_oids)
+      or return;
+
+   # Also go through our non-repeaters and replace them in our
+   # expression, since they are constant (i.e. not leaf dependent)
+    my @repeaters;
+    for my $dep_oid (@dep_oids) {
+      push @repeaters, $dep_oid and next if $oids->{$dep_oid}{'repeat'};
+      $expr =~ s/\{$dep_oid\}/$oids->{$dep_oid}{'val'}/g;
+    }
+
+   # Handle repeater-type oids
+    if($oid_h->{'repeat'}) {
+     # Map our oids in the expression to a position on the temp 'dep_val' array
+     # Sure, we could just do a regsub for every dep_oid on every leaf, but
+     # thats pretty expensive CPU-wise
+      for (my $i = 0; $i <= $#repeaters; $i++) {
+        $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
+      }
+
+      for my $leaf (keys %{$oids->{$oid_h->{'pri_oid'}}{'val'}}) {
+       # Skip if we got a dependency error for this leaf
+        next if $oid_h->{'error'}{$leaf};
+
+       # Update our dep_val values so that when we eval the expression it
+       # will use the values of the proper leaf of the parent repeater oids
+        my @dep_val;
+        for (@repeaters) { push @dep_val, $oids->{$_}{'val'}{$leaf} }
+
+       # Do our eval and set our time
+        my $result = eval($expr);
+
+        $oid_h->{'time'}{$leaf} = time;
+        if($@ =~ /^Undefined subroutine/) { $result = 0 }
+        elsif($@) {
+            do_log("Failed eval for TRANS_STR on $oid.$leaf: $expr ($@)");
+            $oid_h->{'val'}{$leaf}   = 'Failed eval';
+            $oid_h->{'color'}{$leaf} = 'clear';
+            $oid_h->{'error'}{$leaf} = 1;
+            next;
+        }
+
+        $oid_h->{'val'}{$leaf}  = $result;
+      }
+
+     # Apply thresholds
+      apply_thresh_rep($oids, $thr, $oid);
+    }
+
+   # Otherwise we are a single entry datum
+    else {
+
+     # All of our non-reps were substituted earlier, so we can just eval
+      my $result = eval $expr;
+      $oid_h->{'time'} = time;
+
+      if($@ =~ /^Undefined subroutine/) { $result = 0 }
+      elsif($@) {
+          do_log("Failed eval for TRANS_STR on $oid: $expr ($@)");
+          $oid_h->{'val'}   = 'Failed eval';
+          $oid_h->{'color'} = 'clear';
+          $oid_h->{'error'} = 1;
+      }
+
+      $oid_h->{'val'}  = $result;
+
+     # Now apply our threshold to this data
+      apply_thresh($oids, $thr, $oid);
+    }
+
+  }
 
 
  # Get the best color of one or more oids ################################
@@ -1487,7 +1569,7 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
     my $trans_data = $oid_h->{'trans_data'};
     my ($main_oid, $expr) = ($1,$2) 
-      if $trans_data =~ /^\{\s*(\S+?)\s*\}\s*(\/.+\/.*\/)\s*$/;
+      if $trans_data =~ /^\{\s*(\S+?)\s*\}\s*(\/.+\/.*\/g?)\s*$/;
 
    # Extract all our our parent oids from the expression, first
     my @dep_oids = $trans_data =~ /\{(.+?)\}/g;
@@ -1581,7 +1663,7 @@ require Exporter;
     my ($src_oid, $trg_oid) = $oid_h->{'trans_data'} =~ /\{(.+?)\}/g;
 
    # Validate our dependencies, have to do them seperately
-    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$') 
+    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|')
       or return;
 
     my $src_h = \%{$oids->{$src_oid}};
@@ -1635,12 +1717,12 @@ require Exporter;
 
         my $trg_val = $trg_h->{'val'}{$sub_oid};
         if(!defined $trg_val) {
-          $oid_h->{'val'}{$leaf}    = 'Target val missing';
-          $oid_h->{'time'}{$leaf}   = time;
-          $oid_h->{'color'}{$leaf}  = 'yellow';
-          $oid_h->{'error'}{$leaf}  = 1;
-          next;
-        }
+          $oid_h->{'val'}{$leaf}    = '';
+          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+	 next;
+	}
         
         $oid_h->{'val'}{$leaf}    = $trg_val;
         $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$sub_oid};
@@ -1652,6 +1734,28 @@ require Exporter;
       apply_thresh_rep($oids, $thr, $oid);
       $oid_h->{'repeat'}  = 1;
     }
+#        do_log("AFTER $device, $oids, $oid, $src_oid");
+#        my $key;
+#        my $value;
+#        my $subkey;
+#        my $subvalue;
+#        my $subsubkey;
+#        my $subsubvalue;
+#        while (($key, $value) = each $oids )
+#        {
+#                while (($subkey, $subvalue) = each $value )
+#                {
+#                if (ref($subvalue) eq "HASH") {
+#                        while (($subsubkey, $subsubvalue) = each $subvalue )
+#                                {
+#                        do_log("$key $subkey $subsubkey $subsubvalue",0);
+#                                }
+#                        }
+#                else    {
+#                        do_log("$key $subkey $subvalue",0);
+#                        }
+#                }
+#        }
 
   }
 
@@ -1713,6 +1817,246 @@ require Exporter;
       apply_thresh_rep($oids, $thr, $oid);
     }
 
+  }
+ # Return index values ######################################################
+ # In some cases, the index value in a repeating OID is useful data to have
+ # Examples of this are the index in the cdp table, which refer to the
+ # ifIndex (the only way to get the near side interface name), another
+ # example is some load balancer MIBs which include vserver/real server
+ # detail only in the index
+ # This is more or less the inverse of the chain operator
+  sub trans_inv {
+    my ($device, $oids, $oid, $thr) = @_;
+    my $oid_h = \%{$oids->{$oid}};
+
+   # Extract our translation options
+    my ($dep_oid, $type, $pad) = ($1, lc $2, $3)
+      if $oid_h->{'trans_data'} =~ /\{\s*(\S+?)\s*}\s+(inverse|value|reindexsorttxt|reindexsortnum|invrdex)\s*(\d*)\s*/i;
+      #if $oid_h->{'trans_data'} =~ /\{(.+)\}\s+(hex|oct)\s*(\d*)/i;
+    my $dep_oid_h = \%{$oids->{$dep_oid}};
+
+   # Extract our parent oids from the expression, first
+    my ($src_oid) = $oid_h->{'trans_data'} =~ /\{\s*(\S+?)\s*}\s+(inverse|value|reindexsorttxt|reindexsortnum|invrdex)\s*(\d*)\s*/i;
+    validate_deps($device, $oids, $oid, [$src_oid], '.*') ;
+       #do_log("BEFORE: $device, $oids, $oid, $src_oid");
+	#do_log("test3 $type $pad",0);
+    #    my $key;
+     #   my $value;
+    #    my $subkey;
+    #    my $subvalue;
+    #    my $subsubkey;
+    #    my $subsubvalue;
+    #    while (($key, $value) = each $oids )
+    #    {
+    #            while (($subkey, $subvalue) = each $value )
+    #            {
+    #            if (ref($subvalue) eq "HASH") {
+    #                    while (($subsubkey, $subsubvalue) = each $subvalue )
+    #                            {
+    #                    do_log("$key $subkey $subsubkey $subsubvalue",0);
+    #                            }
+    #                    }
+    #            else    {
+    #                    do_log("$key $subkey $subvalue",0);
+    #                    }
+    #            }
+    #    }
+
+
+   # Validate our dependencies, have to do them seperately
+   # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
+   #   or return;
+   do_log("Transforming $src_oid to $oid via oid transform",0) if $g{'debug'};
+
+    my $src_h = \%{$oids->{$src_oid}};
+
+   # This transform should probably only work for repeater sources
+    if(!$src_h->{'repeat'}) {
+      do_log("Trying to oid a non-repeater source on $device ($@)", 0);
+      return;
+    }
+
+    else {
+      # Tag the target as a repeater
+      $oid_h->{'repeat'} = 2;
+
+     if($type eq 'inverse') {
+ 
+      for my $leaf ( keys %{$src_h->{'val'}}) {
+	#do_log("oid1-- $leaf $src_h->{'val'}{$leaf}", 0);
+
+       # Skip if our source oid is freaky-deaky
+        next if $oid_h->{'error'}{$src_h->{'val'}{$leaf}};
+
+       #if($type eq 'inverse') { 
+
+	#do_log("ERROR1test3  $oid_h->{'error'}{$src_h->{'val'}{$leaf}}", 0);
+	#do_log("ERROR3test3  $leaf $oid_h->{'error'}{$leaf}", 0);
+        #if ($oid_h->{'error'}{$src_h->{'val'}{$leaf}}) {
+	if ($oid_h->{'error'}{$leaf}) {
+	  #do_log("ERROR2test3  $oid_h->{'error'}{$src_h->{'val'}{$leaf}}", 0);
+	  delete $oid_h->{'val'}{$leaf};
+	  delete $oid_h->{'time'}{$leaf};
+	  delete $oid_h->{'color'}{$leaf};	
+	  delete $oid_h->{'error'}{$leaf};
+	  next;
+	}		
+
+       # Our oid sub leaf
+       # my $oid_idx = $src_h->{'val'}{$leaf};
+       # do_log("ERROR3test3  $leaf $src_h->{'val'}{$leaf}", 0);
+	if ($src_h->{'val'}{$leaf} eq "Unknown") {
+	   delete $oid_h->{'error'}{$leaf}; 
+	   next;
+	}
+        if(!defined $leaf) {
+	  next;
+          $oid_h->{'val'}{$src_h->{'val'}{$leaf}}    = 'Target val missing - index';
+          $oid_h->{'time'}{$src_h->{'val'}{$leaf}}   = time;
+          $oid_h->{'color'}{$src_h->{'val'}{$leaf}}  = 'yellow';
+          $oid_h->{'error'}{$src_h->{'val'}{$leaf}}  = 1;
+          next;
+        }
+
+        $oid_h->{'val'}{$src_h->{'val'}{$leaf}}    = $leaf;
+        $oid_h->{'time'}{$src_h->{'val'}{$leaf}}   = $src_h->{'time'}{$leaf};
+        $oid_h->{'color'}{$src_h->{'val'}{$leaf}}  = $src_h->{'color'}{$leaf};
+        $oid_h->{'error'}{$src_h->{'val'}{$leaf}}  = $src_h->{'error'}{$leaf};
+	delete $oid_h->{'error'}{$leaf};
+	delete $oid_h->{'pri_oid'};
+       }
+     }	
+     elsif ($type eq 'reindexsortnum') {
+      for my $leaf ( sort { $src_h->{'val'}{$a} <=>  $src_h->{'val'}{$b} } keys %{$src_h->{'val'}}) {
+         #  do_log("$src_h->{'val'}{$leaf}",0);
+      #  for my $leaf (sort keys %{$src_h->{'val'}}) {
+
+       # Skip if our source oid is freaky-deaky
+        next if $oid_h->{'error'}{$leaf};
+
+       # Our oid sub leaf
+       # my $oid_idx = $src_h->{'val'}{$leaf};
+
+        if(!defined $leaf) {
+          $oid_h->{'val'}{$leaf}    = 'Target val missing - index';
+          $oid_h->{'time'}{$leaf}   = time;
+          $oid_h->{'color'}{$leaf}  = 'yellow';
+          $oid_h->{'error'}{$leaf}  = 1;
+          next;
+        }
+
+      # if val is empty do not reindex
+        if ($src_h->{'val'}{$leaf} eq '') {
+          $oid_h->{'val'}{$leaf}    =  $src_h->{'val'}{$leaf};
+          $oid_h->{'time'}{$leaf}   =  $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$leaf}  =  $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$leaf}  =  $src_h->{'error'}{$leaf};
+        next;
+        }
+
+
+
+        $oid_h->{'val'}{$leaf}    = $pad++;
+        $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+        $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+        $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+       }
+
+     }
+
+     elsif ($type eq 'reindexsorttxt') {
+      for my $leaf ( sort { $src_h->{'val'}{$a} cmp  $src_h->{'val'}{$b} } keys %{$src_h->{'val'}}) {
+         #  do_log("$src_h->{'val'}{$leaf}",0);
+      #  for my $leaf (sort keys %{$src_h->{'val'}}) {
+
+       # Skip if our source oid is freaky-deaky
+        next if $oid_h->{'error'}{$leaf};
+
+       # Our oid sub leaf
+       # my $oid_idx = $src_h->{'val'}{$leaf};
+
+        if(!defined $leaf) {
+          $oid_h->{'val'}{$leaf}    = 'Target val missing - index';
+          $oid_h->{'time'}{$leaf}   = time;
+          $oid_h->{'color'}{$leaf}  = 'yellow';
+          $oid_h->{'error'}{$leaf}  = 1;
+          next;
+        }
+
+      # if val is empty do not reindex
+        if ($src_h->{'val'}{$leaf} eq '') {
+          $oid_h->{'val'}{$leaf}    =  $src_h->{'val'}{$leaf};
+          $oid_h->{'time'}{$leaf}   =  $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$leaf}  =  $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$leaf}  =  $src_h->{'error'}{$leaf};
+        next;
+        }
+
+
+
+        $oid_h->{'val'}{$leaf}    = $pad++;
+        $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+        $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+        $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+       }
+
+     }
+
+
+     elsif ($type eq 'value') {
+      for my $leaf (keys %{$src_h->{'val'}}) {
+
+       # Skip if our source oid is freaky-deaky
+        next if $oid_h->{'error'}{$leaf};
+
+       # Our oid sub leaf
+       # my $oid_idx = $src_h->{'val'}{$leaf};
+
+        if(!defined $leaf) {
+          $oid_h->{'val'}{$leaf}    = 'Target val missing - index';
+          $oid_h->{'time'}{$leaf}   = time;
+          $oid_h->{'color'}{$leaf}  = 'yellow';
+          $oid_h->{'error'}{$leaf}  = 1;
+          next;
+        }
+
+        $oid_h->{'val'}{$leaf}    = $leaf;
+        $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+        $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+        $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+       }
+     }
+
+
+
+
+     # Apply thresholds
+      apply_thresh_rep($oids, $thr, $oid);
+    }
+#	do_log("AFTER $device, $oids, $oid, $src_oid");
+#        my $key;
+#        my $value;
+#        my $subkey;
+#        my $subvalue;
+#        my $subsubkey;
+#        my $subsubvalue;
+#        while (($key, $value) = each $oids )
+#        {
+#                while (($subkey, $subvalue) = each $value )
+#                {
+#                if (ref($subvalue) eq "HASH") {
+#                        while (($subsubkey, $subsubvalue) = each $subvalue )
+#                                {
+#                        do_log("$key $subkey $subsubkey $subsubvalue",0);
+#                                }
+#                        }
+#                else    {
+#                        do_log("$key $subkey $subvalue",0);
+#                        }
+#                }
+#
+#        }
   }
 
  # Extract names and values from simple tables #############################

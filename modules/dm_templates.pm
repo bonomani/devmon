@@ -508,6 +508,17 @@ require Exporter;
           last CASE;
         };
 
+	$func_type eq 'inv' and do {
+	  #do_log("$temp");
+          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(inverse|value|reindexsorttxt|reindexsortnum)\s*\d*\s*//g;
+	  #$temp =~ s/.*//g;
+	  do_log("$temp");
+          do_log("INV inverse oids and value at " .
+                 "$trans_file, line $l_num", 0)
+            and next LINE if $temp ne '';
+          last CASE;
+        };
+
         $func_type eq 'convert' and do {
           $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i; 
           my ($type) = ($1);
@@ -568,6 +579,14 @@ require Exporter;
           last CASE;
         };
 
+        $func_type eq 'str' and do {
+          $temp =~ s/^.+\s*$//g;
+          do_log("STR transform should be a perl regex match at " .
+                 "$trans_file, line $l_num", 0)
+            and next LINE if $temp ne '';
+          last CASE;
+        };
+
 	$func_type eq 'pack' and do {
           $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+.+)?//; 
           my $type = $1;
@@ -589,7 +608,7 @@ require Exporter;
         };
 
         $func_type eq 'regsub' and do {
-	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/\s*$//g; 
+	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/g?\s*$//g;
           do_log("REGSUB transform should be a perl regex substitution at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 

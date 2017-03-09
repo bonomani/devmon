@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 2800
+snmpver	: 2
+sysdesc : C2800

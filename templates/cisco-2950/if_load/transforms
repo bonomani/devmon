@@ -1,8 +1,12 @@
 # Create a human-readable ifc speed
+ifBps           : MATH          : {ifHighSpeed} x 1000000 
 ifSpeed		: SPEED		: {ifBps}
+# Use HC for Vlan
+iIO		: SWITCH	: {ifName} "Vl.*"={ifHCInOctets},".*"={ifInOctets}
+iOO             : SWITCH        : {ifName} "Vl.*"={ifHCOutOctets},".*"={ifOutOctets}
 # Get bit speed delta (so we dont have to provide custom delta limit)
-ifInOps  	: DELTA		: {ifInOctets}
-ifOutOps 	: DELTA		: {ifOutOctets}
+ifInOps  	: DELTA		: {iIO}
+ifOutOps 	: DELTA		: {iOO}
 # Convert our octets delta into bits per second
 ifInBps		: MATH		: {ifInOps} x 8
 ifOutBps	: MATH		: {ifOutOps} x 8

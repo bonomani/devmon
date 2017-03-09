@@ -1,6 +1,6 @@
 MemPerUse    : red           : >99   : Memory utilization is critical
 MemPerUse    : yellow        : >95   : Memory utilization is high
 
-SwapPerUse    : red           : >80   : Swap utilization is critical
-SwapPerUse    : yellow        : >50   : Swap utilization is high
+#SwapPerUse    : red           : >80   : Swap utilization is critical
+#SwapPerUse    : yellow        : >50   : Swap utilization is high
 

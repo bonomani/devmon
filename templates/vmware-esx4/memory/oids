@@ -1,6 +1,11 @@
-MemBlocks	: .1.3.6.1.2.1.25.2.3.1.5.2	: leaf
-MemBlocksUsed	: .1.3.6.1.2.1.25.2.3.1.6.2	: leaf
-MemBlockSize	: .1.3.6.1.2.1.25.2.3.1.4.2	: leaf
-SwapBlocks	: .1.3.6.1.2.1.25.2.3.1.5.3	: leaf
-SwapBlocksUsed	: .1.3.6.1.2.1.25.2.3.1.6.3	: leaf
-SwapBlockSize	: .1.3.6.1.2.1.25.2.3.1.4.3	: leaf
+#MemBlocks	: .1.3.6.1.2.1.25.2.3.1.5.2	: leaf
+#MemBlocksUsed	: .1.3.6.1.2.1.25.2.3.1.6.2	: leaf
+#MemBlockSize	: .1.3.6.1.2.1.25.2.3.1.4.2	: leaf
+#SwapBlocks	: .1.3.6.1.2.1.25.2.3.1.5.3	: leaf
+#SwapBlocksUsed	: .1.3.6.1.2.1.25.2.3.1.6.3	: leaf
+#SwapBlockSize	: .1.3.6.1.2.1.25.2.3.1.4.3	: leaf
+hrStorageType                   : .1.3.6.1.2.1.25.2.3.1.2       : branch
+hrStorageSize                   : .1.3.6.1.2.1.25.2.3.1.5       : branch
+hrStorageUsed                   : .1.3.6.1.2.1.25.2.3.1.6       : branch
+hrStorageAllocationUnits        : .1.3.6.1.2.1.25.2.3.1.4       : branch
+

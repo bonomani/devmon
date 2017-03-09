@@ -1,11 +1,18 @@
+realMemoryRow 		: MATCH : {hrStorageType} /.*hrStorageRam$/
+MemBlocks               : CHAIN : {realMemoryRow} {hrStorageAllocationUnits}
+MemBlockSize            : CHAIN : {realMemoryRow} {hrStorageSize}
+MemBlocksUsed           : CHAIN : {realMemoryRow} {hrStorageUsed}
+
+
+
 MemSize : MATH	: {MemBlocks} x {MemBlockSize} / 1024 : 0
 MemSizeUsed : MATH	: {MemBlocksUsed} x {MemBlockSize} / 1024 : 0
 MemAvail : MATH	: {MemSize} - {MemSizeUsed} : 0
 MemPerUse : MATH	: ({MemSizeUsed} x 100) / {MemSize} : 0
 
-SwapSize : MATH	: {SwapBlocks} x {SwapBlockSize} / 1024 : 0
-SwapSizeUsed : MATH	: {SwapBlocksUsed} x {SwapBlockSize} / 1024 : 0
-SwapAvail : MATH	: {SwapSize} - {SwapSizeUsed} : 0
-SwapPerUse : MATH	: ({SwapSizeUsed} x 100) / {SwapSize} : 0
+#SwapSize : MATH	: {SwapBlocks} x {SwapBlockSize} / 1024 : 0
+#SwapSizeUsed : MATH	: {SwapBlocksUsed} x {SwapBlockSize} / 1024 : 0
+#SwapAvail : MATH	: {SwapSize} - {SwapSizeUsed} : 0
+#SwapPerUse : MATH	: ({SwapSizeUsed} x 100) / {SwapSize} : 0
 
 

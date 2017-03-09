@@ -1,2 +1,1 @@
-ifName : alarm  : .+
-ifName : ignore : Nu.+|Vl.+
+#ifName : ignore : Stack.+|Nu.+

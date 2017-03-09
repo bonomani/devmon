@@ -1,0 +1,10 @@
+entPhysicalName         : .1.3.6.1.2.1.47.1.1.1.1.7            : branch
+entPhysicalHardwareRev  : .1.3.6.1.2.1.47.1.1.1.1.8            : branch
+entPhysicalFirmwareRev  : .1.3.6.1.2.1.47.1.1.1.1.9            : branch
+entPhysicalSoftwareRev  : .1.3.6.1.2.1.47.1.1.1.1.10           : branch
+entPhysicalSerialNum    : .1.3.6.1.2.1.47.1.1.1.1.11           : branch
+entPhysicalModelName    : .1.3.6.1.2.1.47.1.1.1.1.13           : branch
+entPhysicalIsFRU        : .1.3.6.1.2.1.47.1.1.1.1.16           : branch
+moduleSerialNumber      : .1.3.6.1.4.1.9.5.1.3.1.1.26          : branch
+moduleStatus            : .1.3.6.1.4.1.9.5.1.3.1.1.10          : branch
+moduleModel             : .1.3.6.1.4.1.9.5.1.3.1.1.17          : branch

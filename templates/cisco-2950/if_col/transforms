@@ -1,12 +1,22 @@
-# Convert our total ifc octets(bytes) into bits
-ifOutCps	: DELTA		: {ifOutCollisions}
+# Collision = single collision + multiple collision (not late nor excessive)
 
-# Create our REAL packets per second 
-ifOutPps	: MATH		: {ifOutCps} + {ifOutPktsSec}
+# Compute the sum of paquets 
+ifOutPkts     	: MATH          : {ifOutUcastPkts} + {ifOutNUcastPkts} 
+
+# Do delta transform on all counters
+ifOutPps        	: DELTA         : {ifOutPkts}
+ifOutCps		: DELTA		: {ifOutCollisions}
+
+# Compute the real packets per second inclidung collision
+ifOutCPps		: MATH		: {ifOutCps} + {ifOutPps}
 
 # Determine percentage of packets that are collisions
-ifOutColPct	: MATH		: ({ifOutCps} / {ifOutPps}) x 100
+ifOutColPct		: MATH		: ({ifOutCps} / {ifOutCPps}) x 100
 
 # Create an alias in a bracketed box, or nothing if alias is blank
-ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
+ifAliasBox      	: REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
+
+ifDuplexStatus		: SWITCH	: {c2900PortDuplexStatus} 1=FD,2=HD
+#ifDuplexStatusBox	: REGSUB        : {ifDuplexStatus} /(\S+.*)/ [$1]/
+ifPriOidCol     	: REGSUB        : {ifName} /(.*)/$1{ifAliasBox}_{ifDuplexStatus}/
 

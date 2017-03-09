@@ -1,3 +1,3 @@
-TABLE: 
-Ifc name|Ifc speed|Ifc status
-{ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
+TABLE: noalarmsmsg
+Ifc name|Speed|Admin / Oper|Alarm
+{ifNameAliasBox}|{ifSpeed}|{ifStat.color}{ifStat.errors}{ifAdminOperStat}|{ifAlarm}
