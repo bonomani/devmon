@@ -1,0 +1,4 @@
+vendor	: vmware
+model	: vcsa6
+snmpver	: 2
+sysdesc : VMware-vCenter-Server-Appliance 6

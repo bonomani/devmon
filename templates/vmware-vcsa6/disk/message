@@ -1,0 +1,3 @@
+TABLE:plain,noalarmsmsg
+Filesystem 1024-blocks Used Available Capacity Mounted on
+{DiskName} {DiskSize} {DiskSizeUsed} {DiskAvail} {DiskPerUse}% {DiskName} {DiskPerUse.color}

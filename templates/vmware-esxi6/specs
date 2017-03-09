@@ -1,0 +1,4 @@
+vendor	: vmware
+model	: esxi6
+snmpver	: 2
+sysdesc : VMware ESXi 6
