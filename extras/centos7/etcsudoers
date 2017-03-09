@@ -1,0 +1,4 @@
+xymon ALL = NOPASSWD: /usr/sbin/service devmon reload
+xymon ALL = NOPASSWD: /usr/sbin/service devmon start
+xymon ALL = NOPASSWD: /usr/sbin/service devmon stop
+
