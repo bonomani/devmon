@@ -1,0 +1,73 @@
+#!/bin/bash
+ENV=~/server/etc/xymonserver.cfg
+
+if [ "$BB" == "" ] ; then
+	echo "This script must be run under a Hobbit or Xymon environment, I will try to source it" >&2
+	source $ENV
+	if [ "$BB" == "" ] ; then
+		echo "Failed to source it">&2 
+                echo "e.g. by: bbcmd $0" >&2
+	        exit 1
+	fi
+fi
+DEVMONLOGS=$(grep -m 1 -e '^LOGFILE='  $BBHOME/ext/devmon/devmon.cfg | cut -d'/' -f2- | grep -o '.*/')
+if [ "$DEVMONLOGS" == "" ] ; then
+        echo "Failed to locate devmon log folder ">&2
+        echo "e.g. by: bbcmd $0" >&2
+        exit 1
+else 
+	DEVMONLOGS=$(echo "/$DEVMONLOGS") 
+fi
+
+if [ "$BBDISPLAYS" != "" ] ; then
+	BBDISP=${BBDISPLAYS#,*}
+fi
+COLOR=$($BB $BBDISP "hobbitdboard host=$HOSTNAME test=dm" | cut -d'|' -f3)
+
+if [ "`id -u`" -eq 0 ] ; then
+	DEVMON="service devmon"
+	PKILL="pkill"
+else
+	DEVMON="sudo service devmon"
+	PKILL="pkill"
+fi
+
+if [ "$COLOR" == "purple" ] ; then
+	if [ ! -d $DEVMONLOGS/devmon-failure/ ] ; then
+		mkdir $DEVMONLOGS/devmon-failure/
+		if [ $? -ne 0 ] ; then
+    			echo "Error creating $DEVMONLOGS/devmon-failure/ directory, will try to use $DEVMONLOGS only" >&2
+			DEVMONFAILURELOGS=$DEVMONLOGS
+		else		
+			DEVMONFAILURELOGS=$DEVMONLOGS/devmon-failure
+		fi
+	else
+		 DEVMONFAILURELOGS=$DEVMONLOGS/devmon-failure
+	fi
+	if [ ! -d $DEVMONFAILURELOGS ] ; then
+		echo "Error $DEVMONFAILURELOGS do not exist" >&2
+		exit 1
+	fi
+	LOGSAVE=$DEVMONFAILURELOGS/devmon-failure-`date +%Y-%m-%d-%H:%M:%S`.log
+	echo "Devmon is purple, saving last 200 lines of log to $LOGSAVE" >&2
+	tail -n200 $DEVMONLOGS/devmon.log > $LOGSAVE
+	if [ ! -s $LOGSAVE ] ; then
+		echo "Error failed to write log file $LOGSAVE"
+	fi
+	$DEVMON stop
+	NUM=$(pgrep ^devmon.* |wc -l)
+	if [ "$NUM" -ne 0 ] ; then
+		echo "Devmon failed to stop cleanly, terminating manually"
+		$PKILL ^devmon.* 
+		sleep 5
+	fi
+	NUM=$(pgrep ^devmon.* |wc -l)
+	if [ "$NUM" -ne 0 ] ; then
+		echo "Devmon failed to terminate cleanly, killing manually"
+		PKILL -9 ^devmon.* 
+	fi
+	$DEVMON start
+else
+	[ "$DEBUG" == 1 ] && echo "Devmon isn't purple, it is $COLOR"
+	exit 0
+fi

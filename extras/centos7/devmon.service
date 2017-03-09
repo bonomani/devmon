@@ -1,0 +1,21 @@
+# systemd file for Fedora 18 and up, or RHEL 7 and up
+
+[Unit]
+Description=Devmon
+After=xymon.target network.target
+
+[Install]
+WantedBy=multi-user.target
+
+
+[Service]
+PIDFile=/var/run/devmon/devmon.pid
+User=xymon
+Group=xymon
+RuntimeDirectory=devmon
+# Change the devmon filder according to you settings !
+ExecStartPre=/var/xymon/server/ext/devmon/devmon --readbbhosts
+ExecStart=/var/xymon/server/ext/devmon/devmon
+ExecReload=/var/xymon/server/ext/devmon/devmon --readbbhosts
+Type=forking
+

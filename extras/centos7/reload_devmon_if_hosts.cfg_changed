@@ -1,0 +1,7 @@
+#!/bin/sh
+
+	IS_HOSTSCFG_YELLOW=$(echo "$BBALPHAMSG" | grep -e yellow.*xymon/server/etc/hosts.cfg | wc -l)  
+	if [ $IS_HOSTSCFG_YELLOW = 1 ]; then
+		sudo service devmon reload
+        fi
+
