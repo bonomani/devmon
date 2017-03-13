@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 1800
+snmpver	: 2
+sysdesc : C1800|C1841
