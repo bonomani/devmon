@@ -1,3 +1,0 @@
-FanStatus	: red		: critical|not functioning
-FanStatus	: yellow	: warning|shutdown|not present
-FanStatus	: green		: normal

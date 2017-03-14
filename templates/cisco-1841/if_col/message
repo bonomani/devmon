@@ -1,9 +1,0 @@
-<b>Collisions:</b>
-Collision load: yellow={ifOutColPct.thresh:yellow}%, red={ifOutColPct.thresh:red}%
-TABLE:
-Ifc name|Collisions|Collisions rate|Collisions load
-{ifName}{ifAliasBox}|{ifOutCollisions}|{ifOutCps}|{ifOutColPct.color}{ifOutColPct}%{ifOutColPct.errors}
-
-Note: 
-Error rates are per second.
-Load percentages are based on an error/packet ratio.

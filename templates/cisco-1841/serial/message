@@ -1,5 +1,0 @@
-Serial :
-
-TABLE:
-Physical Descr | Hardware Rev | Firmware Rev | Software Rev |  System serial number | Model Name
-{entPhysicalDescr} | {entPhysicalHardwareRev} | {entPhysicalFirmwareRev} | {entPhysicalSoftwareRev} | {entPhysicalSerialNum} | {entPhysicalModelName} 

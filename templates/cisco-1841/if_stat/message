@@ -1,3 +1,0 @@
-TABLE:
-Ifc name|Ifc speed|Ifc status
-{ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
