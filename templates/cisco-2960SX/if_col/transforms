@@ -1,0 +1,22 @@
+# Collision = single collision + multiple collision (not late nor excessive)
+
+# Compute the sum of paquets 
+ifHCOutPkts     	: MATH          : {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
+
+# Do delta transform on all counters
+ifOutPps        	: DELTA         : {ifHCOutPkts}
+ifOutCps		: DELTA		: {ifOutCollisions}
+
+# Compute the real packets per second inclidung collision
+ifOutCPps		: MATH		: {ifOutCps} + {ifOutPps}
+
+# Determine percentage of packets that are collisions
+ifOutColPct		: MATH		: ({ifOutCps} / {ifOutCPps}) x 100
+
+# Create an alias in a bracketed box, or nothing if alias is blank
+ifAliasBox      	: REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
+
+ifDuplexStatus		: SWITCH	: {dot3StatsDuplexStatus} 1=-,2=HD,3=FD
+#ifDuplexStatusBox	: REGSUB        : {ifDuplexStatus} /(\S+.*)/ [$1]/
+ifPriOidCol     	: REGSUB        : {ifName} /(.*)/$1{ifAliasBox}_{ifDuplexStatus}/
+

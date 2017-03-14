@@ -1,0 +1,5 @@
+vendor  : cisco
+model   : IE
+snmpver : 2
+sysdesc : IES
+

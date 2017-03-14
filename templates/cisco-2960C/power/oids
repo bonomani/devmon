@@ -1,0 +1,3 @@
+ciscoEnvMonSupplyStatusDescr	: .1.3.6.1.4.1.9.9.13.1.5.1.2	: branch
+ciscoEnvMonSupplyState		: .1.3.6.1.4.1.9.9.13.1.5.1.3	: branch
+ciscoEnvMonSupplySource		: .1.3.6.1.4.1.9.9.13.1.5.1.4	: branch

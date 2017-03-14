@@ -1,0 +1,15 @@
+# Get bit speed delta (so we dont have to provide custom delta limit)
+ifInPkts      : MATH    : {ifInUcastPkts} + {ifInMulticastPkts} + {ifInBroadcastPkts}
+ifOutPkts     : MATH    : {ifOutUcastPkts} + {ifOutMulticastPkts} + {ifOutBroadcastPkts}
+
+# Do delta transform on all counters
+ifInPps        	: DELTA         : {ifInPkts}
+ifOutPps       	: DELTA         : {ifOutPkts}
+ifInErrPps	: DELTA		: {ifInErrors}
+ifOutErrPps	: DELTA		: {ifOutErrors}
+# Perform percentage calculations
+ifInErrTraf	: MATH		: ({ifInErrPps} / {ifInPps}) x 100
+ifOutErrTraf	: MATH		: ({ifOutErrPps} / {ifOutPps}) x 100
+# Create an alias in a bracketed box, or nothing if alias is blank
+ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
+
