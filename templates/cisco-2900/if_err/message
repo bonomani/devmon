@@ -1,11 +1,8 @@
 <b>Errors:</b>
-Input errors:  yellow={ifInErrPct.thresh:yellow}%, red={ifInErrPct.thresh:red}%
-Output errors: yellow={ifOutErrPct.thresh:yellow}%, red={ifOutErrPct.thresh:red}%
-
-TABLE:
-Ifc name|Errors in|Error rate in|Error load in|Errors out|Error rate out|Error load out
-{ifName}{ifAliasBox}|{ifInErrors}|{ifInEps}|{ifInErrPct.color}{ifInErrPct}%{ifInErrPct.errors}|{ifOutErrors}|{ifOutEps}|{ifOutErrPct.color}{ifOutErrPct}%{ifOutErrPct.errors}
-
-Note: 
-Error rates are per second, averaged over a 60 second interval.
-Load percentages are based on error/bit ratio.
+Rates are per second, averaged over a 60 second interval
+Traffic percentages(%) are based on error/packet ratio
+Input alarm thresholds (traffic%):  yellow={ifInErrTraf.thresh:yellow}%, red={ifInErrTraf.thresh:red}% 
+Output alarm thresholds (traffic%): yellow={ifOutErrTraf.thresh:yellow}%, red={ifOutErrTraf.thresh:red}% 
+TABLE:rrd(DS:ds0:ifInErrors:COUNTER; DS:ds1:ifOutErrors:COUNTER)
+Ifc name|Errors in|Rate in (traffic%)|Errors out|Rate out (traffic%)
+{ifDescr}{ifAliasBox}|{ifInErrors}|{ifInErrTraf.color}{ifInErrPps} ({ifInErrTraf}%){ifInErrTraf.errors}|{ifOutErrors}|{ifOutErrTraf.color}{ifOutErrPps} ({ifOutErrTraf}%){ifOutErrTraf.errors}

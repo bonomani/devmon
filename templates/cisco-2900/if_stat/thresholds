@@ -1,6 +1,5 @@
-ifAdminStatTxt	: green		: admin down					: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
-ifAdminStatTxt	: yellow	: testing					: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
-ifAdminStatTxt	: red		: up						: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
-ifOperStatTxt	: green		: up 						: Interface {ifName}{ifAliasBox} is {ifOperStatTxt}
-ifOperStatTxt	: yellow	: dormant|testing|yellow|not present|layer down : Interface {ifName}{ifAliasBox} is {ifOperStatTxt}
-ifOperStatTxt	: red		: down                                          : Interface {ifName}{ifAliasBox} is {ifOperStatTxt}
+ifStat		: green		: not monitoredi|up / up|up / dormant		:
+ifStat		: yellow        : down / down					: Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+ifStat		: red           : up / down                                     : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+
+

@@ -1,2 +1,1 @@
-ifName : alarm  : .+
-ifName : ignore : Nu.+|Vl.+|VL.+
+ifNameAliasBox: alarm:  .*\[CDP\:.+|.*\[PO\:.+|.*\[LLDP\:.+|.*\[MONI.*

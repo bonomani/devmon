@@ -1,2 +1,0 @@
-entPhysicalDescr : ignore : Nu.+|Vl.+|Gi.+|.*Ethernet
-entPhysicalDescr : alarm : YouNeedToSleep
