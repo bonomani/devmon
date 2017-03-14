@@ -1,10 +1,10 @@
 entPhysicalSerialNumClean                  : REGSUB : {entPhysicalSerialNum} /(\S+).*/$1/
 entPhysicalModelNameClean                  : REGSUB : {entPhysicalModelName} /(\S+).*/$1/ 
 entPhysicalIsFRUTxt	                   : SWITCH : {entPhysicalIsFRU}      1=True,2=False
-cefcModuleAdminStatusTxt                   : SWITCH : {cefcModuleAdminStatus} 1=Enable,2=Disable,3=Reset,4=Out of service admin
-cefcModuleOperStatusTxt                    : SWITCH : {cefcModuleOperStatus}  1=Unknown,2=Ok,3=Disabled,4=Ok but diag failed,5=Boot,6=Self test,7=Failed,8=Missing,9=Mismatch with parent,10=Mismatch config,11=Diag failed,12=Dormant,13=Out of service admin,14=Out of service env temp,15=Powered down,16=Powered up,17=Power denied,18=Power cycled,19=Ok but power over warning,20=Ok but power over critical,21=Sync in progress,22=Upgrading,23=Ok but auth failed
-cefcModuleResetReasonTxt                   : SWITCH : {cefcModuleResetReason} 1=Unknown,2=Power up,3=Parity error,4=Clear config reset,5=Manual reset,6=Watch dog timeout reset,7=Resource overflow reset,8=Missing task reset,9=Low voltage reset,10=Controller reset,11=System reset,12=Switchover reset,13=Upgrade reset,14=Downgrade reset,15=Cache error reset,16=Device driver reset,17=Software exception reset,18=Restore config reset,19=Abort rev reset,20=Burn boot reset,21=Standby cd healthier reset,22=Non native config clear reset,23=Memory protection error reset
-cefcModuleAdminOperReset                   : STR    : {cefcModuleAdminStatusTxt} . " / " . {cefcModuleOperStatusTxt} . " / " . {cefcModuleResetReasonTxt}
+#cefcModuleAdminStatusTxt                   : SWITCH : {cefcModuleAdminStatus} 1=Enable,2=Disable,3=Reset,4=Out of service admin
+#cefcModuleOperStatusTxt                    : SWITCH : {cefcModuleOperStatus}  1=Unknown,2=Ok,3=Disabled,4=Ok but diag failed,5=Boot,6=Self test,7=Failed,8=Missing,9=Mismatch with parent,10=Mismatch config,11=Diag failed,12=Dormant,13=Out of service admin,14=Out of service env temp,15=Powered down,16=Powered up,17=Power denied,18=Power cycled,19=Ok but power over warning,20=Ok but power over critical,21=Sync in progress,22=Upgrading,23=Ok but auth failed
+#cefcModuleResetReasonTxt                   : SWITCH : {cefcModuleResetReason} 1=Unknown,2=Power up,3=Parity error,4=Clear config reset,5=Manual reset,6=Watch dog timeout reset,7=Resource overflow reset,8=Missing task reset,9=Low voltage reset,10=Controller reset,11=System reset,12=Switchover reset,13=Upgrade reset,14=Downgrade reset,15=Cache error reset,16=Device driver reset,17=Software exception reset,18=Restore config reset,19=Abort rev reset,20=Burn boot reset,21=Standby cd healthier reset,22=Non native config clear reset,23=Memory protection error reset
+#cefcModuleAdminOperReset                   : STR    : {cefcModuleAdminStatusTxt} . " / " . {cefcModuleOperStatusTxt} . " / " . {cefcModuleResetReasonTxt}
 
 entParent2                                 : CHAIN  : {entPhysicalContainedIn} {entPhysicalContainedIn}
 entParent3                                 : CHAIN  : {entPhysicalContainedIn} {entParent2}
@@ -29,8 +29,8 @@ entPhysicalChildIndexPath                  : REGSUB : {entPhysicalChildIndexPath
 entPhysicalChildIndexPathSorted            : INV    : {entPhysicalChildIndexPath} reindexsorttxt 1
 NewIndex                                   : INV    : {entPhysicalChildIndexPathSorted} inverse
 PRPChainNI                                 : CHAIN  : {NewIndex} {PRPChain}
-cefcModuleMonitored                        : SWITCH  : {cefcModuleAdminStatus} ".+"=*
-priOid                                     : STR    :  " " x (eval(length({entPhysicalChildIndexPath}))-6) . (sprintf "%5s", {entPhysicalChildIndexVal}) . "." x (eval(1-length{cefcModuleMonitored})) . {cefcModuleMonitored} . " " . {entPhysicalDescr}
+#cefcModuleMonitored                        : SWITCH  : {cefcModuleAdminStatus} ".+"=*
+priOid                                     : STR    :  " " x (eval(length({entPhysicalChildIndexPath}))-6) . (sprintf "%5s", {entPhysicalChildIndexVal}) . " . " . {entPhysicalDescr}
 
 priOidNI				   : CHAIN  : {NewIndex} {priOid}
 entPhysicalHardwareRevNI                   : CHAIN  : {NewIndex} {entPhysicalHardwareRev}
@@ -39,4 +39,4 @@ entPhysicalSoftwareRevNI                   : CHAIN  : {NewIndex} {entPhysicalSof
 entPhysicalSerialNumNI                     : CHAIN  : {NewIndex} {entPhysicalSerialNum}
 entPhysicalModelNameNI                     : CHAIN  : {NewIndex} {entPhysicalModelName}
 entPhysicalIsFRUNI                         : CHAIN  : {NewIndex} {entPhysicalIsFRUTxt}
-state                                      : CHAIN  : {NewIndex} {cefcModuleAdminOperReset}
+#state                                      : CHAIN  : {NewIndex} {cefcModuleAdminOperReset}

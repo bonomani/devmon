@@ -1,1 +1,1 @@
-ifNameAliasBox: alarm:    ^CDP\:.*|^PO\:.*|^LLDP\:.*|^MONI:\.*
+ifNameAliasBox: alarm:  .*\[CDP\:.+|.*\[PO\:.+|.*\[LLDP\:.+|.*\[MONI.*
