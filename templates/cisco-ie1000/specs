@@ -1,0 +1,5 @@
+vendor  : cisco
+model   : IE1000
+snmpver : 2
+sysdesc : IE1000
+

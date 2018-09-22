@@ -1,0 +1,4 @@
+Thermal sensors:
+TABLE:rrd(DS:ds0:ciscoEnvMonTemperatureStatusValue:GAUGE; DS:ds1:ciscoEnvMonTemperatureThresholdLow:GAUGE ;DS:ds2:ciscoEnvMonTemperatureThresholdHigh:GAUGE)
+Id|Description|Temp|Low/High Tresholds|Condition
+{ciscoEnvMonTemperatureStatusIndex}|{ciscoEnvMonTemperatureStatusDescr}|{ciscoEnvMonTemperatureStatusValue}|{ciscoEnvMonTemperatureThresholdLow}/{ciscoEnvMonTemperatureThresholdHigh}|{ciscoEnvMonTemperatureState.color}{ciscoEnvMonTemperatureState}{ciscoEnvMonTemperatureState.errors}

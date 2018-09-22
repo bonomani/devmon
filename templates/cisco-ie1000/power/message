@@ -1,0 +1,5 @@
+TABLE:
+#PSU|Source|State
+#{ciscoEnvMonSupplyStatusDescr}|{PsuSource}|{PsuStatus.color}{PsuStatus}
+PSU|State
+{ciscoEnvMonSupplyStatusDescr}|{PsuStatus.color}{PsuStatus}

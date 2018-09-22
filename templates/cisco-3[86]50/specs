@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 3[86]50
+snmpver	: 2
+sysdesc : CAT3K

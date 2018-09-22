@@ -1,0 +1,7 @@
+#ciscoEnvMonTemperatureStatusDescr	: 1.3.6.1.4.1.9.9.13.1.3.1.2   	: branch
+#ciscoEnvMonTemperatureStatusValue	: 1.3.6.1.4.1.9.9.13.1.3.1.3   	: branch
+#ciscoEnvMonTemperatureThresholdHigh 	: 1.3.6.1.4.1.9.9.13.1.3.1.4    : branch
+#ciscoEnvMonTemperatureStateRaw		: 1.3.6.1.4.1.9.9.13.1.3.1.6 	: branch
+ciscoEnvMonTemperatureStatusValue       : 1.3.6.1.4.1.9.9.832.1.24.1.3.6.1.5 : branch
+ciscoEnvMonTemperatureThresholdHigh     : 1.3.6.1.4.1.9.9.832.1.24.1.2.3.1.3 : branch
+ciscoEnvMonTemperatureThresholdCritical : 1.3.6.1.4.1.9.9.832.1.24.1.2.3.1.4 : branch
