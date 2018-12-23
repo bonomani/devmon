@@ -3,6 +3,7 @@ our $VERSION = '0.3.1-beta1';
 #    Devmon: An SNMP data collecteor & page generator for the BigBrother &
 #    Hobbit network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
+#    Copyright (C) 2018 Stef Coene <stef.coene@docum.org>, <stef.coene@axi.be>
 #
 #    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/devmon $
 #    $Revision
