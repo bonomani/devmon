@@ -1277,6 +1277,13 @@ require Exporter;
     my $etcdir  = $1 if $g{'bbhosts'} =~ /^(.+)\/.+?$/;
     $etcdir = $g{'homedir'} if !defined $etcdir;
 
+    # Read SNMP V3 config file
+    my %config ;
+    if ( -f $g{'configfileV3'} ) {
+      my $configIni = new Config::Abstract::Ini($g{'configfileV3'});
+      %config = $configIni->get_all_settings;
+    }
+
     FILEREAD: do { 
 
       my $bbfile = shift @bbfiles;
@@ -1450,13 +1457,6 @@ require Exporter;
       close BBFILE;
     
     } while @bbfiles; # End of do {} loop
-
-    # Read SNMP V3 config file
-    my %config ;
-    if ( -f $g{'configfileV3'} ) {
-      my $configIni = new Config::Abstract::Ini($g{'configfileV3'});
-      %config = $configIni->get_all_settings;
-    }
 
    # Gather our existing hosts
     my %old_hosts = read_hosts();
