@@ -41,6 +41,7 @@ require Exporter;
       'version'       => $_[0], # set in main script now
       'homedir'       => $FindBin::Bin,
       'configfile'    => "$FindBin::Bin/devmon.cfg",
+      'configfileV3'  => "$FindBin::Bin/devmonV3.cfg",
       'dbfile'        => "$FindBin::Bin/hosts.db",
       'daemonize'     => 1,
       'initialized'   => 0,
@@ -234,6 +235,7 @@ require Exporter;
     while ($_ = shift @ARGV) {
       if(/^-v+$/)                 { $g{'verbose'} = tr/v/v/                   }
       elsif(/^-c$/)               { $g{'configfile'} = shift @ARGV or usage() } 
+      elsif (/^-3$/)              { $g{'configfileV3'} = shift @ARGV or usage() }
       elsif(/^-d/)                { $g{'dbfile'} = shift @ARGV or usage()     }
       elsif(/^-f$/)               { $g{'daemonize'} = 0                       }
       elsif(/^-p$/)               { $g{'print_msg'} = 1                       }
@@ -1429,6 +1431,13 @@ require Exporter;
             do_log("Unknown devmon option ($options) on line " .
                    "$. of $bbfile",0) and next if $options ne '';
 
+            # Version 3 config merge
+            if ( defined $config{$host} ) {
+               foreach my $key (keys %{$config{$host}}) {
+                  $bb_hosts{$host}{$key} = $config{$host}{$key} ;
+               }
+            }
+
             $bb_hosts{$host}{'ip'}    = $ip;
             $bb_hosts{$host}{'tests'} = $tests;
 
@@ -1441,6 +1450,13 @@ require Exporter;
       close BBFILE;
     
     } while @bbfiles; # End of do {} loop
+
+    # Read SNMP V3 config file
+    my %config ;
+    if ( -f $g{'configfileV3'} ) {
+      my $configIni = new Config::Abstract::Ini($g{'configfileV3'});
+      %config = $configIni->get_all_settings;
+    }
 
    # Gather our existing hosts
     my %old_hosts = read_hosts();
@@ -1991,6 +2007,14 @@ require Exporter;
      # Check if the hosts file even exists
       return %hosts if !-e $g{'dbfile'};
 
+      # Read SNMP V3 config file
+      use Config::Abstract::Ini ;
+      my %config ;
+      if ( -f $g{'configfileV3'} ) {
+         my $configIni = new Config::Abstract::Ini($g{'configfileV3'});
+         %config = $configIni->get_all_settings;
+      }
+
      # Open and read in data
       open HOSTS, $g{'dbfile'} or
         log_fatal("Unable to open host file: $g{'dbfile'} ($!)", 0);
@@ -2014,6 +2038,13 @@ require Exporter;
         $hosts{$name}{'tests'}  = $tests;
         $hosts{$name}{'cid'}    = $cid;
         $hosts{$name}{'port'}   = $port;
+
+         # Version 3 config merge
+         if ( defined $config{$name} ) {
+            foreach my $key (keys %{$config{$name}}) {
+               $hosts{$name}{$key} = $config{$name}{$key} ;
+            }     
+         }
 
         if(defined $threshes and $threshes ne '') {
           for my $thresh (split ',', $threshes) {
