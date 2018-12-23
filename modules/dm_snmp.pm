@@ -32,6 +32,8 @@ require Exporter;
   use Storable qw(nfreeze thaw);
   use dm_config;
 
+  use Net::SNMP;
+
  # Our global variable hash
   use vars qw(%g);
   *g = \%dm_config::g;
