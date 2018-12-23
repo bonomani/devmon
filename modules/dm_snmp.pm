@@ -7,6 +7,7 @@ require Exporter;
 #    Hobbit network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
+#    Copyright (C) 2018 Stef Coene <stef.coene@docum.org>, <stef.coene@axi.be>
 #
 #    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/modules/dm_snmp.pm $
 #    $Revision: 236 $
@@ -26,7 +27,6 @@ require Exporter;
   use IO::Handle;
   use IO::Select;
   use IO::Socket::INET;
-  use SNMP_Session;
   use POSIX ":sys_wait_h";
   use Math::BigInt;
   use Storable qw(nfreeze thaw);
@@ -119,10 +119,19 @@ require Exporter;
       $tests = join ',', keys %{$g{'templates'}{$vendor}{$model}{'tests'}}
         if $tests eq 'all';
 
-      $snmp_input{$device}{'dev_ip'}   = $g{'dev_data'}{$device}{'ip'};
-      $snmp_input{$device}{'cid'}      = $g{'dev_data'}{$device}{'cid'};
-      $snmp_input{$device}{'port'}     = $g{'dev_data'}{$device}{'port'};
-      $snmp_input{$device}{'dev'}      = $device;
+      $snmp_input{$device}{'dev_ip'} = $g{'dev_data'}{$device}{'ip'};
+      $snmp_input{$device}{'cid'}    = $g{'dev_data'}{$device}{'cid'};
+      $snmp_input{$device}{'port'}   = $g{'dev_data'}{$device}{'port'};
+      $snmp_input{$device}{'dev'}    = $device;
+
+      $snmp_input{$device}{'ver'}    = $g{'dev_data'}{$device}{'ver'};
+
+      # SNMP v3 options
+      $snmp_input{$device}{'USERNAME'}         = $g{'dev_data'}{$device}{'USERNAME'}         if defined $g{'dev_data'}{$device}{'USERNAME'} ;
+      $snmp_input{$device}{'PASSPHRASE_AUTH'}  = $g{'dev_data'}{$device}{'PASSPHRASE_AUTH'}  if defined $g{'dev_data'}{$device}{'PASSPHRASE_AUTH'} ;
+      $snmp_input{$device}{'PROTOCOL_AUTH'}    = $g{'dev_data'}{$device}{'PROTOCOL_AUTH'}    if defined $g{'dev_data'}{$device}{'PROTOCOL_AUTH'} ;
+      $snmp_input{$device}{'PASSPHRASE_PRIV'}  = $g{'dev_data'}{$device}{'PASSPHRASE_PRIV'}  if defined $g{'dev_data'}{$device}{'PASSPHRASE_PRIV'} ;
+      $snmp_input{$device}{'PROTOCOL_PRIV'}    = $g{'dev_data'}{$device}{'PROTOCOL_PRIV'}    if defined $g{'dev_data'}{$device}{'PROTOCOL_PRIV'} ;
 
       do_log("Querying $device for tests $tests", 3);
 
@@ -136,13 +145,13 @@ require Exporter;
 
        # Create a shortcut
         my $tmpl    = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
-        my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'}; 
+        #my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'}; 
 
        # Determine what type of snmp version we are using
        # Use the highest snmp variable type we find amongst all our tests
-        $snmp_input{$device}{'ver'} = $snmpver if
-          !defined $snmp_input{$device}{'ver'} or
-          $snmp_input{$device}{'ver'} < $snmpver;
+       # $snmp_input{$device}{'ver'} = $snmpver if
+       #   !defined $snmp_input{$device}{'ver'} or
+       #   $snmp_input{$device}{'ver'} < $snmpver;
 
        # Go through our oids and add them to our repeater/non-repeater hashs
         for my $oid (keys %{$tmpl->{'oids'}}) {
@@ -576,6 +585,8 @@ require Exporter;
       my $session;
       my $sess_err = 0;
 
+      my ($SessionNew,$SessionNewError) ;
+
       if(!defined $data_in{'nonreps'} and !defined $data_in{'reps'}) {
         my $error_str = 
           "No oids to query for $dev, skipping";
@@ -590,12 +601,34 @@ require Exporter;
         send_data($sock, \%data_out);
         next DEVICE;
       }
-      elsif($snmp_ver eq '1') {
-        $session = SNMPv1_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
-      }
-      elsif($snmp_ver =~ /^2c?$/) {
-        $session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
-        $session->{'use_getbulk'} = 1;
+      elsif ( $snmp_ver eq '1' ) {
+         ($SessionNew,$SessionNewError) = Net::SNMP->session(
+                           -hostname      => $host,
+                           -port          => $snmp_port,
+                           -version       => 'v1',
+                           -community     => $snmp_cid   # v1/v2c
+                        );
+      } 
+      elsif ( $snmp_ver =~ /^2c?$/ ) {
+         ($SessionNew,$SessionNewError) = Net::SNMP->session(
+                           -hostname      => $host,
+                           -port          => $snmp_port,
+                           -version       => 'v2c',
+                           -community     => $snmp_cid   # v1/v2c
+                        );
+      } 
+      elsif($snmp_ver eq "3" ) {
+         my %options ;
+         $options{hostname}     = $host ;
+         $options{port}         = $snmp_port ;
+         $options{version}      = 'v3' ;
+         $options{username}     = $data_in{'USERNAME'} ;
+         $options{authpassword} = $data_in{'PASSPHRASE_AUTH'} if defined $data_in{'PASSPHRASE_AUTH'};
+         $options{authprotocol} = $data_in{'PROTOCOL_AUTH'}   if defined $data_in{'PROTOCOL_AUTH'} ;
+         $options{privpassword} = $data_in{'PASSPHRASE_PRIV'} if defined $data_in{'PASSPHRASE_PRIV'} ;
+         $options{privprotocol} = $data_in{'PROTOCOL_PRIV'}   if defined $data_in{'PROTOCOL_PRIV'} ;
+
+         ($SessionNew,$SessionNewError) = Net::SNMP->session(%options) ;
       }
      
      # Whoa, we dont support this version of SNMP
@@ -607,133 +640,77 @@ require Exporter;
         next DEVICE;
       }
 
-     # Set our retries & timeouts
-      SNMP_Session::set_retries($session, $retries);
-      SNMP_Session::set_timeout($session, $timeout);
-
-     # We cant recover from a failed snmp connect
-      if($sess_err) {
-        my $snmp_err;
-        ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
-        my $error_str = 
-          "Failed SNMP session to $dev ($snmp_err)";
-        $data_out{'error'}{$error_str} = 1;
-        send_data($sock, \%data_out);
-        next DEVICE;
+      # We cant recover from a failed snmp connect
+      if ( ! defined $SessionNew ) {
+         my $error_str = "Failed SNMP session to $dev ($SessionNewError)";
+	 if ( $SessionNewError =~ /SNMPv3 support is unavailable/ ) {
+	    do_log("$SessionNewError", 0);
+	 }
+         $data_out{'error'}{$error_str} = 1;
+         send_data($sock, \%data_out);
+         next DEVICE;
       }
 
-     # Do SNMP gets
-      my $failed_query = 0;
-      my @nrep_oids;
-      my @nrep_oids_my;
-      my $oids_num = keys %{$data_in{'nonreps'}};
-	my $ii = 0;
+      # Set our retries & timeouts
+      $SessionNew->retries($retries) ;
+      $SessionNew->timeout($timeout) ;
 
-	do_log("DEBUG SNMP($fork_num): $oids_num",0) if $g{'debug'};
-      for my $oid (keys  %{$data_in{'nonreps'}}) {
-	do_log("DEBUG SNMP($fork_num): $ii => $oid ",0) if $g{'debug'};
-	$ii++;
-	push @nrep_oids_my, $oid;
-        push @nrep_oids, encode_oid(split /\./, $oid);
+      $SessionNew->translate("0") ;
+
+      # Query all non-repeat oid's
+      foreach my $oid (sort keys %{$data_in{'nonreps'}} ) {
+         my @oids = ($oid) ;
+         my $req = $SessionNew->get_request(-varbindlist => \@oids);
+         if ( $req ) {
+            while (my ($key,$value) = each %{$req}) {
+               #$value = pretty_print($value); TODO = Wat doet dit?
+               #print "$key = $value\n" ;
+               $data_out{$key}{'val'}  = $value;
+               $data_out{$key}{'time'} = time;
+               do_log("DEBUG SNMP ver=$snmp_ver ($fork_num): get $oid : $key = $value",0) if $g{'debug'};
+            }
+         } else {
+            my $error_str = "snmp get_request $dev, $oid";
+            $data_out{'error'}{$error_str} = 1;
+            do_log("DEBUG SNMP ver=$snmp_ver ($fork_num): $error_str",0) if $g{'debug'};
+            send_data($sock, \%data_out);
+            next DEVICE;
+         }
+         #my $val = $SessionNew->get(".$oid") ;
+         #print "get $oid : $val\n" ;
+         #$data_out{$oid}{'val'}  = $val;
+         #$data_out{$oid}{'time'} = time;
       }
 
-	my @nrep_oids_temp;
-	my $nrep_oids_temp_cpt = 0;
-for (my $index = 0; $index < $oids_num; $index++) { 
-++$nrep_oids_temp_cpt;
-push @nrep_oids_temp, $nrep_oids[$index];
-do_log("DEBUG SNMP($fork_num): Adding ID => $nrep_oids_temp_cpt OID =>$nrep_oids_my[$index]",0) if $g{'debug'};
-
-#if ($nrep_oids_temp_cpt == 10) {
-	do_log("DEBUG SNMP($fork_num): Pooling $nrep_oids_temp_cpt oids",0) if $g{'debug'};
-      if(@nrep_oids_temp) {
-        if($session->get_request_response(@nrep_oids_temp)) {
-          my $response = $session->pdu_buffer;
-          my ($bindings) = $session->decode_get_response($response);
-          if(!defined $bindings or $bindings eq '') {
-            my $snmp_err;
-		do_log("DEBUG SNMP($fork_num): $SNMP_Session::errmsg",0) if $g{'debug'};
-            ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
-            my $error_str = "snmpget $dev ($snmp_err)";
-            $data_out{'error'}{$error_str} = 0;
-            ++$failed_query;
-          }
-
-         # Go through our results, decode them, and add to our return hash
-          while ($bindings ne '') {
-            my $binding;
-            ($binding,$bindings) = decode_sequence($bindings);
-            my ($oid,$value) = decode_by_template($binding, "%O%@");
-            $oid   = pretty_print($oid);
-            $value = pretty_print($value);
-            $data_out{$oid}{'val'}  = $value;
-            $data_out{$oid}{'time'} = time;
-          }
-        }
-        else {
-          my $snmp_err;
-          ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
-          my $error_str = "snmpget $dev ($snmp_err)";
-          $data_out{'error'}{$error_str} = 1;
-          send_data($sock, \%data_out);
-          next DEVICE;
-        }
-	$nrep_oids_temp_cpt = 0;
-	@nrep_oids_temp = ();
-      }
-#} # end if
-} # end for
-
-     # Now do SNMP walks
-      for my $oid (keys %{$data_in{'reps'}}) {
-        my $max_reps = $data_in{'reps'}{$oid};
-        $max_reps = $g{'max_reps'} if !defined $max_reps or $max_reps < 2;
-
-       # Encode our oid and walk it
-        my @oid_array = split /\./, $oid;
-        my $num_reps = $session->map_table_4(
-          [\@oid_array],
-          sub {
-           # Decode our result and add to our result hash
-            my ($leaf, $value) = @_;
-            $value = pretty_print($value);
-            $data_out{$oid}{'val'}{$leaf} = $value;
-            $data_out{$oid}{'time'}{$leaf} = time;
-          },
-          $max_reps
-        );
-
-       # Catch any failures
-        if(!defined $num_reps or $num_reps == 0) {
-          my $snmp_err;
-	do_log("DEBUG SNMP($fork_num): $SNMP_Session::errmsg",0) if $g{'debug'};
-          ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
-	  if ($snmp_err ne '') {
-            my $error_str = 
-              "Error walking $oid for $dev ($snmp_err)";
-            $data_out{'error'}{$error_str} = 0;
-            ++$failed_query;
-          }
-        }
-        else {
-         # Record our maxrep value for our next poll cycle
-          $data_out{'maxrep'}{$oid} = $num_reps + 1;
-        }
-
-	do_log("DEBUG SNMP($fork_num): Failed queries $failed_query",0) if ($g{'debug'} and $failed_query gt 0);
-       # We dont want to do every table if we are failing alot of walks
-        if($failed_query > 6) {
-          my $error_str =
-            "Failed too many queries on $dev, aborting query";
-          $data_out{'error'}{$error_str} = 1;
-          send_data($sock, \%data_out);
-          $session->close();
-          next DEVICE;
-        }
+      # Now do SNMP walks on the repeat oid's
+      foreach my $oid (sort keys %{$data_in{'reps'}}) {
+         my @oids = ($oid) ;
+         my $req = $SessionNew->get_table(-baseoid => $oid);
+         if ( $req ) {
+            while (my ($leaf,$value) = each %{$req}) {
+               $leaf =~ s/.*\.(\d+)$/$1/ ; # key = last number of oid
+               #print "$oid   $leaf = $value\n" ;
+               $data_out{$oid}{'val'}{$leaf} = $value;
+               $data_out{$oid}{'time'}{$leaf} = time;
+               do_log("DEBUG SNMP ver=$snmp_ver ($fork_num): get $oid : $leaf = $value",0) if $g{'debug'};
+            }
+         } else {
+            my $error_str = "snmp get_table $dev, $oid";
+            $data_out{'error'}{$error_str} = 1;
+            do_log("DEBUG SNMP ver=$snmp_ver ($fork_num): $error_str",0) if $g{'debug'};
+            send_data($sock, \%data_out);
+            next DEVICE;
+         }
+         #print "Query .$oid\n" ;
+         #my $table = $SessionNew->gettable(".$oid") ;
+         #print Data::Dumper->Dump([\$table]);
+         #foreach my $key (keys %{$table}) {
+         #print "$key\n" ;
+         #}
       }
 
      # Now are done gathering data, close the session and return our hash
-      $session->close();
+      $SessionNew->close();
       send_data($sock, \%data_out);
     }
   }

@@ -360,7 +360,7 @@ require Exporter;
         $val = '2' if $val eq '2c';
         do_log("Bad snmp version ($val) in $specs_file, line $." .
           "(only ver. 1/2c supported).  Skipping this test", 0)
-          and return if $val !~ /^1|2$/;
+          and return if $val !~ /^1|2|3/;
       }
 
      # Assign the value in our temp hash
