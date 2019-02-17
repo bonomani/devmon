@@ -1,5 +1,0 @@
-ifStat		: green		: not monitoredi|up / up|up / dormant		:
-ifStat		: yellow        : down / down					: Interface {ifName} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
-ifStat		: red           : up / down                                     : Interface {ifName} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
-
-
