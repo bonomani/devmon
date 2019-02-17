@@ -1,0 +1,3 @@
+TABLE:
+Physical Name [Module Name] |Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable|State
+{entPhysicalNamemM}|{entPhysicalHardwareRev}|{entPhysicalFirmwareRev}|{entPhysicalSoftwareRev}|{entPhysicalSerialNumClean}|{entPhysicalModelNameClean}|{entPhysicalIsFRUTxt}|{mST-mSNInv-ePSNC.color}{mST-mSNInv-ePSNC.errors}{mST-mSNInv-ePSNC}

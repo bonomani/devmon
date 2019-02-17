@@ -1,0 +1,4 @@
+mST-mSNInv-ePSNC  : green         : Ok                                          :
+mST-mSNInv-ePSNC  : yellow        : Other|Minor fault                           : Module Model moduleModel with serial number moduleSerialNumber is "moduleStatusTxt"
+mST-mSNInv-ePSNC  : red           : Major fault                                 : Module Model moduleModel with serial number moduleSerialNumber is "moduleStatusTxt"
+mST-mSNInv-ePSNC  : clear         : <br>                                        :

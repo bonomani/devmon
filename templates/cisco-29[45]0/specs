@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 2950 2940
+snmpver	: 2
+sysdesc : C2950|C2940

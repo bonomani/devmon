@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: ISR 4000
+snmpver	: 2
+sysdesc : ISR

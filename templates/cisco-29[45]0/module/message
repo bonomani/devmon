@@ -1,0 +1,3 @@
+TABLE:
+Physical Name |Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable
+{entPhysicalName}|{entPhysicalHardwareRev}|{entPhysicalFirmwareRev}|{entPhysicalSoftwareRev}|{entPhysicalSerialNumClean}|{entPhysicalModelNameClean}|{entPhysicalIsFRUTxt}
