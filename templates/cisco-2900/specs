@@ -1,4 +1,4 @@
 vendor	: cisco
 model	: 2900
 snmpver	: 2
-sysdesc : C2900
+sysdesc : C2900|C2951
