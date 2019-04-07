@@ -1,1 +1,2 @@
 #ifDescr: ignore: BR.+:.+|VoiceOverIpPeer.+|VoiceEncapPeer.+
+#ifDescr: ignore: Virtual-Template.+
