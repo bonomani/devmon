@@ -1,0 +1,2 @@
+hwEntityMemUsage        : yellow        : 75    : Memory load is high
+hwEntityMemUsage        : red           : 95    : Memory load is very high

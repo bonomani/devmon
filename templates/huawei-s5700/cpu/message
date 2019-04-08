@@ -1,0 +1,11 @@
+
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{sysUpTimeSecs.color}: Last reboot due to {hwSysRebootReasonTxt}
+{hwEntityCpuUsage.color}: CPU usage: {hwEntityCpuUsage}% (1min average, low/high threshold: {hwEntityCpuUsageThresholdLow}/{hwEntityCpuUsageThreshold})
+
+
+System description:
+{sysDescr}
+<!--
+<br>CPU 5 min average: {hwEntityCpuUsage}
+-->

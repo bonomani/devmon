@@ -1,0 +1,3 @@
+TABLE:
+Fan Id|Mode|Speed|Status
+{FanDescr}|{hwEntityFanSpdAdjModeTxt}|{hwEntityFanSpeed}|{FanStatus.color}{FanStatus}

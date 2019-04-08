@@ -1,0 +1,4 @@
+hwSysRebootReasonTxt         : SWITCH   : {hwSysRebootReason} 1=manual,2=powerOff,3=unknown,4=schedule,5=software
+sysUpTimeSecs                : MATH     : {sysUpTime} / 100
+UpTimeTxt                    : ELAPSED  : {sysUpTimeSecs}
+hwEntityCpuUsageThresholdLow : MATH     : {hwEntityCpuUsageThreshold}*0.75

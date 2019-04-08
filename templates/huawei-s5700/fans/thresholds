@@ -1,0 +1,3 @@
+FanStatus       : green         : normal-present
+FanStatus       : yellow        : normal-absent
+FanStatus       : red           : abnormal-present|abnormal-absent

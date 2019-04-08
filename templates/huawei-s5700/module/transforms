@@ -1,0 +1,14 @@
+entPhysicalSerialNumClean : REGSUB   : {entPhysicalSerialNum} /(\S+).*/$1/
+entPhysicalModelNameClean : REGSUB   : {entPhysicalModelName} /(\S+).*/$1/ 
+entPhysicalIsFRUTxt	  : SWITCH   : {entPhysicalIsFRU} 1=True,2=False
+
+mSNInv			  : INV      : {moduleSerialNumber} inverse
+mST-mSNInv                : CHAIN    : {mSNInv} {moduleStatus}
+mST-mSNInv-ePSNCRaw       : CHAIN    : {entPhysicalSerialNumClean} {mST-mSNInv}
+mST-mSNInv-ePSNC	  : SWITCH   : {mST-mSNInv-ePSNCRaw} "Target val missing" =<br> ,1=Other,2=Ok,3=Minor fault,4=Major fault
+
+mM-mSNInv                 : CHAIN    : {mSNInv} {moduleModel}
+mM-mSNInv-ePSNCRaw     	  : CHAIN    : {entPhysicalSerialNumClean} {mM-mSNInv}
+mM-mSNInv-ePSNC		  : SWITCH   : {mM-mSNInv-ePSNCRaw}  'Target val missing' =<br>, ".*"={mM-mSNInv-ePSNCRaw}
+mM-mSNInv-ePSNCBox	  : REGSUB   : {mM-mSNInv-ePSNC} /^([^<].*)$/ [$1]/
+entPhysicalNamemM         : REGSUB   : {entPhysicalName} /(.*)/$1{mM-mSNInv-ePSNCBox}/

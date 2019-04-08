@@ -1,0 +1,8 @@
+#mem_total : MATH : {mem_used} + {mem_free}
+#mem_used_per : MATH : ({mem_used} x 100) / {mem_total} : 0
+#mem_free     : MATH : ({mem_free} x 100) / {hwEntityMemSize} : 0
+#mem_free_per : MATH : 100 - {}
+mem_used     : MATH : {hwEntityMemSize} x {hwEntityMemUsage} / 100
+mem_free     : MATH : {hwEntityMemSize} - {mem_used} 
+mem_free_per : MATH : 100 - {hwEntityMemUsage}
+

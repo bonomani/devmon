@@ -1,0 +1,7 @@
+hwEntityFanSlot 	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.1 : branch
+hwEntityFanSn   	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.2 : branch
+hwEntityFanReg  	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.3 : branch
+hwEntityFanSpdAdjMode	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.4 : branch
+hwEntityFanSpeed	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.5 : branch
+hwEntityFanPresent	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.6 : branch
+hwEntityFanState	: .1.3.6.1.4.1.2011.5.25.31.1.1.10.1.7 : branch

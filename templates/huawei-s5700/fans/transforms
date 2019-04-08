@@ -1,0 +1,8 @@
+#hwEntityFanRegTxt        : SWITCH : {hwEntityFanReg} 1=yes,2=no
+hwEntityFanSpdAdjModeTxt : SWITCH : {hwEntityFanSpdAdjMode} 1=auto,2=manual,3=unknown
+hwEntityFanPresentTxt    : SWITCH : {hwEntityFanPresent} 1=present,2=absent
+hwEntityFanStateTxt      : SWITCH : {hwEntityFanState} 1=normal,2=abnormal
+
+FanStatus                : REGSUB : {hwEntityFanStateTxt} /(\S+.*)/$1-{hwEntityFanPresentTxt}/
+FanIndex                 : INDEX  : {hwEntityFanSlot}
+FanDescr                 : REGSUB : {FanIndex} /(\S+.*)/Fan $1/
