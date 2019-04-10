@@ -2066,12 +2066,12 @@ require Exporter;
  # column matches the provided regex
   sub trans_match {
     my ($device, $oids, $oid, $thr) = @_;
+
     my $oid_h = \%{$oids->{$oid}};
    # Extract our parent oids from the expression, first
     my $trans_data = $oid_h->{'trans_data'};
     my ($src_oid, $expr) = ($1,$2) 
       if $trans_data =~ /^\{\s*(\S+?)\s*\}\s*(\/.+\/)\s*$/;
-#    validate_deps($device, $oids, $oid, [$src_oid], '.+') ;
      validate_deps($device, $oids, $oid, [$src_oid]);
 
    # Validate our dependencies, have to do them seperately
