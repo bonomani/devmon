@@ -2523,7 +2523,8 @@ require Exporter;
               $val = ($val =~ /^[+-]?\d+(\.\d+)?/) ? int $val : 'U';
               $temp_data .= "$val:";
             }
-	    if ($temp_data =~ /U:/) {
+	    if ($temp_data =~ /^(U:)+$/) {
+            #if ($temp_data =~ /U:/) { 
               do_log("Text values in data for rrd repeater, dropping rrd for $pri_val") if $g{'debug'};;
 	      next;
             }
