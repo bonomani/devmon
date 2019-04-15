@@ -4,7 +4,7 @@ ifOutPkts       : MATH          : {ifOutUcastPkts} + {ifOutNUcastPkts}
 # Do delta transform on all counters
 ifInPps         : DELTA         : {ifInPkts}
 ifOutPps        : DELTA         : {ifOutPkts}
-ifInErrPps		: DELTA		: {ifInErrors}
+ifInErrPps	: DELTA		: {ifInErrors}
 ifOutErrPps	: DELTA		: {ifOutErrors}
 # Perform percentage calculations
 ifInErrTraf	: MATH		: ({ifInErrPps} / {ifInPps}) x 100

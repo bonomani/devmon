@@ -1,3 +1,4 @@
-PsuStatus	: red		: critical|not functioning
-PsuStatus	: yellow	: warning|shutdown|not present
-PsuStatus	: green		: normal
+PwrStatus      : red           : nonoperational
+PwrStatus      : yellow        : unavailable
+PwrStatus      : green         : ok
+

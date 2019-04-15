@@ -1,1 +1,6 @@
-FanStatus : SWITCH : {FanState} 1=normal,2=warning,3=critical,4=shutdown,5=not present,6=not functioning
+FanRowIndex         : MATCH  : {entPhysicalName} /.*RPM.*/
+FanDescrRaw         : CHAIN  : {FanRowIndex} {entPhysicalName}
+FanDescr            : REGSUB : {FanDescrRaw} /RPM: (\S+)/$1/
+FanStatusRaw        : CHAIN  : {FanRowIndex} {entSensorStatus}
+FanStatus           : SWITCH : {FanStatusRaw} 1=ok,2=unavailable,3=nonoperational
+

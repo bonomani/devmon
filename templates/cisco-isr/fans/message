@@ -1,3 +1,4 @@
 TABLE:
 Fan location|Fan state
 {FanDescr}|{FanStatus.color}{FanStatus}
+#{FanDescr}

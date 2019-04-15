@@ -1,5 +1,7 @@
-ciscoEnvMonTemperatureState  : green         : normal
-ciscoEnvMonTemperatureState  : yellow        : warning|shutdown|not functioning
-ciscoEnvMonTemperatureState  : red           : critical
-ciscoEnvMonTemperatureState  : clear         : non present
-
+# oid name                   : color         : limit    : Error message
+ValueIsBelowThreshold1       : red           : 0        : {TempIndex} {TempDescr} - Threshold1 reached 
+ValueIsBelowThreshold1       : green         : 1
+ValueIsBelowThreshold2       : yellow        : 0        : {TempIndex} {TempDescr} - Threshold2 reached
+ValueIsBelowThreshold2       : green         : 1
+ValueIsBelowThreshold3       : red           : 0        : {TempIndex} {TempDescr} - Threshold3 reached
+ValueIsBelowThreshold3       : green         : 1 

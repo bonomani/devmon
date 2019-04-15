@@ -1,2 +1,10 @@
-PsuStatus : SWITCH : {ciscoEnvMonSupplyState} 1=normal,2=warning,3=critical,4=shutdown,5=not present,6=not functioning
-PsuSource : SWITCH : {ciscoEnvMonSupplySource} 1=unknown,2=ac,3=dc,4=external power supply,5=internal redundant
+#PsuStatus : SWITCH : {ciscoEnvMonSupplyState} 1=normal,2=warning,3=critical,4=shutdown,5=not present,6=not functioning
+#PsuSource : SWITCH : {ciscoEnvMonSupplySource} 1=unknown,2=ac,3=dc,4=external power supply,5=internal redundant
+PwrRowIndex         : MATCH  : {entPhysicalName} /.*pwr.*/
+PwrDescrRaw         : CHAIN  : {PwrRowIndex} {entPhysicalName}
+PwrDescr            : REGSUB : {PwrDescrRaw} /P: (\S+)/$1/
+PwrStatusRaw        : CHAIN  : {PwrRowIndex} {entSensorStatus}
+PwrStatus           : SWITCH : {PwrStatusRaw} 1=ok,2=unavailable,3=nonoperational
+PsuRowIndex         : MATCH  : {entPhysicalModelName} /PWR/
+PsuDescrRaw         : CHAIN  : {PsuRowIndex} {entPhysicalModelName}
+PsuDescr            : REGSUB : {PsuDescrRaw} /(\S+)/$1/
