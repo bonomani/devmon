@@ -920,7 +920,7 @@ require Exporter;
   }
 
  # Do String translations ###############################################
-  sub trans_str {
+  sub trans_eval {
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $expr  = $oid_h->{'trans_data'};
@@ -961,11 +961,10 @@ require Exporter;
 
        # Do our eval and set our time
         my $result = eval($expr);
-
         $oid_h->{'time'}{$leaf} = time;
         if($@ =~ /^Undefined subroutine/) { $result = 0 }
         elsif($@) {
-            do_log("Failed eval for TRANS_STR on $oid.$leaf: $expr ($@)");
+            do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)");
             $oid_h->{'val'}{$leaf}   = 'Failed eval';
             $oid_h->{'color'}{$leaf} = 'clear';
             $oid_h->{'error'}{$leaf} = 1;

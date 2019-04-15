@@ -579,9 +579,9 @@ require Exporter;
           last CASE;
         };
 
-        $func_type eq 'str' and do {
+        $func_type eq 'eval' and do {
           $temp =~ s/^.+\s*$//g;
-          do_log("STR transform should be a perl regex match at " .
+          do_log("EVAL transform should be a perl regex match at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
           last CASE;
