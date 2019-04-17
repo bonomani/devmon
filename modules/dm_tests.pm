@@ -1757,6 +1757,176 @@ require Exporter;
 #        }
 
   }
+ # Do pictre #########################################################
+ # Pick and accumulate data (trg) in a oid tree by using a parent or
+ # child (src) oid value : Each leaf look recursivly to its parent one 
+ # until a non existant one. Option ":opt1, opt2" 
+ # Opt1: Separate the accumulate data with separator string (def = '')
+ # Opt2: Pad data before accumulation. Example
+ #       r5( )  : pad from left with space to lengtih of 5.
+ #       l(+)   : pad from right with + . Lenght is detected automaically
+  
+
+
+  sub trans_pictre {
+    my ($device, $oids, $oid, $thr) = @_;
+    my $oid_h = \%{$oids->{$oid}};
+    my $expr  = $oid_h->{'trans_data'};
+    my $separator = '';
+    my $padding_type = 'l';
+    my $padding_length = 'auto';
+    my $padding_char = '';
+
+    # Extract our optional arguments
+    $padding_char = $1 if $expr =~ s/[({](.)[)}]\s*$//;
+    $padding_length = $1 if $expr =~ s/(\d+?)$//;
+    $padding_type = $1  if $expr =~ s/,\s*([rl])$//;
+    $separator = $1 if $expr =~ s/:\s*(\S+?)\s*$//;
+
+   # Extract all our our parent oids from the expression, first
+    my ($src_oid, $trg_oid) = $expr =~ /\{(.+?)\}/g;
+
+   # Validate our dependencies, have to do them seperately
+    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|')
+      or return;
+
+    my $src_h = \%{$oids->{$src_oid}};
+    my $trg_h = \%{$oids->{$trg_oid}};
+    if( $padding_char ne '' ) {
+       if($padding_length eq 'auto') {
+          my $maxlength = 0;
+          my %value_length;
+          while (my ($key, $value) = each $trg_h->{'val'}) {
+             $value_length{$key} = length($value);
+	     if ($maxlength < $value_length{$key}) {
+	        $maxlength = $value_length{$key};
+	     }
+          }
+          while (my ($key, $value) = each %value_length) {
+             if($padding_type eq 'l') {
+                $trg_h->{'val'}{$key} = $padding_char x ($maxlength - $value_length{$key}) . $trg_h->{'val'}{$key};
+             }
+             else {
+                $trg_h->{'val'}{$key} .= $padding_char x ($maxlength - $value_length{$key});
+             }
+          }
+       }
+       else {
+          while (my ($key, $value) = each $trg_h->{'val'}) {
+             if($padding_type eq 'l') {
+                $trg_h->{'val'}{$key} = $padding_char x ($padding_length - length($trg_h->{'val'}{$key})) . $trg_h->{'val'}{$key};       
+             }
+             else {
+                $trg_h->{'val'}{$key} .= $padding_char x ($padding_length - length($trg_h->{'val'}{$key}));
+             }
+          }
+       }
+    }
+
+   # Our source MUST be a repeater type oid 
+    if(!$trg_h->{'repeat'}) {
+      do_log("Trying to accumulate a non-repeater source on $device ($@)", 0);
+      $oid_h->{'repeat'} = 0;
+      $oid_h->{'val'}    = 'Failed accumulation';
+      $oid_h->{'time'}   = time;
+      $oid_h->{'color'}  = 'yellow';
+      $oid_h->{'error'}  = 1;
+    }
+
+   # Our target SHOULD be a repeater type oid (but non repeater is not implemented)
+    elsif(!$trg_h->{'repeat'}) {
+      do_log("Trying to accumulate a non-repeater target on $device ($@)", 0);
+      $oid_h->{'repeat'} = 0;
+      $oid_h->{'val'}    = 'Failed accumulation';
+      $oid_h->{'time'}   = time;
+      $oid_h->{'color'}  = 'yellow';
+      $oid_h->{'error'}  = 1;
+    }
+
+   # Both source and target are repeaters.  Go go go!
+    else {
+      for my $leaf ( sort { $src_h->{'val'}{$a} <=> $src_h->{'val'}{$b} } keys %{$src_h->{'val'}}) {
+
+       # Skip if our source oid is freaky-deaky
+        next if $oid_h->{'error'}{$leaf};
+
+        $oid_h->{'val'}{$leaf}    = $oid_h->{'val'}{$src_h->{'val'}{$leaf}}.$separator.$trg_h->{'val'}{$leaf};
+#        $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$leaf};
+#        $oid_h->{'color'}{$leaf}  = $trg_h->{'color'}{$leaf};
+#        $oid_h->{'error'}{$leaf}  = $trg_h->{'error'}{$leaf};
+      }
+
+     # Apply thresholds
+#      apply_thresh_rep($oids, $thr, $oid);
+      $oid_h->{'repeat'}  = 1;
+    }
+  }
+
+ # Do norlen  #########################################################
+ # Accumulate target (trg) data by walking to parent or child (src) value
+ # each leaf look to parent one until they reach a non existant one
+ # Separate the accumulate data with optional (: \.+ ) separator (default = '')
+
+  sub trans_norlen {
+    my ($device, $oids, $oid, $thr) = @_;
+    my $oid_h = \%{$oids->{$oid}};
+    my $expr  = $oid_h->{'trans_data'};
+    my $separator = '';
+
+    # Extract our optional separator argument
+    $separator = $1 if $expr =~ s/:\s*(\S+?)\s*$//;
+
+
+   # Extract all our our parent oids from the expression, first
+    my ($src_oid, $trg_oid) = $expr =~ /\{(.+?)\}/g;
+
+   # Validate our dependencies, have to do them seperately
+    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|')
+      or return;
+
+    my $src_h = \%{$oids->{$src_oid}};
+    my $trg_h = \%{$oids->{$trg_oid}};
+
+   # Our source MUST be a repeater type oid
+    if(!$trg_h->{'repeat'}) {
+      do_log("Trying to accumulate a non-repeater source on $device ($@)", 0);
+      $oid_h->{'repeat'} = 0;
+      $oid_h->{'val'}    = 'Failed accumulation';
+      $oid_h->{'time'}   = time;
+      $oid_h->{'color'}  = 'yellow';
+      $oid_h->{'error'}  = 1;
+    }
+
+   # Our target SHOULD be a repeater type oid (but non repeater is not implemented)
+    elsif(!$trg_h->{'repeat'}) {
+      do_log("Trying to accumulate a non-repeater target on $device ($@)", 0);
+      $oid_h->{'repeat'} = 0;
+      $oid_h->{'val'}    = 'Failed accumulation';
+      $oid_h->{'time'}   = time;
+      $oid_h->{'color'}  = 'yellow';
+      $oid_h->{'error'}  = 1;
+    }
+
+   # Both source and target are repeaters.  Go go go!
+    else {
+      for my $leaf ( sort { $src_h->{'val'}{$a} <=> $src_h->{'val'}{$b} } keys %{$src_h->{'val'}}) {
+
+       # Skip if our source oid is freaky-deaky
+        next if $oid_h->{'error'}{$leaf};
+
+        $oid_h->{'val'}{$leaf}    = $oid_h->{'val'}{$src_h->{'val'}{$leaf}}.$separator.$trg_h->{'val'}{$leaf};
+#        $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$leaf};
+#        $oid_h->{'color'}{$leaf}  = $trg_h->{'color'}{$leaf};
+#        $oid_h->{'error'}{$leaf}  = $trg_h->{'error'}{$leaf};
+      }
+
+     # Apply thresholds
+#      apply_thresh_rep($oids, $thr, $oid);
+      $oid_h->{'repeat'}  = 1;
+    }
+  }
+
+
 
  # Return index values ######################################################
  # In some cases, the index value in a repeating OID is useful data to have

@@ -508,6 +508,14 @@ require Exporter;
           last CASE;
         };
 
+        $func_type eq 'pictre' and do {
+          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S+?\s*,\s*[rl]\d*[({].[)}]\s*$)//g;
+          do_log("PICTRE uses two dependent oids and optional argument at " .
+                 "$trans_file, line $l_num", 0)
+            and next LINE if $temp ne '';
+          last CASE;
+        };
+
 	$func_type eq 'inv' and do {
 	  #do_log("$temp");
           $temp =~ s/\s*\{\s*\S+?\s*\}\s+(inverse|value|reindexsorttxt|reindexsortnum)\s*\d*\s*//g;
