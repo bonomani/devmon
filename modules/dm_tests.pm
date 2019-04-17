@@ -1757,18 +1757,18 @@ require Exporter;
 #        }
 
   }
- # Do pictre #########################################################
- # Pick and accumulate data (trg) in a oid tree by using a parent or
- # child (src) oid value : Each leaf look recursivly to its parent one 
- # until a non existant one. Option ":opt1, opt2" 
+ # Do coltre #########################################################
+ # Collect and accumulate data (=trg) in a tree (the tree is in a repeater) 
+ # by using a pointer to a parent or child (=src) oid value : Each leaf look
+ # recursivly until a non existing value. Option ":opt1, opt2" 
  # Opt1: Separate the accumulate data with separator string (def = '')
  # Opt2: Pad data before accumulation. Example
- #       r5( )  : pad from left with space to lengtih of 5.
- #       l(+)   : pad from right with + . Lenght is detected automaically
+ #       r5( )  : pad from left with space to length of 5.
+ #       l{+}   : pad from right with + . Length is detected automatically
   
 
 
-  sub trans_pictre {
+  sub trans_coltre {
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $expr  = $oid_h->{'trans_data'};
@@ -1780,7 +1780,7 @@ require Exporter;
     # Extract our optional arguments
     $padding_char = $1 if $expr =~ s/[({](.)[)}]\s*$//;
     $padding_length = $1 if $expr =~ s/(\d+?)$//;
-    $padding_type = $1  if $expr =~ s/,\s*([rl])$//;
+    $padding_type = $1  if $expr =~ s/[,:]\s*([rl])$//;
     $separator = $1 if $expr =~ s/:\s*(\S+?)\s*$//;
 
    # Extract all our our parent oids from the expression, first
@@ -1825,19 +1825,19 @@ require Exporter;
 
    # Our source MUST be a repeater type oid 
     if(!$trg_h->{'repeat'}) {
-      do_log("Trying to accumulate a non-repeater source on $device ($@)", 0);
+      do_log("Trying to COLTRE a non-repeater 1rst oid on $device ($@)", 0); 
       $oid_h->{'repeat'} = 0;
-      $oid_h->{'val'}    = 'Failed accumulation';
+      $oid_h->{'val'}    = 'Failed coltre';
       $oid_h->{'time'}   = time;
       $oid_h->{'color'}  = 'yellow';
       $oid_h->{'error'}  = 1;
     }
 
-   # Our target SHOULD be a repeater type oid (but non repeater is not implemented)
+   # Our target MUST be a repeater type oid 
     elsif(!$trg_h->{'repeat'}) {
-      do_log("Trying to accumulate a non-repeater target on $device ($@)", 0);
+      do_log("Trying to COLTRE a non-repeater 2nd oid on $device ($@)", 0);
       $oid_h->{'repeat'} = 0;
-      $oid_h->{'val'}    = 'Failed accumulation';
+      $oid_h->{'val'}    = 'Failed coltree';
       $oid_h->{'time'}   = time;
       $oid_h->{'color'}  = 'yellow';
       $oid_h->{'error'}  = 1;

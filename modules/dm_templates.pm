@@ -508,9 +508,9 @@ require Exporter;
           last CASE;
         };
 
-        $func_type eq 'pictre' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S+?\s*,\s*[rl]\d*[({].[)}]\s*$)//g;
-          do_log("PICTRE uses two dependent oids and optional argument at " .
+        $func_type eq 'coltre' and do {
+          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
+          do_log("COLTRE uses two dependent oids and optional arguments at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
           last CASE;
