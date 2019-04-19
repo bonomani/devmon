@@ -561,6 +561,14 @@ require Exporter;
           last CASE;
         };
 
+        $func_type eq 'sort' and do {
+          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
+          do_log("SORT transform uses only a single oid at " .
+                 "$trans_file, line $l_num", 0)
+            and next LINE if $temp ne '';
+          last CASE;
+        };
+
         $func_type eq 'index' and do {
           $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
           do_log("INDEX transform uses only a single oid at " .

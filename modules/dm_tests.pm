@@ -1793,34 +1793,34 @@ require Exporter;
     my $src_h = \%{$oids->{$src_oid}};
     my $trg_h = \%{$oids->{$trg_oid}};
     if( $padding_char ne '' ) {
-       if($padding_length eq 'auto') {
-          my $maxlength = 0;
-          my %value_length;
-          while (my ($key, $value) = each $trg_h->{'val'}) {
-             $value_length{$key} = length($value);
-	     if ($maxlength < $value_length{$key}) {
-	        $maxlength = $value_length{$key};
-	     }
+      if($padding_length eq 'auto') {
+        my $maxlength = 0;
+        my %value_length;
+        while (my ($key, $value) = each $trg_h->{'val'}) {
+          $value_length{$key} = length($value);
+          if ($maxlength < $value_length{$key}) {
+	    $maxlength = $value_length{$key};
+	  }
+        }
+        while (my ($key, $value) = each %value_length) {
+          if($padding_type eq 'l') {
+            $trg_h->{'val'}{$key} = $padding_char x ($maxlength - $value_length{$key}) . $trg_h->{'val'}{$key};
           }
-          while (my ($key, $value) = each %value_length) {
-             if($padding_type eq 'l') {
-                $trg_h->{'val'}{$key} = $padding_char x ($maxlength - $value_length{$key}) . $trg_h->{'val'}{$key};
-             }
-             else {
-                $trg_h->{'val'}{$key} .= $padding_char x ($maxlength - $value_length{$key});
-             }
+          else {
+            $trg_h->{'val'}{$key} .= $padding_char x ($maxlength - $value_length{$key});
           }
-       }
-       else {
-          while (my ($key, $value) = each $trg_h->{'val'}) {
-             if($padding_type eq 'l') {
-                $trg_h->{'val'}{$key} = $padding_char x ($padding_length - length($trg_h->{'val'}{$key})) . $trg_h->{'val'}{$key};       
-             }
-             else {
-                $trg_h->{'val'}{$key} .= $padding_char x ($padding_length - length($trg_h->{'val'}{$key}));
-             }
+        }
+      }
+      else {
+        while (my ($key, $value) = each $trg_h->{'val'}) {
+          if($padding_type eq 'l') {
+            $trg_h->{'val'}{$key} = $padding_char x ($padding_length - length($trg_h->{'val'}{$key})) . $trg_h->{'val'}{$key};       
           }
-       }
+          else {
+            $trg_h->{'val'}{$key} .= $padding_char x ($padding_length - length($trg_h->{'val'}{$key}));
+          }
+        }
+      }
     }
 
    # Our source MUST be a repeater type oid 
@@ -1862,71 +1862,121 @@ require Exporter;
     }
   }
 
- # Do norlen  #########################################################
- # Accumulate target (trg) data by walking to parent or child (src) value
- # each leaf look to parent one until they reach a non existant one
- # Separate the accumulate data with optional (: \.+ ) separator (default = '')
-
-  sub trans_norlen {
+ # Do Sort Transform ######################################################
+ # Sort 
+ # This operator schould be combined with the chain operator
+  sub trans_sort {
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $expr  = $oid_h->{'trans_data'};
-    my $separator = '';
+    my $sort = 'none';
 
-    # Extract our optional separator argument
-    $separator = $1 if $expr =~ s/:\s*(\S+?)\s*$//;
-
+   # Extract our optional arguments
+    $sort = $1 if $expr =~ s/:\s*(num|txt)\s*$//;
 
    # Extract all our our parent oids from the expression, first
-    my ($src_oid, $trg_oid) = $expr =~ /\{(.+?)\}/g;
+    my ($src_oid) = $expr =~ /\{(.+?)\}/g;
+    validate_deps($device, $oids, $oid, [$src_oid], '.+') ;
 
    # Validate our dependencies, have to do them seperately
-    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|')
-      or return;
+   # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$') 
+   #   or return;
+   do_log("Transforming $src_oid to $oid via sort transform",0) if $g{'debug'};
 
     my $src_h = \%{$oids->{$src_oid}};
-    my $trg_h = \%{$oids->{$trg_oid}};
 
-   # Our source MUST be a repeater type oid
-    if(!$trg_h->{'repeat'}) {
-      do_log("Trying to accumulate a non-repeater source on $device ($@)", 0);
-      $oid_h->{'repeat'} = 0;
-      $oid_h->{'val'}    = 'Failed accumulation';
-      $oid_h->{'time'}   = time;
-      $oid_h->{'color'}  = 'yellow';
-      $oid_h->{'error'}  = 1;
+   # This transform should probably only work for repeater sources
+    if(!$src_h->{'repeat'}) {
+      do_log("Trying to SORT a non-repeater source on $device ($@)", 0);
+      return;
     }
 
-   # Our target SHOULD be a repeater type oid (but non repeater is not implemented)
-    elsif(!$trg_h->{'repeat'}) {
-      do_log("Trying to accumulate a non-repeater target on $device ($@)", 0);
-      $oid_h->{'repeat'} = 0;
-      $oid_h->{'val'}    = 'Failed accumulation';
-      $oid_h->{'time'}   = time;
-      $oid_h->{'color'}  = 'yellow';
-      $oid_h->{'error'}  = 1;
-    }
-
-   # Both source and target are repeaters.  Go go go!
     else {
-      for my $leaf ( sort { $src_h->{'val'}{$a} <=> $src_h->{'val'}{$b} } keys %{$src_h->{'val'}}) {
+      # Tag the target as a repeater
+      $oid_h->{'repeat'} = 2;
+      if ($sort eq 'none') {
+        my $pad = 0;
+        for my $leaf ( sort { $src_h->{'val'}{$a} cmp  $src_h->{'val'}{$b} } keys %{$src_h->{'val'}})  {
+          $pad++;
 
-       # Skip if our source oid is freaky-deaky
-        next if $oid_h->{'error'}{$leaf};
+          # Skip if our source oid is freaky-deaky
+          next if $oid_h->{'error'}{$leaf};
 
-        $oid_h->{'val'}{$leaf}    = $oid_h->{'val'}{$src_h->{'val'}{$leaf}}.$separator.$trg_h->{'val'}{$leaf};
-#        $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$leaf};
-#        $oid_h->{'color'}{$leaf}  = $trg_h->{'color'}{$leaf};
-#        $oid_h->{'error'}{$leaf}  = $trg_h->{'error'}{$leaf};
+          # Our oid sub leaf
+          # my $oid_idx = $src_h->{'val'}{$leaf};
+
+          if(!defined $leaf) {
+            $oid_h->{'val'}{$leaf}    = 'Target val missing - index';
+            $oid_h->{'time'}{$leaf}   = time;
+            $oid_h->{'color'}{$leaf}  = 'yellow';
+            $oid_h->{'error'}{$leaf}  = 1;
+            next;
+          }
+ 
+#          $oid_h->{'val'}{$leaf}    = $leaf;
+#          $oid_h->{'val'}{$leaf}    = $pad++;
+#          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+#          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+#          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+          $oid_h->{'val'}{$pad}     = $leaf;
+          $oid_h->{'time'}{$pad}   = $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$pad}  = $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$pad}  = $src_h->{'error'}{$leaf};
+        }                                                                      
+      }
+      elsif ($sort eq 'num') {
+        for my $leaf (keys %{$src_h->{'val'}}) {
+
+          # Skip if our source oid is freaky-deaky
+          next if $oid_h->{'error'}{$leaf};
+
+          # Our oid sub leaf
+          # my $oid_idx = $src_h->{'val'}{$leaf};
+
+          if(!defined $leaf) {
+            $oid_h->{'val'}{$leaf}    = 'Target val missing - index';
+            $oid_h->{'time'}{$leaf}   = time;
+            $oid_h->{'color'}{$leaf}  = 'yellow';
+            $oid_h->{'error'}{$leaf}  = 1;
+            next;
+          }
+
+          $oid_h->{'val'}{$leaf}    = $leaf;
+          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+        }
+      }
+      else {
+        for my $leaf (keys %{$src_h->{'val'}}) {
+
+         # Skip if our source oid is freaky-deaky
+          next if $oid_h->{'error'}{$leaf};
+
+         # Our oid sub leaf
+         # my $oid_idx = $src_h->{'val'}{$leaf};
+
+          if(!defined $leaf) {
+            $oid_h->{'val'}{$leaf}    = 'Target val missing - index';
+            $oid_h->{'time'}{$leaf}   = time;
+            $oid_h->{'color'}{$leaf}  = 'yellow';
+            $oid_h->{'error'}{$leaf}  = 1;
+            next;
+          }
+        
+          $oid_h->{'val'}{$leaf}    = $leaf;
+          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+        }
       }
 
      # Apply thresholds
-#      apply_thresh_rep($oids, $thr, $oid);
-      $oid_h->{'repeat'}  = 1;
+      apply_thresh_rep($oids, $thr, $oid);
     }
+
   }
-
-
 
  # Return index values ######################################################
  # In some cases, the index value in a repeating OID is useful data to have
@@ -1945,7 +1995,7 @@ require Exporter;
 
    # Validate our dependencies, have to do them seperately
    # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
-   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$') 
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
    #   or return;
    do_log("Transforming $src_oid to $oid via index transform",0) if $g{'debug'};
 
@@ -1975,7 +2025,7 @@ require Exporter;
           $oid_h->{'error'}{$leaf}  = 1;
           next;
         }
-        
+
         $oid_h->{'val'}{$leaf}    = $leaf;
         $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
         $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
@@ -1987,6 +2037,7 @@ require Exporter;
     }
 
   }
+
  # Return index values ######################################################
  # In some cases, the index value in a repeating OID is useful data to have
  # Examples of this are the index in the cdp table, which refer to the
