@@ -1995,7 +1995,7 @@ require Exporter;
 
    # Validate our dependencies, have to do them seperately
    # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
-   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$') 
    #   or return;
    do_log("Transforming $src_oid to $oid via index transform",0) if $g{'debug'};
 
@@ -2025,7 +2025,7 @@ require Exporter;
           $oid_h->{'error'}{$leaf}  = 1;
           next;
         }
-
+         
         $oid_h->{'val'}{$leaf}    = $leaf;
         $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
         $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
@@ -2038,6 +2038,7 @@ require Exporter;
 
   }
 
+ # Extract names and values from simple tables #############################
  # Some MIBs just return a table of names and values, with rows that  have 
  # different data, types, meanings, units etc.
  # This operator allows the creation of new columns for rows where the name
@@ -2502,7 +2503,7 @@ require Exporter;
               $temp_data .= "$val:";
             }
 	    if ($temp_data =~ /^(U:)+$/) {
-            #if ($temp_data =~ /U:/) { 
+									
               do_log("Text values in data for rrd repeater, dropping rrd for $pri_val") if $g{'debug'};;
 	      next;
             }

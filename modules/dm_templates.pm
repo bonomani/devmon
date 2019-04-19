@@ -270,7 +270,7 @@ require Exporter;
               $trans_data->{'dep_oid'} = $dep_oid;
 
               for my $val_pair (split /\s*,\s*/, $switch_data) {
-                if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) { 
+                if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) {  
                   my ($if, $then) = ($1, $2);
                   my $type = '';
                   if($if =~ /^'(.+)'$/) {$type = 'str'; $if = $1}
@@ -279,14 +279,14 @@ require Exporter;
                   $cases->{$case_num}{'type'} = $type;
                   $cases->{$case_num}{'then'} = $then;
 
-		} 
-		elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
+                } 
+                elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
                   my ($if, $then) = ($1, $2);
                   my $type = '';
                   if($if =~ /^\d+$/) {$type = 'num'}
-                  elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/)
+                  elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/) 
                     {$type = 'gt'; $if = $1}
-                  elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/)
+                  elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/) 
                     {$type = 'gte'; $if = $1}
                   elsif($if =~ /^<\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'lt'; $if = $1}
@@ -511,17 +511,6 @@ require Exporter;
         $func_type eq 'coltre' and do {
           $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
           do_log("COLTRE uses two dependent oids and optional arguments at " .
-                 "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne '';
-          last CASE;
-        };
-
-	$func_type eq 'inv' and do {
-	  #do_log("$temp");
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(inverse|value|reindexsorttxt|reindexsortnum)\s*\d*\s*//g;
-	  #$temp =~ s/.*//g;
-	  do_log("$temp");
-          do_log("INV inverse oids and value at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
           last CASE;
