@@ -1,3 +1,6 @@
 TABLE:
-Physical Name |Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable
-{entPhysicalName}|{entPhysicalHardwareRev}|{entPhysicalFirmwareRev}|{entPhysicalSoftwareRev}|{entPhysicalSerialNumClean}|{entPhysicalModelNameClean}|{entPhysicalIsFRUTxt}
+Entity Idx|Path to Entity|Description|Class|Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable|Adm / Oper / Reset Cause
+{moduleSortedIndexMon}|{modulePathSorted}|{entPhysicalDescrSorted}|{entPhysicalClassSorted}|{entPhysicalHardwareRevSorted}|{entPhysicalFirmwareRevSorted}|{entPhysicalSoftwareRevSorted}|{entPhysicalSerialNumSorted}|{entPhysicalModelNameSorted}|{entPhysicalIsFRUSorted}|{moduleState.color}{moduleState}{moduleState.errors}
+
+
+

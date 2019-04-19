@@ -1,1 +1,1 @@
-priOID		: INV : {vmwVmDisplayName} value 
+priOID          : INDEX : {vmwVmDisplayName}

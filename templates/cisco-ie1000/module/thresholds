@@ -1,0 +1,4 @@
+moduleState          : green         : ^Enable / Ok /                                :
+moduleState          : yellow        : ^Disable /                                    : Module {entPhysicalDescrSorted} [{moduleSortedIndex}] is (admin/oper/resetcause) "{moduleState}"
+moduleState          : red           : ^Enable / (?!Ok)                              : Module {entPhysicalDescrSorted} [{moduleSortedIndex}] is (admin/oper/resetcause) "{moduleState}"
+

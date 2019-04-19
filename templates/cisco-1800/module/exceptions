@@ -1,1 +1,1 @@
-priOidNI: alarm: ^\s*\d+\*.*
+moduleSortedIndexMon: alarm: .+\*

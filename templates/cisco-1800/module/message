@@ -1,7 +1,6 @@
 TABLE:
-Path to Entity [Moni=Supervised Module)]|Slot (Pos)|Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable
-{priOidNI}|{PRPChainNI}|{entPhysicalHardwareRevNI}|{entPhysicalFirmwareRevNI}|{entPhysicalSoftwareRevNI}|{entPhysicalSerialNumNI}|{entPhysicalModelNameNI}|{entPhysicalIsFRUNI}
-#{}
+Entity Idx|Path to Entity|Description|Class|Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable|Adm / Oper / Reset Cause
+{moduleSortedIndexMon}|{modulePathSorted}|{entPhysicalDescrSorted}|{entPhysicalClassSorted}|{entPhysicalHardwareRevSorted}|{entPhysicalFirmwareRevSorted}|{entPhysicalSoftwareRevSorted}|{entPhysicalSerialNumSorted}|{entPhysicalModelNameSorted}|{entPhysicalIsFRUSorted}|{moduleState.color}{moduleState}{moduleState.errors}
 
 
 

@@ -1,4 +1,4 @@
-state          : green         : ^Enable / Ok /                                :
-state          : yellow        : ^Disable /                                    : Module {priOidNI} is (admin/oper/resetcause) "{state}"
-state          : red           : ^Enable / (?!Ok)                               : Module {priOidNI} is (admin/oper/resetcause) "{state}"
+moduleState          : green         : ^Enable / Ok /                                :
+moduleState          : yellow        : ^Disable /                                    : Module {entPhysicalDescrSorted} [{moduleSortedIndex}] is (admin/oper/resetcause) "{moduleState}"
+moduleState          : red           : ^Enable / (?!Ok)                              : Module {entPhysicalDescrSorted} [{moduleSortedIndex}] is (admin/oper/resetcause) "{moduleState}"
 
