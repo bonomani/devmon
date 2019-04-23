@@ -613,7 +613,7 @@ require Exporter;
         };
 
         $func_type eq 'regsub' and do {
-	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/g?\s*$//g;
+          $temp =~ s/^\{\S+?\}\s*\/.+\/.*\/[rg]*\s*$//; 
           do_log("REGSUB transform should be a perl regex substitution at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 

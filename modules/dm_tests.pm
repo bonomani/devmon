@@ -1567,8 +1567,9 @@ require Exporter;
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $trans_data = $oid_h->{'trans_data'};
-    my ($main_oid, $expr) = ($1,$2) 
-      if $trans_data =~ /^\{\s*(\S+?)\s*\}\s*(\/.+\/.*\/g?)\s*$/;
+
+    my ($main_oid, $expr) = ($1,$2)
+      if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[rg]*)\s*$/; 
 
    # Extract all our our parent oids from the expression, first
     my @dep_oids = $trans_data =~ /\{(.+?)\}/g;
