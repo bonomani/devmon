@@ -613,7 +613,7 @@ require Exporter;
         };
 
         $func_type eq 'regsub' and do {
-          $temp =~ s/^\{\S+?\}\s*\/.+\/.*\/[rg]*\s*$//; 
+          $temp =~ s/^\{\S+?\}\s*\/.+\/.*\/[eg]*\s*$//; 
           do_log("REGSUB transform should be a perl regex substitution at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -1031,6 +1031,7 @@ require Exporter;
         for my $opt (keys %t_opts) {
           if ($opt eq 'nonhtml' or 
               $opt eq 'plain' or
+              $opt eq 'sort' or
               $opt eq 'border' or
               $opt eq 'pad' or
               $opt eq 'noalarmsmsg' or

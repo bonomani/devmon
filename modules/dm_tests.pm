@@ -1569,7 +1569,7 @@ require Exporter;
     my $trans_data = $oid_h->{'trans_data'};
 
     my ($main_oid, $expr) = ($1,$2)
-      if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[rg]*)\s*$/; 
+      if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[eg]*)\s*$/; 
 
    # Extract all our our parent oids from the expression, first
     my @dep_oids = $trans_data =~ /\{(.+?)\}/g;
@@ -1864,13 +1864,13 @@ require Exporter;
   }
 
  # Do Sort Transform ######################################################
- # Sort 
+ # Sort
  # This operator schould be combined with the chain operator
   sub trans_sort {
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $expr  = $oid_h->{'trans_data'};
-    my $sort = 'none';
+    my $sort = 'txt';
 
    # Extract our optional arguments
     $sort = $1 if $expr =~ s/:\s*(num|txt)\s*$//;
@@ -1881,7 +1881,7 @@ require Exporter;
 
    # Validate our dependencies, have to do them seperately
    # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
-   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$') 
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
    #   or return;
    do_log("Transforming $src_oid to $oid via sort transform",0) if $g{'debug'};
 
@@ -1896,11 +1896,9 @@ require Exporter;
     else {
       # Tag the target as a repeater
       $oid_h->{'repeat'} = 2;
-      if ($sort eq 'none') {
-        my $pad = 0;
+      if ($sort eq 'txt') {
+        my $pad = 1;
         for my $leaf ( sort { $src_h->{'val'}{$a} cmp  $src_h->{'val'}{$b} } keys %{$src_h->{'val'}})  {
-          $pad++;
-
           # Skip if our source oid is freaky-deaky
           next if $oid_h->{'error'}{$leaf};
 
@@ -1914,17 +1912,11 @@ require Exporter;
             $oid_h->{'error'}{$leaf}  = 1;
             next;
           }
- 
-#          $oid_h->{'val'}{$leaf}    = $leaf;
-#          $oid_h->{'val'}{$leaf}    = $pad++;
-#          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
-#          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
-#          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
-          $oid_h->{'val'}{$pad}     = $leaf;
-          $oid_h->{'time'}{$pad}   = $src_h->{'time'}{$leaf};
-          $oid_h->{'color'}{$pad}  = $src_h->{'color'}{$leaf};
-          $oid_h->{'error'}{$pad}  = $src_h->{'error'}{$leaf};
-        }                                                                      
+          $oid_h->{'val'}{$leaf}    = $pad++;
+          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
+          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
+          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
+        }
       }
       elsif ($sort eq 'num') {
         for my $leaf (keys %{$src_h->{'val'}}) {
@@ -1965,7 +1957,7 @@ require Exporter;
             $oid_h->{'error'}{$leaf}  = 1;
             next;
           }
-        
+
           $oid_h->{'val'}{$leaf}    = $leaf;
           $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
           $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
@@ -2173,7 +2165,7 @@ require Exporter;
         if(defined $opts) {
           for my $optval (split /\s*,\s*/, $opts) {
             my ($opt,$val) = ($1,$2) if $optval =~ /(\w+)(?:\((.+)\))?/;
-	    ($opt,$val) = ($1,$2) if $optval =~ /^(\w+)=(\d+)$/;
+	    ($opt,$val) = ($1,$2) if $optval =~ /^(\w+)=(\w+)$/;
             $val = 1 if !defined $val;
             push @{$t_opts{$opt}}, $val;
             
@@ -2229,7 +2221,6 @@ require Exporter;
             $rrd{$name}{'header'} = $header;
           }
         }
-
         next;
       }
 
@@ -2302,7 +2293,14 @@ require Exporter;
         else {
           @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{'val'}};
         }
-
+######
+       my $sortnew = $t_opts{'sort'}[0];
+       if ($sortnew ne '')
+       {
+           my %temphash = %{$oids->{$sortnew}{'val'}};
+           @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
+       }  
+######
        # Now go through all oid vals, using the primary's leaves
         T_LEAF: for my $leaf (@table_leaves) {
 

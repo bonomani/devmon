@@ -1,4 +1,2 @@
-moduleState          : green         : ^Enable / Ok /                                :
-moduleState          : yellow        : ^Disable /                                    : Module {entPhysicalDescrSorted} [{moduleSortedIndex}] is (admin/oper/resetcause) "{moduleState}"
-moduleState          : red           : ^Enable / (?!Ok)                              : Module {entPhysicalDescrSorted} [{moduleSortedIndex}] is (admin/oper/resetcause) "{moduleState}"
-
+cefcModuleOperStatusTxt           : red           : ^(?!Ok)                                        : Module {entPhysicalDescr} [{entPhysicalIndex}] operational status is "{cefcModuleOperStatusTxt}"
+cefcModuleOperStatusTxt           : yellow        : ^Ok but                                        : Module {entPhysicalDescr} [{entPhysicalIndex}] operational status is "{cefcModuleOperStatusTxt}"
