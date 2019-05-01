@@ -1,6 +1,6 @@
 # Get bit speed delta (so we dont have to provide custom delta limit)
-ifInPkts        : MATH  	: {ifInUcastPkts} + {ifInNUcastPkts} 
-ifOutPkts       : MATH  	: {ifOutUcastPkts} + {ifOutNUcastPkts} 
+ifInPkts      : MATH  	: {ifInUcastPkts} + {ifInMulticastPkts} + {ifInBroadcastPkts}
+ifOutPkts     : MATH  	: {ifOutUcastPkts} + {ifOutMulticastPkts} + {ifOutBroadcastPkts}
 # Do delta transform on all counters
 ifInPps         : DELTA         : {ifInPkts}
 ifOutPps        : DELTA         : {ifOutPkts}
@@ -13,4 +13,5 @@ ifInStat        : BEST          : {ifInDscPct},{ifInDps}
 ifOutStat       : BEST          : {ifOutDscPct},{ifOutDps}
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-#ifPriOidDsc	: REGSUB        : {ifName} /(.*)/$1{ifAliasBox}/
+ifIndex         : INDEX         : {ifDescr}
+ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e

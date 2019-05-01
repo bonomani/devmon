@@ -1,6 +1,6 @@
-TABLE:sort=moduleSorted
-Entity Idx|Description|Admin Status|Reset Cause|Oper Status
-{entPhysicalIndex}|{entPhysicalDescr}|{cefcModuleAdminStatusTxt}|{cefcModuleResetReasonTxt}|{cefcModuleOperStatusTxt.color}{cefcModuleOperStatusTxt}{cefcModuleOperStatusTxt.errors}
+#TABLE:sort=moduleSorted
+#Entity Idx|Description|Admin Status|Reset Cause|Oper Status
+#{entPhysicalIndex}|{entPhysicalDescr}|{cefcModuleAdminStatusTxt}|{cefcModuleResetReasonTxt}|{cefcModuleOperStatusTxt.color}{cefcModuleOperStatusTxt}{cefcModuleOperStatusTxt.errors}
 
 TABLE:sort=moduleSorted,noalarmsmsg
 Entity Idx|Path to Entity|Description|Class|Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable

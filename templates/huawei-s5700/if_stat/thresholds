@@ -1,5 +1,14 @@
-ifStat		: green		: not monitoredi|up / up|up / dormant		:
-ifStat		: yellow        : down / down					: Interface {ifName} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
-ifStat		: red           : up / down                                     : Interface {ifName} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+ifAdminOperStat    : blue       : up / up|up / lower layer down                                  :
+ifAdminOperStat    : green      : up / up|up / dormant                                           : 
+ifAdminOperStat    : yellow     : down / down                                                    : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+ifAdminOperStat    : red        : up / down                                                      : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+
+ifStatAlarmingOn   : blue       : .                                                              : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+#ifStatAlarmingOn   : red        : ^$                                                             : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+
+ifStatSwitch       : blue       : off                                                            : 
+ifStatSwitch       : red        : on                                                             : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
 
 
+#ifStatSta1         : blue       :                                                                : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+#ifStatSta1         : red        :                                                                 : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"

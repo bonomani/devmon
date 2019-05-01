@@ -24,13 +24,14 @@ require Exporter;
   use dm_config;
   use Math::BigInt::Calc;
   use POSIX qw/ strftime / ;
+use Data::Dumper;
 
  # Our global variable hash
   use vars qw(%g);
   *g = \%dm_config::g;
 
  # Global array and hash by descending priority/severity
-   my %colors = ('red' => 4, 'yellow' => 3, 'clear' => 2, 'green' => 1); 
+   my %colors = ('red' => 5, 'yellow' => 4, 'clear' => 3, 'green' => 2, 'blue' => 1); 
    my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
    my $color_list = join '|', @color_order;
 
@@ -100,7 +101,7 @@ require Exporter;
           for my $oid (@translist) {
            # Only transform if we dont already have values for this oid
             next if !$oids->{$oid}{'transform'} or
-                     defined $oids->{$oid}{'val'};
+            defined $oids->{$oid}{'val'};
            # Only transform if we have dependent value, otherwise push onto end of queue (not a perfect solution, but better than before)
             if(ref $oids->{$oid}{trans_edata} eq "HASH" && ! defined $oids->{$oids->{$oid}{trans_edata}{dep_oid}}{val}) {
                 do_log("Skipping oid $oid until ".$oids->{$oid}{trans_edata}{dep_oid}." defined for $device") if $g{debug};
@@ -147,13 +148,13 @@ require Exporter;
 
    # For now we will copy the data from the template and snmp
     for my $oid (keys %{$tmpl->{'oids'}}) {
-
      # Dont hash an OID more than once
       next if defined $oids->{$oid}{'val'};
 
      # Put all the info we got on the oid in (sans transform data)
      # in the oids hash ref
      # First we do threshold data
+
       if(defined $tmpl->{'oids'}{$oid}{'thresh'}) {
         $oids->{$oid}{'thresh'} = $tmpl->{'oids'}{$oid}{'thresh'};
       }
@@ -231,7 +232,7 @@ require Exporter;
 
    # Transform any oids that we depend on before we finish this one
     for my $dep_oid ($trans_data =~ /\{(.+?)\}/g) {
-      transform($device, $oids, $dep_oid) 
+      transform($device, $oids, $dep_oid, $thr) 
         if $oids->{$dep_oid}{'transform'}; 
     }
 
@@ -247,7 +248,6 @@ require Exporter;
         &$trans_sub($device, $oids, $oid, $thr);
         alarm 0;
       };
-
       if($@) {
         if ($@ eq "Timeout\n") {
           do_log("Timed out waiting for $trans_type transform " .
@@ -614,7 +614,8 @@ require Exporter;
 
      # Default values
       my $value   = 1;
-      my $color   = 'green';
+#      my $color   = 'green';
+      my $color   = 'blue';
       my $pri_oid = $oid_h->{'pri_oid'};
       my $msg     = $oids->{$pri_oid}{'msg'};
 
@@ -624,7 +625,8 @@ require Exporter;
         next if $oid_h->{'error'}{$leaf};
 
         my $val = 1;
-        my $col = 'green';
+#        my $col = 'green';
+        my $col = 'blue';
         my $msg = '';
         for my $dep_oid (@dep_oids) {
           my $dep_oid_h = \%{$oids->{$dep_oid}};
@@ -659,7 +661,8 @@ require Exporter;
 
      # Default values
       my $val = 1;
-      my $col = 'green';
+#      my $col = 'green';
+      my $col = 'blue';
       my $msg = '';
 
       for my $dep_oid (@dep_oids) {
@@ -705,7 +708,8 @@ require Exporter;
 
      # Default values
       my $val = 0;
-      my $col = 'green';
+#      my $col = 'green';
+      my $col = 'blue';
       my $msg = $oids->{$pri_oid}{'msg'};
 
       for my $leaf (keys %{$oids->{$pri_oid}{'val'}}) {
@@ -714,7 +718,8 @@ require Exporter;
         next if $oid_h->{'error'}{$leaf};
 
         my $val = 1;
-        my $col = 'green';
+#        my $col = 'green';
+        my $col = 'blue';
         my $msg = '';
 
         for my $dep_oid (@dep_oids) {
@@ -750,7 +755,8 @@ require Exporter;
 
      # Default values
       my $val = 0;
-      my $col = 'green';
+#      my $col = 'green';
+      my $col = 'blue';
       my $msg = '';
 
       for my $dep_oid (@dep_oids) {
@@ -1373,7 +1379,6 @@ require Exporter;
         $oid_h->{'time'}{$leaf}  = time;
 
       }
-
       apply_thresh_rep($oids, $thr, $oid);
     }
 
@@ -1858,7 +1863,7 @@ require Exporter;
       }
 
      # Apply thresholds
-#      apply_thresh_rep($oids, $thr, $oid);
+      apply_thresh_rep($oids, $thr, $oid);
       $oid_h->{'repeat'}  = 1;
     }
   }
@@ -2293,14 +2298,17 @@ require Exporter;
         else {
           @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{'val'}};
         }
-######
-       my $sortnew = $t_opts{'sort'}[0];
-       if ($sortnew ne '')
-       {
-           my %temphash = %{$oids->{$sortnew}{'val'}};
-           @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
-       }  
-######
+       # if table SORT option is set, sort the table by the oid provided
+       # This condition should be included on previous ones to be optimized
+       # but this is a WIP: it does not apply to rrd graphs which are sorted
+       # numerically or alpha: try to make someting that match if graphs are used:
+       # graph used the pri oid so this sort option do not feel weel when graphing
+        my $sortnew = $t_opts{'sort'}[0];
+        if ($sortnew ne '')
+        {
+            my %temphash = %{$oids->{$sortnew}{'val'}};
+            @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
+        }  
        # Now go through all oid vals, using the primary's leaves
         T_LEAF: for my $leaf (@table_leaves) {
 
@@ -2351,7 +2359,8 @@ require Exporter;
 
 
            # If we arent alarming on a value, its green by default
-            $color = 'green' if !$alarm;
+#            $color = 'green' if !$alarm;
+            $color = 'blue' if !$alarm;
 
            # Keep track of our primary value
             if($oid eq $pri) {
@@ -2403,7 +2412,7 @@ require Exporter;
               elsif ($flag eq 'errors') {
                 $row_data =~ s/\{$root\}//;
 
-                next if $color eq 'green';
+                next if $color eq 'green' or $color eq 'blue' ;
 
                # Get oid msg and replace any inline oid dependencies
                 my $oid_msg = $oid_h->{'msg'}{$leaf};
@@ -2565,7 +2574,7 @@ require Exporter;
               $line =~ s/\{$root\}/#ERRORONLY#/;
 
              # Skip this value if it is green
-              next if !defined $color or $color eq 'green';
+              next if !defined $color or $color eq 'green' or $color eq 'blue';
 
              # Get oid msg and replace any inline oid dependencies
               my $oid_msg = $oid_h->{'msg'};
@@ -2617,6 +2626,18 @@ require Exporter;
       }
 
     } 
+   
+   # Xymon work with graph for 1 table only. The rrd info
+   # should be at the end of the message, otherwise the 
+   # linecount is wrong and there are empty graphs
+   # Pick the first RRD message and put it at the end
+   # ref lib/htmllog.c : (the rendering is not ready to have multiple rrd)  
+   # > See if there is already a linecount in the report.
+   # > * If there is, this overrides the calculation here.
+   # Simply comment the 2 following line to revert and make it compaible
+
+   my $rrdmsg  = $1 if $msg =~ s/(<!--DEVMON.*-->)//s;
+   $msg .= $rrdmsg;
 
    # Add our errors
     $msg = join "\n", ($errors, $msg) if $errors ne '';
@@ -2775,11 +2796,13 @@ require Exporter;
  # Apply thresholds to a supplied non-repeater oid, save in the oids hash
   sub apply_thresh {
     my ($oids, $thr, $oid) = @_;
-
     my $oid_val = $oids->{$oid}{'val'};
+
+
     if($oid_val eq 'wait') {
       $oids->{$oid}{'msg'} = 'wait';
-      $oids->{$oid}{'color'} = 'green';
+#      $oids->{$oid}{'color'} = 'green';
+      $oids->{$oid}{'color'} = 'blue';
       return;
     }
 
@@ -2838,6 +2861,7 @@ require Exporter;
 
    # Check to make sure to assign a color by default
     $oids->{$oid}{'color'} = 'green';
+#    $oids->{$oid}{'color'} = 'blue';
   }
           
  # Apply thresholds to a supplied repeater oid, save in the oids hash
@@ -2850,7 +2874,8 @@ require Exporter;
 
       if($oid_val eq 'wait') {
         $oids->{$oid}{'msg'}{$leaf} = 'wait';
-        $oids->{$oid}{'color'}{$leaf} = 'green';
+#        $oids->{$oid}{'color'}{$leaf} = 'green';
+        $oids->{$oid}{'color'}{$leaf} = 'blue';
         next;
       }
 
@@ -2858,12 +2883,21 @@ require Exporter;
         my $threshes;
 
        # Determine if we use custom or template thresholds
-        if(defined $thr->{$oid}{$color}) {
+      if(defined $thr) {
+        if(defined $thr->{$oid}) {
+            if(defined $thr->{$oid}{$color}) {
           $threshes = $thr->{$oid}{$color};
+
+
         }
-        elsif(defined $oids->{$oid}{'thresh'}{$color}) {
-          $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+}
+}
+             if(!defined $threshes ) { 
+             if(defined $oids->{$oid}{'thresh'}{$color}) {
+
+         $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
         }
+}
 
         next if !defined $threshes;
         my $match = 0;
@@ -2911,6 +2945,7 @@ require Exporter;
 
      # Check to make sure to assign a color by default
       $oids->{$oid}{'color'}{$leaf} = 'green';
+#      $oids->{$oid}{'color'}{$leaf} = 'blue';
     }
 
     return;
@@ -2985,7 +3020,8 @@ require Exporter;
           if($val eq 'wait') {
             $oid_h->{'val'}{$leaf}   = 'wait';
             $oid_h->{'time'}{$leaf}  = time;
-            $oid_h->{'color'}{$leaf} = 'green';
+#            $oid_h->{'color'}{$leaf} = 'green';
+            $oid_h->{'color'}{$leaf} = 'blue';
             $oid_h->{'error'}{$leaf} = 1;
             next;
           }
@@ -3055,7 +3091,8 @@ require Exporter;
         elsif($val eq 'wait') {
           $oid_h->{'val'}   = 'wait';
           $oid_h->{'time'}  = time;
-          $oid_h->{'color'} = 'green';
+#          $oid_h->{'color'} = 'green';
+          $oid_h->{'color'} = 'blue';
           $oid_h->{'error'} = 1;
         }
 

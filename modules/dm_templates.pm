@@ -31,7 +31,7 @@ require Exporter;
   *g = \%dm_config::g;
 
  # Global array and hash by descending priority/severity
-   my %colors = ('red' => 4, 'yellow' => 3, 'clear' => 2, 'green' => 1);
+   my %colors = ('red' => 5, 'yellow' => 4, 'clear' => 3, 'green' => 2, 'blue' => 1);
    my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
    my $color_list = join '|', @color_order;
 
@@ -829,7 +829,7 @@ require Exporter;
     my ($dir, $tmpl) = @_;
 
    # Define our valid transforms functions
-    my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1); 
+    my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1); 
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too

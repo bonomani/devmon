@@ -13,4 +13,5 @@ ifInStat        : BEST          : {ifInDscPct},{ifInDps}
 ifOutStat       : BEST          : {ifOutDscPct},{ifOutDps}
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-#ifPriOidDsc	: REGSUB        : {ifName} /(.*)/$1{ifAliasBox}/
+ifIndex         : INDEX         : {ifDescr}
+ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
