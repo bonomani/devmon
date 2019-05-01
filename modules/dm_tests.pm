@@ -24,7 +24,7 @@ require Exporter;
   use dm_config;
   use Math::BigInt::Calc;
   use POSIX qw/ strftime / ;
-use Data::Dumper;
+#use Data::Dumper;
 
  # Our global variable hash
   use vars qw(%g);
