@@ -101,7 +101,7 @@ require Exporter;
           for my $oid (@translist) {
            # Only transform if we dont already have values for this oid
             next if !$oids->{$oid}{'transform'} or
-            defined $oids->{$oid}{'val'};
+                     defined $oids->{$oid}{'val'};
            # Only transform if we have dependent value, otherwise push onto end of queue (not a perfect solution, but better than before)
             if(ref $oids->{$oid}{trans_edata} eq "HASH" && ! defined $oids->{$oids->{$oid}{trans_edata}{dep_oid}}{val}) {
                 do_log("Skipping oid $oid until ".$oids->{$oid}{trans_edata}{dep_oid}." defined for $device") if $g{debug};
@@ -148,6 +148,7 @@ require Exporter;
 
    # For now we will copy the data from the template and snmp
     for my $oid (keys %{$tmpl->{'oids'}}) {
+
      # Dont hash an OID more than once
       next if defined $oids->{$oid}{'val'};
 
@@ -248,6 +249,7 @@ require Exporter;
         &$trans_sub($device, $oids, $oid, $thr);
         alarm 0;
       };
+
       if($@) {
         if ($@ eq "Timeout\n") {
           do_log("Timed out waiting for $trans_type transform " .
@@ -614,7 +616,6 @@ require Exporter;
 
      # Default values
       my $value   = 1;
-#      my $color   = 'green';
       my $color   = 'blue';
       my $pri_oid = $oid_h->{'pri_oid'};
       my $msg     = $oids->{$pri_oid}{'msg'};
@@ -625,7 +626,6 @@ require Exporter;
         next if $oid_h->{'error'}{$leaf};
 
         my $val = 1;
-#        my $col = 'green';
         my $col = 'blue';
         my $msg = '';
         for my $dep_oid (@dep_oids) {
@@ -661,7 +661,6 @@ require Exporter;
 
      # Default values
       my $val = 1;
-#      my $col = 'green';
       my $col = 'blue';
       my $msg = '';
 
@@ -708,7 +707,6 @@ require Exporter;
 
      # Default values
       my $val = 0;
-#      my $col = 'green';
       my $col = 'blue';
       my $msg = $oids->{$pri_oid}{'msg'};
 
@@ -718,7 +716,6 @@ require Exporter;
         next if $oid_h->{'error'}{$leaf};
 
         my $val = 1;
-#        my $col = 'green';
         my $col = 'blue';
         my $msg = '';
 
@@ -755,7 +752,6 @@ require Exporter;
 
      # Default values
       my $val = 0;
-#      my $col = 'green';
       my $col = 'blue';
       my $msg = '';
 
@@ -1379,6 +1375,7 @@ require Exporter;
         $oid_h->{'time'}{$leaf}  = time;
 
       }
+
       apply_thresh_rep($oids, $thr, $oid);
     }
 
@@ -1572,8 +1569,7 @@ require Exporter;
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $trans_data = $oid_h->{'trans_data'};
-
-    my ($main_oid, $expr) = ($1,$2)
+    my ($main_oid, $expr) = ($1,$2) 
       if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[eg]*)\s*$/; 
 
    # Extract all our our parent oids from the expression, first
@@ -1668,7 +1664,7 @@ require Exporter;
     my ($src_oid, $trg_oid) = $oid_h->{'trans_data'} =~ /\{(.+?)\}/g;
 
    # Validate our dependencies, have to do them seperately
-    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|')
+    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|') 
       or return;
 
     my $src_h = \%{$oids->{$src_oid}};
@@ -1722,12 +1718,12 @@ require Exporter;
 
         my $trg_val = $trg_h->{'val'}{$sub_oid};
         if(!defined $trg_val) {
-          $oid_h->{'val'}{$leaf}    = '';
-          $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
-          $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
-          $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
-	 next;
-	}
+          $oid_h->{'val'}{$leaf}    = 'Target val missing';
+          $oid_h->{'time'}{$leaf}   = time;
+          $oid_h->{'color'}{$leaf}  = 'yellow';
+          $oid_h->{'error'}{$leaf}  = 1;
+          next;
+        }
         
         $oid_h->{'val'}{$leaf}    = $trg_val;
         $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$sub_oid};
@@ -1739,28 +1735,6 @@ require Exporter;
       apply_thresh_rep($oids, $thr, $oid);
       $oid_h->{'repeat'}  = 1;
     }
-#        do_log("AFTER $device, $oids, $oid, $src_oid");
-#        my $key;
-#        my $value;
-#        my $subkey;
-#        my $subvalue;
-#        my $subsubkey;
-#        my $subsubvalue;
-#        while (($key, $value) = each $oids )
-#        {
-#                while (($subkey, $subvalue) = each $value )
-#                {
-#                if (ref($subvalue) eq "HASH") {
-#                        while (($subsubkey, $subsubvalue) = each $subvalue )
-#                                {
-#                        do_log("$key $subkey $subsubkey $subsubvalue",0);
-#                                }
-#                        }
-#                else    {
-#                        do_log("$key $subkey $subvalue",0);
-#                        }
-#                }
-#        }
 
   }
  # Do coltre #########################################################
@@ -2023,7 +1997,7 @@ require Exporter;
           $oid_h->{'error'}{$leaf}  = 1;
           next;
         }
-         
+        
         $oid_h->{'val'}{$leaf}    = $leaf;
         $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
         $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
@@ -2226,6 +2200,7 @@ require Exporter;
             $rrd{$name}{'header'} = $header;
           }
         }
+
         next;
       }
 
@@ -2359,7 +2334,6 @@ require Exporter;
 
 
            # If we arent alarming on a value, its green by default
-#            $color = 'green' if !$alarm;
             $color = 'blue' if !$alarm;
 
            # Keep track of our primary value
@@ -2511,7 +2485,7 @@ require Exporter;
               $temp_data .= "$val:";
             }
 	    if ($temp_data =~ /^(U:)+$/) {
-									
+		 
               do_log("Text values in data for rrd repeater, dropping rrd for $pri_val") if $g{'debug'};;
 	      next;
             }
@@ -2627,14 +2601,14 @@ require Exporter;
 
     } 
    
-   # Xymon work with graph for 1 table only. The rrd info
+   # Xymon can currently graph only 1 table. The rrd info
    # should be at the end of the message, otherwise the 
    # linecount is wrong and there are empty graphs
    # Pick the first RRD message and put it at the end
    # ref lib/htmllog.c : (the rendering is not ready to have multiple rrd)  
    # > See if there is already a linecount in the report.
    # > * If there is, this overrides the calculation here.
-   # Simply comment the 2 following line to revert and make it compaible
+   # Simply comment the 2 following lines to revert this workaround
 
    my $rrdmsg  = $1 if $msg =~ s/(<!--DEVMON.*-->)//s;
    $msg .= $rrdmsg;
@@ -2796,12 +2770,10 @@ require Exporter;
  # Apply thresholds to a supplied non-repeater oid, save in the oids hash
   sub apply_thresh {
     my ($oids, $thr, $oid) = @_;
+
     my $oid_val = $oids->{$oid}{'val'};
-
-
     if($oid_val eq 'wait') {
       $oids->{$oid}{'msg'} = 'wait';
-#      $oids->{$oid}{'color'} = 'green';
       $oids->{$oid}{'color'} = 'blue';
       return;
     }
@@ -2811,11 +2783,17 @@ require Exporter;
       my $threshes;
 
      # Determine if we use custom or template thresholds
-      if(defined $thr->{$oid}{$color}) {
-        $threshes = $thr->{$oid}{$color};
+      if(defined $thr) {
+        if(defined $thr->{$oid}) {
+          if(defined $thr->{$oid}{$color}) {
+            $threshes = $thr->{$oid}{$color};
+          }
+        }
       }
-      elsif(defined $oids->{$oid}{'thresh'}{$color}) {
-        $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+      if(!defined $threshes ) {
+        if(defined $oids->{$oid}{'thresh'}{$color}) {
+          $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+        }
       }
 
       next if !defined $threshes;
@@ -2861,7 +2839,6 @@ require Exporter;
 
    # Check to make sure to assign a color by default
     $oids->{$oid}{'color'} = 'green';
-#    $oids->{$oid}{'color'} = 'blue';
   }
           
  # Apply thresholds to a supplied repeater oid, save in the oids hash
@@ -2874,7 +2851,6 @@ require Exporter;
 
       if($oid_val eq 'wait') {
         $oids->{$oid}{'msg'}{$leaf} = 'wait';
-#        $oids->{$oid}{'color'}{$leaf} = 'green';
         $oids->{$oid}{'color'}{$leaf} = 'blue';
         next;
       }
@@ -2883,23 +2859,21 @@ require Exporter;
         my $threshes;
 
        # Determine if we use custom or template thresholds
-      if(defined $thr) {
-        if(defined $thr->{$oid}) {
+        if(defined $thr) {
+          if(defined $thr->{$oid}) {
             if(defined $thr->{$oid}{$color}) {
-          $threshes = $thr->{$oid}{$color};
-
-
+              $threshes = $thr->{$oid}{$color};
+            }
+          }
         }
-}
-}
-             if(!defined $threshes ) { 
-             if(defined $oids->{$oid}{'thresh'}{$color}) {
-
-         $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+        if(!defined $threshes) {
+          if(defined $oids->{$oid}{'thresh'}{$color}) {
+            $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+          }
         }
-}
 
         next if !defined $threshes;
+
         my $match = 0;
 
        # Split our comma-delimited thresholds up
@@ -2945,7 +2919,6 @@ require Exporter;
 
      # Check to make sure to assign a color by default
       $oids->{$oid}{'color'}{$leaf} = 'green';
-#      $oids->{$oid}{'color'}{$leaf} = 'blue';
     }
 
     return;
@@ -3020,7 +2993,6 @@ require Exporter;
           if($val eq 'wait') {
             $oid_h->{'val'}{$leaf}   = 'wait';
             $oid_h->{'time'}{$leaf}  = time;
-#            $oid_h->{'color'}{$leaf} = 'green';
             $oid_h->{'color'}{$leaf} = 'blue';
             $oid_h->{'error'}{$leaf} = 1;
             next;
@@ -3091,7 +3063,6 @@ require Exporter;
         elsif($val eq 'wait') {
           $oid_h->{'val'}   = 'wait';
           $oid_h->{'time'}  = time;
-#          $oid_h->{'color'} = 'green';
           $oid_h->{'color'} = 'blue';
           $oid_h->{'error'} = 1;
         }

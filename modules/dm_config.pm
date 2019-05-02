@@ -1412,16 +1412,11 @@ require Exporter;
                 my $test = shift @args; 
                 my $oid  = shift @args;
                 for my $valpair (@args) {
-do_log("THRESH_BB $valpair");
                   my ($sc, $val) = split /:/, $valpair, 2;
                   my $type = $thr_sc{$sc}; # Process shortcut text
-do_log("THRESH_BB1 $host $test $oid $sc $val");
-do_log("THRESH_BB $type");
-
                   do_log("Unknown exception shortcut '$sc' for $host") and next
                     if !defined $type;
                   $bb_hosts{$host}{'thresh'}{$test}{$oid}{$type} = $val;
-do_log("THRESH_BB2 $host $test $oid $type $val"); 
                 }
               }
             }
@@ -1784,9 +1779,7 @@ do_log("THRESH_BB2 $host $test $oid $type $val");
             for my $oid (keys %{$new_hosts{$host}{'thresh'}{$test}}) {
               for my $color (keys %{$new_hosts{$host}{'thresh'}{$test}{$oid}}) {
                 my $val = $new_hosts{$host}{'thresh'}{$test}{$oid}{$color}; 
-do_log("THRESH_BB3 $host $test $oid $color $val");
                 my $old_val = $old_hosts{$host}{'thresh'}{$test}{$oid}{$color};
-do_log("THRESH_BB4 $host $test $oid $color $old_val");
 
                 if (defined $val and defined $old_val and $val ne $old_val) {
                   db_do("update custom_threshs set val='$val' where " .
