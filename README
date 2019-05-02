@@ -135,7 +135,8 @@ This is a work in progress, changes can occur without notice
 
 Main results
 - Cisco, Wmware, Huawei templates updates
-  - Cisco 1800, 1900, 2800, 2900, 2960, 3750, IE, ISR
+  - Cisco r1800, r1900, r2800, r2900, sw2940, sw2950, sw2960, sw3750
+    sw3850, sw3650, swIE, rISR
   - Interfaces are ordered correctly
   - Layer 2 interfaces can be monitored easily
   - Correct all wrong calculations of traffic
