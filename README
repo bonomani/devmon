@@ -134,10 +134,10 @@ r256+Added Features: This code is based on the latest r256
 This is a work in progress, changes can occur without notice
 
 Main results
-- Cisco, Wmware, Huawei templates updates
+- Cisco, Wmware, Huawei templates update
   - Cisco r1800, r1900, r2800, r2900, sw2940, sw2950, sw2960, sw3750
     sw3850, sw3650, swIE, rISR
-  - Interfaces are ordered correctly
+  - Interfaces graphs are ordered correctly
   - Layer 2 interfaces can be monitored easily
   - Correct all wrong calculations of traffic
   - Alarming on relative and absolute thresholds for traffic
@@ -152,14 +152,14 @@ New Features
   - Eval: should be avoided, but it's the perl5 eval fct 
 - Added capabilities to Regsub: eg
   
-Major bug resolved
+Major bugs resolved
 - Threshold bug : 20% speed-up in some cases
 
-Minor bug resolved
+Minor bugs resolved
 - If a test has multiple table, only last can be graphed
 - Ability to assign empty value for (T)SWITCH
 - Ability to graph, even not all values are defined
 
-Workaround
+Workarounds
 - Multiple tables support: only 1 (but anyone) can be graphed
 
