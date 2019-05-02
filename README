@@ -1,5 +1,5 @@
 
-Devmon, version 0.3.1-beta1
+Devmon, version 0.3.1-beta1, based on r256+features: see end of file
 =====================================================================
 
   This program is free software; you can redistribute it and/or modify
@@ -127,3 +127,38 @@ Devmon, version 0.3.1-beta1
 
 
 $Id: README 190 2011-01-14 13:32:06Z buchanmilne $
+
+=====================================================================
+
+r256+Added Features: This code is based on the latest r256
+This is a work in progress, changes can occur without notice
+
+Main results
+- Cisco, Wmware, Huawei templates updates
+  - Cisco 1800, 1900, 2800, 2900, 2960, 3750, IE, ISR
+  - Interfaces are ordered correctly
+  - Layer 2 interfaces can be monitored easily
+  - Correct all wrong calculations of traffic
+  - Alarming on relative and absolute thresholds for traffic
+  - Fan, Power and Module are monitored
+- New "Blue" color for disabled tests
+- Multiple tables support in a test with graph
+
+New Features
+- New tramsforms: 
+  - Coltree: To collect data when there are "parent" oid   
+  - Sort: to sort a table with another oid than the pri
+  - Eval: should be avoided, but it's the perl5 eval fct 
+- Added capabilities to Regsub: eg
+  
+Major bug resolved
+- Threshold bug : 20% speed-up in some cases
+
+Minor bug resolved
+- If a test has multiple table, only last can be graphed
+- Ability to assign empty value for (T)SWITCH
+- Ability to graph, even not all values are defined
+
+Workaround
+- Multiple tables support: only 1 (but anyone) can be graphed
+
