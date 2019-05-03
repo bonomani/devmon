@@ -535,7 +535,8 @@ require Exporter;
         };
 
         $func_type eq 'delta' and do {
-          $temp =~ s/\s*\{\s*\S+?\}(\s*\d*)\s*//;
+#          $temp =~ s/\s*\{\s*\S+?\}(\s*\d*)\s*//;
+           $temp =~ s/^\{\s*\S+?\s*\}(?:\s+\d+)?\s*//;
           do_log("DELTA transform  only a single oid (plus an " .
                  "optional limit) at $trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -551,7 +552,7 @@ require Exporter;
         };
 
         $func_type eq 'sort' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
+          $temp =~ s/^\{\s*\S+?\s*\}|\s*,\s*//g;
           do_log("SORT transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
@@ -613,7 +614,7 @@ require Exporter;
         };
 
         $func_type eq 'regsub' and do {
-          $temp =~ s/^\{\S+?\}\s*\/.+\/.*\/[eg]*\s*$//; 
+          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//; 
           do_log("REGSUB transform should be a perl regex substitution at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 

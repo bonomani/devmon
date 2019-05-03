@@ -166,6 +166,7 @@ Minor bugs resolved
 - If a test has multiple table, only last can be graphed
 - Ability to assign empty value for (T)SWITCH
 - Ability to graph, even not all values are defined
+- Apply some patch (some with an alternate patch)
 
 Workarounds
 - Multiple tables support: only 1 (but anyone) can be graphed
@@ -175,7 +176,7 @@ Workarounds
 PATCH                                                                  Sourceforge Status   this release Status          
 38     Template for cisco nexus 3500                                           open             open                 07.06.2018     07.06.2018
 37     Allow for OIDS with flag in message part of a threshold definition      open             open                 01.04.2017     01.04.2017
-36     Enhance REGSUB transformation capabilities                              open             fixed                01.04.2017     01.04.2017
+36     Enhance REGSUB transformation capabilities                              open             fixed(alternate)     01.04.2017     01.04.2017
 35     Replacement for function render_msg in module dm_tests.pm               open             open                 17.03.2017     24.03.2017
 34     Replace an OID errors flag by an empry string incase of a green colour  open             open                 26.02.2017     04.03.2017
 33     Patch for the (T)SWITCH transform to be able to assign empty string     open             fixed                24.02.2017     24.02.2017
@@ -190,26 +191,26 @@ PATCH                                                                  Sourcefor
 24     Align columns of a TABLE to the right side                              open             open                 23.10.2013     23.10.2013
 23     Consistent notation OIDs                                                open             open                 04.01.2013     04.01.2013
 22     Templates for Cisco 7609 and ITP                                        open             open                 29.06.2012     29.06.2012
-21     Extend capabilites of transform REGSUB                                  open             fixed                10.01.2012     10.01.2012
+21     Extend capabilites of transform REGSUB                                  open             fixed(alternate)     10.01.2012     10.01.2012
 20     Add transform STATISTIC                                                 open             open                 06.01.2012     21.12.2012
-17     Fix syntax check of the DELTA transform                                 open             open                 02.01.2012     02.01.2012
+17     Fix syntax check of the DELTA transform                                 open             fixed(alternate)     02.01.2012     02.01.2012
 16     Change output of SPEED transform                                        open             open                 02.01.2012     02.01.2012
-15     Improve syntax check DELTA transform                                    open             open                 02.01.2012     02.01.2012
+15     Improve syntax check DELTA transform                                    open             fixed(alternate)     02.01.2012     02.01.2012
 14     Layout of devmon statistics in Xymon, test dm                           open             open                 02.01.2012     02.01.2012
 13     Template for OpenBSD using Net-SNMP                                     open             open                 09.08.2011     09.08.2011
 12     snmpEngineTime vs sysUpTimeSecs over 497 days                           open             open                 07.03.2011     07.03.2011
 11     Brocade SAN switch template                                             open             open                 07.08.2010     07.08.2010
 10     SUBSTR negative                                                         open-remind      open                 04.03.2010     22.01.2011
-9     New templates for cisco and hp                                           open             open                 16.11.2009     16.11.2009
-2     Cisco Template for Class Based Weighted Fair Qeueing (QoS)               open             open                 06.10.2008     06.10.2008
+9      New templates for cisco and hp                                          open             open                 16.11.2009     16.11.2009
+2      Cisco Template for Class Based Weighted Fair Qeueing (QoS)              open             open                 06.10.2008     06.10.2008
                          
 FEATURE REQUEST                         
 New templates for other devices     Next Release (example)                     open            open/partially fixed  29.09.2016     29.09.2016
-9     Allow for empty repeater-type OIDs                                       open            open                  05.06.2012     05.06.2012
-8     exceptions based on other oid values                                     open            open                  19.04.2012     19.04.2012
-7     Share templates for similar devices                                      open            open                  22.01.2010     22.01.2010
-3     Use OID value in threshold comparison                                    open            open                  31.12.2008     04.04.2011
-2     SNMP V3 support                                                          open            open (next priority)  17.10.2008     17.10.2008
+9      Allow for empty repeater-type OIDs                                      open            open                  05.06.2012     05.06.2012
+8      exceptions based on other oid values                                    open            open                  19.04.2012     19.04.2012
+7      Share templates for similar devices                                     open            open                  22.01.2010     22.01.2010
+3      Use OID value in threshold comparison                                   open            open                  31.12.2008     04.04.2011
+2      SNMP V3 support                                                         open            open (next priority)  17.10.2008     17.10.2008
                          
                          
 BUG                         
@@ -219,12 +220,12 @@ BUG
 13     Thresholds remain undefined                                             open            fixed                 30.08.2011     30.08.2011
 12     New templates for Cisco 3750 switch                                     open            fixed(alternate)      01.02.2011     01.02.2011
 10     Many templates share "sysdesc" in specs                                 open            open                  22.01.2010     22.01.2010
-9     Template exceptions sorted misleadingly                                  open-remind     open                  31.12.2009     22.01.2011
-8     devmon goes purple                                                       open            fixed(alternate)      13.11.2009     13.11.2009
-6     cisco-2811 has wrong ifName oids                                         open-later      fixed                 19.02.2009     05.02.2010
-5     Wrong threshold calculation for Cisco templates                          open            fixed                 03.02.2009     03.02.2009
+9      Template exceptions sorted misleadingly                                 open-remind     open                  31.12.2009     22.01.2011
+8      devmon goes purple                                                      open            fixed(alternate)      13.11.2009     13.11.2009
+6      cisco-2811 has wrong ifName oids                                        open-later      fixed                 19.02.2009     05.02.2010
+5      Wrong threshold calculation for Cisco templates                         open            fixed                 03.02.2009     03.02.2009
                          
 TODO                         
-     Fix Huawei template                    
-     Document Transform Coltre, Sort, Eval                    
-     Intergate SNMPv3  
+       Fix Huawei template                    
+       Document Transform Coltre, Sort, Eval                    
+       Intergate SNMPv3  
