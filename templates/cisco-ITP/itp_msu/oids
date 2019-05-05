@@ -1,0 +1,8 @@
+cimrMsuTrafficRate	: .1.3.6.1.4.1.9.9.529.1.2.2.1.3	: Branch
+cimrMsuTrafficMaxRate	: .1.3.6.1.4.1.9.9.529.1.2.2.1.7	: Branch
+timestamp		: .1.3.6.1.4.1.9.9.529.1.2.2.1.8	: Branch
+cimrMsuTrafficMSUs	: .1.3.6.1.4.1.9.9.529.1.2.2.1.9	: Branch
+cimrMsuProcSlotNumber	: .1.3.6.1.4.1.9.9.529.1.2.1.1.8	: Branch
+cimrMsuProcBayNumber	: .1.3.6.1.4.1.9.9.529.1.2.1.1.9	: Branch
+cimrMsuProcid		: .1.3.6.1.4.1.9.9.529.1.2.1.1.2	: Branch
+cimrMsuProcReset	: .1.3.6.1.4.1.9.9.529.1.2.1.1.6	: Branch

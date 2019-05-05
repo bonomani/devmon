@@ -1,0 +1,5 @@
+sysUpTimeSecs   : MATH          : {sysUpTime} / 100
+UpTimeDiff	: MATH          : {sysUpTimeSecs} - {snmpEngineTime}
+UpTimeTxt	: ELAPSED	: {sysUpTimeSecs}
+snmpUpTimeTxt	: ELAPSED       : {snmpEngineTime}
+

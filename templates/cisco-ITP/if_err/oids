@@ -1,0 +1,11 @@
+ifName		: .1.3.6.1.2.1.31.1.1.1.1	: branch
+ifAlias		: .1.3.6.1.2.1.31.1.1.1.18	: branch
+ifSpeed		: .1.3.6.1.2.1.2.2.1.5		: branch
+#ifInOctets	: .1.3.6.1.2.1.2.2.1.10		: branch
+# 64 bit couter ifHCInOctets
+ifInOctets	: .1.3.6.1.2.1.31.1.1.1.6	: branch
+ifInErrors	: .1.3.6.1.2.1.2.2.1.14		: branch
+#ifOutOctets	: .1.3.6.1.2.1.2.2.1.16		: branch
+# 64 bit couter ifHCOutOctets
+ifOutOctets	: .1.3.6.1.2.1.31.1.1.1.10	: branch
+ifOutErrors	: .1.3.6.1.2.1.2.2.1.20		: branch

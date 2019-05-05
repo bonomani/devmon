@@ -1,0 +1,16 @@
+<b>Errors:</b>
+EEM error Trigger: yellow={ifInEps.thresh:yellow}, red={ifInEps.thresh:red} 
+EEM Interface State: red={ifEemActive.thresh:red}
+
+TABLE:rrd(DS:ds0:ifInEps:GAUGE)
+Ifc name|Total Errors in|Delta Errors in
+{ifName}{ifEemActive.color}{ifAliasBox}{ifEemActive.errors}|{ifInErrors}|{ifInEps.color}{ifInEps}{ifInEps.errors}
+
+Note: 
+Error rates are per second, averaged over a 60 second interval.
+EEM errors match up with triggers set in EEM scripts using the inInErrors delta counter.
+The EEM script on the routers watch the counter and triggers the script when it crosses 10 errors.
+Then it holds the path out of OSPF till the error count drops back to Zero. This test will go yellow when
+one error is counted then turn red at 10. This is so we can see events leading up to the script
+triggering then monitor till it clears.
+Alert Will also trigger when the interface discription is set to ****EEM Interface SHUTDOWN. This will catch EEM scripts that have not reset the interface.

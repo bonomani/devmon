@@ -1296,7 +1296,7 @@ require Exporter;
 
      # Get largest speed type
       my $speed = 1; # Start low: 1 bps
-      $speed *= 1000 while $bps > ($speed * 1000);
+      $speed *= 1000 while $bps >= ($speed * 1000);
       my $unit = $speeds{$speed};
 
      # Measure to 2 decimal places
@@ -2545,10 +2545,18 @@ require Exporter;
            # This flag only causes errors (with the color) to be displayed
            # Can also modifies global color
             elsif ($flag eq 'errors') {
-              $line =~ s/\{$root\}/#ERRORONLY#/;
+#              $line =~ s/\{$root\}/#ERRORONLY#/;
 
              # Skip this value if it is green
-              next if !defined $color or $color eq 'green' or $color eq 'blue';
+#              next if !defined $color or $color eq 'green' or $color eq 'blue';
+             if ( ! defined $color  or  $color eq 'green' or $color eq 'blue') {
+               $line= '#ERRORONLY#'    if $line eq "{$root}" ;
+               $line=~ s/\{$root\}// ;
+               next ;
+             } else {
+               $line=~ s/\{$root\}// ;
+             }
+
 
              # Get oid msg and replace any inline oid dependencies
               my $oid_msg = $oid_h->{'msg'};
@@ -2795,7 +2803,6 @@ require Exporter;
           $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
         }
       }
-
       next if !defined $threshes;
 
       my $match = 0;
@@ -2998,7 +3005,9 @@ require Exporter;
             next;
           }
 
-          if($dep_oid_h->{'error'}{$leaf}) {
+          my $error = ($dep_oid_h->{'repeat'}) ?
+            $dep_oid_h->{'error'}{$leaf} : $dep_oid_h->{'error'};
+          if($error) {
             $oid_h->{'val'}{$leaf}   = 'Inherited error';
             $oid_h->{'time'}{$leaf}  = time;
             $oid_h->{'color'}{$leaf} = 'clear';
@@ -3015,7 +3024,7 @@ require Exporter;
             next;
           }
           if(defined $regex and $val !~ /$regex/) {
-            $oid_h->{'val'}{$leaf}   = 'Regex mismatch';
+            $oid_h->{'val'}{$leaf}   = "Regex $regex mismatch: $val";
             $oid_h->{'time'}{$leaf}  = time;
             $oid_h->{'color'}{$leaf} = 'yellow';
             $oid_h->{'error'}{$leaf} = 1;
@@ -3083,7 +3092,7 @@ require Exporter;
         }
 
         elsif(defined $regex and $regex ne '' and $val !~ /$regex/) {
-          $oid_h->{'val'}   = 'Regex mismatch';
+          $oid_h->{'val'}   = "Regex $regex mismatch: $val";
           $oid_h->{'time'}  = time;
           $oid_h->{'color'} = 'clear';
           $oid_h->{'error'} = 1;

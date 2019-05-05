@@ -1,0 +1,4 @@
+UpTime           : MATH          : {hrSystemUptime} / 100
+UpTimeTxt        : ELAPSED       : {UpTime}
+CPUIndex         : INDEX         : {hrProcessorLoad}
+

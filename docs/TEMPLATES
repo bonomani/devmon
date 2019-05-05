@@ -608,17 +608,19 @@
     floating point numerical value [i.e. 1, 5.33, 0.001, etc], and 's'
     is a alphanumeric string):
 
-       n     :   Source alias is equal to this amount
-       >n    :   Source alias is greater than this amount
-       >=n   :   Source alias is greater than or equal to this amount
-       <n    :   Source alias is less than this amount
-       <=n   :   Source alias is less than or equal to this amount
-       a - b :   Source alias is between 'a' and 'b', inclusive
-       's'   :   Source alias matches this string exactly (case sensitive)
-       "s"   :   Source alias matches this regular expression (non-anchored)
+       n       : Source alias is equal to this amount
+       >n      : Source alias is greater than this amount
+       >=n     : Source alias is greater than or equal to this amount
+       <n      : Source alias is less than this amount
+       <=n     : Source alias is less than or equal to this amount
+       a - b   : Source alias is between 'a' and 'b', inclusive
+       's'     : Source alias matches this string exactly (case sensitive)
+       "s"     : Source alias matches this regular expression (non-anchored)
+       default : Default value for the target alias, used in case none of
+                 the other statements matc
 
     Note that switch statements are applied in a left to right order;
-    so if you have a value that matches the target value on multiple
+    so if you have a value that matches the source value on multiple
     switch statements, the leftmost statement will be the one applied.
 
     The switch statement can also assign values from another OID 

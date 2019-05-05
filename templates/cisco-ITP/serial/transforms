@@ -1,0 +1,1 @@
+moduleStatus_T : SWITCH : {moduleStatus} 1 = other, 2 = ok, 3 =  minorFault, 4 = majorFault

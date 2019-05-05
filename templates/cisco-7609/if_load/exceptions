@@ -1,0 +1,3 @@
+ifName : alarm  : .+
+ifName : ignore : Nu.+|Vl.+|VLAN.+|Gi7/47|Gi7/48
+ifAdminStatNum : ignore : 2

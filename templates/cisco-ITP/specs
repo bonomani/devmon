@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: ITP
+snmpver	: 2
+sysdesc : s72033_rp-ITP

@@ -1,0 +1,5 @@
+<b>Interface status:</b>
+
+TABLE:
+If name|Speed|Duplex|State
+{ifName}{ifAliasBox}|{ifSpeed}|{ifDuplex.color}{ifDuplex}{ifDuplex.errors}|{ifStat.color}{ifStat}{ifStat.errors}

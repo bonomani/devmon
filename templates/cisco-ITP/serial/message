@@ -1,0 +1,7 @@
+Serial :
+
+TABLE:
+Slot | Physical Descr | Hardware Rev | Firmware Rev | Software Rev |  System serial number | Model Name |  module Status
+{moduleIndex} | {entPhysicalDescr} | {entPhysicalHardwareRev} | {entPhysicalFirmwareRev} | {entPhysicalSoftwareRev} | {entPhysicalSerialNum} | {entPhysicalModelName} | {moduleStatus_T}
+
+

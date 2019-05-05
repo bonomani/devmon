@@ -353,7 +353,7 @@ require Exporter;
 
       do_log("Syntax error in $specs_file at line $.", 0) and next
         if !defined $vars{$var};
-      eo_log("No value assigned to '$var'", 0) if !defined $val;
+      do_log("No value assigned to '$var'", 0) if !defined $val;
 
      # Check our snmp version
       if($var eq 'snmpver') {
@@ -577,7 +577,8 @@ require Exporter;
 
         $func_type eq 'math' and do {
           $temp =~ s/:\s*\d+\s*$//;
-          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(\.\d*)?|\(|\)//g;
+#          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(\.\d*)?|\(|\)|abs\(//g;
+          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(?:\.\d*)?|\(|\)|abs\(//g;
           $temp =~ s/\s*//;
           do_log("MATH transform uses only math/numeric symbols and an " .
                  "optional precision number, $temp did not pass, at $trans_file, line $l_num", 0)

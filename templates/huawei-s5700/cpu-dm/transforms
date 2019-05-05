@@ -1,0 +1,5 @@
+hwSysRebootReasonTxt         : SWITCH        : {hwSysRebootReason} 1=manual,2=powerOff,3=unknown,4=schedule,5=software
+UpTime                       : MATH          : {snmpEngineTime} + ((( {sysUpTime} - ({snmpEngineTime} x 100) + 4294967295 ) % 4294967295 ) / 100 )
+UpTimeTxt                    : ELAPSED       : {UpTime}
+#CPUIndex                     : SORT          : {hwEntityCpuUsage}
+

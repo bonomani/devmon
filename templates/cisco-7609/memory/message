@@ -1,0 +1,10 @@
+{mem_used_per.errors}
+Free memory:       {mem_free} bytes ({mem_free_per}%)
+Used memory:	   {mem_used} bytes ({mem_used_per}%) {mem_used_per.color}
+-------------     ----------------
+Total memory:      {mem_total} bytes (100%)
+
+
+Alarm threshold: yellow={mem_used_per.thresh:yellow}%,red={mem_used_per.thresh:red}%
+<!-- DEVMON to RRD Physical {mem_used_per}%
+-->

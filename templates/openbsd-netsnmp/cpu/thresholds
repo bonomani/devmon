@@ -1,0 +1,11 @@
+laLoad5	: red           : >10   : CPU utilization is very high
+laLoad5	: yellow        : >=5   : CPU utilization is high
+laLoad5	: green         :       : CPU utilization is nominal
+
+laLoad10 : red           : >10   : CPU utilization is very high
+laLoad10 : yellow        : >=5   : CPU utilization is high
+laLoad10 : green         :       : CPU utilization is nominal
+
+sysUpTimeSecs   : red           : <600  : Device rebooted recently. System uptime: {UpTimeTxt}
+sysUpTimeSecs   : yellow        : <5000 : Device rebooted recently. System uptime: {UpTimeTxt}
+sysUpTimeSecs   : green         :       : System uptime: {UpTimeTxt}

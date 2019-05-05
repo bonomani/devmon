@@ -1,0 +1,10 @@
+ifName		: .1.3.6.1.2.1.31.1.1.1.1	: branch
+ifAlias		: .1.3.6.1.2.1.31.1.1.1.18	: branch
+#ifInOctets	: .1.3.6.1.2.1.2.2.1.10		: branch
+# 64 bit counter ifHCInOctets
+ifInOctets	: .1.3.6.1.2.1.31.1.1.1.6	: branch
+ifInDiscards	: .1.3.6.1.2.1.2.2.1.13		: branch
+#ifOutOctets     : .1.3.6.1.2.1.2.2.1.16        : branch
+# 64 bit counter ifHCOutOctets
+ifOutOctets     : .1.3.6.1.2.1.31.1.1.1.10      : branch
+ifOutDiscards	: .1.3.6.1.2.1.2.2.1.19		: branch

@@ -1,0 +1,3 @@
+moduleStatus	: red		: other|majorFault
+moduleStatus	: yellow	: minorFault
+moduleStatus	: green		: ok

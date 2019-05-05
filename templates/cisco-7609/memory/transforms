@@ -1,0 +1,3 @@
+mem_total : MATH : {mem_used} + {mem_free}
+mem_used_per : MATH : ({mem_used}*100) / {mem_total} : 0
+mem_free_per : MATH : ({mem_free}*100) / {mem_total} : 0

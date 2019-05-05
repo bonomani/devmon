@@ -1,0 +1,4 @@
+sysUpTimeSecs   : MATH          : {sysUpTime} / 100
+UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
+
+

@@ -1,5 +1,0 @@
-
-sysDescr        : .1.3.6.1.2.1.1.1.0			: leaf
-sysReloadReason	: .1.3.6.1.4.1.9.2.1.2.0		: leaf
-sysUpTime	: .1.3.6.1.2.1.1.3.0			: leaf
-CPUTotal5Min	: .1.3.6.1.4.1.9.9.109.1.1.1.1.5.7	: leaf

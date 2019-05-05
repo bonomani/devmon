@@ -1,0 +1,18 @@
+###### Transforms #######
+# Create a human-readable ifc speed
+ifSpeed_T       : MATH          : {ifHighSpeed}*1000000
+ifHighSpeed_T   : SPEED         : {ifSpeed_T}
+# Get bit speed delta (so we dont have to provide custom delta limit)
+ifInOps_T       : DELTA         : {ifHCInOctets}
+ifOutOps_T      : DELTA         : {ifHCOutOctets}
+# Convert our octets delta into bits per second
+ifInBps_T       : MATH          : {ifInOps_T}*8
+ifOutBps_T      : MATH          : {ifOutOps_T}*8
+# Make some easily readable speed variables
+ifInSpeed_T     : SPEED         : {ifInBps_T}
+ifOutSpeed_T    : SPEED         : {ifOutBps_T}
+# Now determine our percentage load, based on traffic and ifc speed
+ifInLoad_T      : MATH          : ({ifInBps_T} / {ifSpeed_T})*100
+ifOutLoad_T     : MATH          : ({ifOutBps_T} / {ifSpeed_T})*100
+# Create an alias in a bracketed box, or nothing if alias is blank
+ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/

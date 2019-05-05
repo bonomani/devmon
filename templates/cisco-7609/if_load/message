@@ -1,0 +1,8 @@
+####### Message #######
+<b>Interface error rates:</b>
+Input load:  yellow={ifInLoad_T.thresh:yellow}%,red={ifInLoad_T.thresh:red}%
+Output load: yellow={ifOutLoad_T.thresh:yellow}%,red={ifOutLoad_T.thresh:red}%
+#TABLE:rrd(DS:ds0:ifHCInOctets:COUNTER;DS:ds1:ifHCOutOctets:COUNTER)
+TABLE:
+Interface Name|Interface Speed|Rate in (load %)|Rate out (load %)
+{ifName}{ifAliasBox}|{ifHighSpeed_T}|{ifInLoad_T.color}{ifInSpeed_T}({ifInLoad_T}%){ifInLoad_T.errors}|{ifOutLoad_T.color}{ifOutSpeed_T} ({ifOutLoad_T}%){ifOutLoad_T.errors}

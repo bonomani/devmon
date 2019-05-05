@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 7609
+snmpver	: 2
+sysdesc : c7600s72033_rp-ADV

@@ -1,8 +1,0 @@
-
-hwEntityCpuUsage        : red           : >{hwEntityCpuUsageThreshold}          : CPU utilization is very high: {hwEntityCpuUsage}%
-hwEntityCpuUsage        : yellow        : >{hwEntityCpuUsageThresholdLow}       : CPU utilization is high: {hwEntityCpuUsage}%
-hwEntityCpuUsage        : green         :                                       : CPU utilization is nominal: {hwEntityCpuUsage}%
-
-sysUpTimeSecs           : red           : <600                                  : Device rebooted recently. System uptime: {UpTimeTxt}
-sysUpTimeSecs           : yellow        : <5000                                 : Device rebooted recently. System uptime: {UpTimeTxt}
-sysUpTimeSecs           : green         :                                       : System uptime: {UpTimeTxt}

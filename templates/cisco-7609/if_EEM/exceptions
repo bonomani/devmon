@@ -1,0 +1,2 @@
+ifName : only	: S.+|AT\d\/\d/\d|PO\d\/\d\/\d|EO0/0
+ifName : alarm  : S.+|AT\d\/\d/\d|PO\d\/\d\/\d

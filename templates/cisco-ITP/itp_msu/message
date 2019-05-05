@@ -1,0 +1,7 @@
+<b>Processor MSU Report:</b>
+
+Processor MSU Load: Yellow={TrafficMsu.thresh:yellow}, red={TrafficMsu.thresh:red} 
+
+TABLE:rrd(DS:ds0:cimrMsuTrafficRate:GAUGE)
+Index | Processor | Direction | MSUs | TrafficMsus
+{procIndex}|Processor {PROCSLT}/x|{DIRECTION}|{cimrMsuTrafficRate}|{TrafficMsu.color}{TrafficMsu}

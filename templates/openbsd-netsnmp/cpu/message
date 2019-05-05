@@ -1,0 +1,21 @@
+Host: {sysDescr}
+
+{sysUpTimeSecs.color} Uptime: {UpTimeTxt}
+
+Load Averages: 
+
+1  minute : {laLoad1}
+5  minute : {laLoad5} {laLoad5.color}
+10 minute : {laLoad10} {laLoad10.color}
+
+
+CPU utilization:
+
+User    : {CpuUser} 
+Nice    : {CpuNice}
+System  : {CpuSystem}
+CpuIdle : {CpuIdle}
+
+
+<!-- DEVMON to RRD <br>CPU 5 min average: {hrProcessorLoad}
+-->

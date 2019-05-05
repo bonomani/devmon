@@ -1,0 +1,8 @@
+
+CPUTotal5Min	: red		: >70	: CPU utilization is very high: {CPUTotal5Min}%
+CPUTotal5Min	: yellow	: >30	: CPU utilization is high: {CPUTotal5Min}%
+CPUTotal5Min	: green		:	: CPU utilization is nominal: {CPUTotal5Min}%
+
+snmpEngineTime  : red           : <600  : Device rebooted recently. System uptime: {UpTimeTxt}
+snmpEngineTime  : yellow        : <5000 : Device rebooted recently. System uptime: {UpTimeTxt}
+snmpEngineTime  : green         :       : System uptime: {UpTimeTxt}

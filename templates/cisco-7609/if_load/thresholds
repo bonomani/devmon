@@ -1,0 +1,4 @@
+ifInLoad_T	: yellow	: 85	: {ifName}{ifAliasBox} load is high
+ifInLoad_T	: red		: 95	: {ifName}{ifAliasBox} load is very high
+ifOutLoad_T	: yellow	: 85	: {ifName}{ifAliasBox} load is high
+ifOutLoad_T	: red		: 95	: {ifName}{ifAliasBox} load is very high

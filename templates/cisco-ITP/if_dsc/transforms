@@ -1,0 +1,14 @@
+# Get bit speed delta (so we dont have to provide custom delta limit)
+ifInOps         : DELTA         : {ifInOctets}
+ifOutOps        : DELTA         : {ifOutOctets}
+# Convert our octets delta into bits per second
+ifInBps         : MATH          : {ifInOps}*8
+ifOutBps        : MATH          : {ifOutOps}*8
+# Do delta transform on all error counters
+ifInDps		: DELTA		: {ifInDiscards}
+ifOutDps	: DELTA		: {ifOutDiscards}
+# Perform error to traffic percentage calculations
+ifInDscPct	: MATH		: ({ifInDps} / {ifInBps})*100
+ifOutDscPct	: MATH		: ({ifOutDps} / {ifOutBps})*100
+# Create an alias in a bracketed box, or nothing if alias is blank
+ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/

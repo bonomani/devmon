@@ -1,0 +1,16 @@
+
+{sysUpTimeSecs.color}: Up for {snmpUpTimeTxt}  <small>(SNMP started {UpTimeDiff} seconds after the system up time of {UpTimeTxt})</small>
+{sysUpTimeSecs.color}: Last reboot due to {sysReloadReason}
+{CPUTotal5Min.color}: CPU usage: {CPUTotal5Min}%
+
+System description:
+{sysDescr}
+
+System Location:
+{sysLocation}
+
+{sysContact}
+
+<!--
+<br>CPU 5 min average: {CPUTotal5Min}
+-->

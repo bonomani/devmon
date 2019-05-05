@@ -1,0 +1,4 @@
+vendor	: packeteer
+model	: 7500
+snmpver	: 2
+sysdesc : Packeteer PacketShaper 8.3.1

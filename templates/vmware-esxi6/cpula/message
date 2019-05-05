@@ -1,9 +1,0 @@
-System description:
-{sysDescr}
-
-{sysUpTimeSecs.color}: Up for {UpTimeTxt}
-
-#TABLE:rrd(name:la; DS:la:hrProcessorLoad:GAUGE; )
-TABLE:rrd(DS:ds0:hrProcessorLoad:GAUGE; )
-Processor|Load
-{hrProcessorIndex}|{hrProcessorLoad}%

@@ -1,4 +1,0 @@
-sysUpTimeSecs    : MATH          : {sysUpTime} / 100
-UpTimeTxt        : ELAPSED       : {sysUpTimeSecs}
-
-hrProcessorIndex : INDEX         : {hrProcessorLoad}

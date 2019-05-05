@@ -1,0 +1,38 @@
+<html>
+<b>Crypto:</b>
+
+<table border='1' cellpadding='5'>
+	<tr>
+		<th>Name</th>
+		<th>Value</th>
+	</tr>	
+	<tr>
+		<td># Active accelerators</td>
+		<td>{ccaGlobalNumActiveAccelerators}</td>
+	</tr>
+        <tr>
+                <td># Non active accelerators</td>
+                <td>{ccaGlobalNumNonOperAccelerators}</td>
+        </tr>
+        <tr>
+                <td># Octects in</td>
+                <td>{ccaGlobalInOctets}</td>
+        </tr>
+        <tr>
+                <td># Octets out</td>
+                <td>{ccaGlobalOutOctets}</td>
+        </tr>
+        <tr>
+                <td># Packets in</td>
+                <td>{ccaGlobalInPkts}</td>
+        </tr>
+        <tr>
+                <td># Packets out</td>
+                <td>{ccaGlobalOutPkts}</td>
+        </tr>
+        <tr>
+                <td># Packets error</td>
+                <td>{ccaGlobalOutErrPkts}</td>
+        </tr>
+</table>
+

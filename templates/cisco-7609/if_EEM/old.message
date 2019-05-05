@@ -1,0 +1,15 @@
+<b>Errors:</b>
+
+EEM error Trigger: yellow={ifInEps.thresh:yellow}, red={ifInEps.thresh:red} 
+
+TABLE:rrd(DS:ds0:ifInEps:GAUGE)
+Ifc name|Total Errors in|Delta Errors in
+{ifName}{ifAliasBox}|{ifInErrors}|{ifInEps.color}{ifInEps}
+
+Note: 
+Error rates are per second, averaged over a 60 second interval.
+EEM errors match up with triggers set in EEM scripts using the inInErrors delta counter.
+The EEM script on the routers watch the counter and triggers the script when it crosses 10 errors.
+Then it holds the path out of OSPF till the error count drops back to Zero. This test will go yellow when
+one error is counted then turn red at 10. This is so we can see events leading up to the script
+triggering then monitor till it clears.

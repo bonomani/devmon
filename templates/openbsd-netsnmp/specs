@@ -1,0 +1,4 @@
+vendor	: openbsd
+model	: netsnmp
+snmpver	: 2
+sysdesc : OpenBSD
