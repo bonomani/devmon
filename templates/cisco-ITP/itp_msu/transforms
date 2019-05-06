@@ -1,6 +1,6 @@
 procIndex	: INDEX	: {cimrMsuTrafficRate}{cimrMsuProcReset}
 TrafficMsu	: DELTA : {cimrMsuTrafficMSUs}
-TXRX		: SUBSTR : {procIndex} -1 1
+TXRX		: SUBSTR : {procIndex} 0 1
 DIRECTION	: SWITCH : {TXRX} 1 = RX MSUs, 2 = TX MSUs
 PROCN		: REGSUB : {procIndex} /\.[0-2]/$1/
 PROCSLT		: CHAIN	 : {PROCN} {cimrMsuProcSlotNumber}

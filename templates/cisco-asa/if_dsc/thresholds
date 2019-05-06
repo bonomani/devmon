@@ -1,6 +1,11 @@
 # Create thresholds for all the error rate counters
-# oid name	: color		: limit	: Error message
-ifInDscPct	: yellow	: 5	: {ifName}{ifAliasBox} - High input discard rate. ({ifInDscPct}%)
-ifInDscPct	: red		: 10	: {ifName}{ifAliasBox} - Very high input discard rate. ({ifInDscPct}%)
-ifOutDscPct	: yellow	: 5	: {ifName}{ifAliasBox} - High output discard rate ({ifOutDscPct}%)
-ifOutDscPct	: red		: 10	: {ifName}{ifAliasBox} - Very high output discard rate ({ifOutDscPct}%)
+# oid name      : color         : limit : Error message
+ifInDscPct      : yellow        : 1     : {ifName}{ifAliasBox} - Low input ratio of discard rate to total traffic rate: {ifInDscPct}%
+ifInDscPct      : red           : 5     : {ifName}{ifAliasBox} - High input ratio of discard rate to total traffic rate: {ifInDscPct}%
+ifOutDscPct     : yellow        : 1     : {ifName}{ifAliasBox} - Low output ratio of discard rate to total traffic rate: {ifOutDscPct}%
+ifOutDscPct     : red           : 5     : {ifName}{ifAliasBox} - High output ratio of discard rate to total traffic rate: {ifOutDscPct}%
+
+ifInDps         : yellow        : 2     : {ifName}{ifAliasBox} - Low input discard rate: {ifInDps}p/s
+ifInDps         : red           : 10    : {ifName}{ifAliasBox} - High input discard rate: {ifInDps}p/s
+ifOutDps        : yellow        : 2     : {ifName}{ifAliasBox} - Low output discard rate: {ifOutDps}p/s
+ifOutDps        : red           : 10    : {ifName}{ifAliasBox} - High output discard rate: {ifOutDps}p/s
