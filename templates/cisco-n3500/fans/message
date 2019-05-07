@@ -1,0 +1,3 @@
+TABLE:
+Name|Model|Serial|Class|Status
+{cefcFanTrayentPhysicalName}|{cefcFanTrayentPhysicalModelName}|{cefcFanTrayentPhysicalSerialNum}|{cefcFanTrayentPhysicalClassTxt}|{cefcFanTrayOperStatusTxt.color}{cefcFanTrayOperStatusTxt} {cefcFanTrayOperStatusTxt.errors}

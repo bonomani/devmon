@@ -133,18 +133,6 @@ $Id: README 190 2011-01-14 13:32:06Z buchanmilne $
 r256+Added Features: This code is based on the latest r256
 This is a work in progress, changes can occur without notice
 
-Main results
-- Cisco, Wmware, Huawei templates update
-  - Cisco r1800, r1900, r2800, r2900, sw2940, sw2950, sw2960, sw3750
-    sw3850, sw3650, swIE, rISR
-  - Interfaces graphs are ordered correctly
-  - Layer 2 interfaces state can be monitored easily
-  - Correct all wrong calculations of traffic
-  - Alarming on relative and absolute thresholds for traffic
-  - Fan, Power and Module(serial) are monitored
-- New "Blue" color for disabled tests
-- Multiple tables support in a test with graph
-
 New Features
 - New tramsforms: 
   - Coltree : To collect data when there are "parent" oid   
@@ -158,37 +146,55 @@ New Features
 - Table Sort: An option for a table. Display a table based on the
               sorted oid value (like an oid transformed by the 
               new SORT transform !) 
+- New "Blue" color for disabled tests 
+- Multiple tables support in a test with graph
+
+Template Update and Maintained:
+- Cisco
+  - Cisco r1800, r1900, r2800, r2900, sw2940, sw2950, sw2960, sw3750
+    sw3850, sw3650, swIE, rISR, asa
+- Wmware
+  - esxi6
+- Huawei
+- For all template:
+  - Interfaces graphs are ordered correctly
+  - Layer 2 interfaces state can be monitored easily
+  - Correct all wrong calculations of traffic
+  - Alarming on relative and absolute thresholds for traffic
+  - Fan, Power and Module(serial) are monitored
              
 Major bugs resolved
-- Threshold bug : 20% speed-up in some cases
+- Threshold bug (autovivification bug)
 
 Minor bugs resolved
 - If a test has multiple table, only last can be graphed
 - Ability to assign empty value for (T)SWITCH
 - Ability to graph, even not all values are defined
 - Apply some patch (some with an alternate patch)
+- Trim files for a better experience
+- Optimized regexp for speed
 
 Workarounds
 - Multiple tables support: only 1 (but anyone) can be graphed
 
-=====================================================================
+===========================================================================================================================================
 
 PATCH                                                                  Sourceforge Status   this release Status          
-38     Template for cisco nexus 3500                                           open            open                   07.06.2018 07.06.2018
-37     Allow for OIDS with flag in message part of a threshold definition      open            open                   01.04.2017 01.04.2017
+38     Template for cisco nexus 3500                                           open            fixed                  07.06.2018 07.06.2018
+37     Allow for OIDS with flag in message part of a threshold definition      open            fixed                  01.04.2017 01.04.2017
 36     Enhance REGSUB transformation capabilities                              open            fixed(alternate)       01.04.2017 01.04.2017
-35     Replacement for function render_msg in module dm_tests.pm               open            open                   17.03.2017 24.03.2017
+35     Replacement for function render_msg in module dm_tests.pm               open            wont/partial fix(bugs) 17.03.2017 24.03.2017
 34     Replace an OID errors flag by an empty string incase of a green colour  open            fixed                  26.02.2017 04.03.2017
 33     Patch for the (T)SWITCH transform to be able to assign empty string     open            fixed                  24.02.2017 24.02.2017
-32     Formatting of result of MATH transform                                  open            open                   06.02.2017 06.02.2017
+32     Formatting of result of MATH transform                                  open            reported in todo       06.02.2017 06.02.2017
 31     Fix typo in function name                                               open            fixed                  16.01.2017 16.01.2017
-30     Support for negative numbers in (T)SWITCH                               open            open                   13.01.2015 13.01.2015
+30     Support for negative numbers in (T)SWITCH                               open            reported in todo       13.01.2015 13.01.2015
 29     Document default in SWITCH transform                                    open            fixed                  14.11.2014 14.11.2014
-28     Allow function time in a MATH transform                                 open            open                   22.10.2014 22.10.2014
+28     Allow function time in a MATH transform                                 open            wont(use eval trans)   22.10.2014 22.10.2014
 27     Add TABLE:sort option                                                   open            fixed(alternate)       26.08.2014 26.08.2014
-26     Add transform SET                                                       open            open                   18.08.2014 18.08.2014
+26     Add transform SET                                                       open            fixed(incompleted)     18.08.2014 18.08.2014
 25     Fix bug #13                                                             open            fixed(alternate)       25.06.2014 25.06.2014
-24     Align columns of a TABLE to the right side                              open            open                   23.10.2013 23.10.2013
+24     Align columns of a TABLE to the right side                              open            reported in todo       23.10.2013 23.10.2013
 23     Consistent notation OIDs                                                open            fixed/alternate)       04.01.2013 04.01.2013
 22     Templates for Cisco 7609 and ITP                                        open            fixed                  29.06.2012 29.06.2012
 21     Extend capabilites of transform REGSUB                                  open            fixed(alternate)       10.01.2012 10.01.2012
@@ -196,36 +202,64 @@ PATCH                                                                  Sourcefor
 17     Fix syntax check of the DELTA transform                                 open            fixed(alternate)       02.01.2012 02.01.2012
 16     Change output of SPEED transform                                        open            fixed                  02.01.2012 02.01.2012
 15     Improve syntax check DELTA transform                                    open            fixed(alternate)       02.01.2012 02.01.2012
-14     Layout of devmon statistics in Xymon, test dm                           open            open                   02.01.2012 02.01.2012
+14     Layout of devmon statistics in Xymon, test dm                           open            fixed                  02.01.2012 02.01.2012
 13     Template for OpenBSD using Net-SNMP                                     open            fixed                  09.08.2011 09.08.2011
 12     snmpEngineTime vs sysUpTimeSecs over 497 days                           open            fixed(alternate)       07.03.2011 07.03.2011
 11     Brocade SAN switch template                                             open            wont(see sf comment)   07.08.2010 07.08.2010
 10     SUBSTR negative                                                         open-remind     wont fix(disp prob)    04.03.2010 22.01.2011
 9      New templates for cisco and hp                                          open            fixed(asa+ps) wont:hp  16.11.2009 16.11.2009
-2      Cisco Template for Class Based Weighted Fair Qeueing (QoS)              open            open                   06.10.2008 06.10.2008
+2      Cisco Template for Class Based Weighted Fair Qeueing (QoS)              open            fixed                  06.10.2008 06.10.2008
               
 FEATURE REQUEST                         
-10     New templates for other devices                                         open            open/part. fixed(1/3)  29.09.2016 29.09.2016
-9      Allow for empty repeater-type OIDs                                      open            open                   05.06.2012 05.06.2012
-8      exceptions based on other oid values                                    open            open                   19.04.2012 19.04.2012
-7      Share templates for similar devices                                     open            open                   22.01.2010 22.01.2010
-3      Use OID value in threshold comparison                                   open            open                   31.12.2008 04.04.2011
-2      SNMP V3 support                                                         open            open                   17.10.2008 17.10.2008
+10     New templates for other devices                                         open            wont/part. fixed(1/3)  29.09.2016 29.09.2016
+9      Allow for empty repeater-type OIDs                                      open            reported in todo       05.06.2012 05.06.2012
+8      exceptions based on other oid values                                    open            reported in todo       19.04.2012 19.04.2012
+7      Share templates for similar devices                                     open            reported in todo       22.01.2010 22.01.2010
+3      Use OID value in threshold comparison                                   open            reported in todo       31.12.2008 04.04.2011
+2      SNMP V3 support                                                         open            reported in todo       17.10.2008 17.10.2008
                          
                          
 BUG                         
 16     Some interface of cisco Router do not appear                            open            nothing to do          20.09.2015 15.03.2017
-15     MATH transform fails if with both repeaters and non-repeaters           open            fixed                   22.10.2014 22.10.2014
-14     Cisco-6509 wrong oids for serial                                        open-later      open                   21.12.2011 03.01.2013
+15     MATH transform fails if with both repeaters and non-repeaters           open            fixed                  22.10.2014 22.10.2014
+14     Cisco-6509 wrong oids for serial                                        open-later      wont(cannot test)      21.12.2011 03.01.2013
 13     Thresholds remain undefined                                             open            fixed                  30.08.2011 30.08.2011
 12     New templates for Cisco 3750 switch                                     open            fixed(alternate)       01.02.2011 01.02.2011
-10     Many templates share "sysdesc" in specs                                 open            open                   22.01.2010 22.01.2010
-9      Template exceptions sorted misleadingly                                 open-remind     open                   31.12.2009 22.01.2011
+10     Many templates share "sysdesc" in specs                                 open            wont                   22.01.2010 22.01.2010
+9      Template exceptions sorted misleadingly                                 open-remind     reported in todo       31.12.2009 22.01.2011
 8      devmon goes purple                                                      open            fixed(alternate)       13.11.2009 13.11.2009
 6      cisco-2811 has wrong ifName oids                                        open-later      fixed                  19.02.2009 05.02.2010
 5      Wrong threshold calculation for Cisco templates                         open            fixed                  03.02.2009 03.02.2009
+
+===========================================================================================================================================
                          
 TODO                         
+Priority 1: Sourceforge open
+       Integrate SNMPv3: need to analyse work done by StefCoene (see fork)
+       Support for negative numbers in (T)SWITCH: Parse mathematical expression simply....: Need more work
+       Format display (SUBSTR negative, Align columns of a TABLE to the right side,  Formatting of result of MATH transform): Problems Alignement and Padding
+       Exceptions based on other oid values: now only PriOi: make it work for alternate oid
+       Template exceptions sorted misleadingly: need documentation clarification
+       Use OID value in threshold comparison: Nice to have (workaround is to do that is transform)
+       Share templates for similar devices: Lot of work!!!
+
+Priority 2: Fix current changes        
        Fix Huawei template: Power, Temperature                    
        Document Transform Coltre, Sort, Eval                    
-       Integrate SNMPv3  
+
+Priority 3: Other
+       Warn if autovivification (creates the hash if it do not exists, but it should not) and check if it does already make problem 
+       Make Table compatible with LEAF 
+       
+       
+
+FEATURE REQUEST
+
+       Better discovery (SF bug 10)
+       Multiple graph in a test
+
+HELP NEEDED
+      
+       Template not listed above cannot be test: please help to updated: take a look at template liste above that are maintained! 
+       Template exceptions sorted misleadingly: need documentation clarification: I dont used it: I need concrate case!)
+

@@ -73,7 +73,7 @@ require Exporter;
 
      # Separate tests, perform individual test logic
       for my $test (split /,/, $tests) {
-        do_log("... for test $test on device $device ($vendor-$model)",2) if $g{debug};
+        do_log("... for test $test on device $device ($vendor-$model)",2) if $g{'debug'};
 
        # Make sure test template exists
         do_log("Could not find test template for '$test' on $device", 0)
@@ -104,7 +104,7 @@ require Exporter;
                      defined $oids->{$oid}{'val'};
            # Only transform if we have dependent value, otherwise push onto end of queue (not a perfect solution, but better than before)
             if(ref $oids->{$oid}{trans_edata} eq "HASH" && ! defined $oids->{$oids->{$oid}{trans_edata}{dep_oid}}{val}) {
-                do_log("Skipping oid $oid until ".$oids->{$oid}{trans_edata}{dep_oid}." defined for $device") if $g{debug};
+                do_log("Skipping oid $oid until ".$oids->{$oid}{trans_edata}{dep_oid}." defined for $device") if $g{'debug'};
                 push @translist,($oid) unless $skiplist{$oid}++;
             } else {
                 transform($device, $oids, $oid, $thr);
@@ -283,7 +283,7 @@ require Exporter;
   
    # Extract our transform options
     my ($dep_oid, $limit) = ($1, $2 || 0) 
-      if $oid_h->{'trans_data'} =~ /\{(.+)\}(\s*:\s*(\d+))?/;
+      if $oid_h->{'trans_data'} =~ /\{(.+)\}(?:\s+:\s*(\d+))?/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Check our parent oids for any errors
@@ -323,9 +323,10 @@ require Exporter;
                 ($this_time - $last_time);
             }
            # Otherwise the counter was 64bit...
+           # In this case, a counter wrap is highly unlikely. A reset of the
+           # counters is a much more likely reason for this (apparent) wrap.
             elsif($last_data < 18446744073709551616) {
-              $delta = ($this_data + (18446744073709551616 - $last_data)) /
-                ($this_time - $last_time);
+              $delta = $this_data /  ($this_time - $last_time);
             }
 
            # Otherwise something is seriously wrong
@@ -399,9 +400,10 @@ require Exporter;
               ($this_time - $last_time);
           }
          # Otherwise the counter was 64bit...
+         # In this case, a counter wrap is highly unlikely. A reset of the
+         # counters is a much more likely reason for this (apparent) wrap.
           elsif($last_data < 18446744073709551616) {
-            $delta = ($this_data + (18446744073709551616 - $last_data)) /
-              ($this_time - $last_time);
+            $delta = $this_data / ($this_time - $last_time) ;
           }
 
          # Otherwise something is seriously wrong
@@ -457,7 +459,7 @@ require Exporter;
     my $precision = 2;
 
    # Extract our optional precision argument
-    $precision = $1 if $expr =~ s/\s*:\s*(\d+)\s*$//;
+    $precision = $1 if $expr =~ s/\s*:\s*(\d+)//;
     my $print_mask = '%.' . $precision . 'f';
 
    # Convert our math symbols to their perl equivalents
@@ -1358,6 +1360,33 @@ require Exporter;
 
   }
 
+ # Set a repeater OID to a constant (vector) value ###########################
+ # Define a repeater OID filled with constant values. The leaf values  start
+ # at 1, and incremetn by 1.
+  sub trans_set {
+    my ($device, $oids, $oid, $thr)= @_ ;
+    my $oid_h= \%{ $oids->{$oid} } ;
+
+    my (@Fields, $leaf ) ;
+
+ # Do not use the function validate_deps. As there are no parent OIDs, only
+ # constant values, it will have nothing to check and it will generate a
+ # leaf-type OID.
+    $oid_h->{'repeat'}=  1 ;		# Make a repeater-type OID
+    $oid_h->{'val'}   = {} ;		# Empty set of leafes
+    $oid_h->{'time'}  = {} ;
+
+#    $oid_h->{'trans_data'}=~ s/^\s+// ;	# Remove surrounding spaces
+#    $oid_h->{'trans_data'}=~ s/\s+$// ;
+    @Fields= split( /\s*,\s*/, $oid_h->{'trans_data'} ) ;
+    for ( $leaf= 1 ; $leaf <= @Fields ; $leaf++ ) {
+      $oid_h->{'val'}{$leaf} = $Fields[$leaf-1] ;
+      $oid_h->{'time'}{$leaf}= time ;
+    }  # of for
+
+    apply_thresh_rep( $oids, $thr, $oid ) ;
+  }  # of trans_set
+
 
 
  # Convert value to its appropriate bps-speed ################################
@@ -1679,7 +1708,7 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
     my $trans_data = $oid_h->{'trans_data'};
     my ($main_oid, $expr) = ($1,$2) 
-      if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[eg]*)\s*$/; 
+      if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[eg]*)/; 
 
    # Extract all our our parent oids from the expression, first
     my @dep_oids = $trans_data =~ /\{(.+?)\}/g;
@@ -1773,7 +1802,7 @@ require Exporter;
     my ($src_oid, $trg_oid) = $oid_h->{'trans_data'} =~ /\{(.+?)\}/g;
 
    # Validate our dependencies, have to do them seperately
-    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|') 
+    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$') 
       or return;
 
     my $src_h = \%{$oids->{$src_oid}};
@@ -2920,7 +2949,7 @@ require Exporter;
         $match = 1;
 
        # Determine if our thresholds are numeric or string based
-        if($thresh =~ /^(>|<|>=|<=|=)?\s*([+-]?\d+(\.\d+)?)$/) {
+        if($thresh =~ /^(>|<|>=|<=|=)?\s*([+-]?\d+(?:\.\d+)?)$/) {
           my ($op, $limit) = ($1, $2);
           $op = '>' if !defined $op;
           last if $op eq '>'  and $oid_val > $limit;
@@ -2996,7 +3025,7 @@ require Exporter;
         for my $thresh (split /\s*,\s*/, $threshes) {
           $match = 1;
          # Determine if our thresholds are numeric or string based
-          if($thresh =~ /^(>|<|>=|<=|=)?\s*([+-]?\d+(\.\d+)?)$/) {
+          if($thresh =~ /^(>|<|>=|<=|=)?\s*([+-]?\d+(?:\.\d+)?)$/) {
 
            # If our thresh is numeric and our data isnt, something
            # probably went wrong; dont do threshold tests
@@ -3171,14 +3200,14 @@ require Exporter;
       for my $dep_oid (@$dep_arr) {
         my $val = $oids->{$dep_oid}{'val'};
 
-        if(!defined $val) {
-          $oid_h->{'val'}   = 'No data.';
-          $oid_h->{'time'}  = time;
-          $oid_h->{'color'} = 'clear';
-          $oid_h->{'error'} = 1;
-        }
+#        if(!defined $val) {
+#          $oid_h->{'val'}   = 'No data.';
+#          $oid_h->{'time'}  = time;
+#          $oid_h->{'color'} = 'clear';
+#          $oid_h->{'error'} = 1;
+#        }
 
-        elsif($val eq 'wait') {
+        if($val eq 'wait') {
           $oid_h->{'val'}   = 'wait';
           $oid_h->{'time'}  = time;
           $oid_h->{'color'} = 'blue';

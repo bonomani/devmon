@@ -1,0 +1,8 @@
+cefcFRUPowerAdminStatusTxt : red : on|inlineAuto|inlineOn : {cefcFRUentPhysicalName} has status {cefcFRUPowerAdminStatusTxt}
+cefcFRUPowerAdminStatusTxt : yellow : powerCycle : {cefcFRUentPhysicalName} has status {cefcFRUPowerAdminStatusTxt}
+cefcFRUPowerAdminStatusTxt : green : admin off : {cefcFRUentPhysicalName} has status {cefcFRUPowerAdminStatusTxt}
+
+cefcFRUPowerOperStatusTxt : green : on|inlineAuto|inlineOn : {cefcFRUentPhysicalName} has status {cefcFRUPowerOperStatusTxt}
+cefcFRUPowerOperStatusTxt : yellow : powerCycle|onButFanFail : {cefcFRUentPhysicalName} has status {cefcFRUPowerOperStatusTxt}
+cefcFRUPowerOperStatusTxt : red : off.*|failed|onButInlinePowerFail : {cefcFRUentPhysicalName} has status {cefcFRUPowerOperStatusTxt}
+

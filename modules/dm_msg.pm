@@ -224,6 +224,14 @@ require Exporter;
     my $color = 'green';
     my $this_poll_time = $g{'snmppolltime'} + $g{'testtime'} +
       $g{'msgxfrtime'};
+    my $snmp_poll_time= sprintf( "%3d   [s] (%5.3f)",
+      $g{'snmppolltime'}, $g{'snmppolltime'}/$this_poll_time ) ;
+    my $test_time= sprintf( "%3d   [s] (%5.3f)",
+      $g{'testtime'}    , $g{'testtime'}    /$this_poll_time ) ;
+    my $msg_xfr_time= sprintf( "%3d   [s] (%5.3f)",
+      $g{'msgxfrtime'}  , $g{'msgxfrtime'}  /$this_poll_time ) ;
+    $this_poll_time= sprintf( "%3d   [s]", $this_poll_time ) ;
+
 
    # Determine our number of clear msgs sent
     my $num_clears = 0;
@@ -237,21 +245,20 @@ require Exporter;
                   "Node number:      $g{'my_nodenum'}\n"   .
                   "Process ID:       $g{'mypid'}\n"        .
                   "\n"                                     .
-                  "Cycle time:       $g{'cycletime'}\n"    .
-                  "Dead time:        $g{'deadtime'}\n"     .
+                  "Cycle time:       $g{'cycletime'} [s]\n".
+                  "Dead time:        $g{'deadtime'} [s]\n" .
                   "\n"                                     .
                   "Polled devices:   $g{'numdevs'}\n"      .
                   "Polled tests:     $g{'numtests'}\n"     .
                   "Avg tests/node:   $g{'avgtestsnode'}\n" .
                   "# clear msgs:     $num_clears\n"        .
+                  "BB msg xfer size: $g{'sentmsgsize'}\n"  .
                   "\n"                                     .
-                  "SNMP test time:   $g{'snmppolltime'}\n" .
-                  "Test logic time:  $g{'testtime'}\n"     .
-                  "BB msg xfer time: $g{'msgxfrtime'}\n"   .
-		  "BB msg xfer size: $g{'sentmsgsize'}\n"  .
+                  "SNMP test time:   $snmp_poll_time\n"    .
+                  "Test logic time:  $test_time\n"         .
+                  "BB msg xfer time: $msg_xfr_time\n"      .
                   "This poll period: $this_poll_time\n"    .
-                  "\n"                                     .
-                  "Avg poll time:    ";
+                  "Avg poll time:   ";
 
    # Calculate avg poll time over the last 5 poll cycles
     my $num_polls = scalar @{$g{'avgpolltime'}};
@@ -262,7 +269,7 @@ require Exporter;
       my $avg_time;
       for my $time (@{$g{'avgpolltime'}}) { $avg_time += $time }
       $avg_time /= $num_polls;
-      $message .= "$avg_time seconds\n\n" .
+      $message .= sprintf( "%6.1f [s]\n\n", $avg_time ) .
         "Poll time averaged over 5 poll cycles.";
 
     }

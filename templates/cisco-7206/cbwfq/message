@@ -1,0 +1,3 @@
+TABLE:rrd(DS:ds0:cbQosCMPostPolicyByte64:COUNTER; DS:ds1:cbQosCMPostPolicyByte64:COUNTER)
+Qos Name|Qos Index|Traffic (bytes)
+{cbQosConfigName}|{cbQosConfigIndex}|{cbQosCMPostPolicyByte64}

@@ -1,0 +1,15 @@
+entPhysicalDescr	: .1.3.6.1.2.1.47.1.1.1.1.2	: branch
+#entPhysicalVendorType	: .1.3.6.1.2.1.47.1.1.1.1.3	: branch
+entPhysicalContainedIn	: .1.3.6.1.2.1.47.1.1.1.1.4	: branch
+entPhysicalClass	: .1.3.6.1.2.1.47.1.1.1.1.5	: branch
+entPhysicalParentRelPos	: .1.3.6.1.2.1.47.1.1.1.1.6	: branch
+entPhysicalName	: .1.3.6.1.2.1.47.1.1.1.1.7	: branch
+entPhysicalHardwareRev	: .1.3.6.1.2.1.47.1.1.1.1.8	: branch
+entPhysicalFirmwareRev	: .1.3.6.1.2.1.47.1.1.1.1.9	: branch
+entPhysicalSoftwareRev	: .1.3.6.1.2.1.47.1.1.1.1.10	: branch
+entPhysicalSerialNum	: .1.3.6.1.2.1.47.1.1.1.1.11	: branch
+entPhysicalMfgName	: .1.3.6.1.2.1.47.1.1.1.1.12	: branch
+entPhysicalModelName	: .1.3.6.1.2.1.47.1.1.1.1.13	: branch
+entPhysicalAlias	: .1.3.6.1.2.1.47.1.1.1.1.14	: branch
+entPhysicalAssetID	: .1.3.6.1.2.1.47.1.1.1.1.15	: branch
+entPhysicalIsFRU	: .1.3.6.1.2.1.47.1.1.1.1.16	: branch

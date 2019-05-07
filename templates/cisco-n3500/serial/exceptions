@@ -1,0 +1,3 @@
+entPhysicalClassTxt : only : chassis|module|stack
+#entPhysicalIsFRUTxt : only : true
+#entPhysicalClass

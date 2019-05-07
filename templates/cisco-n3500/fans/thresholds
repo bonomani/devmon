@@ -1,0 +1,3 @@
+cefcFanTrayOperStatusTxt : green : up 
+cefcFanTrayOperStatusTxt : yellow : unknown|warning : {cefcFanTrayentPhysicalName} is {cefcFanTrayOperStatusTxt}
+cefcFanTrayOperStatusTxt : red : down : {cefcFanTrayentPhysicalName} is {cefcFanTrayOperStatusTxt}

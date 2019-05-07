@@ -639,6 +639,15 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
           last CASE;
         };
 
+	$func_type eq 'set' and do {
+	  $temp = '{}'		if $temp =~ m/^\s*$/ ;
+	  $temp =~ tr/{}//cd ;		# Check for OID references
+	  do_log("SET transform requires a non-empty list of constant values at " .
+		 "$trans_file, line $l_num", 0)
+	  and next LINE	if $temp ne '' ;
+	  last CASE ;
+	};
+
         $func_type eq 'speed' and do {
 #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
          $temp =~ s/^\{\S+}//;

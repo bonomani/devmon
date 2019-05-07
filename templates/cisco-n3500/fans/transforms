@@ -1,0 +1,10 @@
+cefcFanTrayOperStatusTxt : SWITCH : {cefcFanTrayOperStatus} 1=unknown,2=up,3=down,4=warning
+cefcFanTrayIndex	: INDEX : {cefcFanTrayOperStatus}
+
+
+entPhysicalClassTxt     : SWITCH        : {entPhysicalClass} 1=other,2=unknown,3=chassis,4=backplane,5=container,6=powerSupply,7=fan,8=sensor,9=module,10=port,11=stack,12=cpu
+
+cefcFanTrayentPhysicalName : CHAIN : {cefcFanTrayIndex} {entPhysicalName}
+cefcFanTrayentPhysicalModelName : CHAIN : {cefcFanTrayIndex} {entPhysicalModelName}
+cefcFanTrayentPhysicalSerialNum : CHAIN : {cefcFanTrayIndex} {entPhysicalSerialNum}
+cefcFanTrayentPhysicalClassTxt : CHAIN : {cefcFanTrayIndex} {entPhysicalClassTxt}

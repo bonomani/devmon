@@ -1,0 +1,6 @@
+vendor	: cisco
+model	: n3500
+snmpver	: 2
+sysdesc : Cisco NX-OS.*n3500.*
+#Cisco NX-OS(tm) n3500, Software (n3500-uk9), Version 6.0(2)A7(2), RELEASE SOFTWARE Copyright (c) 2002-2012 by Cisco Systems, Inc.   Compiled 2/18/2016 8:00:00
+#SNMPv2-MIB::sysObjectID.0 = OID: SNMPv2-SMI::enterprises.9.12.3.1.3.1410
