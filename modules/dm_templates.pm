@@ -406,6 +406,9 @@ require Exporter;
 
       my ($oid, $number, $repeat) = split /\s*:\s*/, $line, 3;
 
+     # Trim right
+      $repeat =~ s/\s+$//;
+
      # Make sure we got all our variables and they are non-blank
       do_log("Syntax error in $oid_file at line $.", 0) and next
         if !defined $number or $number eq '' or
@@ -414,7 +417,7 @@ require Exporter;
      # Make sure repeater variable is valid
       $repeat = lc $repeat;
       do_log("Invalid repeater type '$repeat' for $oid in $oid_file", 0) 
-        and next if $repeat !~ /^leaf|branch$/;
+        and next if $repeat !~ /leaf|branch/;
 
      # Make sure this oid hasnt been defined before
       do_log("$oid defined more than once in $oid_file", 0) and next
@@ -478,6 +481,9 @@ require Exporter;
      # Render oid & function 
       my ($oid, $func_type, $func_data) = split /\s*:\s*/, $line, 3; 
 
+     # Trim right       
+      $func_data =~ s/\s+$//;
+
      # Make sure we got all our variables and they are non-blank
       do_log("Syntax error in $trans_file at line $l_num", 0) 
         and next if !defined $func_type or $func_type eq '';
@@ -489,13 +495,12 @@ require Exporter;
         if defined $tmpl->{'oids'}{$oid};
 
      # Make sure function is a real one and that it is formatted correctly
-#      $func_data =~ s/^\s+|\s+$//g;
       my $temp   = $func_data;
       $func_type = lc $func_type;
       CASE: {
         $func_type eq 'best' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
-#          $temp =~ s/^\{\S+?\}|\s*,\s*//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+          $temp =~ s/\{\S+\}|\s*,\s*//g;
           do_log("BEST transform uses only comma-delimited oids at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -503,8 +508,8 @@ require Exporter;
         };
 
         $func_type eq 'chain' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*//g; 
-#          $temp =~ s/^\{\S+?\}\s*\{\s*\S+?\s*\}\s*//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*//g; 
+          $temp =~ s/^\{\S+\}\s*\{\S+\}//;
           do_log("CHAIN uses exactly two dependent oids at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -512,8 +517,9 @@ require Exporter;
         };
 
         $func_type eq 'coltre' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
-#          $temp =~ s/^\{\S+?\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
+#          $temp =~ s/^\{\S+\}\s*\{\S+\}\s*(|:\s*\S+?|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}])//;
+$temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)}])//;
           do_log("COLTRE uses two dependent oids and optional arguments at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
@@ -521,8 +527,8 @@ require Exporter;
         };
 
         $func_type eq 'convert' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i; 
-#          $temp =~ s/^\{\S+?\}\s+(hex|oct)(\s*\d*)\s*//i;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i; 
+          $temp =~ s/^\{\S+\}\s+(hex|oct)(\s*\d*)//i;
           my ($type) = ($1);
           do_log("CONVERT transform uses only a single oid, a valid " .
                  "conversion type & an option pad length at " .
@@ -532,8 +538,8 @@ require Exporter;
         };
 
         $func_type eq 'date' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
-#          $temp =~ s/^\{\S+?\}|\s*,\s*//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+          $temp =~ s/^\{\S+\}//;
           do_log("DATE transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -541,8 +547,8 @@ require Exporter;
         };
 
         $func_type eq 'delta' and do {
-          $temp =~ s/\s*\{\s*\S+?\}(\s*\d*)\s*//;
-#           $temp =~ s/^\{\S+?\}(?:\s+\d+)?\s*//;
+#          $temp =~ s/\s*\{\s*\S+?\}(\s*\d*)\s*//;
+           $temp =~ s/^\{\S+\}(?:$|\s+\d+$)//;
           do_log("DELTA transform  only a single oid (plus an " .
                  "optional limit) at $trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -550,8 +556,8 @@ require Exporter;
         };
 
         $func_type eq 'elapsed' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s*//g; 
-#          $temp =~ s/^\{\S+?\}\s*//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*//g; 
+          $temp =~ s/^\{\S+\}//;
           do_log("ELAPSED transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -559,7 +565,7 @@ require Exporter;
         };
 
         $func_type eq 'sort' and do {
-          $temp =~ s/^\s*\{\S+?\}|\s*,\s*//g;
+          $temp =~ s/^\{\S+\}//;
           do_log("SORT transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
@@ -567,8 +573,8 @@ require Exporter;
         };
 
         $func_type eq 'index' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
-#          $temp =~ s/^\{\S+?\}|\s*,\s*//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+          $temp =~ s/^\{\S+\}//;
           do_log("INDEX transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -576,8 +582,8 @@ require Exporter;
         };
 
         $func_type eq 'match' and do {
-	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/\s*$//g; 
-#         $temp =~ s/^\{\S+?\}\s*\/.+\/\s*$//g;
+#	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/\s*$//g; 
+         $temp =~ s/^\{\S+\}\s+\/.+\///;
           do_log("MATCH transform should be a perl regex match at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -586,8 +592,8 @@ require Exporter;
 
         $func_type eq 'math' and do {
           $temp =~ s/:\s*\d+\s*$//;
-          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(\.\d*)?|\(|\)|abs\(//g;
-#          $temp =~ s/^\{\S+?\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(?:\.\d*)?|\(|\)//g;
+#          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(\.\d*)?|\(|\)|abs\(//g;
+          $temp =~ s/\{\S+\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(?:\.\d+)?|\(|\)//g;
           $temp =~ s/\s*//;
           do_log("MATH transform uses only math/numeric symbols and an " .
                  "optional precision number, $temp did not pass, at $trans_file, line $l_num", 0)
@@ -604,8 +610,8 @@ require Exporter;
         };
 
 	$func_type eq 'pack' and do {
-          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+.+)?//; 
-#          $temp =~ s/^\{\S+?\}\s+(\S+)(\s+.+)?//;
+#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+.+)?//; 
+          $temp =~ s/^\{\S+\}\s+(\S+)(\s+.+)?//;
           my $type = $1;
           my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
           do_log("PACK transform uses only a single oid,an encode type, " .
@@ -625,8 +631,8 @@ require Exporter;
         };
 
         $func_type eq 'regsub' and do {
-          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//; 
-#          $temp =~ s/^\{\S+?\}\s*\/.+\/.*\/[eg]*\s*$//;
+#          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//; 
+          $temp =~ s/^\{\S+\}\s*\/.+\/.*\/[eg]*//;
           do_log("REGSUB transform should be a perl regex substitution at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -634,16 +640,25 @@ require Exporter;
         };
 
         $func_type eq 'speed' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+         $temp =~ s/^\{\S+}//;
           do_log("SPEED transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
           last CASE;
         };
 
+        $func_type eq 'statistic' and do {
+          $temp =~ s/\{\S+\}\s+(?:avg|cnt|max|min|sum)//i; 
+          do_log("STATISTIC transform uses only a single oid at " .
+                 "$trans_file, line $l_num", 0)
+            and next LINE if $temp ne ''; 
+          last CASE;
+        };
+
         $func_type eq 'substr' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(\d+)\s*(\d*)\s*//; 
-#          $temp =~ s/^\{\S+?\}\s+(\d+)\s*(\d*)\s*//;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(\d+)\s*(\d*)\s*//; 
+          $temp =~ s/^\{\S+\}\s+\d+(?:$|\s+\d+)//;
           do_log("SUBSTR transform uses only a single oid, a numeric offset " .
                  "and an optional shift value at $trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -651,8 +666,8 @@ require Exporter;
         };
 
         $func_type eq 'switch' and do {
-          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
-#          $temp =~ s/^\{\S+?\}\s*//g;
+#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
+          $temp =~ s/^\{\S+\}\s*//;
           my $temp2 = '';
           for my $val (split /\s*,\s*/, $temp) {
             my ($if, $then);
@@ -684,8 +699,8 @@ require Exporter;
         };
 
         $func_type eq 'tswitch' and do {
-          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
-#          $temp =~ s/^\{\S+?\}\s*//g;
+#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
+          $temp =~ s/^\{\S+\}\s*//;
           my $temp2 = '';
           for my $val (split /\s*,\s*/, $temp) {
             my ($if, $then);
@@ -717,8 +732,8 @@ require Exporter;
         };
 
         $func_type eq 'unpack' and do {
-          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+".+")?//; 
-#          $temp =~ s/^\{\S+?\}\s+(\S+)(\s+".+")?//;
+#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+".+")?//; 
+          $temp =~ s/^\{\S+\}\s+(\S+)(?:\s+.+)?//;
           my $type = $1;
           my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
           do_log("UNPACK transform uses only a single oid,a decode type, " .
@@ -738,8 +753,8 @@ require Exporter;
         };
 
         $func_type eq 'worst' and do {
-          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
-#          $temp =~ s/^\{\S+?\}|\s*,\s*//g;
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+          $temp =~ s/\{\S+\}|\s*,\s*//g;
           do_log("WORST transform uses only comma-delimited oids at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne ''; 
@@ -867,6 +882,9 @@ require Exporter;
 
      # Render variables
       my ($oid, $color, $threshold, $msg) = split /\s*:\s*/, $line, 4; 
+     
+     # Trim msg
+      $msg =~ s/\s+$//;
 
      # If a threshold is blank, it should automatch any value
       $threshold = "_AUTOMATCH_" if !defined $threshold;
@@ -882,14 +900,16 @@ require Exporter;
      # Validate oid
       do_log("Undefined oid '$oid' referenced in $thresh_file at line $.", 0) 
         and next if !defined $tmpl->{'oids'}{$oid};
+     
 
      # Validate any oids in the message
       my $tmp = $msg;
       while(defined $tmp and $tmp =~ s/\{(.+?)}//) {
-        my $oid = $1;
-        do_log("Undefined oid '$oid' referenced in " .
+        my $oid  = $1;
+       	$oid=~ s/\..+$//;     # Remove flag, if any
+        do_log("Undefined oid '$1' referenced in " .
                "$thresh_file at line $.", 0) 
-        and next if !defined $tmpl->{'oids'}{$oid};
+        if !defined $tmpl->{'oids'}{$oid};
       } 
 
      # Add the threshold to the global hash
@@ -933,6 +953,9 @@ require Exporter;
 
      # Render variables
       my ($oid, $type, $data) = split /\s*:\s*/, $line, 3; 
+
+     # Trim right
+      $data =~ s/\s+$//;
 
      # Make sure we got all our variables and they are non-blank
       do_log("Syntax error in $except_file at line $.", 0) and next

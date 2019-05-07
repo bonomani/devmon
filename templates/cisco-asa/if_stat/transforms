@@ -7,8 +7,8 @@ ifStatSwitch      : SWITCH        : {ifStatSwitchAlias} 'on'=on,".*"={ifStatSwit
 
 ifStatAlarmingOn  : SWITCH        : {ifName} ".*"={ifName}
 
-ifStatSta1        : WORST         : {ifStatSwitch} {ifStatAlarmingOn}
-ifStatStat        : BEST          : {ifStatSta1} {ifAdminOperStat}
+ifStatSta1        : WORST         : {ifStatSwitch} , {ifStatAlarmingOn}
+ifStatStat        : BEST          : {ifStatSta1} , {ifAdminOperStat}
 
 ifAliasBox        : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
 ifIndex           : INDEX         : {ifName}

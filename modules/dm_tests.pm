@@ -542,7 +542,116 @@ require Exporter;
 
   }
 
+ # Extract a statistic from a repeater OID ###################################
+ # Extract a statistic from a repeater-type oid, resulting in a leaf-type oid.
+ # The statistic is one of 'min', 'avg', 'max', 'cnt' or 'sum'.
+ #
+  sub trans_statistic {
+    my ($device, $oids, $oid, $thr)= @_ ;
+    my $oid_h= \%{ $oids->{$oid} } ;
+    
+    my ( $dep_oid, $dep_oid_h, @leaf, $leaf) ;
+    my ( $statistic, $val, $result, $count) ;
 
+   # Define the computational step for each statistic. Scalar $result holds the
+   # accumulator, while $val is the next value to handle. The number of values
+   # is maintained outside these mini-functions in scalar $count.
+   #
+    my %comp= (
+        cnt => sub{ $result = $count ; },
+        sum => sub{ $result+= $val ; },
+        min => sub{ $result = $val  if $val < $result ; },
+        max => sub{ $result = $val  if $val > $result ; },
+        avg => sub{ $result+= $val ; } 			) ;
+
+   # Extract the parent oid from the expression.
+    ($dep_oid,$statistic)= $oid_h->{'trans_data'} =~ /\{(.+?)\}\s+(\S+)/ ;
+    $statistic= lc $statistic ;
+    $dep_oid_h= \%{$oids->{$dep_oid}} ;
+
+   # Do not use function validate_deps. It will make this oid to be a
+   # repeater-type oid if the parent oid is a repeater-type oid. The code
+   # section below is inspired on relevant parts of function validate_deps.
+   #
+    $oid_h->{'repeat'} = 0 ;		# Make a leaf-type oid
+    $oid_h->{'val'} = undef ;
+
+   # Check all the leaves of a repeater-type oid for an error condition. If
+   # one is found, propagate the error condition to the result oid.
+   #
+    if ( $dep_oid_h->{'repeat'} ) {
+      for $leaf ( keys %{$dep_oid_h->{'val'}} ) {
+        $val= $dep_oid_h->{'val'}{$leaf} ;
+        if ( ! defined $val ) {
+          $oid_h->{'val'}   = 'Parent data missing' ;
+          $oid_h->{'color'} = 'clear' ;
+          last ;
+        } elsif ( $val eq 'wait' ) {
+          $oid_h->{'val'}   = 'wait' ;
+          $oid_h->{'color'} = 'blue' ;
+          last ;
+        } elsif ( $dep_oid_h->{'error'}{$leaf} ) {
+          $oid_h->{'val'}   = 'Inherited error' ;
+          $oid_h->{'color'} = 'clear' ;
+          last ;
+        } elsif ( $statistic ne 'cnt' and $val !~ m/^[-+]?\d+(?:\.\d+)?$/ ) {
+          $oid_h->{'val'}   = 'Regex mismatch' ;
+          $oid_h->{'color'} = 'yellow' ;
+          last ;
+        }  
+      }  
+    } else {
+      if ( $dep_oid_h->{'error'} ) {
+        $oid_h->{'val'}   = $dep_oid_h->{'val'}   ;
+        $oid_h->{'color'} = $dep_oid_h->{'color'} ;
+      }  # of if
+    }  # of else
+
+    if ( defined $oid_h->{'val'} ) {
+      $oid_h->{'time'}  = time ;
+      $oid_h->{'error'} = 1 ;
+    }  # of if
+ 
+   # Abort if we already have an error code
+    return 0 if defined $oid_h->{'error'} ;
+
+   # The parent oid is a repeater-type oid. Determine the requested statistic
+   # from this list.
+   #
+    if ( $dep_oid_h->{'repeat'} ) {
+      @leaf = keys %{$dep_oid_h->{'val'}} ;
+      $count= scalar @leaf ;
+      if ( $statistic eq 'cnt' ) {   
+        $result= $count ;             
+      } elsif ( $count == 0 ) {      
+        $result=  undef ;             
+      } else {                       
+       # Extract the first value of the list. This value is a nice starting
+       # value to determine the minimum and the maximum.
+       #
+        $leaf  = shift @leaf ;
+        $result= $dep_oid_h->{'val'}{$leaf} ;
+        for $leaf ( @leaf ) {
+          $val= $dep_oid_h->{'val'}{$leaf} ;
+          &{ $comp{$statistic} } ;	# Perform statistical computation
+        }  # of for
+        $result= $result/$count	if $statistic eq 'avg' ;
+      }  # of else
+
+      $oid_h->{'val'} = $result ;
+      $oid_h->{'time'}= time ;
+      
+   # The parent oid is a non-repeater-type oid. The computation of the
+   # statistic is trivial in this case.
+    } else {
+      $oid_h->{'val'} = $dep_oid_h->{'val'}   ;
+      $oid_h->{'val'} = 1 if $statistic eq 'cnt' ;
+      $oid_h->{'time'}= $dep_oid_h->{'time'}  ;
+      $oid_h->{'msg'} = $dep_oid_h->{'msg'}   ;
+    }  # of else
+    
+    apply_thresh( $oids, $thr, $oid ) ;
+  }  # of trans_statistic
 
  # Get substring of dependent oid ############################################
   sub trans_substr {
@@ -1357,7 +1466,7 @@ require Exporter;
         my $then;
         if(defined $num) { $then = $cases->{$num}{'then'} }
         else { $then = $default }
-        while($then =~ /\{(\S+?)\}/) {
+        while($then =~ /\{(\S+)\}/) {
           my $then_oid = $1;
           my $then_oid_val;
           if($oids->{$then_oid}{'repeat'}) {
@@ -1405,7 +1514,7 @@ require Exporter;
       if(defined $num) { $then = $cases->{$num}{'then'} }
       else { $then = $default }
 
-      while($then =~ /\{(\S+?)\}/) {
+      while($then =~ /\{(\S+)\}/) {
         my $then_oid = $1;
         my $then_oid_val;
         if($oids->{$then_oid}{'repeat'}) {
@@ -1476,7 +1585,7 @@ require Exporter;
         my $then;
         if(defined $num) { $then = $cases->{$num}{'then'} }
         else { $then = $default }
-        while($then =~ /\{(\S+?)\}/) {
+        while($then =~ /\{(\S+)\}/) {
           my $then_oid = $1;
           my $then_oid_val;
           if($oid_h->{'repeat'}) {
@@ -1531,7 +1640,7 @@ require Exporter;
       my $then;
       if(defined $num) { $then = $cases->{$num}{'then'} }
       else { $then = $default }
-      while($then =~ /\{(\S+?)\}/) {
+      while($then =~ /\{(\S+)\}/) {
         my $then_oid = $1;
         my $then_oid_val;
         if($oids->{$then_oid}{'repeat'}) {
@@ -3110,3 +3219,4 @@ require Exporter;
     return 0;
   } 
 1;
+

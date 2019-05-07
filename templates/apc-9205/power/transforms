@@ -10,4 +10,4 @@ upsSecsOnBatt	: MATH		: {upsMsecsOnBatt} / 100
 upsMinsRunTime	: MATH		: {upsMsecsRunTime} / 6000
 
 # Only alarm if this isnt a self test
-upsStatus	: BEST		: {upsOutStat} {upsFailCause}
+upsStatus	: BEST		: {upsOutStat} , {upsFailCause}

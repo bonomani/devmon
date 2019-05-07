@@ -1,8 +1,10 @@
-procIndex	: INDEX	: {cimrMsuTrafficRate}{cimrMsuProcReset}
+#procIndex	: INDEX	: {cimrMsuTrafficRate}{cimrMsuProcReset}
+procIndex       : INDEX : {cimrMsuTrafficRate}
 TrafficMsu	: DELTA : {cimrMsuTrafficMSUs}
 TXRX		: SUBSTR : {procIndex} 0 1
 DIRECTION	: SWITCH : {TXRX} 1 = RX MSUs, 2 = TX MSUs
 PROCN		: REGSUB : {procIndex} /\.[0-2]/$1/
 PROCSLT		: CHAIN	 : {PROCN} {cimrMsuProcSlotNumber}
-BayprocIndex	: INDEX	 : {PROCSLT} {cimrMsuProcBayNumber}
+#BayprocIndex	: INDEX	 : {PROCSLT} {cimrMsuProcBayNumber}
+BayprocIndex   : INDEX  : {PROCSLT}
 Bayprocn	: REGSUB : {BayprocIndex} /\.[0-2]/$1/

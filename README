@@ -189,10 +189,10 @@ PATCH                                                                  Sourcefor
 26     Add transform SET                                                       open            open                   18.08.2014 18.08.2014
 25     Fix bug #13                                                             open            fixed(alternate)       25.06.2014 25.06.2014
 24     Align columns of a TABLE to the right side                              open            open                   23.10.2013 23.10.2013
-23     Consistent notation OIDs                                                open            open                   04.01.2013 04.01.2013
+23     Consistent notation OIDs                                                open            fixed/alternate)       04.01.2013 04.01.2013
 22     Templates for Cisco 7609 and ITP                                        open            fixed                  29.06.2012 29.06.2012
 21     Extend capabilites of transform REGSUB                                  open            fixed(alternate)       10.01.2012 10.01.2012
-20     Add transform STATISTIC                                                 open            open                   06.01.2012 21.12.2012
+20     Add transform STATISTIC                                                 open            fixed                  06.01.2012 21.12.2012
 17     Fix syntax check of the DELTA transform                                 open            fixed(alternate)       02.01.2012 02.01.2012
 16     Change output of SPEED transform                                        open            fixed                  02.01.2012 02.01.2012
 15     Improve syntax check DELTA transform                                    open            fixed(alternate)       02.01.2012 02.01.2012

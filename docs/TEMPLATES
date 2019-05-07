@@ -560,6 +560,32 @@
     '1.2 Kbps', a value of 13000000 will return a value of '13 
     Mbps', etc.
 
+  'STATISTIC' transform:
+
+    This transform takes a repeater type data alias as the input for the
+    transform and computes a non-repeater type data alias. The STATISTIC
+    transform can compute the minimum value, the maximum value, the
+    average value and the sum of the values of the repeater type data
+    alias. Moreover it can count the number of values of the repeater
+    type data alias.
+
+    If the input is a non-repeater data alias, the transform returns the
+    value of the input data. However, if the number of values is to be
+    counted the returned value is 1.
+
+    If for example the average temperature in a device with multiple
+    temperature sensors is to be monitored, the transformation could be:
+
+      TempAvg : STATISTIC : {ciscoEnvMonTemperatureStatusValue} AVG
+
+    As the example shows, the last keyword determines the value to be
+    returned. The possible keywords are:
+
+      AVG : Average value
+      CNT : Number of values
+      MAX : Maximum value
+      MIN : Minimum value
+      SUM : Sum of the values
 
   'SUBSTR' transform:
 
