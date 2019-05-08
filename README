@@ -129,9 +129,10 @@ Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.1
 
 $Id: README 190 2011-01-14 13:32:06Z buchanmilne $
 
-=====================================================================
+===========================================================================================================================================
 
-r256+Added Features: This code is based on the latest r256
+VERSION 0.3.1b1.256.1
+
 This is a work in progress, changes can occur without notice
 but is should be the most stable release....
 
@@ -269,3 +270,4 @@ HELP NEEDED
        Template not listed above cannot be test: please help to updated: take a look at template liste above that are maintained! 
        Template exceptions sorted misleadingly: need documentation clarification: I dont used it: I need concrate case!)
 
+Date 09.05.2019
