@@ -1,5 +1,6 @@
+SEE END OF FILE for current status and roadmap! STABLE RELEASE
 
-Devmon, version 0.3.1-beta1, based on r256+features: see end of file
+Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.1
 =====================================================================
 
   This program is free software; you can redistribute it and/or modify
@@ -132,6 +133,12 @@ $Id: README 190 2011-01-14 13:32:06Z buchanmilne $
 
 r256+Added Features: This code is based on the latest r256
 This is a work in progress, changes can occur without notice
+but is should be the most stable release....
+
+Thanks for all the work done and also all patch/ideas submitted !
+Please feel free to fork again and ask for support !
+
+ALL PATCH FROM SOURCEFORGE ARE NOW INTERGRATED IN THIS RELEASE
 
 New Features
 - New tramsforms: 
@@ -168,14 +175,13 @@ Major bugs resolved
 
 Minor bugs resolved
 - If a test has multiple table, only last can be graphed
-- Ability to assign empty value for (T)SWITCH
 - Ability to graph, even not all values are defined
-- Apply some patch (some with an alternate patch)
 - Trim files for a better experience
+- Do not start more process that devices
 - Optimized regexp for speed
 
 Workarounds
-- Multiple tables support: only 1 (but anyone) can be graphed
+- Multiple tables support: only 1 (but anyone) can be graphed now
 
 ===========================================================================================================================================
 
@@ -235,7 +241,6 @@ BUG
                          
 TODO                         
 Priority 1: Sourceforge open
-       Integrate SNMPv3: need to analyse work done by StefCoene (see fork)
        Support for negative numbers in (T)SWITCH: Parse mathematical expression simply....: Need more work
        Format display (SUBSTR negative, Align columns of a TABLE to the right side,  Formatting of result of MATH transform): Problems Alignement and Padding
        Exceptions based on other oid values: now only PriOi: make it work for alternate oid
@@ -250,13 +255,14 @@ Priority 2: Fix current changes
 Priority 3: Other
        Warn if autovivification (creates the hash if it do not exists, but it should not) and check if it does already make problem 
        Make Table compatible with LEAF 
-       
+       SNMPv3: After trinig to use the work from StefCoene, it seem more complicated that what I tought...       
        
 
 FEATURE REQUEST
 
        Better discovery (SF bug 10)
        Multiple graph in a test
+       Add better timer calculation (HiRes)
 
 HELP NEEDED
       
