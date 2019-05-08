@@ -1208,7 +1208,7 @@ require Exporter;
           my $dep_oid_h = \%{$oids->{$dep_oid}};
           my ($dep_val, $dep_col, $dep_msg);
 
-          if($dep_oid_h-{'repeat'}) {
+          if($dep_oid_h->{'repeat'}) {
             if(!defined $oid_h->{'color'}{$leaf} or
                 $colors{$dep_oid_h->{'color'}{$leaf}} >=
                 $colors{$oid_h->{'color'}{$leaf}}) {
@@ -1955,7 +1955,7 @@ require Exporter;
     elsif(!$trg_h->{'repeat'}) {
       do_log("Trying to COLTRE a non-repeater 2nd oid on $device ($@)", 0);
       $oid_h->{'repeat'} = 0;
-      $oid_h->{'val'}    = 'Failed coltree';
+      $oid_h->{'val'}    = 'Failed coltre';
       $oid_h->{'time'}   = time;
       $oid_h->{'color'}  = 'yellow';
       $oid_h->{'error'}  = 1;
@@ -1963,15 +1963,21 @@ require Exporter;
 
    # Both source and target are repeaters.  Go go go!
     else {
+      my $isfirst = 1;
       for my $leaf ( sort { $src_h->{'val'}{$a} <=> $src_h->{'val'}{$b} } keys %{$src_h->{'val'}}) {
 
        # Skip if our source oid is freaky-deaky
         next if $oid_h->{'error'}{$leaf};
-
-        $oid_h->{'val'}{$leaf}    = $oid_h->{'val'}{$src_h->{'val'}{$leaf}}.$separator.$trg_h->{'val'}{$leaf};
-#        $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$leaf};
-#        $oid_h->{'color'}{$leaf}  = $trg_h->{'color'}{$leaf};
-#        $oid_h->{'error'}{$leaf}  = $trg_h->{'error'}{$leaf};
+        #TODO CHECK $oid_h->{'val'}{$src_h->{'val'}{$leaf}} if it exist
+        if ($isfirst) {
+          $oid_h->{'val'}{$leaf}    = $trg_h->{'val'}{$leaf};
+          $isfirst=0;
+        } else {
+          $oid_h->{'val'}{$leaf}    = $oid_h->{'val'}{$src_h->{'val'}{$leaf}}.$separator.$trg_h->{'val'}{$leaf};
+        }
+        $oid_h->{'time'}{$leaf}   = time;
+        $oid_h->{'color'}{$leaf}  = $trg_h->{'color'}{$leaf};
+        $oid_h->{'error'}{$leaf}  = $trg_h->{'error'}{$leaf};
       }
 
      # Apply thresholds
@@ -2401,27 +2407,43 @@ require Exporter;
 
        # If the primary oids leaves are non-numeric, then we cant sort it
        # numerically, we'll have to resort to a cmp
+       # my @table_leaves = ();
+#
+ #       if($oids->{$pri}{'repeat'} == 2) {
+  #        my @unsorted = keys %{$oids->{$pri}{'val'}};
+   #       @table_leaves = leaf_sort(\@unsorted);
+    #    }
+       # Otherwise sort them numerically ascending
+       # else {
+       #   @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{'val'}};
+       # }
+
+       # If table SORT option is set, sort the table by the oid provided
+       # This condition should be included on previous ones to be optimized
+       # but this is a WIP: it does not apply to rrd graphs which are sorted
+       # numerically or alpha: try to make someting that match if graphs are used:
+       # graph used the pri oid so this sort option do not feel weel when graphing
         my @table_leaves = ();
 
-        if($oids->{$pri}{'repeat'} == 2) {
+        if (exists $t_opts{'sort'}[0]) 
+        {
+          if (defined $t_opts{'sort'}[0])
+          {
+            my %temphash = %{$oids->{$t_opts{'sort'}[0]}{'val'}};
+            @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
+          }
+        }  
+       # If the primary oids leaves are non-numeric, then we cant sort it
+       # numerically, we'll have to resort to a cmp
+        elsif ($oids->{$pri}{'repeat'} == 2) {
           my @unsorted = keys %{$oids->{$pri}{'val'}};
           @table_leaves = leaf_sort(\@unsorted);
         }
        # Otherwise sort them numerically ascending
         else {
-          @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{'val'}};
+           @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{'val'}};
         }
-       # if table SORT option is set, sort the table by the oid provided
-       # This condition should be included on previous ones to be optimized
-       # but this is a WIP: it does not apply to rrd graphs which are sorted
-       # numerically or alpha: try to make someting that match if graphs are used:
-       # graph used the pri oid so this sort option do not feel weel when graphing
-        my $sortnew = $t_opts{'sort'}[0];
-        if ($sortnew ne '')
-        {
-            my %temphash = %{$oids->{$sortnew}{'val'}};
-            @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
-        }  
+
        # Now go through all oid vals, using the primary's leaves
         T_LEAF: for my $leaf (@table_leaves) {
 
@@ -2619,7 +2641,12 @@ require Exporter;
             $temp_data = '';
             for my $oid (@{$rrd{$name}{'oids'}}) {
               my $val = $oids->{$oid}{'val'}{$leaf};
-              $val = ($val =~ /^[+-]?\d+(\.\d+)?/) ? int $val : 'U';
+              if (defined $val) {
+                $val = ($val =~ /^[+-]?\d+(\.\d+)?/) ? int $val : 'U';
+              }
+              else {
+                $val = 'U';
+              }
               $temp_data .= "$val:";
             }
 	    if ($temp_data =~ /^(U:)+$/) {
@@ -2756,9 +2783,10 @@ require Exporter;
    # > * If there is, this overrides the calculation here.
    # Simply comment the 2 following lines to revert this workaround
 
-   my $rrdmsg  = $1 if $msg =~ s/(<!--DEVMON.*-->)//s;
-   $msg .= $rrdmsg;
-
+   #my $rrdmsg  = $1 if $msg =~ s/(<!--DEVMON.*-->)//s;
+   if ( $msg =~ s/(<!--DEVMON.*-->)//s ) {
+     $msg .= $1;
+   }
    # Add our errors
     $msg = join "\n", ($errors, $msg) if $errors ne '';
 

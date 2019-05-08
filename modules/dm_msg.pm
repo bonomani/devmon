@@ -224,6 +224,7 @@ require Exporter;
     my $color = 'green';
     my $this_poll_time = $g{'snmppolltime'} + $g{'testtime'} +
       $g{'msgxfrtime'};
+    $this_poll_time = 1 if ($this_poll_time == 0);
     my $snmp_poll_time= sprintf( "%3d   [s] (%5.3f)",
       $g{'snmppolltime'}, $g{'snmppolltime'}/$this_poll_time ) ;
     my $test_time= sprintf( "%3d   [s] (%5.3f)",

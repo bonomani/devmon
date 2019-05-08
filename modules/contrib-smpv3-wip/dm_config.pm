@@ -41,6 +41,7 @@ require Exporter;
       'version'       => $_[0], # set in main script now
       'homedir'       => $FindBin::Bin,
       'configfile'    => "$FindBin::Bin/devmon.cfg",
+      'configfileV3'  => "$FindBin::Bin/devmonV3.cfg",
       'dbfile'        => "$FindBin::Bin/hosts.db",
       'daemonize'     => 1,
       'initialized'   => 0,
@@ -234,6 +235,7 @@ require Exporter;
     while ($_ = shift @ARGV) {
       if(/^-v+$/)                 { $g{'verbose'} = tr/v/v/                   }
       elsif(/^-c$/)               { $g{'configfile'} = shift @ARGV or usage() } 
+      elsif (/^-3$/)              { $g{'configfileV3'} = shift @ARGV or usage() }
       elsif(/^-d/)                { $g{'dbfile'} = shift @ARGV or usage()     }
       elsif(/^-f$/)               { $g{'daemonize'} = 0                       }
       elsif(/^-p$/)               { $g{'print_msg'} = 1                       }
@@ -1274,6 +1276,13 @@ require Exporter;
     my $etcdir  = $1 if $g{'bbhosts'} =~ /^(.+)\/.+?$/;
     $etcdir = $g{'homedir'} if !defined $etcdir;
 
+    # Read SNMP V3 config file
+    my %config ;
+    if ( -f $g{'configfileV3'} ) {
+      my $configIni = new Config::Abstract::Ini($g{'configfileV3'});
+      %config = $configIni->get_all_settings;
+    }
+
     FILEREAD: do { 
 
       my $bbfile = shift @bbfiles;
@@ -1428,6 +1437,13 @@ require Exporter;
             do_log("Unknown devmon option ($options) on line " .
                    "$. of $bbfile",0) and next if $options ne '';
 
+            # Version 3 config merge
+            if ( defined $config{$host} ) {
+               foreach my $key (keys %{$config{$host}}) {
+                  $bb_hosts{$host}{$key} = $config{$host}{$key} ;
+               }
+            }
+
             $bb_hosts{$host}{'ip'}    = $ip;
             $bb_hosts{$host}{'tests'} = $tests;
 
@@ -1470,6 +1486,13 @@ require Exporter;
       $snmp_input{$host}{'dev'}    = $host;
       $snmp_input{$host}{'ver'}    = $snmpver;
 
+     # Add SNMP v3 settings
+      $snmp_input{$host}{'USERNAME'}         = $bb_hosts{$host}{'USERNAME'}         if defined $bb_hosts{$host}{'USERNAME'} ;
+      $snmp_input{$host}{'PASSPHRASE_AUTH'}  = $bb_hosts{$host}{'PASSPHRASE_AUTH'}  if defined $bb_hosts{$host}{'PASSPHRASE_AUTH'} ;
+      $snmp_input{$host}{'PROTOCOL_AUTH'}    = $bb_hosts{$host}{'PROTOCOL_AUTH'}    if defined $bb_hosts{$host}{'PROTOCOL_AUTH'} ;
+      $snmp_input{$host}{'PASSPHRASE_PRIV'}  = $bb_hosts{$host}{'PASSPHRASE_PRIV'}  if defined $bb_hosts{$host}{'PASSPHRASE_PRIV'} ;
+      $snmp_input{$host}{'PROTOCOL_PRIV'}    = $bb_hosts{$host}{'PROTOCOL_PRIV'}    if defined $bb_hosts{$host}{'PROTOCOL_PRIV'} ;
+
      # Add our sysdesc oid
       $snmp_input{$host}{'nonreps'}{$sysdesc_oid} = 1;
     }
@@ -1488,6 +1511,7 @@ require Exporter;
       if(defined $bb_hosts{$host}{'vendor'}) {
         %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
         $new_hosts{$host}{'cid'}    = $old_hosts{$host}{'cid'};
+        $new_hosts{$host}{'ver'}    = $old_hosts{$host}{'ver'};
         $new_hosts{$host}{'port'}   = $old_hosts{$host}{'port'};
 
         --$hosts_left;
@@ -1515,6 +1539,7 @@ require Exporter;
          # We got a match, assign the pertinent data
           %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
           $new_hosts{$host}{'cid'}    = $old_hosts{$host}{'cid'};
+          $new_hosts{$host}{'ver'}    = $old_hosts{$host}{'ver'};
           $new_hosts{$host}{'port'}   = $old_hosts{$host}{'port'};
           $new_hosts{$host}{'vendor'} = $vendor;
           $new_hosts{$host}{'model'}  = $model;
@@ -1527,9 +1552,9 @@ require Exporter;
     }
 
    # Now go through each cid from most common to least
-    my @snmpvers = (2, 1);
+    my @snmpvers = (3, 2, 1);
     
-   # For our new hosts, query them first with snmp v2, then v1 if v2 fails
+   # For our new hosts, query them first with snmp v3, then v2, then v1
     for my $snmpver (@snmpvers) { 
 
      # Dont bother if we dont have any hosts left to query
@@ -1549,6 +1574,41 @@ require Exporter;
          # Skip if they have already been succesfully queried
           next if defined $new_hosts{$host};
   
+         # SNMp v3 options
+         # Only use v3 if we have at least USERNAME
+          if ( $snmpver eq "3" ) {
+             if ( defined $bb_hosts{$host}{'USERNAME'} ) {
+                $snmp_input{$host}{'USERNAME'}         = $bb_hosts{$host}{'USERNAME'} ;
+             } else {
+                #do_log( "Missing USERNAME option for snmpver=3 for host $host") ;
+                next ;
+             }
+             if ( defined $bb_hosts{$host}{'PASSPHRASE_AUTH'} ) {
+                $snmp_input{$host}{'PASSPHRASE_AUTH'}  = $bb_hosts{$host}{'PASSPHRASE_AUTH'} ;
+             } else {
+                #do_log( "Missing PASSPHRASE_PRIV option for snmpver=3 for host $host") ;
+                #next ;
+             }
+             if ( defined $bb_hosts{$host}{'PROTOCOL_AUTH'} ) {
+                $snmp_input{$host}{'PROTOCOL_AUTH'}    = $bb_hosts{$host}{'PROTOCOL_AUTH'} ;
+             } else {
+                #do_log( "Missing PROTOCOL_AUTH option for snmpver=3 for host $host") ;
+                #next ;
+             }
+             if ( defined $bb_hosts{$host}{'PASSPHRASE_PRIV'} ) {
+                $snmp_input{$host}{'PASSPHRASE_PRIV'}  = $bb_hosts{$host}{'PASSPHRASE_PRIV'} ;
+             } else {
+                #do_log( "Missing PASSPHRASE_PRIV option for snmpver=3 for host $host") ;
+                #next ;
+             }
+             if ( defined $bb_hosts{$host}{'PROTOCOL_PRIV'} ) {
+                $snmp_input{$host}{'PROTOCOL_PRIV'}    = $bb_hosts{$host}{'PROTOCOL_PRIV'} ;
+             } else {
+                #do_log( "Missing PROTOCOL_PRIV option for snmpver=3 for host $host") ;
+                #next ;
+             }
+          }
+
          # Throw together our query data
           $snmp_input{$host}{'dev_ip'} = $bb_hosts{$host}{'ip'};
           $snmp_input{$host}{'cid'}    = $bb_hosts{$host}{'cid'};
@@ -1572,15 +1632,17 @@ require Exporter;
           $sysdesc = 'UNDEFINED' if !defined $sysdesc;
           do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{'debug'};
           next if $sysdesc eq 'UNDEFINED';
+          # Stef Coene TODO: next NEWHOST if $sysdesc eq 'UNDEFINED';
 
          # Catch vendor/models override with the model() option
           if(defined $bb_hosts{$host}{'vendor'}) {
             %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+            $new_hosts{$host}{'ver'}    = $snmpver ;
             --$hosts_left;
 
             do_log("Discovered $host as a $bb_hosts{$host}{'vendor'} " .
                    "$bb_hosts{$host}{'model'}",2);
-            last NEWHOST;
+            last NEWHOST; # TODO Stef Coene: next?
           }
 
          # Try and match sysdesc
@@ -1599,6 +1661,7 @@ require Exporter;
               %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
               $new_hosts{$host}{'vendor'} = $vendor;
               $new_hosts{$host}{'model'}  = $model;
+              $new_hosts{$host}{'ver'}    = $snmpver ;
               --$hosts_left;
 
              # If they are an old host, they probably changes models...
@@ -1620,7 +1683,7 @@ require Exporter;
          
          # Make sure we were able to get a match
           if(!defined $new_hosts{$host}) {
-            do_log("No matching templates for device: $host",0);
+            do_log("No matching templates for device: $host, sysdesc=$sysdesc",0);
            # Delete the bbhosts key so we dont throw another error later
             delete $bb_hosts{$host};
           }
@@ -1644,6 +1707,41 @@ require Exporter;
 
          # Dont query this host if we already have succesfully done so
           next if defined $new_hosts{$host};
+
+         # SNMp v3 options
+         # Only use v3 if we have at least USERNAME
+          if ( $snmpver eq "3" ) {
+             if ( defined $bb_hosts{$host}{'USERNAME'} ) {
+                $snmp_input{$host}{'USERNAME'}         = $bb_hosts{$host}{'USERNAME'} ;
+             } else {
+                #do_log( "Missing USERNAME option for snmpver=3 for host $host") ;
+                next ;
+             }
+             if ( defined $bb_hosts{$host}{'PASSPHRASE_AUTH'} ) {
+                $snmp_input{$host}{'PASSPHRASE_AUTH'}  = $bb_hosts{$host}{'PASSPHRASE_AUTH'} ;
+             } else {
+                #do_log( "Missing PASSPHRASE_PRIV option for snmpver=3 for host $host") ;
+                #next ;
+             }
+             if ( defined $bb_hosts{$host}{'PROTOCOL_AUTH'} ) {
+                $snmp_input{$host}{'PROTOCOL_AUTH'}    = $bb_hosts{$host}{'PROTOCOL_AUTH'} ;
+             } else {
+                #do_log( "Missing PROTOCOL_AUTH option for snmpver=3 for host $host") ;
+                #next ;
+             }
+             if ( defined $bb_hosts{$host}{'PASSPHRASE_PRIV'} ) {
+                $snmp_input{$host}{'PASSPHRASE_PRIV'}  = $bb_hosts{$host}{'PASSPHRASE_PRIV'} ;
+             } else {
+                #do_log( "Missing PASSPHRASE_PRIV option for snmpver=3 for host $host") ;
+                #next ;
+             }
+             if ( defined $bb_hosts{$host}{'PROTOCOL_PRIV'} ) {
+                $snmp_input{$host}{'PROTOCOL_PRIV'}    = $bb_hosts{$host}{'PROTOCOL_PRIV'} ;
+             } else {
+                #do_log( "Missing PROTOCOL_PRIV option for snmpver=3 for host $host") ;
+                #next ;
+             }
+          }
 
           $snmp_input{$host}{'dev_ip'} = $bb_hosts{$host}{'ip'};
           $snmp_input{$host}{'port'}   = $bb_hosts{$host}{'port'};
@@ -1694,6 +1792,7 @@ require Exporter;
              # We got a match, assign the pertinent data
               %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
               $new_hosts{$host}{'cid'}    = $cid;
+              $new_hosts{$host}{'ver'}    = $snmpver ;
               $new_hosts{$host}{'vendor'} = $vendor;
               $new_hosts{$host}{'model'}  = $model;
               --$hosts_left;
@@ -1717,7 +1816,7 @@ require Exporter;
          
          # Make sure we were able to get a match
           if(!defined $new_hosts{$host}) {
-            do_log("No matching templates for device: $host",0);
+            do_log("No matching templates for device: $host, sysdesc=$sysdesc",0);
            # Delete the bbhosts key so we dont throw another error later
             delete $bb_hosts{$host};
           }
@@ -1888,6 +1987,7 @@ require Exporter;
         my $model  = $new_hosts{$host}{'model'};
         my $tests  = $new_hosts{$host}{'tests'};
         my $cid    = $new_hosts{$host}{'cid'};
+        my $ver    = $new_hosts{$host}{'ver'} || "2" ;
         my $port   = $new_hosts{$host}{'port'};
 
         $cid .= "::$port" if defined $port;
@@ -1924,7 +2024,7 @@ require Exporter;
         }
         $excepts =~ s/,$//;
 
-        print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e" .
+        print HOSTFILE "$host\e$ip\e$ver\e$vendor\e$model\e$tests\e$cid\e" .
                        "$threshes\e$excepts\n";
       }
 
@@ -1990,6 +2090,14 @@ require Exporter;
      # Check if the hosts file even exists
       return %hosts if !-e $g{'dbfile'};
 
+      # Read SNMP V3 config file
+      use Config::Abstract::Ini ;
+      my %config ;
+      if ( -f $g{'configfileV3'} ) {
+         my $configIni = new Config::Abstract::Ini($g{'configfileV3'});
+         %config = $configIni->get_all_settings;
+      }
+
      # Open and read in data
       open HOSTS, $g{'dbfile'} or
         log_fatal("Unable to open host file: $g{'dbfile'} ($!)", 0);
@@ -1997,7 +2105,7 @@ require Exporter;
       my $num;
       FILELINE: for my $line (<HOSTS>) {
         chomp $line;
-        my ($name,$ip,$vendor,$model,$tests,$cid,$threshes,$excepts) 
+        my ($name,$ip,$ver,$vendor,$model,$tests,$cid,$threshes,$excepts) 
           = split /\e/, $line;
         ++$num;
 
@@ -2012,7 +2120,15 @@ require Exporter;
         $hosts{$name}{'model'}  = $model;
         $hosts{$name}{'tests'}  = $tests;
         $hosts{$name}{'cid'}    = $cid;
+        $hosts{$name}{'ver'}    = $ver;
         $hosts{$name}{'port'}   = $port;
+
+         # Version 3 config merge
+         if ( defined $config{$name} ) {
+            foreach my $key (keys %{$config{$name}}) {
+               $hosts{$name}{$key} = $config{$name}{$key} ;
+            }     
+         }
 
         if(defined $threshes and $threshes ne '') {
           for my $thresh (split ',', $threshes) {
