@@ -360,7 +360,7 @@ require Exporter;
         $val = '2' if $val eq '2c';
         do_log("Bad snmp version ($val) in $specs_file, line $." .
           "(only ver. 1/2c supported).  Skipping this test", 0)
-          and return if $val !~ /^1|2$/;
+          and return if $val !~ /^1|2|3/;
       }
 
      # Assign the value in our temp hash
@@ -893,7 +893,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
       my ($oid, $color, $threshold, $msg) = split /\s*:\s*/, $line, 4; 
      
      # Trim msg
-      $msg =~ s/\s+$// if defined $msg;
+#      $msg =~ s/\s+$//;
 
      # If a threshold is blank, it should automatch any value
       $threshold = "_AUTOMATCH_" if !defined $threshold;

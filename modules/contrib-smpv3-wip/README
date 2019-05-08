@@ -1,0 +1,12 @@
+This WIP seems to partially work
+- Some value are note correctly returned?
+- Timout on some values
+- 2x slower in snmpv2c...
+
+To test it simply put the content of this directory in modules !
+
+Install source:
+Centos: 
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install perl-Net-SNMP
+
