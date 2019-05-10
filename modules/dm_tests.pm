@@ -36,8 +36,8 @@ require Exporter;
    my $color_list = join '|', @color_order;
 
  # Speed hash for trans_speed conversions
-   my %speeds = ( 1 => 'bps', 10**3 => 'Kbps', 10**6 => 'Mbps',
-     10**9 => 'Gbps', 10**12 => 'Tbps', 10**15 => 'Pbps');
+   my %speeds = ( 1 => '[b/s]', 10**3 => '[kb/s]', 10**6 => '[Mb/s]',
+     10**9 => '[Gb/s]', 10**12 => '[Tb/s]', 10**15 => '[Pb/s]');
 
  # Main test subroutine; parse data and feed it to the individual
  # test-specific subs

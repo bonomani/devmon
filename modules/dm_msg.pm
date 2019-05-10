@@ -224,15 +224,25 @@ require Exporter;
     my $color = 'green';
     my $this_poll_time = $g{'snmppolltime'} + $g{'testtime'} +
       $g{'msgxfrtime'};
-    $this_poll_time = 1 if ($this_poll_time == 0);
-    my $snmp_poll_time= sprintf( "%3d   [s] (%5.3f)",
-      $g{'snmppolltime'}, $g{'snmppolltime'}/$this_poll_time ) ;
-    my $test_time= sprintf( "%3d   [s] (%5.3f)",
-      $g{'testtime'}    , $g{'testtime'}    /$this_poll_time ) ;
-    my $msg_xfr_time= sprintf( "%3d   [s] (%5.3f)",
-      $g{'msgxfrtime'}  , $g{'msgxfrtime'}  /$this_poll_time ) ;
-    $this_poll_time= sprintf( "%3d   [s]", $this_poll_time ) ;
+#    $this_poll_time = 1 if ($this_poll_time == 0);
 
+  # Show the fraction of the time spent in the various stages of this script,
+  # but only if the runtime is long enough to show a meaningfull fraction.
+  #
+    my ($snmp_poll_time,$test_time,$msg_xfr_time) ;
+    if ( $this_poll_time > 10 ) {
+      $snmp_poll_time= sprintf( "%3d   [s] (%5.3f)",
+       $g{'snmppolltime'}, $g{'snmppolltime'}/$this_poll_time ) ;
+      $test_time= sprintf( "%3d   [s] (%5.3f)",
+       $g{'testtime'}    , $g{'testtime'}    /$this_poll_time ) ;
+      $msg_xfr_time= sprintf( "%3d   [s] (%5.3f)",
+       $g{'msgxfrtime'}  , $g{'msgxfrtime'}  /$this_poll_time ) ;
+    } else {
+      $snmp_poll_time= sprintf( "%3d   [s]", $g{'snmppolltime'} ) ;
+      $test_time     = sprintf( "%3d   [s]", $g{'testtime'} ) ;
+      $msg_xfr_time  = sprintf( "%3d   [s]", $g{'msgxfrtime'} ) ;
+    }  # of else
+    $this_poll_time  = sprintf( "%3d   [s]", $this_poll_time ) ;
 
    # Determine our number of clear msgs sent
     my $num_clears = 0;
@@ -293,6 +303,16 @@ require Exporter;
       $color = 'red';
       $message .= "&red $stalledforks forks of $g{'numforks'} are stalled\n";
     }
+
+   # Replace each ":" and "=" by their equivalent HTML escape character, in
+   # order not to confuse the Xymon NCV module. Write the polling time
+   # (in HTML comment) for storage in an RRD.
+    $message =~ s/:/&#58;/g ;
+    $message =~ s/=/&#61;/g ;
+    $message .= "<!--\n"                        .
+                "PollTime : $this_poll_time\n"  .
+                "-->" ;
+                  
 
    # Add the header
     my $host = $g{'nodename'};
