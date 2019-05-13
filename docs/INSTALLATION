@@ -13,12 +13,12 @@ For an overview of how Devmon works, please see the OVERVIEW file.
         http://www.switch.ch/misc/leinen/snmp/perl/
 
   2. Unpack the Devmon tarball into your preferred directory.  I
-     typically use /usr/local/devmon, but it is totally up to you.
+     typically use /var/xymon/server/ext/devmon, but it is totally 
+     up to you. I added also a specfic folder for centos in
+     devmon/extra/centos with scripts for systemd linux (can  
+     probably be usefull for ubuntu install that work with systemd 
 
-     Since templates are now shipped in a separate tarball, download
-     the templates tarball and unpack it in the above directory,
-     and if the resulting direcotry is not named 'templates', rename 
-     it to be 'templates'.
+     Templates are in devmon/templates
 
   3. Edit the devmon.cfg file.  For a single node installation, the
      options you want to pay particular attention to are: 

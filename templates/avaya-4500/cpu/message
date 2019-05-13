@@ -1,0 +1,4 @@
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{CPUTotal1Min.color}: CPU usage: {CPUTotal1Min}%
+System description:
+{sysDescr}

@@ -1482,7 +1482,7 @@ require Exporter;
       my $sysdesc = $g{'snmp_data'}{$host}{$sysdesc_oid}{'val'};
       $sysdesc = 'UNDEFINED' if !defined $sysdesc;
       do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{'debug'};
-      next if $sysdesc eq 'UNDEFINED';
+      next OLDHOST if $sysdesc eq 'UNDEFINED';
 
      # Catch vendor/models override with the model() option
       if(defined $bb_hosts{$host}{'vendor'}) {
@@ -1571,7 +1571,7 @@ require Exporter;
           my $sysdesc = $g{'snmp_data'}{$host}{$sysdesc_oid}{'val'};
           $sysdesc = 'UNDEFINED' if !defined $sysdesc;
           do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{'debug'};
-          next if $sysdesc eq 'UNDEFINED';
+          next NEWHOST if $sysdesc eq 'UNDEFINED';
 
          # Catch vendor/models override with the model() option
           if(defined $bb_hosts{$host}{'vendor'}) {
@@ -1666,7 +1666,7 @@ require Exporter;
           my $sysdesc = $g{'snmp_data'}{$host}{$sysdesc_oid}{'val'};
           $sysdesc = 'UNDEFINED' if !defined $sysdesc;
           do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{'debug'};
-          next if $sysdesc eq 'UNDEFINED';
+          next CUSTOMHOST if $sysdesc eq 'UNDEFINED';
 
          # Catch vendor/models override with the model() option
           if(defined $bb_hosts{$host}{'vendor'}) {
