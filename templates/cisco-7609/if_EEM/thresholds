@@ -1,5 +1,5 @@
 # Create thresholds for all the error rate counters
 # oid name	: color		: limit	: Error message
-ifInEps		: yellow	: 1	: {ifName}{ifAliasBox} - EEM Path Error warning ({ifInEps})  	
-ifInEps		: red		: 10	: {ifName}{ifAliasBox} - EEM Path Error Alarm ({ifInEps})  	
-ifEemActive	: red	: EEM Has Activated : {ifName} -EEM Has Disabled This interface. 
+ifInEps		: yellow	: 1	: {ifName}{ifAliasBox} - EEM Path Error warning ({ifInEps})
+ifInEps		: red		: 10	: {ifName}{ifAliasBox} - EEM Path Error Alarm ({ifInEps})
+ifEemActive	: red	: EEM Has Activated : {ifName} -EEM Has Disabled This interface.

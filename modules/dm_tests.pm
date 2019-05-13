@@ -31,7 +31,7 @@ require Exporter;
   *g = \%dm_config::g;
 
  # Global array and hash by descending priority/severity
-   my %colors = ('red' => 5, 'yellow' => 4, 'clear' => 3, 'green' => 2, 'blue' => 1); 
+   my %colors = ('red' => 5, 'yellow' => 4, 'clear' => 3, 'green' => 2, 'blue' => 1);
    my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
    my $color_list = join '|', @color_order;
 
@@ -43,7 +43,7 @@ require Exporter;
  # test-specific subs
   sub tests {
 
-    @{$g{'test_results'}} = (); # Our outgoing message queue  
+    @{$g{'test_results'}} = (); # Our outgoing message queue
     %{$g{'tmp_hist'}}     = (); # Temporary history hash
 
    # Timestamp
@@ -54,7 +54,7 @@ require Exporter;
 
    # Now go through each device and perform the test logic it needs
     for my $device (sort keys %{$g{'dev_data'}}) {
-    
+
       my $oids = {};
 
      # Get template-specific variables
@@ -92,7 +92,7 @@ require Exporter;
 
        # Check to see if this device was unreachable in hobbit
        # If so, dont bother doing transforms or rendering the message
-        if(!defined $g{'hobbit_color'}{$device} or 
+        if(!defined $g{'hobbit_color'}{$device} or
            $g{'hobbit_color'}{$device} eq 'green') {
 
          # First transform any data and do threshold evaluations
@@ -111,7 +111,7 @@ require Exporter;
             }
           }
         }
-     
+
        # Now crank out our message
         my $msg = render_msg($device, $tmpl, $test, $oids);
 
@@ -127,7 +127,7 @@ require Exporter;
    # this test cycle
     for my $device (keys %{$g{'tmp_hist'}}) {
       %{$g{'dev_hist'}{$device}} = %{$g{'tmp_hist'}{$device}};
-    } 
+    }
 
    # Finish timestamp
     $g{'testtime'} = time - $g{'testtime'};
@@ -147,6 +147,8 @@ require Exporter;
     my $snmp = \%{$g{'snmp_data'}{$device}};
 
    # For now we will copy the data from the template and snmp
+   # Copy the data even if the OID is already cached during a preceeding test.
+   # In the current test, the thresholds or the exceptions might be different.
     for my $oid (keys %{$tmpl->{'oids'}}) {
 
      # Dont hash an OID more than once
@@ -158,11 +160,15 @@ require Exporter;
 
       if(defined $tmpl->{'oids'}{$oid}{'thresh'}) {
         $oids->{$oid}{'thresh'} = $tmpl->{'oids'}{$oid}{'thresh'};
+      } elsif ( defined $oids->{$oid}{'thresh'} ) {
+	delete $oids->{$oid}{'thresh'} ;	# Remove old definition
       }
 
      # Then exceptions
       if(defined $tmpl->{'oids'}{$oid}{'exceptions'}) {
         $oids->{$oid}{'except'} = $tmpl->{'oids'}{$oids}{'exceptions'};
+      } elsif ( defined $oids->{$oid}{'except'} ) {
+	delete $oids->{$oid}{'except'} ;	# Remove old definition
       }
 
      # We dont have transform data yet, mark it for later and skip
@@ -175,12 +181,12 @@ require Exporter;
       }
 
       my $num    = $tmpl->{'oids'}{$oid}{'number'};
-      my $repeat = $tmpl->{'oids'}{$oid}{'repeat'}; 
+      my $repeat = $tmpl->{'oids'}{$oid}{'repeat'};
 
       $oids->{$oid}{'transform'} = 0;
       $oids->{$oid}{'repeat'}    = $repeat;
 
-      if (!defined $num or !defined $snmp->{$num} 
+      if (!defined $num or !defined $snmp->{$num}
         or !defined $snmp->{$num}{'val'} )
       {
         do_log("No SNMP data found for $oid on $device", 0) if ($g{'hobbit_color'}{$device} eq 'green');
@@ -208,13 +214,13 @@ require Exporter;
       else {
         my $val  = $snmp->{$num}{'val'};
         my $time = $snmp->{$num}{'time'};
-        
+
         $oids->{$oid}{'val'}  = $val;
         $oids->{$oid}{'time'} = $time;
 
        # Apply threshold
         apply_thresh($oids, $thr, $oid);
-        
+
       }
     }
     return $oids;
@@ -233,8 +239,8 @@ require Exporter;
 
    # Transform any oids that we depend on before we finish this one
     for my $dep_oid ($trans_data =~ /\{(.+?)\}/g) {
-      transform($device, $oids, $dep_oid, $thr) 
-        if $oids->{$dep_oid}{'transform'}; 
+      transform($device, $oids, $dep_oid, $thr)
+        if $oids->{$dep_oid}{'transform'};
     }
 
    # Make sure we inherit repeatability from previous types
@@ -242,7 +248,7 @@ require Exporter;
     no strict 'refs';
     do_log("DEBUG TESTS: Doing $trans_type transform on $device/$oid")
       if $g{'debug'};
-    if(defined &$trans_sub) { 
+    if(defined &$trans_sub) {
       eval {
         local $SIG{ALRM} = sub { die "Timeout\n" };
         alarm 5;
@@ -253,7 +259,7 @@ require Exporter;
       if($@) {
         if ($@ eq "Timeout\n") {
           do_log("Timed out waiting for $trans_type transform " .
-                 "on oid $oid for $device to complete."); 
+                 "on oid $oid for $device to complete.");
         }
         else {
           do_log("Got unexpected error while performing $trans_type " .
@@ -280,14 +286,14 @@ require Exporter;
     my $hist      = \%{$g{'dev_hist'}{$device}};
     my $hist_tmp  = \%{$g{'tmp_hist'}{$device}};
     my $oid_h     = \%{$oids->{$oid}};
-  
+
    # Extract our transform options
-    my ($dep_oid, $limit) = ($1, $2 || 0) 
+    my ($dep_oid, $limit) = ($1, $2 || 0)
       if $oid_h->{'trans_data'} =~ /\{(.+)\}(?:\s+:\s*(\d+))?/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Check our parent oids for any errors
-    validate_deps($device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$') 
+    validate_deps($device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$')
       or return;
 
    # See if we are a repeating variable type datum
@@ -337,7 +343,7 @@ require Exporter;
               $oid_h->{'time'}{$leaf}  = time;
               $oid_h->{'color'}{$leaf} = 'yellow';
               $oid_h->{'error'}{$leaf} = 1;
-              next LEAF;   
+              next LEAF;
             }
 
             do_log("Counterwrap on $oid.$leaf on $device (this: $this_data " .
@@ -346,17 +352,17 @@ require Exporter;
 
          # Otherwise do normal delta calc
           else {
-            $delta = ($this_data - $last_data) / 
+            $delta = ($this_data - $last_data) /
               ($this_time - $last_time);
           }
-          
+
          # Round delta to two decimal places
           $delta = sprintf "%.2f", $delta;
 
           $oid_h->{'val'}{$leaf}   = $delta;
           $oid_h->{'time'}{$leaf}  = time;
         }
-  
+
        # No history; throw wait message
         else {
           $oid_h->{'val'}{$leaf}   = 'wait';
@@ -413,7 +419,7 @@ require Exporter;
             $oid_h->{'time'}  = time;
             $oid_h->{'color'} = 'yellow';
             $oid_h->{'error'} = 1;
-            return;   
+            return;
           }
 
           do_log("Counterwrap on $oid on $device (this: $this_data " .
@@ -422,7 +428,7 @@ require Exporter;
 
        # Otherwise do normal delta calc
         else {
-          $delta = ($this_data - $last_data) / 
+          $delta = ($this_data - $last_data) /
             ($this_time - $last_time);
         }
 
@@ -459,7 +465,7 @@ require Exporter;
     my $precision = 2;
 
    # Extract our optional precision argument
-    $precision = $1 if $expr =~ s/\s*:\s*(\d+)//;
+    $precision = $1 if $expr =~ s/\s*:\s*(\d+)$//;
     my $print_mask = '%.' . $precision . 'f';
 
    # Convert our math symbols to their perl equivalents
@@ -483,20 +489,21 @@ require Exporter;
 
    # Handle repeater-type oids
     if($oid_h->{'repeat'}) {
+      my @dep_val;
      # Map our oids in the expression to a position on the temp 'dep_val' array
      # Sure, we could just do a regsub for every dep_oid on every leaf, but
      # thats pretty expensive CPU-wise
       for (my $i = 0; $i <= $#repeaters; $i++) {
         $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
       }
-        
+
       for my $leaf (keys %{$oids->{$oid_h->{'pri_oid'}}{'val'}}) {
        # Skip if we got a dependency error for this leaf
         next if $oid_h->{'error'}{$leaf};
 
        # Update our dep_val values so that when we eval the expression it
        # will use the values of the proper leaf of the parent repeater oids
-        my @dep_val;
+        #my @dep_val;
         for (@repeaters) { push @dep_val, $oids->{$_}{'val'}{$leaf} }
 
        # Do our eval and set our time
@@ -537,7 +544,7 @@ require Exporter;
 
       $result = sprintf $print_mask, $result;
       $oid_h->{'val'}  = $result;
-        
+
      # Now apply our threshold to this data
       apply_thresh($oids, $thr, $oid);
     }
@@ -551,7 +558,7 @@ require Exporter;
   sub trans_statistic {
     my ($device, $oids, $oid, $thr)= @_ ;
     my $oid_h= \%{ $oids->{$oid} } ;
-    
+
     my ( $dep_oid, $dep_oid_h, @leaf, $leaf) ;
     my ( $statistic, $val, $result, $count) ;
 
@@ -560,23 +567,22 @@ require Exporter;
    # is maintained outside these mini-functions in scalar $count.
    #
     my %comp= (
-        cnt => sub{ $result = $count ; },
         sum => sub{ $result+= $val ; },
         min => sub{ $result = $val  if $val < $result ; },
         max => sub{ $result = $val  if $val > $result ; },
         avg => sub{ $result+= $val ; } 			) ;
 
    # Extract the parent oid from the expression.
-    ($dep_oid,$statistic)= $oid_h->{'trans_data'} =~ /\{(.+?)\}\s+(\S+)/ ;
+    ($dep_oid,$statistic)= $oid_h->{'trans_data'} =~ /^\{(.+)\}\s+(\S+)$/ ;
     $statistic= lc $statistic ;
     $dep_oid_h= \%{$oids->{$dep_oid}} ;
 
-   # Do not use function validate_deps. It will make this oid to be a
-   # repeater-type oid if the parent oid is a repeater-type oid. The code
-   # section below is inspired on relevant parts of function validate_deps.
+   # Do not use function validate_deps. It will make this oid to be of the
+   # repeater-type if the parent oid is of the repeater-type. The code section
+   # below is inspired on the relevant parts of function validate_deps.
    #
-    $oid_h->{'repeat'} = 0 ;		# Make a leaf-type oid
-    $oid_h->{'val'} = undef ;
+    $oid_h->{'repeat'}= 0 ;		# Make a leaf-type oid
+    $oid_h->{'val'}   = undef ;
 
    # Check all the leaves of a repeater-type oid for an error condition. If
    # one is found, propagate the error condition to the result oid.
@@ -585,35 +591,35 @@ require Exporter;
       for $leaf ( keys %{$dep_oid_h->{'val'}} ) {
         $val= $dep_oid_h->{'val'}{$leaf} ;
         if ( ! defined $val ) {
-          $oid_h->{'val'}   = 'Parent data missing' ;
-          $oid_h->{'color'} = 'clear' ;
+          $oid_h->{'val'}  = 'Parent data missing' ;
+          $oid_h->{'color'}= 'clear' ;
           last ;
         } elsif ( $val eq 'wait' ) {
-          $oid_h->{'val'}   = 'wait' ;
-          $oid_h->{'color'} = 'blue' ;
+          $oid_h->{'val'}  = 'wait' ;
+          $oid_h->{'color'}= 'blue' ;
           last ;
         } elsif ( $dep_oid_h->{'error'}{$leaf} ) {
-          $oid_h->{'val'}   = 'Inherited error' ;
-          $oid_h->{'color'} = 'clear' ;
+          $oid_h->{'val'}  = 'Inherited error' ;
+          $oid_h->{'color'}= 'clear' ;
           last ;
         } elsif ( $statistic ne 'cnt' and $val !~ m/^[-+]?\d+(?:\.\d+)?$/ ) {
-          $oid_h->{'val'}   = 'Regex mismatch' ;
-          $oid_h->{'color'} = 'yellow' ;
+          $oid_h->{'val'}  = 'Regex mismatch' ;
+          $oid_h->{'color'}= 'yellow' ;
           last ;
-        }  
-      }  
+        }
+      }
     } else {
       if ( $dep_oid_h->{'error'} ) {
-        $oid_h->{'val'}   = $dep_oid_h->{'val'}   ;
-        $oid_h->{'color'} = $dep_oid_h->{'color'} ;
+        $oid_h->{'val'}  = $dep_oid_h->{'val'}   ;
+        $oid_h->{'color'}= $dep_oid_h->{'color'} ;
       }  # of if
     }  # of else
 
     if ( defined $oid_h->{'val'} ) {
-      $oid_h->{'time'}  = time ;
-      $oid_h->{'error'} = 1 ;
+      $oid_h->{'time'} = time ;
+      $oid_h->{'error'}= 1 ;
     }  # of if
- 
+
    # Abort if we already have an error code
     return 0 if defined $oid_h->{'error'} ;
 
@@ -623,11 +629,11 @@ require Exporter;
     if ( $dep_oid_h->{'repeat'} ) {
       @leaf = keys %{$dep_oid_h->{'val'}} ;
       $count= scalar @leaf ;
-      if ( $statistic eq 'cnt' ) {   
-        $result= $count ;             
-      } elsif ( $count == 0 ) {      
-        $result=  undef ;             
-      } else {                       
+      if ( $statistic eq 'cnt' ) {
+        $result = $count ;
+      } elsif ( $count == 0 ) {
+        $result = undef ;
+      } else {
        # Extract the first value of the list. This value is a nice starting
        # value to determine the minimum and the maximum.
        #
@@ -642,7 +648,7 @@ require Exporter;
 
       $oid_h->{'val'} = $result ;
       $oid_h->{'time'}= time ;
-      
+
    # The parent oid is a non-repeater-type oid. The computation of the
    # statistic is trivial in this case.
     } else {
@@ -651,7 +657,7 @@ require Exporter;
       $oid_h->{'time'}= $dep_oid_h->{'time'}  ;
       $oid_h->{'msg'} = $dep_oid_h->{'msg'}   ;
     }  # of else
-    
+
     apply_thresh( $oids, $thr, $oid ) ;
   }  # of trans_statistic
 
@@ -660,11 +666,11 @@ require Exporter;
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
 
-    my ($dep_oid, $offset, $length) = ($1, $2, $3) 
-      if $oid_h->{'trans_data'} =~ /\{(.+)\}\s+(\d+)\s*(\d*)/;
+    my ($dep_oid, $offset, $length) = ($1, $2, $3)
+      if $oid_h->{'trans_data'} =~ /^\{(.+)\}\s+(\d+)\s*(\d*)$/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
     $length = undef if $length eq '';
- 
+
     validate_deps($device, $oids, $oid, [$dep_oid]) or return;
 
    # See if we are a repeating variable type datum
@@ -708,7 +714,7 @@ require Exporter;
   }
 
 
-
+ # WIP : DO NOT USE
  # Compute logical 'AND' of dependent oids' values ###########################
   sub trans_and {
     my ($device, $oids, $oid, $thr) = @_;
@@ -753,8 +759,8 @@ require Exporter;
             $dep_col = $dep_oid_h->{'color'};
             $dep_msg = $dep_oid_h->{'msg'};
           }
-       
-          $col = $dep_col and $msg = $dep_msg 
+
+          $col = $dep_col and $msg = $dep_msg
             if $colors{$col} < $colors{$dep_col};
           $val = 0 if !$dep_val;
         }
@@ -780,8 +786,8 @@ require Exporter;
         my $dep_val  = $dep_oid_h->{'val'};
         my $dep_col = $dep_oid_h->{'color'};
         my $dep_msg = $dep_oid_h->{'msg'};
-     
-        $col = $dep_col and $msg = $dep_msg 
+
+        $col = $dep_col and $msg = $dep_msg
           if $colors{$col} < $colors{$dep_col};
         $val = 0 if !$dep_val;
       }
@@ -796,7 +802,7 @@ require Exporter;
   }
 
 
-
+ # WIP: DO NOT USE
  # Compute logical 'OR' of dependent oids' values ###########################
   sub trans_or {
     my ($device, $oids, $oid, $thr) = @_;
@@ -844,7 +850,7 @@ require Exporter;
             $dep_col = $dep_oid_h->{'color'};
             $dep_msg = $dep_oid_h->{'msg'};
           }
-       
+
           $col = $dep_col and $msg = $dep_msg
             if $colors{$col} < $colors{$dep_col};
           $val = 1 if $dep_val;
@@ -871,7 +877,7 @@ require Exporter;
         my $dep_val = $dep_oid_h->{'val'};
         my $dep_col = $dep_oid_h->{'color'};
         my $dep_msg = $dep_oid_h->{'msg'};
-     
+
         $col = $dep_col and $msg = $dep_msg
           if $colors{$col} < $colors{$dep_col};
         $val = 1 if $dep_val;
@@ -890,8 +896,8 @@ require Exporter;
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
 
-    my ($dep_oid, $type, $seperator) = ($1, $2, $3 || '') 
-      if $oid_h->{'trans_data'} =~ /\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
+    my ($dep_oid, $type, $seperator) = ($1, $2, $3 || '')
+      if $oid_h->{'trans_data'} =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Validate our dependencies
@@ -910,7 +916,7 @@ require Exporter;
         my $val = pack $type, @packed;
 
 	do_log("Transformed $dep_oid_h->{'val'}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ",0) if $g{'debug'};
-        
+
         $oid_h->{'val'}{$leaf}   = $val;
         $oid_h->{'time'}{$leaf}  = time;
       }
@@ -923,7 +929,7 @@ require Exporter;
     else {
       my $packed = $dep_oid_h->{'val'};
       my @vars = pack $type, $packed;
-        
+
       $oid_h->{'val'}  = join $seperator, @vars;
       $oid_h->{'time'} = time;
 
@@ -940,8 +946,8 @@ require Exporter;
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
 
-    my ($dep_oid, $type, $seperator) = ($1, $2, $3 || '') 
-      if $oid_h->{'trans_data'} =~ /\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
+    my ($dep_oid, $type, $seperator) = ($1, $2, $3 || '')
+      if $oid_h->{'trans_data'} =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Validate our dependencies
@@ -958,7 +964,7 @@ require Exporter;
 
         my $packed = $dep_oid_h->{'val'}{$leaf};
         my @vars = unpack $type, $packed;
-        
+
         $oid_h->{'val'}{$leaf}   = join $seperator, @vars;
         $oid_h->{'time'}{$leaf}  = time;
       }
@@ -971,7 +977,7 @@ require Exporter;
     else {
       my $packed = $dep_oid_h->{'val'};
       my @vars = unpack $type, $packed;
-        
+
       $oid_h->{'val'}  = join $seperator, @vars;
       $oid_h->{'time'} = time;
 
@@ -989,8 +995,8 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
 
    # Extract our translation options
-    my ($dep_oid, $type, $pad) = ($1, lc $2, $3) 
-      if $oid_h->{'trans_data'} =~ /\{(.+)\}\s+(hex|oct)\s*(\d*)/i;
+    my ($dep_oid, $type, $pad) = ($1, lc $2, $3)
+      if $oid_h->{'trans_data'} =~ /^\{(.+)\}\s+(hex|oct)\s*(\d*)$/i;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Validate our dependencies
@@ -1256,7 +1262,7 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
 
    # Extract our transform options
-    my $dep_oid = $1 if $oid_h->{'trans_data'} =~ /\{(.+)\}/;
+    my $dep_oid = $1 if $oid_h->{'trans_data'} =~ /^\{(.+)\}$/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Validate our dependencies
@@ -1284,7 +1290,7 @@ require Exporter;
         $oid_h->{'time'}{$leaf}  = time;
         $oid_h->{'color'}{$leaf} = $dep_oid_h->{'color'}{$leaf};
         $oid_h->{'msg'}{$leaf}   = $dep_oid_h->{'msg'}{$leaf};
-       
+
       }
     }
 
@@ -1315,7 +1321,7 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
 
    # Extract our transform options
-    my $dep_oid = $1 if $oid_h->{'trans_data'} =~ /\{(.+)\}/;
+    my $dep_oid = $1 if $oid_h->{'trans_data'} =~ /^\{(.+)\}$/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Validate our dependencies
@@ -1340,7 +1346,7 @@ require Exporter;
         $oid_h->{'time'}{$leaf}  = time;
         $oid_h->{'color'}{$leaf} = $dep_oid_h->{'color'}{$leaf};
         $oid_h->{'msg'}{$leaf}   = $dep_oid_h->{'msg'}{$leaf};
-       
+
       }
     }
 
@@ -1395,7 +1401,7 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
 
    # Extract our single dependant oid
-    my $dep_oid = $1 if $oid_h->{'trans_data'} =~ /\{(.+)\}/;
+    my $dep_oid = $1 if $oid_h->{'trans_data'} =~ /^\{(.+)\}$/;
     my $dep_oid_h = \%{$oids->{$dep_oid}};
 
    # Validate our dependencies
@@ -1411,7 +1417,7 @@ require Exporter;
         next if $oid_h->{'error'}{$leaf};
 
         my $bps = int $dep_oid_h->{'val'}{$leaf};
- 
+
        # Get largest speed type
         my $speed = 1; # Start low: 1 bps
         $speed *= 1000 while $bps >= ($speed * 1000);
@@ -1471,7 +1477,7 @@ require Exporter;
 
        # Skip if there was a dependency error for this leaf
         next if $oid_h->{'error'}{$leaf};
-       
+
         my $val = $dep_oid_h->{'val'}{$leaf};
 
         my $num;
@@ -1483,15 +1489,15 @@ require Exporter;
           if($type eq 'gte') { $num = $case and last if $val >= $if; next}
           if($type eq 'lt')  { $num = $case and last if $val < $if; next}
           if($type eq 'lte') { $num = $case and last if $val <= $if; next}
-          if($type eq 'rng') { 
+          if($type eq 'rng') {
             my ($ll,$ul) = split /-/, $if;
-            $num = $case and last if $val >= $ll and $val <= $ul; 
+            $num = $case and last if $val >= $ll and $val <= $ul;
             next;
           }
           if($type eq 'str') { $num = $case and last if $val eq $if; next}
           if($type eq 'reg') { $num = $case and last if $val =~ /$if/; next}
         }
-          
+
         my $then;
         if(defined $num) { $then = $cases->{$num}{'then'} }
         else { $then = $default }
@@ -1508,7 +1514,7 @@ require Exporter;
           }
           $then =~ s/\{$then_oid\}/$then_oid_val/g;
         }
-          
+
         $oid_h->{'val'}{$leaf}   = $then;
         $oid_h->{'time'}{$leaf}  = time;
 
@@ -1530,15 +1536,15 @@ require Exporter;
         if($type eq 'gte') { $num = $case and last if $val >= $if; next}
         if($type eq 'lt')  { $num = $case and last if $val < $if; next}
         if($type eq 'lte') { $num = $case and last if $val <= $if; next}
-        if($type eq 'rng') { 
+        if($type eq 'rng') {
           my ($ll,$ul) = split /-/, $if;
-          $num = $case and last if $val >= $ll and $val <= $ul; 
+          $num = $case and last if $val >= $ll and $val <= $ul;
           next;
         }
         if($type eq 'str') { $num = $case and last if $val eq $if; next}
         if($type eq 'reg') { $num = $case and last if $val =~ /$if/; next}
       }
-        
+
       my $then;
       if(defined $num) { $then = $cases->{$num}{'then'} }
       else { $then = $default }
@@ -1558,10 +1564,10 @@ require Exporter;
         }
         $then =~ s/\{$then_oid\}/$then_oid_val/g;
       }
-        
+
       $oid_h->{'val'}   = $then;
       $oid_h->{'time'}  = time;
-      
+
       apply_thresh($oids, $thr, $oid);
     }
 
@@ -1602,15 +1608,15 @@ require Exporter;
           if($type eq 'gte') { $num = $case and last if $val >= $if; next}
           if($type eq 'lt')  { $num = $case and last if $val < $if; next}
           if($type eq 'lte') { $num = $case and last if $val <= $if; next}
-          if($type eq 'rng') { 
+          if($type eq 'rng') {
             my ($ll,$ul) = split /-/, $if;
-            $num = $case and last if $val >= $ll and $val <= $ul; 
+            $num = $case and last if $val >= $ll and $val <= $ul;
             next;
           }
           if($type eq 'str') { $num = $case and last if $val eq $if; next}
           if($type eq 'reg') { $num = $case and last if $val =~ /$if/; next}
         }
-          
+
         my $then;
         if(defined $num) { $then = $cases->{$num}{'then'} }
         else { $then = $default }
@@ -1635,7 +1641,7 @@ require Exporter;
           }
           $then =~ s/\{$then_oid\}/$then_oid_val/g;
         }
-          
+
         $oid_h->{'val'}{$leaf}   = $then;
         $oid_h->{'time'}{$leaf}  = time;
 
@@ -1657,15 +1663,15 @@ require Exporter;
         if($type eq 'gte') { $num = $case and last if $val >= $if; next}
         if($type eq 'lt')  { $num = $case and last if $val < $if; next}
         if($type eq 'lte') { $num = $case and last if $val <= $if; next}
-        if($type eq 'rng') { 
+        if($type eq 'rng') {
           my ($ll,$ul) = split /-/, $if;
-          $num = $case and last if $val >= $ll and $val <= $ul; 
+          $num = $case and last if $val >= $ll and $val <= $ul;
           next;
         }
         if($type eq 'str') { $num = $case and last if $val eq $if; next}
         if($type eq 'reg') { $num = $case and last if $val =~ /$if/; next}
       }
-        
+
       my $then;
       if(defined $num) { $then = $cases->{$num}{'then'} }
       else { $then = $default }
@@ -1691,10 +1697,10 @@ require Exporter;
         }
         $then =~ s/\{$then_oid\}/$then_oid_val/g;
       }
-        
+
       $oid_h->{'val'}  = $then;
       $oid_h->{'time'} = time;
-      
+
       apply_thresh($oids, $thr, $oid);
     }
 
@@ -1707,8 +1713,8 @@ require Exporter;
     my ($device, $oids, $oid, $thr) = @_;
     my $oid_h = \%{$oids->{$oid}};
     my $trans_data = $oid_h->{'trans_data'};
-    my ($main_oid, $expr) = ($1,$2) 
-      if $trans_data =~ /^\{(\S+?)\}\s*(\/.+\/.*\/[eg]*)/; 
+    my ($main_oid, $expr) = ($1,$2)
+      if $trans_data =~ /^\{(.+)\}\s*(\/.+\/.*\/[eg]*)$/;
 
    # Extract all our our parent oids from the expression, first
     my @dep_oids = $trans_data =~ /\{(.+?)\}/g;
@@ -1732,12 +1738,16 @@ require Exporter;
     if($oid_h->{'repeat'}) {
 
      # Map the names of our repeater oids to a position on a placeholder array
+#my $size = scalar @repeaters;
+#do_log("DDD: $size");
+#      for (my $i = 0; $i <= (scalar @repeaters); $i++) {
       for (my $i = 0; $i <= $#repeaters; $i++) {
         $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
       }
       for my $leaf (keys %{$oids->{$oid_h->{'pri_oid'}}{'val'}}) {
 
        # Skip if there was a dependency error for this leaf
+#do_log("DDD: $oid $leaf $oid_h->{'error'}{$leaf}");
         next if $oid_h->{'error'}{$leaf};
 
        # Update our dep_val values so that when we eval the expression it
@@ -1780,7 +1790,7 @@ require Exporter;
       }
       $oid_h->{'val'}  = $exp_val;
       $oid_h->{'time'} = time;
-        
+
      # Now apply our threshold to this data
       apply_thresh($oids, $thr, $oid);
     }
@@ -1802,7 +1812,7 @@ require Exporter;
     my ($src_oid, $trg_oid) = $oid_h->{'trans_data'} =~ /\{(.+?)\}/g;
 
    # Validate our dependencies, have to do them seperately
-    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$') 
+    validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$')
       or return;
 
     my $src_h = \%{$oids->{$src_oid}};
@@ -1862,7 +1872,7 @@ require Exporter;
           $oid_h->{'error'}{$leaf}  = 1;
           next;
         }
-        
+
         $oid_h->{'val'}{$leaf}    = $trg_val;
         $oid_h->{'time'}{$leaf}   = $trg_h->{'time'}{$sub_oid};
         $oid_h->{'color'}{$leaf}  = $trg_h->{'color'}{$sub_oid};
@@ -1876,14 +1886,14 @@ require Exporter;
 
   }
  # Do coltre #########################################################
- # Collect and accumulate data (=trg) in a tree (the tree is in a repeater) 
+ # Collect and accumulate data (=trg) in a tree (the tree is in a repeater)
  # by using a pointer to a parent or child (=src) oid value : Each leaf look
- # recursivly until a non existing value. Option ":opt1, opt2" 
- # Opt1: Separate the accumulate data with separator string (def = '')
- # Opt2: Pad data before accumulation. Example
+ # recursively until a non existing value. Optionnal args ...:arg1, arg2
+ # Arg1: Separate the accumulate data with separator string (default = '')
+ # Arg2: Pad data before accumulation. Example
  #       r5( )  : pad from left with space to length of 5.
  #       l{+}   : pad from right with + . Length is detected automatically
-  
+
 
 
   sub trans_coltre {
@@ -1899,10 +1909,10 @@ require Exporter;
     $padding_char = $1 if $expr =~ s/[({](.)[)}]\s*$//;
     $padding_length = $1 if $expr =~ s/(\d+?)$//;
     $padding_type = $1  if $expr =~ s/[,:]\s*([rl])$//;
-    $separator = $1 if $expr =~ s/:\s*(\S+?)\s*$//;
+    $separator = $1 if $expr =~ s/\s+:\s*(\S+?)\s*$//;
 
    # Extract all our our parent oids from the expression, first
-    my ($src_oid, $trg_oid) = $expr =~ /\{(.+?)\}/g;
+    my ($src_oid, $trg_oid) = $expr =~ /\{(.+)\}\s+\{(.+)\}$/;
 
    # Validate our dependencies, have to do them seperately
     validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$|')
@@ -1932,7 +1942,7 @@ require Exporter;
       else {
         while (my ($key, $value) = each $trg_h->{'val'}) {
           if($padding_type eq 'l') {
-            $trg_h->{'val'}{$key} = $padding_char x ($padding_length - length($trg_h->{'val'}{$key})) . $trg_h->{'val'}{$key};       
+            $trg_h->{'val'}{$key} = $padding_char x ($padding_length - length($trg_h->{'val'}{$key})) . $trg_h->{'val'}{$key};
           }
           else {
             $trg_h->{'val'}{$key} .= $padding_char x ($padding_length - length($trg_h->{'val'}{$key}));
@@ -1941,9 +1951,9 @@ require Exporter;
       }
     }
 
-   # Our source MUST be a repeater type oid 
+   # Our source MUST be a repeater type oid
     if(!$trg_h->{'repeat'}) {
-      do_log("Trying to COLTRE a non-repeater 1rst oid on $device ($@)", 0); 
+      do_log("Trying to COLTRE a non-repeater 1rst oid on $device ($@)", 0);
       $oid_h->{'repeat'} = 0;
       $oid_h->{'val'}    = 'Failed coltre';
       $oid_h->{'time'}   = time;
@@ -1951,7 +1961,7 @@ require Exporter;
       $oid_h->{'error'}  = 1;
     }
 
-   # Our target MUST be a repeater type oid 
+   # Our target MUST be a repeater type oid
     elsif(!$trg_h->{'repeat'}) {
       do_log("Trying to COLTRE a non-repeater 2nd oid on $device ($@)", 0);
       $oid_h->{'repeat'} = 0;
@@ -1995,16 +2005,14 @@ require Exporter;
     my $expr  = $oid_h->{'trans_data'};
     my $sort = 'txt';
 
-   # Extract our optional arguments
-    $sort = $1 if $expr =~ s/:\s*(num|txt)\s*$//;
+   # Extract our optional arguments (NOT WORKING ONLY DEFAULT "TXT")
+    $sort = $1 if $expr =~ s/\s+:\s*(num|txt)*$//i;
 
    # Extract all our our parent oids from the expression, first
-    my ($src_oid) = $expr =~ /\{(.+?)\}/g;
-    validate_deps($device, $oids, $oid, [$src_oid], '.+') ;
+    my ($src_oid) = $expr =~ /^\{(.+)\}$/;
+    validate_deps($device, $oids, $oid, [$src_oid]) ;
 
    # Validate our dependencies, have to do them seperately
-   # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
-   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
    #   or return;
    do_log("Transforming $src_oid to $oid via sort transform",0) if $g{'debug'};
 
@@ -2042,7 +2050,8 @@ require Exporter;
         }
       }
       elsif ($sort eq 'num') {
-        for my $leaf (keys %{$src_h->{'val'}}) {
+        my $pad = 1;
+        for my $leaf ( sort { $src_h->{'val'}{$a} <=>  $src_h->{'val'}{$b} } keys %{$src_h->{'val'}})  {
 
           # Skip if our source oid is freaky-deaky
           next if $oid_h->{'error'}{$leaf};
@@ -2058,7 +2067,7 @@ require Exporter;
             next;
           }
 
-          $oid_h->{'val'}{$leaf}    = $leaf;
+          $oid_h->{'val'}{$leaf}    = $pad++;
           $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
           $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
           $oid_h->{'error'}{$leaf}  = $src_h->{'error'}{$leaf};
@@ -2106,12 +2115,12 @@ require Exporter;
 
     my $oid_h = \%{$oids->{$oid}};
    # Extract our parent oids from the expression, first
-    my ($src_oid) = $oid_h->{'trans_data'} =~ /\{(.+?)\}/g;
+    my ($src_oid) = $oid_h->{'trans_data'} =~ /^\{(.+)\}$/;
     validate_deps($device, $oids, $oid, [$src_oid], '.+') ;
 
    # Validate our dependencies, have to do them seperately
    # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
-   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$') 
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
    #   or return;
    do_log("Transforming $src_oid to $oid via index transform",0) if $g{'debug'};
 
@@ -2141,7 +2150,7 @@ require Exporter;
           $oid_h->{'error'}{$leaf}  = 1;
           next;
         }
-        
+
         $oid_h->{'val'}{$leaf}    = $leaf;
         $oid_h->{'time'}{$leaf}   = $src_h->{'time'}{$leaf};
         $oid_h->{'color'}{$leaf}  = $src_h->{'color'}{$leaf};
@@ -2155,7 +2164,7 @@ require Exporter;
   }
 
  # Extract names and values from simple tables #############################
- # Some MIBs just return a table of names and values, with rows that  have 
+ # Some MIBs just return a table of names and values, with rows that  have
  # different data, types, meanings, units etc.
  # This operator allows the creation of new columns for rows where the name
  # column matches the provided regex
@@ -2165,13 +2174,13 @@ require Exporter;
     my $oid_h = \%{$oids->{$oid}};
    # Extract our parent oids from the expression, first
     my $trans_data = $oid_h->{'trans_data'};
-    my ($src_oid, $expr) = ($1,$2) 
-      if $trans_data =~ /^\{\s*(\S+?)\s*\}\s*(\/.+\/)\s*$/;
+    my ($src_oid, $expr) = ($1,$2)
+      if $trans_data =~ /^\{(\S+)\}\s+(\/.+\/)$/;
      validate_deps($device, $oids, $oid, [$src_oid]);
 
    # Validate our dependencies, have to do them seperately
    # validate_deps($device, $oids, 'tmp', [$trg_oid]) or return;
-   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$') 
+   # validate_deps($device, $oids, $oid, [$src_oid], '^\.?(\d+\.)?\d+$')
    #   or return;
    do_log("Transforming $src_oid to $oid via match transform matching $expr",0) if $g{'debug'};
 
@@ -2218,7 +2227,7 @@ require Exporter;
           $oid_h->{'error'}{$idx}  = 1;
           next;
         }
-        
+
         $oid_h->{'val'}{$idx}    = $leaf;
         $oid_h->{'time'}{$idx}   = $src_h->{'time'}{$leaf};
         $oid_h->{'color'}{$idx}  = $src_h->{'color'}{$leaf};
@@ -2244,7 +2253,7 @@ require Exporter;
     $bb_host =~ s/\./,/g;
 
     do_log("DEBUG TEST: Rendering $test message for $device") if $g{'debug'};
-    
+
    # Build readable timestamp
     my $now= $g{'bbdateformat'} ?  strftime($g{'bbdateformat'},localtime) : scalar(localtime) ;
 
@@ -2258,7 +2267,7 @@ require Exporter;
     }
 
    # Do we have a hobbit color, and if so, is it green?
-    elsif(defined $g{'hobbit_color'}{$device} and 
+    elsif(defined $g{'hobbit_color'}{$device} and
            $g{'hobbit_color'}{$device} ne 'green') {
 	   my $bbname = ucfirst $g{'bbtype'};
      return "status $bb_host.$test clear $now" .
@@ -2280,7 +2289,7 @@ require Exporter;
    # Go through message template line by line
     MSG_LINE: for my $line (split /\n/, $msg_template) {
 
-     # First see if this is table data 
+     # First see if this is table data
       if($line =~ /^TABLE:\s*(.*)/o) {
         %t_opts = ();
         %rrd    = ();
@@ -2291,7 +2300,7 @@ require Exporter;
 	    ($opt,$val) = ($1,$2) if $optval =~ /^(\w+)=(\w+)$/;
             $val = 1 if !defined $val;
             push @{$t_opts{$opt}}, $val;
-            
+
           }
         }
 
@@ -2355,16 +2364,16 @@ require Exporter;
 
          # Format the line accordingly
           if(defined $t_opts{'nonhtml'}) {
-            $table .= "$line\n";  
+            $table .= "$line\n";
             $line =~ s/\|/:/g;
           }
 	  elsif (defined $t_opts{'plain'}) {
-            $table .= "$line\n";  
+            $table .= "$line\n";
             $line =~ s/\|/ /g;
           }
           else {
             $line =~ s/\|/<\/th><th>/g;
-            $table .= "<tr><th>$line</th></tr>\n";  
+            $table .= "<tr><th>$line</th></tr>\n";
           }
           next MSG_LINE;
         }
@@ -2425,14 +2434,14 @@ require Exporter;
        # graph used the pri oid so this sort option do not feel weel when graphing
         my @table_leaves = ();
 
-        if (exists $t_opts{'sort'}[0]) 
+        if (exists $t_opts{'sort'}[0])
         {
           if (defined $t_opts{'sort'}[0])
           {
             my %temphash = %{$oids->{$t_opts{'sort'}[0]}{'val'}};
             @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
           }
-        }  
+        }
        # If the primary oids leaves are non-numeric, then we cant sort it
        # numerically, we'll have to resort to a cmp
         elsif ($oids->{$pri}{'repeat'} == 2) {
@@ -2511,7 +2520,7 @@ require Exporter;
                   push @{$rrd{$name}{'leaves'}}, $leaf unless grep {$_ eq $leaf} @{$rrd{$name}{'leaves'}};
 		#}
               }
-              
+
              # If this is our primary oid, and we are have an alarm
              # variable defined, save it so we can add it later
                 $alarm_int = $val;
@@ -2530,7 +2539,7 @@ require Exporter;
                 $row_data =~ s/\{$root\}/&$color /;
 
                # If this test has a worse color, use it for the global color
-                $worst_color = $color if !defined $worst_color or 
+                $worst_color = $color if !defined $worst_color or
                   $colors{$worst_color} < $colors{$color};
               }
 
@@ -2552,12 +2561,12 @@ require Exporter;
                 my $oid_msg = $oid_h->{'msg'}{$leaf};
                 $oid_msg = 'Undefined' if !defined $oid_msg;
                 $oid_msg = parse_deps($oids, $oid_msg, $leaf);
-               
+
                # If this test has a worse color, use it for the global color
-                $worst_color = $color if !defined $worst_color or 
+                $worst_color = $color if !defined $worst_color or
                   $colors{$worst_color} < $colors{$color};
 
-               # Now add it to our msg                
+               # Now add it to our msg
                 $errors .= "&$color $oid_msg\n";
               }
 
@@ -2589,7 +2598,7 @@ require Exporter;
 	  # add the primary repeater to our alarm header if we are
 	  # alarming on it; Wrap our header at 60 chars
 	  if(!defined $t_opts{'noalarmsmsg'} and $alarm) {
-		  $alarm_ints =~ s/(.{60,}),$/$1)\nAlarming on (/; 
+		  $alarm_ints =~ s/(.{60,}),$/$1)\nAlarming on (/;
 		  $alarm_ints .= "$alarm_int,";
 	  }
 
@@ -2621,7 +2630,7 @@ require Exporter;
 
        # Add rrd data
         for my $name (keys %rrd) {
-           
+
           my $set_data = '';
 	  my $temp_data = '';
           my $dir      = $rrd{$name}{'dir'};
@@ -2650,27 +2659,27 @@ require Exporter;
               $temp_data .= "$val:";
             }
 	    if ($temp_data =~ /^(U:)+$/) {
-		 
+
               do_log("Text values in data for rrd repeater, dropping rrd for $pri_val") if $g{'debug'};;
 	      next;
             }
 	    $set_data .= "$pri_val ";
 	    $set_data .= "$temp_data";
             $set_data =~ s/:$/\n/;
-       
+
           }
-              
+
           $set_data =~ s/[\/&+\$]/_/gs;
           $msg .= "$header\n$set_data-->\n";
 
-        }   
+        }
 
        # Clear our table status
         $table = undef;
 
       } # End table data processing
 
-                
+
      # Not table data, so it should be a non-repeater type variable
       else {
 
@@ -2695,7 +2704,7 @@ require Exporter;
 
             if($flag eq 'color') {
              # If this test has a worse color, use it for the global color
-              $worst_color = $color if !defined $worst_color or 
+              $worst_color = $color if !defined $worst_color or
                 $colors{$worst_color} < $colors{$color};
               $line =~ s/\{$root\}/\&$color /;
             }
@@ -2726,12 +2735,12 @@ require Exporter;
              # Get oid msg and replace any inline oid dependencies
               my $oid_msg = $oid_h->{'msg'};
               $oid_msg = parse_deps($oids, $oid_msg, undef);
-                 
+
              # If this test has a worse color, use it for the global color
-              $worst_color = $color if !defined $worst_color or 
+              $worst_color = $color if !defined $worst_color or
                 $colors{$worst_color} < $colors{$color};
 
-             # Now add it to our msg                
+             # Now add it to our msg
               $errors .= "&$color $oid_msg\n";
             }
 
@@ -2750,7 +2759,7 @@ require Exporter;
             else {
               do_log("Unknown flag ($flag) for $oid on $device\n");
             }
-            
+
           }
 
           else {
@@ -2765,20 +2774,20 @@ require Exporter;
        # Avoid blank error lines
         $line = ($line eq '#ERRORONLY#') ? '' : "$line\n";
         if ($line =~ /^STATUS:(.*)$/) {
-          # 
+          #
           $extrastatus = $1;
         } else {
           $msg .= $line;
         }
       }
 
-    } 
-   
+    }
+
    # Xymon can currently graph only 1 table. The rrd info
-   # should be at the end of the message, otherwise the 
+   # should be at the end of the message, otherwise the
    # linecount is wrong and there are empty graphs
    # Pick the first RRD message and put it at the end
-   # ref lib/htmllog.c : (the rendering is not ready to have multiple rrd)  
+   # ref lib/htmllog.c : (the rendering is not ready to have multiple rrd)
    # > See if there is already a linecount in the report.
    # > * If there is, this overrides the calculation here.
    # Simply comment the 2 following lines to revert this workaround
@@ -2792,7 +2801,7 @@ require Exporter;
 
    # Now add our header so bb/hobbit can determine the page color
     $msg = "status $bb_host.$test $worst_color $now" .
-      "$extrastatus\n\n$msg"; 
+      "$extrastatus\n\n$msg";
 
    # Add our oh-so-stylish devmon footer
     $msg .= "\n\nDevmon version $g{'version'} " .
@@ -2807,12 +2816,12 @@ require Exporter;
     else {
      # Clear our clear counter if this message wasnt clear
       delete $g{'numclears'}{$device}{$test}
-        if defined $g{'numclears'}{$device} 
+        if defined $g{'numclears'}{$device}
         and defined $g{'numclears'}{$device}{$test};
     }
 
    # Now return null if we are in our 'cleartime' window
-    if(defined $g{'numclears'}{$device} and 
+    if(defined $g{'numclears'}{$device} and
        defined $g{'numclears'}{$device}{$test}) {
       my $start_clear = $g{'numclears'}{$device}{$test};
       if (time - $start_clear < $g{'cleartime'}) {
@@ -2845,28 +2854,28 @@ require Exporter;
   sub check_alarms {
     my ($tmpl, $dev, $test, $oid, $val) = @_;
 
-    if(defined $dev->{'except'}{$test}{$oid}{'noalarm'}) { 
+    if(defined $dev->{'except'}{$test}{$oid}{'noalarm'}) {
       my $match = $dev->{'except'}{$test}{$oid}{'noalarm'};
       return 1 if $val =~ /^(?:$match)$/;
     }
-    elsif(defined $dev->{'except'}{'all'}{$oid}{'noalarm'}) { 
+    elsif(defined $dev->{'except'}{'all'}{$oid}{'noalarm'}) {
       my $match = $dev->{'except'}{'all'}{$oid}{'noalarm'};
       return 1 if $val =~ /^(?:$match)$/;
     }
-    elsif(defined $tmpl->{'oids'}{$oid}{'except'}{'noalarm'}) { 
+    elsif(defined $tmpl->{'oids'}{$oid}{'except'}{'noalarm'}) {
       my $match = $tmpl->{'oids'}{$oid}{'except'}{'noalarm'};
       return 1 if $val =~ /^(?:$match)$/;
     }
 
-    if(defined $dev->{'except'}{$test}{$oid}{'alarm'}) { 
+    if(defined $dev->{'except'}{$test}{$oid}{'alarm'}) {
       my $match = $dev->{'except'}{$test}{$oid}{'alarm'};
       return 1 if $val !~ /^(?:$match)$/;
     }
-    elsif(defined $dev->{'except'}{'all'}{$oid}{'alarm'}) { 
+    elsif(defined $dev->{'except'}{'all'}{$oid}{'alarm'}) {
       my $match = $dev->{'except'}{'all'}{$oid}{'alarm'};
       return 1 if $val !~ /^(?:$match)$/;
     }
-    elsif(defined $tmpl->{'oids'}{$oid}{'except'}{'alarm'}) { 
+    elsif(defined $tmpl->{'oids'}{$oid}{'except'}{'alarm'}) {
       my $match = $tmpl->{'oids'}{$oid}{'except'}{'alarm'};
       return 1 if $val !~ /^(?:$match)$/;
     }
@@ -2881,7 +2890,7 @@ require Exporter;
    # Try to guard against recursion loops
     $depth = 1 if !defined $depth;
     return "Recursion limit exceeded." if ++$depth > 10;
-    
+
 
    # Make sure we have a message to parse!
     return "Undefined msg" if !defined $msg;
@@ -2912,7 +2921,7 @@ require Exporter;
         if(!defined $val) {
           do_log("Missing msg data for $dep_oid on leaf $leaf", 1);
           $val = 'Undefined';
-        } 
+        }
       }
 
      # Not a repeater
@@ -2931,16 +2940,16 @@ require Exporter;
         if(!defined $val) {
           do_log("Missing msg data for $dep_oid", 1);
           $val = 'Undefined';
-        } 
+        }
       }
-          
+
       $msg =~ s/\{$dep_oid\}/$val/g;
     }
 
     return $msg;
   }
-      
-    
+
+
  # Apply thresholds to a supplied non-repeater oid, save in the oids hash
   sub apply_thresh {
     my ($oids, $thr, $oid) = @_;
@@ -2958,15 +2967,15 @@ require Exporter;
 
      # Determine if we use custom or template thresholds
       if(defined $thr) {
-        if(defined $thr->{$oid}) {
+        if(exists $thr->{$oid}) {
           if(defined $thr->{$oid}{$color}) {
             $threshes = $thr->{$oid}{$color};
           }
         }
       }
       if(!defined $threshes ) {
-        if(defined $oids->{$oid}{'thresh'}{$color}) {
-          $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+        if(defined $oids->{$oid}->{'thresh'}->{$color}) {
+          $threshes = $oids->{$oid}->{'thresh'}->{$color}{'val'};
         }
       }
       next if !defined $threshes;
@@ -2976,15 +2985,24 @@ require Exporter;
       for my $thresh (split /\s*,\s*/, $threshes) {
         $match = 1;
 
-       # Determine if our thresholds are numeric or string based
-        if($thresh =~ /^(>|<|>=|<=|=)?\s*([+-]?\d+(?:\.\d+)?)$/) {
-          my ($op, $limit) = ($1, $2);
-          $op = '>' if !defined $op;
-          last if $op eq '>'  and $oid_val > $limit;
-          last if $op eq '<'  and $oid_val < $limit;
-          last if $op eq '>=' and $oid_val >= $limit;
-          last if $op eq '<=' and $oid_val <= $limit;
-          last if $op eq '='  and $oid_val == $limit;
+       # check if the value to test is a num
+        if ($oid_val =~ /^[+-]?\d+(\.\d+)?$/) {
+
+       # Look for a simple numeric threshold, without a comparison operator.
+       # This is the most common threshold definition and handling it separately
+          if ( $thresh =~ /^([+-]?\d+(?:\.\d+)?)$/ ) {
+          last if $oid_val >= $1 ;
+          }
+          # Look for a numeric threshold preceeded by a comparison operator.
+          elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+            my ($op, $limit) = ($1, $2);
+            last if $op eq '<'  and $oid_val < $limit;
+            last if $op eq '>=' and $oid_val >= $limit;
+            last if $op eq '<=' and $oid_val <= $limit;
+            last if $op eq '='  and $oid_val == $limit;
+            last if $op eq '!'  and $oid_val != $limit;
+            last if $op eq '>'  and $oid_val > $limit;
+          }
         }
 
        # Look for negated test, must be string based
@@ -3013,7 +3031,7 @@ require Exporter;
    # Check to make sure to assign a color by default
     $oids->{$oid}{'color'} = 'green';
   }
-          
+
  # Apply thresholds to a supplied repeater oid, save in the oids hash
   sub apply_thresh_rep {
     my ($oids, $thr, $oid) = @_;
@@ -3033,15 +3051,15 @@ require Exporter;
 
        # Determine if we use custom or template thresholds
         if(defined $thr) {
-          if(defined $thr->{$oid}) {
+          if(exists $thr->{$oid}) {
             if(defined $thr->{$oid}{$color}) {
               $threshes = $thr->{$oid}{$color};
             }
           }
         }
         if(!defined $threshes) {
-          if(defined $oids->{$oid}{'thresh'}{$color}) {
-            $threshes = $oids->{$oid}{'thresh'}{$color}{'val'};
+          if(defined $oids->{$oid}->{'thresh'}->{$color}) {
+            $threshes = $oids->{$oid}->{'thresh'}->{$color}{'val'};
           }
         }
 
@@ -3052,21 +3070,26 @@ require Exporter;
        # Split our comma-delimited thresholds up
         for my $thresh (split /\s*,\s*/, $threshes) {
           $match = 1;
-         # Determine if our thresholds are numeric or string based
-          if($thresh =~ /^(>|<|>=|<=|=)?\s*([+-]?\d+(?:\.\d+)?)$/) {
 
-           # If our thresh is numeric and our data isnt, something
-           # probably went wrong; dont do threshold tests
-		my ($op, $limit) = ($1, $2);
-            next APTHRLEAF if $oid_val !~ /^[+-]?\d+(\.\d+)?$/;
-            $op = '>' if !defined $op;
-            last if $op eq '>'  and $oid_val > $limit;
-            last if $op eq '<'  and $oid_val < $limit;
-            last if $op eq '>=' and $oid_val >= $limit;
-            last if $op eq '<=' and $oid_val <= $limit;
-            last if $op eq '='  and $oid_val == $limit;
+         # check if the value to test is a num
+          if ($oid_val =~ /^[+-]?\d+(\.\d+)?$/) {
+
+         # Look for a simple numeric threshold, without a comparison operator.
+         # This is the most common threshold definition and handling it separately
+            if ( $thresh =~ /^([+-]?\d+(?:\.\d+)?)$/ ) {
+            last if $oid_val >= $1 ;
+            }
+            # Look for a numeric threshold preceeded by a comparison operator.
+            elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+              my ($op, $limit) = ($1, $2);
+              last if $op eq '<'  and $oid_val < $limit;
+              last if $op eq '>=' and $oid_val >= $limit;
+              last if $op eq '<=' and $oid_val <= $limit;
+              last if $op eq '='  and $oid_val == $limit;
+              last if $op eq '!'  and $oid_val != $limit;
+              last if $op eq '>'  and $oid_val > $limit;
+            }
           }
-
          # Look for negated test, must be string based
           elsif($thresh =~ /^\!(\s*)(.+)$/) {
             my ($thresh) = ($2);
@@ -3076,16 +3099,16 @@ require Exporter;
          # Okay, its not numeric or negated, it must be string based
           else {
            # Do our automatching for blank thresholds
-            last if $thresh eq '_AUTOMATCH_';
+            #last if $thresh eq '_AUTOMATCH_';
             last if $oid_val =~ /$thresh/;
+            last if $thresh eq '_AUTOMATCH_';
           }
-
           $match = 0;
         }
 
         if($match) {
           $oids->{$oid}{'color'}{$leaf} = $color;
-          $oids->{$oid}{'msg'}{$leaf} = $oids->{$oid}{'thresh'}{$color}{'msg'}; 
+          $oids->{$oid}{'msg'}{$leaf} = $oids->{$oid}{'thresh'}{$color}{'msg'};
           next APTHRLEAF;
         }
       }
@@ -3107,9 +3130,9 @@ require Exporter;
     my $hours = int ($secs / 3600);     $secs -= ($hours * 3600);
     my $mins  = int ($secs / 60);       $secs -= ($mins  * 60);
 
-    my $out = sprintf "%-2.2d:%-2.2d:%-2.2d", 
-      $hours, $mins, $secs; 
-    $out = sprintf "%d day%s, %s", $days, 
+    my $out = sprintf "%-2.2d:%-2.2d:%-2.2d",
+      $hours, $mins, $secs;
+    $out = sprintf "%d day%s, %s", $days,
       ($days == 1) ? "" : "s", $out if $days;
 
     return $out;
@@ -3271,9 +3294,9 @@ require Exporter;
 
       return 1;
     }
-  
+
    # How did we get here?
     return 0;
-  } 
+  }
 1;
 

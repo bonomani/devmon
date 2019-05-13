@@ -134,7 +134,7 @@ require Exporter;
 
        # Create a shortcut
         my $tmpl    = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
-        my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'}; 
+        my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'};
 
        # Determine what type of snmp version we are using
        # Use the highest snmp variable type we find amongst all our tests
@@ -249,7 +249,7 @@ require Exporter;
             else {
               print "failed thaw on $dev\n";
               next;
-            } 
+            }
 
            # Sift through returned errors
             for my $error (keys %{$returned{'error'}}) {
@@ -259,7 +259,7 @@ require Exporter;
              # Incrememnt our fail counter if the query died fatally
               ++$g{'fail'}{$dev} if $fatal;
             }
-            delete $returned{'error'}; 
+            delete $returned{'error'};
 
            # Go through and extract our maxrep values
             for my $oid (keys %{$returned{'maxrep'}}) {
@@ -326,7 +326,7 @@ require Exporter;
           else {
             $snmp_input->{$dev}{'retries'} = $g{'snmptries'};
           }
-          
+
          # set out timeout
           $snmp_input->{$dev}{'timeout'} = $g{'snmptimeout'};
 
@@ -392,7 +392,7 @@ require Exporter;
             else {
               print "failed thaw for ping of fork $fork\n";
               next;
-            } 
+            }
             if (defined $returned{'pong'}) {
               $g{'forks'}{$fork}{'time'} = time;
               do_log("Fork $fork responded to ping request $returned{'ping'} with $returned{'pong'} at $g{'forks'}{$fork}{'time'}",4) if $g{'debug'};
@@ -451,7 +451,7 @@ require Exporter;
       my $pid;
 
      # Find our next available placeholder
-      for (sort {$a <=> $b} keys %{$g{'forks'}}) 
+      for (sort {$a <=> $b} keys %{$g{'forks'}})
         {++$num and next if defined $g{'forks'}{$num}; last}
       do_log("Starting fork number $num") if $g{'debug'};
 
@@ -503,7 +503,7 @@ require Exporter;
     my $sock = $g{'forks'}{$fork_num}{'PS'};
 
     DEVICE: while(1) { # We should never leave this loop
-     # Our outbound data hash 
+     # Our outbound data hash
       my %data_out = ();
 
      # Heres a blocking call
@@ -535,7 +535,7 @@ require Exporter;
         }
 
         $serialized .= $string_in if defined $string_in;
-        
+
       } until $serialized =~ s/\nEOF\n$//s;
       do_log("DEBUG SNMP($fork_num): Got EOF in message, attempting to thaw",4) if $g{'debug'};
 
@@ -577,14 +577,14 @@ require Exporter;
       my $sess_err = 0;
 
       if(!defined $data_in{'nonreps'} and !defined $data_in{'reps'}) {
-        my $error_str = 
+        my $error_str =
           "No oids to query for $dev, skipping";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);
         next DEVICE;
       }
       elsif(!defined $snmp_ver) {
-        my $error_str = 
+        my $error_str =
           "No snmp version found for $dev";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);
@@ -597,10 +597,10 @@ require Exporter;
         $session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
         $session->{'use_getbulk'} = 1;
       }
-     
+
      # Whoa, we dont support this version of SNMP
       else {
-        my $error_str = 
+        my $error_str =
           "Unsupported SNMP version for $dev ($snmp_ver)";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);
@@ -615,7 +615,7 @@ require Exporter;
       if($sess_err) {
         my $snmp_err;
         ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
-        my $error_str = 
+        my $error_str =
           "Failed SNMP session to $dev ($snmp_err)";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);
@@ -639,7 +639,7 @@ require Exporter;
 
 	my @nrep_oids_temp;
 	my $nrep_oids_temp_cpt = 0;
-for (my $index = 0; $index < $oids_num; $index++) { 
+for (my $index = 0; $index < $oids_num; $index++) {
 ++$nrep_oids_temp_cpt;
 push @nrep_oids_temp, $nrep_oids[$index];
 do_log("DEBUG SNMP($fork_num): Adding ID => $nrep_oids_temp_cpt OID =>$nrep_oids_my[$index]",0) if $g{'debug'};
@@ -709,7 +709,7 @@ do_log("DEBUG SNMP($fork_num): Adding ID => $nrep_oids_temp_cpt OID =>$nrep_oids
 	do_log("DEBUG SNMP($fork_num): $SNMP_Session::errmsg",0) if $g{'debug'};
           ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
 	  if ($snmp_err ne '') {
-            my $error_str = 
+            my $error_str =
               "Error walking $oid for $dev ($snmp_err)";
             $data_out{'error'}{$error_str} = 0;
             ++$failed_query;

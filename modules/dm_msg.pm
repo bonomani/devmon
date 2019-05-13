@@ -39,7 +39,7 @@ require Exporter;
 
    # Determine the address we are connecting to
     my $host = $g{'dispserv'};
-    my $addr = inet_aton($host) 
+    my $addr = inet_aton($host)
       or do_log("Can't resolve display server $host ($!)",0) and return;
     my $p_addr = sockaddr_in($g{'dispport'}, $addr);
 
@@ -47,7 +47,7 @@ require Exporter;
     if($g{'print_msg'} and defined $g{'test_results'}) {
       print join "\n", @{$g{'test_results'}};
     }
-    
+
    # Dont actually send messages if we are printing them
     if($g{'print_msg'}) {
       $g{'msgxfrtime'} = time - $g{'msgxfrtime'};
@@ -69,8 +69,8 @@ require Exporter;
         local $SIG{ALRM} = sub { die "Socket timed out\n" };
 	alarm 10;
         socket(SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp'))
-          or do_log("Failed to create socket ($!)",0) and 
-          $g{'msgxfrtime'} = time - $g{'msgxfrtime'} and return; 
+          or do_log("Failed to create socket ($!)",0) and
+          $g{'msgxfrtime'} = time - $g{'msgxfrtime'} and return;
 	alarm 0;
         local $SIG{ALRM} = sub { die "Connect timed out\n" };
 	alarm 10;
@@ -103,8 +103,8 @@ require Exporter;
      # Now print to this socket until we hit the max msg size
       do_log("DEBUG: Looping through messages to build a combo",3) if $g{'debug'};
       my $msg_size = 0;
-      MSGLOOP: while($msg_size < $g{'msgsize'} 
-                     and @{$g{'test_results'}}) { 
+      MSGLOOP: while($msg_size < $g{'msgsize'}
+                     and @{$g{'test_results'}}) {
         my $msg = shift @{$g{'test_results'}};
 	$msg_sent++;
        # Make sure this is a valid message
@@ -112,15 +112,15 @@ require Exporter;
           do_log("Error: dm_msg trying to send a blank message!",0);
           next MSGLOOP;
         }
-        
+
        # Make sure the message itself isnt too big
         if(length $msg > $g{'msgsize'}) {
-        
+
          # Nuts, this is a huge message, bigger than our msg size. Well want
          # to send it by itself to minimize how much it gets truncated
           if($msg_size == 0) {
             $msg_size = length $msg;
-           # Okay, we are clear, send the message 
+           # Okay, we are clear, send the message
 	    eval {
               local $SIG{ALRM} = sub { die "Printing message timed out\n" };
 	      alarm 10;
@@ -137,7 +137,7 @@ require Exporter;
 	  }
 
          # Not an empty combo msg, wait till our new socket is open
-          else { 
+          else {
             unshift @{$g{'test_results'}}, $msg;
 	    $msg_sent--;
           }
@@ -148,13 +148,13 @@ require Exporter;
           close SOCK;
           next SOCKLOOP;
         }
-    
+
        # Now make sure that this msg wont cause our current combo msg to
        # exceed the msgsize limit
         elsif($msg_size + length $msg > $g{'msgsize'}) {
-         
+
          # Whoops, looks like it does;  wait for the next socket
-          unshift @{$g{'test_results'}}, $msg; 
+          unshift @{$g{'test_results'}}, $msg;
 	  $msg_sent--;
           $g{'sentmsgsize'} += $msg_size;
           do_log("DEBUG: Closing socket, $msg_size sent",3) if $g{'debug'};
@@ -162,7 +162,7 @@ require Exporter;
           next SOCKLOOP;
         }
 
-       # Looks good, print the msg           
+       # Looks good, print the msg
         else {
             my $thismsgsize = length $msg;
             do_log("DEBUG: Printing message ($msg_sent of $nummsg), size $thismsgsize to existing combo",3) if $g{'debug'};
@@ -192,7 +192,7 @@ require Exporter;
 
 
    # Now send our dm status message!
-    if(!$g{'print_msg'}) { 
+    if(!$g{'print_msg'}) {
       my $dm_msg = dm_stat_msg();
       my $msgsize = length $dm_msg;
       do_log("DEBUG: Connecting and sending dm message ($msgsize)",3) if $g{'debug'};
@@ -203,7 +203,7 @@ require Exporter;
           or do_log("Failed to create socket ($!)",0) and return;
         connect(SOCK, $p_addr)
           or do_log("Can't connect to display server ($!)",0) and return;
-  
+
         print SOCK "$dm_msg\n";
         close SOCK;
 	alarm 0;
@@ -214,7 +214,7 @@ require Exporter;
         return;
       }
     }
-   
+
     do_log("Done sending messages",2);
   }
 
@@ -249,7 +249,7 @@ require Exporter;
     for my $dev (keys %{$g{'cleardata'}}) {
       $num_clears += scalar keys %{$g{'cleardata'}{$dev}};
     }
- 
+
     my $message = "devmon, version $g{'version'}\n"        .
                   "\n"                                     .
                   "Node name:        $g{'nodename'}\n"     .
@@ -312,7 +312,7 @@ require Exporter;
     $message .= "<!--\n"                        .
                 "PollTime : $this_poll_time\n"  .
                 "-->" ;
-                  
+
 
    # Add the header
     my $host = $g{'nodename'};

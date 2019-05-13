@@ -54,11 +54,11 @@ require Exporter;
 
    # Only do a read if we need to (empty temp hash or update flag set true)
     my $num_templates = scalar (keys %{$g{'templates'}});
-    return if ($num_templates != 0 and 
+    return if ($num_templates != 0 and
       $g{'node_status'}{'nodes'}{$g{'my_nodenum'}}{'read_temps'} eq 'n');
 
     do_log('Reading template data from DB',1);
-      
+
    # Reset templates
     %{$g{'templates'}} = ();
 
@@ -96,7 +96,7 @@ require Exporter;
       my $vendor = $test_index{$id}{'vendor'};
       my $model  = $test_index{$id}{'model'};
       my $test   = $test_index{$id}{'test'};
- 
+
       my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
 
       $tmpl->{'oids'}{$name}{'number'}     = $num if defined $num;
@@ -112,13 +112,13 @@ require Exporter;
 
     for my $oid_row (@results) {
       my ($id,$oid,$color,$thresh,$msg) = @$oid_row;
- 
+
       my $vendor = $test_index{$id}{'vendor'};
       my $model  = $test_index{$id}{'model'};
       my $test   = $test_index{$id}{'test'};
-  
+
       my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
- 
+
       $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'val'} = $thresh;
       $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'msg'} = $msg if defined $msg;
     }
@@ -128,13 +128,13 @@ require Exporter;
 
     for my $oid_row (@results) {
       my ($id,$oid,$type,$data) = @$oid_row;
- 
+
       my $vendor = $test_index{$id}{'vendor'};
       my $model  = $test_index{$id}{'model'};
       my $test   = $test_index{$id}{'test'};
-  
+
       my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
- 
+
       $tmpl->{'oids'}{$oid}{'except'}{$type} = $data;
     }
 
@@ -143,17 +143,17 @@ require Exporter;
 
     for my $oid_row (@results) {
       my ($id,$msg) = @$oid_row;
- 
+
       my $vendor = $test_index{$id}{'vendor'};
       my $model  = $test_index{$id}{'model'};
       my $test   = $test_index{$id}{'test'};
-  
+
       my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
 
      # Convert newline placeholders
       $msg =~ s/\\n/\n/;
       $msg =~ s/~~n/\\n/;
- 
+
       $tmpl->{'msg'} = $msg;
     }
 
@@ -178,7 +178,7 @@ require Exporter;
     my @dirs;
     for my $entry (readdir TEMPLATES) {
       my $dir = "$template_dir/$entry";
-      push @dirs, $dir if -d $dir and $entry !~ /^\..*$/; # . and .svn or .cvs 
+      push @dirs, $dir if -d $dir and $entry !~ /^\..*$/; # . and .svn or .cvs
     }
 
    # Go through each directory
@@ -203,7 +203,7 @@ require Exporter;
       TEST: for my $test (readdir MODELDIR) {
        # Only if this is a test dir
         my $testdir = "$dir/$test";
-        next if !-d $testdir or $test =~ /^\..*$/; # . and .svn or .cvs 
+        next if !-d $testdir or $test =~ /^\..*$/; # . and .svn or .cvs
 
        # Barf if we are trying to define a pre-existing template
         if(defined $g{'templates'}{$vendor}{$model}{'tests'}{$test}) {
@@ -215,19 +215,19 @@ require Exporter;
        # Create template shortcut
         $g{'templates'}{$vendor}{$model}{'tests'}{$test} = {};
         $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
-      
+
        # Read in the other files files, if all previous reads have succeeded
-        read_oids_file($testdir, $tmpl) and 
+        read_oids_file($testdir, $tmpl) and
         read_transforms_file($testdir, $tmpl) and
         read_thresholds_file($testdir, $tmpl) and
         read_exceptions_file($testdir, $tmpl) and
         read_message_file($testdir, $tmpl);
 
        # Make sure we dont have any partial templates hanging around
-        delete $g{'templates'}{$vendor}{$model}{'tests'}{$test} 
+        delete $g{'templates'}{$vendor}{$model}{'tests'}{$test}
           if !defined $tmpl->{'msg'};
 
-        do_log("DEBUG TEMPLATES: read $vendor:$model:$test template") 
+        do_log("DEBUG TEMPLATES: read $vendor:$model:$test template")
           if $g{'debug'};
       }
 
@@ -250,7 +250,7 @@ require Exporter;
           PTL_OID: for my $oid (keys %{$tmpl->{'oids'}}) {
             my $oid_h = \%{$tmpl->{'oids'}{$oid}};
             my $trans_type = $oid_h->{'trans_type'};
-            
+
            # For now we arent doing anything to non-translated oids; skip them
             next if !defined $trans_type;
 
@@ -261,7 +261,7 @@ require Exporter;
                 $oid_h->{'trans_data'} =~ /\{(.+?)}\s*(.+)/;
               next if !defined $dep_oid;
 
-              $oid_h->{'trans_edata'} = {}; 
+              $oid_h->{'trans_edata'} = {};
               my $trans_data = \%{$oid_h->{'trans_edata'}};
               my $cases      = \%{$trans_data->{'cases'}};
               my $case_num   = 0;
@@ -270,7 +270,7 @@ require Exporter;
               $trans_data->{'dep_oid'} = $dep_oid;
 
               for my $val_pair (split /\s*,\s*/, $switch_data) {
-                if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) {  
+                if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) {
                   my ($if, $then) = ($1, $2);
                   my $type = '';
                   if($if =~ /^'(.+)'$/) {$type = 'str'; $if = $1}
@@ -279,14 +279,14 @@ require Exporter;
                   $cases->{$case_num}{'type'} = $type;
                   $cases->{$case_num}{'then'} = $then;
 
-                } 
+                }
                 elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
                   my ($if, $then) = ($1, $2);
                   my $type = '';
                   if($if =~ /^\d+$/) {$type = 'num'}
-                  elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/) 
+                  elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'gt'; $if = $1}
-                  elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/) 
+                  elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'gte'; $if = $1}
                   elsif($if =~ /^<\s*([+-]?\d+(?:\.\d+)?)$/)
                     {$type = 'lt'; $if = $1}
@@ -306,10 +306,10 @@ require Exporter;
                   next PTL_OID;
                 }
               }
-     
+
              # Sort our case numbers this once
               @{$trans_data->{'case_nums'}} = sort {$a <=> $b} keys %$cases;
- 
+
              # Make sure we have a default value
               $trans_data->{'default'} = $default || 'Unknown';
             }
@@ -330,19 +330,19 @@ require Exporter;
 
    # Define the file; make sure it exists and is readable
     my $specs_file = "$dir/specs";
-    do_log ("Missing 'specs' file in $dir, skipping this test.", 0) 
+    do_log ("Missing 'specs' file in $dir, skipping this test.", 0)
       and return 0 if !-e $specs_file;
 
-    open FILE, "$specs_file" 
+    open FILE, "$specs_file"
       or do_log("Failed to open $specs_file ($!), skipping this test.", 0)
       and return 0;
 
    # Define our applicable variables
     my %vars = ('vendor' => '', 'model' => '', snmpver => '', sysdesc => '');
-    
+
    # Read in file
-    for my $line (<FILE>) {
-      chomp $line; 
+    while (my $line = <FILE>) {
+      chomp $line;
 
      # Skip whitespace and comments
       next if $line =~ /^\s*(#.*)?$/;
@@ -351,22 +351,31 @@ require Exporter;
       my ($var, $val) = split /\s*:\s*/, $line, 2;
       $var = lc $var;
 
-      do_log("Syntax error in $specs_file at line $.", 0) and next
-        if !defined $vars{$var};
-      do_log("No value assigned to '$var'", 0) if !defined $val;
-
-     # Check our snmp version
-      if($var eq 'snmpver') {
-        $val = '2' if $val eq '2c';
-        do_log("Bad snmp version ($val) in $specs_file, line $." .
-          "(only ver. 1/2c supported).  Skipping this test", 0)
-          and return if $val !~ /^1|2$/;
+     # Make sure we got all our variables and they are non-blank and valid
+      if (!defined $val) {
+        do_log("Syntax error: Undefined value in $specs_file at line $.", 0);
+        next ;
+      } else {
+        # Trim right (left done by split)
+        do_log("Syntax warning: Trailing space(s) in $specs_file at line $.", 0) if $val =~ s/\s+$//;
+        if ($val eq '') {
+          do_log("Syntax error: Missing spec value in $specs_file at line $.", 0);
+          next;
+        }
+       # Check our snmp version
+        elsif($var eq 'snmpver') {
+          $val = '2' if $val eq '2c';
+          if ($val !~ /^1|2$/) {
+            do_log("Syntax error: Bad snmp version ($val) in $specs_file, line $." .
+              "(only ver. 1/2c supported).  Skipping this test", 0);
+            return;
+          }
+        }
       }
-
      # Assign the value in our temp hash
       $vars{$var} = $val;
     }
-   
+
     close FILE;
 
    # Make sure we got all our necessary vars
@@ -376,7 +385,7 @@ require Exporter;
         and return 0 if !defined $val or $val eq '';
     }
    # Now return out anon hash ref
-    my $vendor  = $vars{'vendor'}; 
+    my $vendor  = $vars{'vendor'};
     my $model   = $vars{'model'};
     my $snmpver = $vars{'snmpver'};
     my $sysdesc = $vars{'sysdesc'};
@@ -391,33 +400,48 @@ require Exporter;
 
    # Define the file; make sure it exists and is readable
     my $oid_file = "$dir/oids";
-    do_log ("Missing 'oids' file in $dir, skipping this test.", 0) 
+    do_log ("Missing 'oids' file in $dir, skipping this test.", 0)
       and return 0 if !-e $oid_file;
-    open FILE, "$oid_file" 
+    open FILE, "$oid_file"
       or do_log("Failed to open $oid_file ($!), skipping this test.", 0)
       and return 0;
 
    # Go through file, read in oids
-    for my $line (<FILE>) {
-      chomp $line; 
+    while (my $line = <FILE>) {
+      chomp $line;
 
      # Skip whitespace and comments
       next if $line =~ /^\s*(#.*)?$/;
 
       my ($oid, $number, $repeat) = split /\s*:\s*/, $line, 3;
 
-     # Trim right
-      $repeat =~ s/\s+$//;
-
-     # Make sure we got all our variables and they are non-blank
-      do_log("Syntax error in $oid_file at line $.", 0) and next
-        if !defined $number or $number eq '' or
-           !defined $repeat or $repeat eq '';
-
-     # Make sure repeater variable is valid
-      $repeat = lc $repeat;
-      do_log("Invalid repeater type '$repeat' for $oid in $oid_file", 0) 
-        and next if $repeat !~ /leaf|branch/;
+     # Make sure we got all our variables and they are non-blank and valid
+      if (!defined $number) {
+        do_log("Syntax error: Missing colon separator near oid value in $oid_file at line $.", 0);
+        next ;
+      } else {
+        if ($number eq '') {
+          do_log("Syntax error: Missing oid value in $oid_file at line $.", 0);
+          next;
+        }
+        # TODO: We should valide also OID format
+      }
+      if (!defined $repeat) {
+        do_log("Syntax error: Missing colon separator near repeater type in $oid_file at line $.", 0);
+        next;
+      } else {
+       # Trim right (left done by split)
+        do_log("Syntax warning: Trailing space(s) in $oid_file at line $.", 0) if $repeat =~ s/\s+$//;
+        if ($repeat eq '') {
+          do_log("Syntax error: Missing repeater type in $oid_file at line $.", 0);
+          next;
+        }
+        # Make sure repeater variable is valid
+        elsif ($repeat !~ /^leaf$|^branch$/) {
+           do_log("Syntax error: Invalid repeater type '$repeat' for $oid in $oid_file", 0);
+           next;
+        }
+      }
 
      # Make sure this oid hasnt been defined before
       do_log("$oid defined more than once in $oid_file", 0) and next
@@ -458,7 +482,7 @@ require Exporter;
     my $trans_file = "$dir/transforms";
     do_log ("Missing 'transforms' file in $dir, skipping this test.", 0)
       and return 0 if !-e $trans_file;
-    open FILE, "$trans_file" 
+    open FILE, "$trans_file"
       or do_log("Failed to open $trans_file ($!), skipping this test.", 0)
       and return 0;
 
@@ -469,57 +493,92 @@ require Exporter;
     LINE: while (my $line = shift @text) {
       ++$l_num;
       my $adjust = 0;
-      chomp $line; 
+      chomp $line;
 
      # Skip whitespace and comments
       next if $line =~ /^\s*(#.*)?$/;
 
+     # Concatenate lines that have a continuation char \ at the end of the line,
+     # remove \$ and adjust the current number of the line
       while($line =~ s/\s*\\$//) {
-        ++$adjust and ($line .= " " . shift @text) if @text;
+        my $cont_line  = shift @text;
+        if (defined $cont_line) {
+          chomp $cont_line;
+          ++$adjust;
+          $cont_line =~ s/^\s+//;
+          $line .= $cont_line;
+        } else {
+          do_log("The continuation char \ is not follow by a line $trans_file at line $l_num", 0);
+        }
+      }
+     # Validate curly bracket
+      my $curly_bracket = $line;
+      $curly_bracket =~ s/\{([^{}\s]+)\}//g;
+      do_log("Curly brackets are not balanced/conform or contain space char in $trans_file at line $l_num", 0)
+        and next if $curly_bracket =~ /{|}/;
+
+     # Render oid & function
+      my ($oid, $func_type, $func_data) = split /\s*:\s*/, $line, 3;
+
+     # Make sure we got all our variables and they are non-blank and valid
+      if (!defined $func_type) {
+        do_log("Syntax error: Missing colon separator near function type in $trans_file at line $l_num", 0);
+        next ;
+      } else {
+        if ($func_type eq '') {
+          do_log("Syntax error: Missing function type in $trans_file at line $l_num", 0);
+          next;
+        }
+        # TODO: We should valide format
+      }
+      if (!defined $func_data) {
+        do_log("Syntax error: Missing colon separator near function data in $trans_file at line $l_num", 0);
+        next;
+      } else {
+       # Trim right (left done by split)
+        do_log("Syntax warning: Trailing space(s) in $trans_file at line $l_num", 0) if $func_data =~ s/\s+$//;
+        if ($func_data eq '') {
+          do_log("Syntax error: Missing function data in $trans_file at line $l_num", 0);
+          next;
+        }
       }
 
-     # Render oid & function 
-      my ($oid, $func_type, $func_data) = split /\s*:\s*/, $line, 3; 
-
-     # Trim right       
-      $func_data =~ s/\s+$//;
-
-     # Make sure we got all our variables and they are non-blank
-      do_log("Syntax error in $trans_file at line $l_num", 0) 
-        and next if !defined $func_type or $func_type eq '';
-      do_log("Missing function data in $trans_file at line $l_num", 0) 
-        and next if !defined $func_data or $func_data eq '';
-
      # Make sure this oid hasnt been defined before
+     # TODO: Would be nice to check that if it was defined
+     # before, both oid are realy the same
       do_log("Cant redefine $oid  in $trans_file", 0) and next
         if defined $tmpl->{'oids'}{$oid};
 
      # Make sure function is a real one and that it is formatted correctly
+     # 1. It is already trimed both sides
+     # 2. Curly bracket are valid
+     # 3. Empty space are not allow
+
       my $temp   = $func_data;
       $func_type = lc $func_type;
       CASE: {
         $func_type eq 'best' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
           $temp =~ s/\{\S+\}|\s*,\s*//g;
           do_log("BEST transform uses only comma-delimited oids at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'chain' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*//g;
           $temp =~ s/^\{\S+\}\s*\{\S+\}//;
           do_log("CHAIN uses exactly two dependent oids at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'coltre' and do {
 #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
-#          $temp =~ s/^\{\S+\}\s*\{\S+\}\s*(|:\s*\S+?|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}])//;
-$temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)}])//;
+#          $temp =~ s/^\{\S+?\}\s*\{\S+?\}\s*(|:\s*\S+?|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}])//;
+           $temp =~ s/^\{\S+\}\s*\{\S+?\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)}])//;
           do_log("COLTRE uses two dependent oids and optional arguments at " .
                  "$trans_file, line $l_num", 0)
             and next LINE if $temp ne '';
@@ -527,22 +586,22 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         };
 
         $func_type eq 'convert' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i; 
-          $temp =~ s/^\{\S+\}\s+(hex|oct)(\s*\d*)//i;
-          my ($type) = ($1);
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i;
+          $temp =~ s/^\{\S+\}\s+(hex|oct)(?:\s*\d*)//i;
+          my ($type) = ($1); #??
           do_log("CONVERT transform uses only a single oid, a valid " .
                  "conversion type & an option pad length at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'date' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
           $temp =~ s/^\{\S+\}//;
           do_log("DATE transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
@@ -551,16 +610,16 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
            $temp =~ s/^\{\S+\}(?:$|\s+\d+$)//;
           do_log("DELTA transform  only a single oid (plus an " .
                  "optional limit) at $trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'elapsed' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s*//g;
           $temp =~ s/^\{\S+\}//;
           do_log("ELAPSED transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
@@ -573,20 +632,20 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         };
 
         $func_type eq 'index' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
           $temp =~ s/^\{\S+\}//;
           do_log("INDEX transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'match' and do {
-#	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/\s*$//g; 
+#	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/\s*$//g;
          $temp =~ s/^\{\S+\}\s+\/.+\///;
           do_log("MATCH transform should be a perl regex match at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
@@ -602,21 +661,21 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         };
 
         $func_type eq 'eval' and do {
-          $temp =~ s/^.+\s*$//g;
-          do_log("EVAL transform should be a perl regex match at " .
-                 "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne '';
-          last CASE;
+#          $temp =~ s/^.+\s*$//g;
+#          do_log("EVAL transform should be a perl regex match at " .
+#                 "$trans_file, line $l_num", 0)
+#            and next LINE if $temp ne '';
+           last CASE;
         };
 
 	$func_type eq 'pack' and do {
-#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+.+)?//; 
+#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+.+)?//;
           $temp =~ s/^\{\S+\}\s+(\S+)(\s+.+)?//;
           my $type = $1;
           my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
           do_log("PACK transform uses only a single oid,an encode type, " .
                  "and an optional seperator at $trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           do_log("No encode type at $trans_file, line $l_num", 0)
             and next LINE if !defined $type;
           while($type =~ s/\((.+?)\)(\d+|\*)?//) {
@@ -631,11 +690,11 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         };
 
         $func_type eq 'regsub' and do {
-#          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//; 
+#          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//;
           $temp =~ s/^\{\S+\}\s*\/.+\/.*\/[eg]*//;
           do_log("REGSUB transform should be a perl regex substitution at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
@@ -649,28 +708,28 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 	};
 
         $func_type eq 'speed' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
          $temp =~ s/^\{\S+}//;
           do_log("SPEED transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'statistic' and do {
-          $temp =~ s/\{\S+\}\s+(?:avg|cnt|max|min|sum)//i; 
+          $temp =~ s/^\{\S+\}\s+(?:avg|cnt|max|min|sum)//i;
           do_log("STATISTIC transform uses only a single oid at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
         $func_type eq 'substr' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(\d+)\s*(\d*)\s*//; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(\d+)\s*(\d*)\s*//;
           $temp =~ s/^\{\S+\}\s+\d+(?:$|\s+\d+)//;
           do_log("SUBSTR transform uses only a single oid, a numeric offset " .
                  "and an optional shift value at $trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
@@ -680,10 +739,10 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
           my $temp2 = '';
           for my $val (split /\s*,\s*/, $temp) {
             my ($if, $then);
-            ($if, $then) = ($1, $2) if $val =~ s/^\s*(["'].*["'])\s*=\s*(.*?)\s*$//; 
+            ($if, $then) = ($1, $2) if $val =~ s/^\s*(["'].*["'])\s*=\s*(.*?)\s*$//;
             if (!defined($if)) {
 	       ($if, $then) = ($1, $2) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
-            } 
+            }
             do_log("Bad SWITCH value pair ($val) at $trans_file, line $l_num",0)
               and next if !defined $if;
             my $type;
@@ -703,7 +762,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
           }
           do_log("SWITCH transform uses a comma delimited list of values " .
                  "in 'case = value' format at $trans_file, line $l_num", 0)
-            and next LINE if $temp2 ne ''; 
+            and next LINE if $temp2 ne '';
           last CASE;
         };
 
@@ -736,18 +795,18 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
           }
           do_log("TSWITCH transform uses a comma delimited list of values " .
                  "in 'case = value' format at $trans_file, line $l_num", 0)
-            and next LINE if $temp2 ne ''; 
+            and next LINE if $temp2 ne '';
           last CASE;
         };
 
         $func_type eq 'unpack' and do {
-#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+".+")?//; 
+#          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+".+")?//;
           $temp =~ s/^\{\S+\}\s+(\S+)(?:\s+.+)?//;
           my $type = $1;
           my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
           do_log("UNPACK transform uses only a single oid,a decode type, " .
                  "and an optional seperator at $trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           do_log("No decode type at $trans_file, line $l_num", 0)
             and next LINE if !defined $type;
           while($type =~ s/\((.+?)\)(\d+|\*)?//) {
@@ -762,15 +821,15 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         };
 
         $func_type eq 'worst' and do {
-#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g; 
+#          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
           $temp =~ s/\{\S+\}|\s*,\s*//g;
           do_log("WORST transform uses only comma-delimited oids at " .
                  "$trans_file, line $l_num", 0)
-            and next LINE if $temp ne ''; 
+            and next LINE if $temp ne '';
           last CASE;
         };
 
-        do_log("Unknown function '$func_type' at $trans_file, line $l_num", 0);
+        do_log("Syntax error: Unknown function '$func_type' at $trans_file, line $l_num", 0);
         next LINE;
       }
 
@@ -789,8 +848,8 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         my $dep_oid = $1;
 
        # Validate oid
-        do_log("Undefined oid '$dep_oid' referenced in $trans_file", 0) 
-          and delete $trans{$oid} and next 
+        do_log("Undefined oid '$dep_oid' referenced in $trans_file", 0)
+          and delete $trans{$oid} and next
           if !defined $tmpl->{'oids'}{$dep_oid} and !defined $trans{$dep_oid};
 
         $deps->{$oid}{$dep_oid} = {};
@@ -810,7 +869,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
     }
 
     return 1;
-  }    
+  }
 
 
 
@@ -848,7 +907,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
           my @temp = @$path;
           while (my $path_oid = shift @temp) {
             next if $path_oid ne $dep_oid;
-            do_log("$root_oid has a looped dependency: " . 
+            do_log("$root_oid has a looped dependency: " .
               join('->', @$path), 0);
             return 0;
           }
@@ -866,50 +925,78 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
 
 
- # Subroutine to read in the thresholds file 
+ # Subroutine to read in the thresholds file
   sub read_thresholds_file {
     my ($dir, $tmpl) = @_;
 
    # Define our valid transforms functions
-    my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1); 
+    my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1);
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
     my $thresh_file = "$dir/thresholds";
     do_log("Missing 'thresholds' file in $dir, skipping this test.", 0)
       and return 0 if !-e $thresh_file;
-    open FILE, "$thresh_file" 
+    open FILE, "$thresh_file"
       or do_log("Failed to open $thresh_file ($!), skipping this test.", 0)
       and return 0;
 
    # Go through file, read in oids
-    for my $line (<FILE>) {
-      chomp $line; 
+    while (my $line = <FILE>) {
+      chomp $line;
 
      # Skip whitespace and comments
       next if $line =~ /^\s*(#.*)?$/;
 
+     # Validate curly bracket
+      my $curly_bracket = $line;
+      $curly_bracket =~ s/\{([^{}\s]+)\}//g;
+      do_log("Curly bracket error in $thresh_file at line $.", 0) and next if $curly_bracket =~ /{|}/;
+
      # Render variables
-      my ($oid, $color, $threshold, $msg) = split /\s*:\s*/, $line, 4; 
-     
-     # Trim msg
-      $msg =~ s/\s+$// if defined $msg;
+      my ($oid, $color, $threshold, $msg) = split /\s*:\s*/, $line, 4;
 
-     # If a threshold is blank, it should automatch any value
-      $threshold = "_AUTOMATCH_" if !defined $threshold;
-
-     # Make sure we got all our variables and they are non-blank
-      do_log("Syntax error in $thresh_file at line $.", 0) 
-        and next if !defined $color or $color eq '';
-
-     # Validate colors
-      do_log("Invalid color '$color' in $thresh_file at line $.", 0) 
-        and next if !defined $colors{$color};
+     # Make sure we got all our variables and they are non-blank and valid
+      if (!defined $color) {
+        do_log("Syntax error:  Missing colon separator near color value in $thresh_file at line $.", 0);
+        next ;
+      } else {
+        if ($color eq '') {
+          do_log("Syntax error: Missing color value in $thresh_file at line $.", 0);
+          next;
+        }
+       # Validate colors
+        elsif (!defined $colors{$color}) {
+          do_log("Syntax error: Invalid color value in $thresh_file at line $.", 0);
+          next;
+        }
+      }
+      if (!defined $threshold) {
+       # If a threshold is blank, it should automatch any value
+        $threshold = "_AUTOMATCH_";
+      } else {
+        if ($threshold eq '') {
+         # If a threshold is blank, it should automatch any value
+          $threshold = "_AUTOMATCH_";
+        }
+      }
+      if (!defined $msg) {
+        if (!defined $threshold) {
+         # Trim right (left done by split)
+          do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $color  =~ s/\s+$//;
+        } else {
+         # Trim right (left done by split)
+          do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $threshold =~ s/\s+$//;
+        }
+      } else {
+       # Trim right (left done by split)
+        do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $msg  =~ s/\s+$//;
+      }
 
      # Validate oid
-      do_log("Undefined oid '$oid' referenced in $thresh_file at line $.", 0) 
+      do_log("Undefined oid '$oid' referenced in $thresh_file at line $.", 0)
         and next if !defined $tmpl->{'oids'}{$oid};
-     
+
 
      # Validate any oids in the message
       my $tmp = $msg;
@@ -917,9 +1004,9 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         my $oid  = $1;
        	$oid=~ s/\..+$//;     # Remove flag, if any
         do_log("Undefined oid '$1' referenced in " .
-               "$thresh_file at line $.", 0) 
+               "$thresh_file at line $.", 0)
         if !defined $tmpl->{'oids'}{$oid};
-      } 
+      }
 
      # Add the threshold to the global hash
       $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'val'} = $threshold;
@@ -932,62 +1019,83 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
 
 
- # Subroutine to read in the exceptions file 
+ # Subroutine to read in the exceptions file
   sub read_exceptions_file {
     my ($dir, $tmpl) = @_;
 
    # Define our valid exception types
     my %excepts = (
-	'ignore'  => 1, 
-	'only'    => 1, 
-	'noalarm' => 1, 
-	'alarm'   => 1); 
+	'ignore'  => 1,
+	'only'    => 1,
+	'noalarm' => 1,
+	'alarm'   => 1);
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
     my $except_file = "$dir/exceptions";
     do_log ("Missing 'exceptions' file in $dir, skipping this test.", 0)
       and return 0 if !-e $except_file;
-    open FILE, "$except_file" 
+    open FILE, "$except_file"
       or do_log("Failed to open $except_file ($!), skipping this test.", 0)
       and return 0;
 
    # Go through file, read in oids
 
-    for my $line (<FILE>) {
-      chomp $line; 
+    while (my $line = <FILE>) {
+      chomp $line;
 
      # Skip whitespace and comments
       next if $line =~ /^\s*(#.*)?$/;
 
-     # Render variables
-      my ($oid, $type, $data) = split /\s*:\s*/, $line, 3; 
+     # Validate curly bracket
+      my $curly_bracket = $line;
+      $curly_bracket =~ s/\{([^{}\s]+)\}//g;
+      do_log("Curly bracket error in $except_file at line $.", 0) and next if $curly_bracket =~ /{|}/;
 
-     # Trim right
-      $data =~ s/\s+$//;
+     # Render variables
+      my ($oid, $type, $data) = split /\s*:\s*/, $line, 3;
+
+#     # Trim right (left done by split)
+#      $data =~ s/\s+$//;
 
      # Make sure we got all our variables and they are non-blank
-      do_log("Syntax error in $except_file at line $.", 0) and next
-        if !defined $type or $type eq '' or
-           !defined $data or $data eq '';
-
-     # Validate colors
-      do_log("Invalid exception type '$type' in $except_file " .
-        "at line $.", 0) 
-        and next if !defined $excepts{$type};
-     
+      if (!defined $type) {
+        do_log("Syntax error: Missing colon separator near exception type in $except_file at line $.", 0);
+        next ;
+      } else {
+        if ($type eq '') {
+          do_log("Syntax error: Missing oid value in $except_file at line $.", 0);
+          next;
+        }
+        # Validate exception type
+        elsif (!defined $excepts{$type}) {
+          do_log("Syntax error: Invalid exception type '$type' for $oid in $except_file", 0);
+          next;
+        }
+      }
+      if (!defined $data) {
+        do_log("Syntax error: Missing colon separator near exception data in $except_file at line $.", 0);
+        next;
+      } else {
+       # Trim right (left done by split)
+        do_log("Syntax warning: Trailing space(s) in $except_file at line $.", 0) if $data =~ s/\s+$//;
+        if ($data eq '') {
+          do_log("Syntax error: Missing typption data $except_file at line $.", 0);
+          next;
+        }
+      }
      # Make sure we dont have an except defined twice
       do_log("Exception for $oid redefined in $except_file at " .
-        "line $.",0) and next 
+        "line $.",0) and next
         if defined $tmpl->{'oids'}{$oid}{'except'}{$type};
 
      # Validate oid
-      do_log("Undefined oid '$oid' in $except_file at line $.", 0) 
+      do_log("Undefined oid '$oid' in $except_file at line $.", 0)
         and next if !defined $tmpl->{'oids'}{$oid};
 
      # Add the threshold to the global hash
       $tmpl->{'oids'}{$oid}{'except'}{$type} = $data;
-      
+
     }
 
     close FILE;
@@ -1009,10 +1117,10 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
     do_log ("Missing 'message' file in $dir, skipping this test.", 0)
       and return 0 if !-e $msg_file;
 
-    open FILE, "$msg_file" 
+    open FILE, "$msg_file"
       or do_log("Failed to open $msg_file ($!), skipping this test.", 0)
       and return 0;
-    
+
    # Go through file, read in oids
     my $table_at = 0;
     my $header   = 0;
@@ -1039,7 +1147,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
        # Skip whitespace
         next if $line =~ /^\s*$/;
-     
+
        # Allow one line of header info
         if ($line !~ /\{.+\}/) {$header = 1; next}
 
@@ -1047,7 +1155,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
         do_log("Table definition at line $table_at of $msg_file has no " .
                "OIDs defined. Skipping this test.", 0)
             and return 0 if $header and $line !~ /\{.+\}/;
- 
+
        # Otherwise verify each oid in the table data
         for my $col (split /\s*\|\s*/, $line) {
           for my $oid ($col =~ /\{(.+?)}/g) {
@@ -1056,7 +1164,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
                     "$msg_file, skipping this test.", 0)
               and return 0 if !defined $tmpl->{'oids'}{$oid};
           }
-        }  
+        }
 
        # Reset our indicators
         $table_at = $header = 0;
@@ -1079,7 +1187,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
        # Check our table options for validity
         for my $opt (keys %t_opts) {
-          if ($opt eq 'nonhtml' or 
+          if ($opt eq 'nonhtml' or
               $opt eq 'plain' or
               $opt eq 'sort' or
               $opt eq 'border' or
@@ -1119,7 +1227,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
                     and return 0 if defined $max and $max ne ''
                     and $max !~ /^([-+]?(\d+)|U$)/;
                   do_log("rrd max value > min value at $msg_file line $.")
-                    and return 0 if (defined $min and $min ne '' and 
+                    and return 0 if (defined $min and $min ne '' and
                       defined $max and $max ne '' and $max <= $min) or
                     (defined $max and $max ne '' and $max < 0);
                   $got_ds = 1;
@@ -1144,7 +1252,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
       }
 
     }
- 
+
    # Assign the msg
     $tmpl->{'msg'} = $msg;
 
@@ -1160,7 +1268,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
     my %index;
     my $model_id = 0;
     my $test_id  = 0;
-   
+
    # Make sure we are in multinode mode
     die "--synctemplates flag only applies if you have the local 'MULTINODE'\n" .
         "option set to 'YES'\n" if $g{'multinode'} ne 'yes';
@@ -1212,7 +1320,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
          # Insert our oids into the DB
           for my $oid (keys %{$tmpl->{'oids'}}) {
-            
+
            # Prepare our data for insert
             my $number = $tmpl->{'oids'}{$oid}{'number'};
             my $repeat = $tmpl->{'oids'}{$oid}{'repeat'};
@@ -1229,11 +1337,11 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
            # Insert our thresholds into the DB
             for my $color (keys %{$tmpl->{'oids'}{$oid}{'thresh'}}) {
-            
+
              # Prepare our data for insert
               my $val = $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'val'};
               my $txt = $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'msg'};
-              
+
               $txt = (defined $txt) ? "'$txt'" : 'NULL';
 
              # Insert our thresholds into DB
@@ -1244,10 +1352,10 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
            # Insert our exceptions into the DB
             for my $type (keys %{$tmpl->{'oids'}{$oid}{'except'}}) {
-            
+
              # Prepare our data for insert
               my $data = $tmpl->{'oids'}{$oid}{'except'}{$type};
-              
+
              # Insert our thresholds into DB
               db_do("insert into template_exceptions values " .
                   "($test_id,'$oid','$type','$data')");
@@ -1264,7 +1372,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
           $msg =~ s/\n/\\n/;
 
           db_do("insert into template_messages values ($test_id, '$msg')");
-          
+
         }
 
       }
@@ -1273,7 +1381,7 @@ $temp =~ s/^\{\S+\}\s*\{\S+\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)
 
    # Update our nodes DB to let all nodes know to reload template data
     db_do("update nodes set read_temps='y'");
-  
+
    # Now quit
     do_log("Template synchronization complete",0);
     exit 0;

@@ -6,7 +6,7 @@ This WIP seems to partially work
 To test it simply put the content of this directory in modules !
 
 Install source:
-Centos: 
+Centos:
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum install perl-Net-SNMP
 

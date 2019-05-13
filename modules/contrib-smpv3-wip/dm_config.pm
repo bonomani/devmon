@@ -171,7 +171,7 @@ require Exporter;
 
    # Our global options
     %{$g{'globals'}} = (
-      'bbtype'      => { 'default' => 'xymon', 
+      'bbtype'      => { 'default' => 'xymon',
                          'regex'   => 'bb|hobbit|xymon',
                          'set'     => 0,
                          'case'    => 0 },
@@ -234,7 +234,7 @@ require Exporter;
     $syncconfig = $synctemps = $resetowner = $readhosts = 0;
     while ($_ = shift @ARGV) {
       if(/^-v+$/)                 { $g{'verbose'} = tr/v/v/                   }
-      elsif(/^-c$/)               { $g{'configfile'} = shift @ARGV or usage() } 
+      elsif(/^-c$/)               { $g{'configfile'} = shift @ARGV or usage() }
       elsif (/^-3$/)              { $g{'configfileV3'} = shift @ARGV or usage() }
       elsif(/^-d/)                { $g{'dbfile'} = shift @ARGV or usage()     }
       elsif(/^-f$/)               { $g{'daemonize'} = 0                       }
@@ -271,7 +271,7 @@ require Exporter;
 
 
    # Dont daemonize if we are printing messages
-    $g{'daemonize'} = 0 if $g{'print_msg'}; 
+    $g{'daemonize'} = 0 if $g{'print_msg'};
 
    # Open the log file
     open_log();
@@ -314,7 +314,7 @@ require Exporter;
       die "Unable to find 'hostname' command!\n" if !defined $hostname_bin;
       my $nodename = `$hostname_bin`;
       chomp $nodename;
-      die "Error executing $hostname_bin" 
+      die "Error executing $hostname_bin"
         if $nodename =~ /not found|permission denied/i;
 
      # Remove domain info, if any
@@ -324,7 +324,7 @@ require Exporter;
       chomp $nodename;
 
       $g{'nodename'} = $nodename;
-   
+
      do_log("Nodename autodetected as $nodename", 2);
     }
 
@@ -369,7 +369,7 @@ require Exporter;
   sub time_test {
 
     do_log("DEBUG CFG: running time_test()",0) if $g{'debug'};
- 
+
     my $poll_time = $g{'snmppolltime'} + $g{'testtime'} + $g{'msgxfrtime'};
 
    # Add our current poll time to our history array
@@ -387,7 +387,7 @@ require Exporter;
     }
 
    # Otherwise calculate our sleep time
-    else { 
+    else {
       quit(0) if $g{'oneshot'};
       $g{'sleep_time'} = -$exceeded;
       $g{'sleep_time'} = 0 if $g{'sleep_time'} < 0;  # just in case!
@@ -410,7 +410,7 @@ require Exporter;
 
    # If we are multinode='no', just load our tests and return
     if($g{'multinode'} ne 'yes') {
-      %{$g{'dev_data'}} = read_hosts(); 
+      %{$g{'dev_data'}} = read_hosts();
       return;
 
     }
@@ -661,7 +661,7 @@ require Exporter;
      # Read in the number of needy nodes
       for my $this_node (@active_nodes) {
         next if $this_node == $g{'my_nodenum'};
-        my $this_node_needs = 
+        my $this_node_needs =
           $g{'node_status'}{'nodes'}{$this_node}{'need_tests'};
         $tests_they_need += $this_node_needs;
         $biggest_test_needed = $this_node_needs
@@ -724,7 +724,7 @@ require Exporter;
                              'read_temps from nodes');
 
     NODE: for my $node (@nodes) {
-      my ($name, $node_num, $active, $heartbeat, $need_tests, 
+      my ($name, $node_num, $active, $heartbeat, $need_tests,
           $read_temps) = @$node;
       $g{'node_status'}{'nodes'}{$node_num} = {
         'name'          => $name,
@@ -752,7 +752,7 @@ require Exporter;
         my $up_duration = time - $old_status{'dead'}{$node_num};
         if ($up_duration > ($g{'deadtime'} * 2)) {
           $g{'node_status'}{'active'}{$node_num} = 1;
-          do_log("Node $node_num($name) has returned! " . 
+          do_log("Node $node_num($name) has returned! " .
                      "Up $up_duration secs",0);
         }
         else {
@@ -782,7 +782,7 @@ require Exporter;
     my $nodenum;
     my $nodename = $g{'nodename'};
     my %nodes;
-    
+
    # First pull down all our node info to make sure we exist in the table
     my @nodeinfo = db_get_array("name,node_num from nodes");
 
@@ -794,26 +794,26 @@ require Exporter;
 
    # If we arent in the table, lets add ourself
     if(!defined $nodenum) {
-   
-     # Find the next available num 
+
+     # Find the next available num
       my $ptr;
       while (!defined $nodenum) {
         $nodenum = $ptr if !defined $nodes{++$ptr};
       }
 
      # Do the db add
-      db_do("insert into nodes values ('$nodename',$nodenum,'y',$now,0,'n')"); 
+      db_do("insert into nodes values ('$nodename',$nodenum,'y',$now,0,'n')");
     }
 
    # If we are in the table, update our activity and heartbeat columns
     else {
-      db_do("update nodes set active='y', heartbeat=$now " . 
+      db_do("update nodes set active='y', heartbeat=$now " .
             "where node_num=$nodenum" );
     }
 
    # Set our global nodenum
     $g{'my_nodenum'} = $nodenum;
-    
+
   }
 
 
@@ -828,7 +828,7 @@ require Exporter;
 
  # Read in the local config parameters from the config file
   sub read_local_config {
-      
+
    # Open config file (assuming we can find it)
     my $file = $g{'configfile'};
     &usage if !defined $file;
@@ -845,9 +845,9 @@ require Exporter;
     for my $line (<FILE>) {
 
      # Skip empty lines and comments
-      next if $line =~ /^\s*(#.*)?$/;  
-    
-      chomp $line; 
+      next if $line =~ /^\s*(#.*)?$/;
+
+      chomp $line;
       my ($option, $value) = split /\s*=\s*/, $line, 2;
 
      # Make sure we have option and value
@@ -906,9 +906,9 @@ require Exporter;
     for my $line (<FILE>) {
 
      # Skip empty lines and comments
-      next if $line =~ /^\s*(#.*)?$/;  
-    
-      chomp $line; 
+      next if $line =~ /^\s*(#.*)?$/;
+
+      chomp $line;
       my ($option, $value) = split /\s*=\s*/, $line, 2;
 
      # Make sure we have option and value
@@ -981,7 +981,7 @@ require Exporter;
       }
     }
     rewrite_config() if $rewrite_config;
-        
+
    # Make sure nothing was missed
     for my $opt (keys %{$g{'globals'}}) {
       next if $g{'globals'}{$opt}{'set'};
@@ -1019,12 +1019,12 @@ require Exporter;
     for my $line (@text_out) {print FILE $line}
     close FILE;
   }
-    
+
 
 
  # Open log file
   sub open_log {
-    
+
    # Dont open the log if we are not in daemon mode
     return if $g{'logfile'} =~ /^\s*$/ or !$g{'daemonize'};
 
@@ -1069,7 +1069,7 @@ require Exporter;
     }
 
     print "$ts $msg\n" if $g{'verbose'} > $verbosity;
-    
+
     return 1;
   }
 
@@ -1110,19 +1110,19 @@ require Exporter;
     do_log("Connecting to DB",2) if !defined $silent;
     $g{'dbh'}->disconnect() if defined $g{'dbh'} and $g{'dbh'} ne '';
 
-   # 5 connect attempts    
+   # 5 connect attempts
     my $try;
     for (1 .. 5) {
       $g{'dbh'} = DBI->connect(
-        $g{'dsn'}, 
-        $g{'dbuser'}, 
+        $g{'dsn'},
+        $g{'dbuser'},
         $g{'dbpass'},
         {AutoCommit => 1, RaiseError => 0, PrintError => 1}
       ) and return;
 
      # Sleep 12 seconds
       sleep 12;
- 
+
       do_log("Failed to connect to DB, attempt ".++$try." of 5",0);
     }
     print "Verbose: ", $g{'verbose'}, "\n";
@@ -1136,9 +1136,9 @@ require Exporter;
     my ($query) = @_;
     do_log("DEBUG DB: select $query") if $g{'debug'};
     my @results;
-    my $a = $g{'dbh'}->selectall_arrayref("select $query") or 
+    my $a = $g{'dbh'}->selectall_arrayref("select $query") or
       do_log("DB query '$query' failed; reconnecting",0)
-      and db_connect() 
+      and db_connect()
       and return db_get($query);
 
     for my $b (@$a) {
@@ -1189,7 +1189,7 @@ require Exporter;
 
     log_fatal("--initialized only valid when multinode='YES'",0)
       if $g{'multinode'} ne 'yes';
-    
+
     db_connect();
     db_do('update devices set owner=0');
     db_do('update nodes set heartbeat=4294967295,need_tests=0 '.
@@ -1231,7 +1231,7 @@ require Exporter;
     &quit(0);
   }
 
- 
+
  # Read in from the bb-hosts file, snmp query hosts to discover their
  # vendor and model type, then add them to the DB
   sub read_bb_hosts {
@@ -1252,7 +1252,7 @@ require Exporter;
 
    # Spew some debug info
     if($g{'debug'}) {
-      my $num_vendor = 0; my $num_model  = 0; 
+      my $num_vendor = 0; my $num_model  = 0;
       my $num_temps  = 0; my $num_descs  = 0;
       for my $vendor (keys %{$g{'templates'}}) {
         ++$num_vendor;
@@ -1269,7 +1269,7 @@ require Exporter;
     }
 
     do_log("SNMP querying all hosts in bb-hosts file, please wait...",1);
- 
+
    # Now open the bb-hosts file and read it in
    # Also read in any other host files that are included in the bb-hosts
     my @bbfiles = ($g{'bbhosts'});
@@ -1283,7 +1283,7 @@ require Exporter;
       %config = $configIni->get_all_settings;
     }
 
-    FILEREAD: do { 
+    FILEREAD: do {
 
       my $bbfile = shift @bbfiles;
       next if !defined $bbfile; # In case next FILEREAD bypasses the while
@@ -1295,7 +1295,7 @@ require Exporter;
       }
       else {
         open BBFILE, $bbfile or
-          do_log("Unable to open file '$g{'bbhosts'}' ($!)", 0) and 
+          do_log("Unable to open file '$g{'bbhosts'}' ($!)", 0) and
           next FILEREAD;
       }
 
@@ -1347,7 +1347,7 @@ require Exporter;
             $options =~ s/^://;
 
            # Skip the .default. host, defined
-            do_log("Can't use Devmon on the .default. host, sorry.",0) 
+            do_log("Can't use Devmon on the .default. host, sorry.",0)
               and next if $host eq '.default.';
 
            # If this IP is 0.0.0.0, try and get IP from DNS
@@ -1375,12 +1375,12 @@ require Exporter;
             if($options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\),?//) {
               $ip = $1;
             }
-          
+
            # See if we have a custom port
             if($options =~ s/(?:,|^)port\((\d+?)\),?//) {
               $bb_hosts{$host}{'port'} = $1;
             }
-          
+
            # Look for vendor/model override
             if($options =~ s/(?:,|^)model\((\S+?)\),?//) {
               my ($vendor, $model) = split /;/, $1, 2;
@@ -1393,14 +1393,14 @@ require Exporter;
               $bb_hosts{$host}{'vendor'} = $vendor;
               $bb_hosts{$host}{'model'}  = $model;
             }
-          
+
            # Read custom exceptions
             if($options =~ s/(?:,|^)except\((\S+?)\)//) {
               for my $except (split /,/, $1) {
                 my @args = split /;/, $except;
                 do_log("Invalid exception clause for $host",0) and next
                   if scalar @args < 3;
-                my $test = shift @args; 
+                my $test = shift @args;
                 my $oid  = shift @args;
                 for my $valpair (@args) {
                   my ($sc, $val) = split /:/, $valpair, 2;
@@ -1411,14 +1411,14 @@ require Exporter;
                 }
               }
             }
-                
+
            # Read custom thresholds
             if($options =~ s/(?:,|^)thresh\((\S+?)\)//) {
               for my $thresh (split /,/, $1) {
                 my @args = split /;/, $thresh;
                 do_log("Invalid threshold clause for $host",0) and next
                   if scalar @args < 3;
-                my $test = shift @args; 
+                my $test = shift @args;
                 my $oid  = shift @args;
                 for my $valpair (@args) {
                   my ($sc, $val) = split /:/, $valpair, 2;
@@ -1429,11 +1429,11 @@ require Exporter;
                 }
               }
             }
-  
+
            # Default to all tests if they arent defined
             my $tests = $1 if $options =~ s/(?:,|^)tests\((\S+?)\)//;
-            $tests = 'all' if !defined $tests; 
-          
+            $tests = 'all' if !defined $tests;
+
             do_log("Unknown devmon option ($options) on line " .
                    "$. of $bbfile",0) and next if $options ne '';
 
@@ -1454,7 +1454,7 @@ require Exporter;
         }
       }
       close BBFILE;
-    
+
     } while @bbfiles; # End of do {} loop
 
    # Gather our existing hosts
@@ -1462,7 +1462,7 @@ require Exporter;
 
    # Put together our query hash
     my %snmp_input;
-  
+
    # Get snmp query params from global conf
     read_global_config();
 
@@ -1531,7 +1531,7 @@ require Exporter;
 
          # Skip if this host doesnt match the regex
           if ($sysdesc !~ /$regex/) {
-            do_log("$host did not match $vendor : $model : $regex", 4) 
+            do_log("$host did not match $vendor : $model : $regex", 4)
               if $g{'debug'};
             next OLDMODEL;
           }
@@ -1553,9 +1553,9 @@ require Exporter;
 
    # Now go through each cid from most common to least
     my @snmpvers = (3, 2, 1);
-    
+
    # For our new hosts, query them first with snmp v3, then v2, then v1
-    for my $snmpver (@snmpvers) { 
+    for my $snmpver (@snmpvers) {
 
      # Dont bother if we dont have any hosts left to query
       next if $hosts_left < 1;
@@ -1573,7 +1573,7 @@ require Exporter;
           next if !defined $bb_hosts{$host}{'cid'};
          # Skip if they have already been succesfully queried
           next if defined $new_hosts{$host};
-  
+
          # SNMp v3 options
          # Only use v3 if we have at least USERNAME
           if ( $snmpver eq "3" ) {
@@ -1622,7 +1622,7 @@ require Exporter;
 
        # Reset our failed hosts
         $g{'fail'} = {};
-     
+
        # Throw data to our query forks
         dm_snmp::snmp_query(\%snmp_input);
 
@@ -1680,14 +1680,14 @@ require Exporter;
               last NEWMATCH;
             }
           }
-         
+
          # Make sure we were able to get a match
           if(!defined $new_hosts{$host}) {
             do_log("No matching templates for device: $host, sysdesc=$sysdesc",0);
            # Delete the bbhosts key so we dont throw another error later
             delete $bb_hosts{$host};
           }
-        }  
+        }
       }
 
      # Now query hosts without custom cids
@@ -1701,7 +1701,7 @@ require Exporter;
        # Zero out our data in and data out hashes
         %{$g{'snmp_data'}} = ();
         %snmp_input = ();
-     
+
        # And query the devices that havent yet responded to previous cids
         for my $host (sort keys %bb_hosts) {
 
@@ -1784,7 +1784,7 @@ require Exporter;
              # Skip if this host doesnt match the regex
               my $regex = $g{'templates'}{$vendor}{$model}{'sysdesc'};
               if ($sysdesc !~ /$regex/) {
-                do_log("$host did not match $vendor : $model : $regex", 0) 
+                do_log("$host did not match $vendor : $model : $regex", 0)
                   if $g{'debug'};
                 next CUSTOMMODEL;
               }
@@ -1813,18 +1813,18 @@ require Exporter;
               last CUSTOMMATCH;
             }
           }
-         
+
          # Make sure we were able to get a match
           if(!defined $new_hosts{$host}) {
             do_log("No matching templates for device: $host, sysdesc=$sysdesc",0);
            # Delete the bbhosts key so we dont throw another error later
             delete $bb_hosts{$host};
           }
-        }  
+        }
       }
     }
 
-   # Go through our bb-hosts and see if we failed any queries on the 
+   # Go through our bb-hosts and see if we failed any queries on the
    # devices;  if they were previously defined, just leave them be
    # at let them go clear.  If they are new, drop a log message
     for my $host (keys %bb_hosts) {
@@ -1859,11 +1859,11 @@ require Exporter;
         if(defined $old_hosts{$host}) {
           my $changes = '';
           $changes .= "ip='$ip'," if $ip ne $old_hosts{$host}{'ip'};
-          $changes .= "vendor='$vendor'," 
+          $changes .= "vendor='$vendor',"
               if $vendor ne $old_hosts{$host}{'vendor'};
-          $changes .= "model='$model'," 
+          $changes .= "model='$model',"
             if $model ne $old_hosts{$host}{'model'};
-            $changes .= "tests='$tests'," 
+            $changes .= "tests='$tests',"
             if $tests ne $old_hosts{$host}{'tests'};
           $changes .= "cid='$cid'," if $cid ne $old_hosts{$host}{'cid'};
 
@@ -1872,12 +1872,12 @@ require Exporter;
             chop $changes;
             db_do("update devices set $changes where name='$host'");
           }
-         
+
          # Go through our custom threshes and exceptions, update as needed
           for my $test (keys %{$new_hosts{$host}{'thresh'}}) {
             for my $oid (keys %{$new_hosts{$host}{'thresh'}{$test}}) {
               for my $color (keys %{$new_hosts{$host}{'thresh'}{$test}{$oid}}) {
-                my $val = $new_hosts{$host}{'thresh'}{$test}{$oid}{$color}; 
+                my $val = $new_hosts{$host}{'thresh'}{$test}{$oid}{$color};
                 my $old_val = $old_hosts{$host}{'thresh'}{$test}{$oid}{$color};
 
                 if (defined $val and defined $old_val and $val ne $old_val) {
@@ -1902,7 +1902,7 @@ require Exporter;
           for my $test (keys %{$new_hosts{$host}{'except'}}) {
             for my $oid (keys %{$new_hosts{$host}{'except'}{$test}}) {
               for my $type (keys %{$new_hosts{$host}{'except'}{$test}{$oid}}) {
-                my $val = $new_hosts{$host}{'except'}{$test}{$oid}{$type}; 
+                my $val = $new_hosts{$host}{'except'}{$test}{$oid}{$type};
                 my $old_val = $old_hosts{$host}{'except'}{$test}{$oid}{$type};
 
                 if (defined $val and defined $old_val and $val ne $old_val) {
@@ -1941,7 +1941,7 @@ require Exporter;
           for my $test (keys %{$new_hosts{$host}{'thresh'}}) {
             for my $oid (keys %{$new_hosts{$host}{'thresh'}{$test}}) {
               for my $color (keys %{$new_hosts{$host}{'thresh'}{$test}{$oid}}) {
-                my $val = $new_hosts{$host}{'thresh'}{$test}{$oid}{$color}; 
+                my $val = $new_hosts{$host}{'thresh'}{$test}{$oid}{$color};
                 db_do("insert into custom_threshs values " .
                       "('$host','$test','$oid','$color','$val')");
               }
@@ -1952,7 +1952,7 @@ require Exporter;
           for my $test (keys %{$new_hosts{$host}{'except'}}) {
             for my $oid (keys %{$new_hosts{$host}{'except'}{$test}}) {
               for my $type (keys %{$new_hosts{$host}{'except'}{$test}{$oid}}) {
-                my $val = $new_hosts{$host}{'except'}{$test}{$oid}{$type}; 
+                my $val = $new_hosts{$host}{'except'}{$test}{$oid}{$type};
                   db_do("insert into custom_excepts values " .
                         "('$host','$test','$oid','$type','$val')");
               }
@@ -1973,12 +1973,12 @@ require Exporter;
 
    # Or write it to our dbfile if we arent in multinode mode
     else {
-      
+
      # Textual abbreviations
       my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'purple' => 'p', 'blue' => 'b' );
       my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao',
                      'noalarm' => 'na' );
-      open HOSTFILE, ">$g{'dbfile'}" 
+      open HOSTFILE, ">$g{'dbfile'}"
         or log_fatal("Unable to write to dbfile '$g{'dbfile'}' ($!)",0);
 
       for my $host (sort keys %new_hosts) {
@@ -2032,14 +2032,14 @@ require Exporter;
     }
 
    # Now quit
-    &quit(0);         
+    &quit(0);
   }
 
 
 
  # Read hosts in from mysql DB in multinode mode, or else from disk
   sub read_hosts {
-    
+
     my %hosts = ();
 
     do_log("DEBUG CFG: running read_hosts",0) if $g{'debug'};
@@ -2078,7 +2078,7 @@ require Exporter;
 
    # Singlenode
     else {
-    
+
      # Hashes containing textual shortcuts for bb exception & thresholds
       my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
       my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm',
@@ -2105,7 +2105,7 @@ require Exporter;
       my $num;
       FILELINE: for my $line (<HOSTS>) {
         chomp $line;
-        my ($name,$ip,$ver,$vendor,$model,$tests,$cid,$threshes,$excepts) 
+        my ($name,$ip,$ver,$vendor,$model,$tests,$cid,$threshes,$excepts)
           = split /\e/, $line;
         ++$num;
 
@@ -2127,7 +2127,7 @@ require Exporter;
          if ( defined $config{$name} ) {
             foreach my $key (keys %{$config{$name}}) {
                $hosts{$name}{$key} = $config{$name}{$key} ;
-            }     
+            }
          }
 
         if(defined $threshes and $threshes ne '') {
@@ -2168,9 +2168,9 @@ require Exporter;
     }
 
     return %hosts;
-        
-  } 
-    
+
+  }
+
 
  # Daemonize: go to daemon mode and fork into background
  # Much code shamelessly stolen from Proc::Daemon by Earl Hood
@@ -2191,7 +2191,7 @@ require Exporter;
    # Prevent possibility of acquiring a controling terminal
     $SIG{'HUP'} = 'IGNORE';
     exit 0 if do_fork();
-    
+
    # Clear file creation mask
     umask 0;
 
@@ -2225,13 +2225,13 @@ require Exporter;
     FORK: {
       if (defined($pid = fork)) {
         return $pid;
-      } 
+      }
 
      # If we are out of process space, wait 1 second, then try 4 more times
       elsif ($! =~ /No more process/ and ++$tries < 5) {
         sleep 1;
         redo FORK;
-      } 
+      }
       elsif($! ne '') {
         log_fatal("Can't fork: $!",0);
       }
@@ -2251,12 +2251,12 @@ require Exporter;
 
    # Now iterate through our dirs, and return if we find a binary
     for my $dir (@pathdirs) {
-      
+
      # Remove any trailing slashes
       $dir =~ s/(.+)\/$/$1/;
       return "$dir/$bin" if -x "$dir/$bin";
     }
-  
+
    # Didnt find it, return undef
     return undef;
   }
@@ -2274,7 +2274,7 @@ require Exporter;
 
  # Print help
   sub usage {
-    die 
+    die
     "Devmon v$g{'version'}, a device monitor for BigBrother/Hobbit\n" .
     "\n" .
     "Usage: devmon [arguments]\n" .
@@ -2296,7 +2296,7 @@ require Exporter;
     "   --synctemplates Update multinode device templates with the template\n" .
     "                   data on this local node.\n" .
     "   --resetowners   Reset multinode device ownership data.  This will\n" .
-    "                   cause all nodes to recalculate ownership data.\n" . 
+    "                   cause all nodes to recalculate ownership data.\n" .
     "\n";
   }
 
