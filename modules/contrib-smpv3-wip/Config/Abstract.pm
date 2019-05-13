@@ -35,7 +35,7 @@ sub new {
 
 sub init {
 	my($self,$settingsfile) = @_;
-	return unless(defined($settingsfile));	
+	return unless(defined($settingsfile));
 	return if($settingsfile eq '');
 	$self->{_settings} = $self->_read_settings($settingsfile);
 	$self->{_settingsfile} = $settingsfile;
@@ -181,7 +181,7 @@ sub patch {
 	my %patch_pathed = $self->_pathalise_object( '',$patch->{_settings} );
 	while( my($k,$v) = each(%patch_pathed) ) {
 		$self->set($k,$v);
-	}	
+	}
 }
 
 
@@ -230,7 +230,7 @@ sub _pathalise_object{
 #%name: _to_string
 #%syntax: _to_string
 #%summary: Recursively generates a string representation of the settings hash
-#%returns: a string in perl source format 
+#%returns: a string in perl source format
 
 sub _to_string{
 	my($self) = @_;
@@ -302,7 +302,7 @@ sub expand_tilde {
 
 # We provide a DESTROY method so that the autoloader
 # doesn't bother trying to find it.
-sub DESTROY { 
+sub DESTROY {
 	print STDERR ("Destroying Config::Abstract\n"); #DEBUG!!!
 }
 
@@ -323,11 +323,11 @@ Config::Abstract - Perl extension for abstracting configuration files
  created to facilitate use and  handling of a  variety of  different
  configuration file formats. It uses the Data::Dumper file format to
  serialise it self and can be initialise from a file of that  format
- 
+
 =head1 EXAMPLES
 
  We assume the content of the file 'testdata.pl' to be:
- 
+
   $settings = {
     'book' => {
       'chapter1' => {
@@ -346,16 +346,16 @@ Config::Abstract - Perl extension for abstracting configuration files
  use Config::Abstract;
  my $settingsfile = 'testdata.pl';
  my $abstract = new Config::Abstract($settingsfile);
- 
+
  my %book = $abstract->get_entry('book');
  my %chap1 = $abstract->get_entry_setting('book','chapter1');
  my $chap1title = $chapter1{'title'};
- 
+
  # Want to see the file?
  # If you can live without comments and blank lines ;),
  # try this:
  print("My abstract file looks like this:\n$abstract\nCool, huh?\n");
- 
+
  # We can also create an ini file from it
  # A bit crude, but it does the job
  bless($abstract,'Config::Abstract::Ini');

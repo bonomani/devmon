@@ -167,6 +167,7 @@ New Features
 - Table Sort  : An option for a table. Display a table based on the
                 sorted oid value (like an oid transformed by the 
                 new SORT transform !) 
+- Syntax      : Syntaxt validation improvement
 
 - New "Blue" color for disabled tests 
 - Multiple tables support in a test with graph
@@ -196,6 +197,8 @@ Minor bugs resolved
 - Trim files for a better experience
 - Do not start more process that devices
 - Optimized regexp for speed
+- Continuation char working on multi-lines
+- Deleted threshold remain undeleted
 
 Workarounds
 - Multiple tables support: only 1 (but anyone) can be graphed now

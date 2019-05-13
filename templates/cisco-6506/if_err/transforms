@@ -1,9 +1,9 @@
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
 # Do delta transform on all error counters
-ifInEps         : DELTA         : {ifInErrors} 
-ifOutEps        : DELTA         : {ifOutErrors} 
-ifInPps         : DELTA         : {ifInPkt} 
-ifOutPps        : DELTA         : {ifOutPkt} 
+ifInEps         : DELTA         : {ifInErrors}
+ifOutEps        : DELTA         : {ifOutErrors}
+ifInPps         : DELTA         : {ifInPkt}
+ifOutPps        : DELTA         : {ifOutPkt}
 ifInErrPct      : MATH          : ({ifInEps} / {ifInPps}) x 100 : 0
 ifOutErrPct     : MATH          : ({ifOutEps} / {ifOutPps}) x 100 : 0

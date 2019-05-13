@@ -3,5 +3,5 @@ ifInEps		: DELTA		: {ifInErrors}
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
 # Create transform for interface that EEM has activated.
-ifEemActive	: SWITCH	: {ifAliasBox} "(\*\*\*\*EEM)" = EEM Has Activated 
+ifEemActive	: SWITCH	: {ifAliasBox} "(\*\*\*\*EEM)" = EEM Has Activated
 

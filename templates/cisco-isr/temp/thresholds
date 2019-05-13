@@ -1,7 +1,9 @@
 # oid name                   : color         : limit    : Error message
-ValueIsBelowThreshold1       : red           : 0        : {TempIndex} {TempDescr} - Threshold1 reached 
-ValueIsBelowThreshold1       : green         : 1
-ValueIsBelowThreshold2       : yellow        : 0        : {TempIndex} {TempDescr} - Threshold2 reached
-ValueIsBelowThreshold2       : green         : 1
-ValueIsBelowThreshold3       : red           : 0        : {TempIndex} {TempDescr} - Threshold3 reached
-ValueIsBelowThreshold3       : green         : 1 
+ValueIsBelowThreshold1       : red           : 1        : {TempIndex} {TempDescr} - Threshold1 reached
+ValueIsBelowThreshold1       : green         : 0        :
+ValueIsBelowThreshold2       : yellow        : 1        : {TempIndex} {TempDescr} - Threshold2 reached
+ValueIsBelowThreshold2       : green         : 0        : 
+ValueIsBelowThreshold2       : blue          :          :
+ValueIsBelowThreshold3       : red           : 1        : {TempIndex} {TempDescr} - Threshold3 reached
+ValueIsBelowThreshold3       : green         : 0        : 
+ValueIsBelowThreshold3       : blue          :          : 

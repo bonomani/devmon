@@ -12,17 +12,20 @@ entSensorThresholdRelationOp    : SWITCH : {entSensorThresholdRelation} 1=<,2=<=
 TempSensorThresholdIndex1       : REGSUB : {TempRowIndex} /(.*)/$1.1/
 TempSensorThresholdValue1       : CHAIN  : {TempSensorThresholdIndex1} {entSensorThresholdValue}
 TempSensorThresholdRelation1    : CHAIN  : {TempSensorThresholdIndex1} {entSensorThresholdRelationOp}
-TempSensorThresholdIndex2       : REGSUB : {TempRowIndex} /(.*)/$1.2/
-TempSensorThresholdValue2tmp    : CHAIN  : {TempSensorThresholdIndex2} {entSensorThresholdValue}
-TempSensorThresholdValue2       : REGSUB : {TempSensorThresholdValue2tmp} /^$/U/
-TempSensorThresholdRelation2tmp : CHAIN  : {TempSensorThresholdIndex2} {entSensorThresholdRelationOp}
-TempSensorThresholdRelation2    : REGSUB : {TempSensorThresholdRelation2tmp} /^$/ne/
-TempSensorThresholdIndex3       : REGSUB : {TempRowIndex} /(.*)/$1.3/
-TempSensorThresholdValue3tmp    : CHAIN  : {TempSensorThresholdIndex3} {entSensorThresholdValue}
-TempSensorThresholdValue3       : REGSUB : {TempSensorThresholdValue3tmp} /^$/U/
-TempSensorThresholdRelation3tmp : CHAIN  : {TempSensorThresholdIndex3} {entSensorThresholdRelationOp}
-TempSensorThresholdRelation3    : REGSUB : {TempSensorThresholdRelation3tmp} /^$/ne/
 
-ValueIsBelowThreshold1          : EVAL    : eval(eval({TempValue})." ".{TempSensorThresholdRelation1}." ".eval({TempSensorThresholdValue1})) || 0
-ValueIsBelowThreshold2          : EVAL    : eval(eval({TempValue})." ".{TempSensorThresholdRelation2}." ".eval({TempSensorThresholdValue2})) || 0
-ValueIsBelowThreshold3          : EVAL    : eval(eval({TempValue})." ".{TempSensorThresholdRelation3}." ".eval({TempSensorThresholdValue3})) || 0
+TempSensorThresholdIndex2       : REGSUB : {TempRowIndex} /(.*)/$1.2/
+TempSensorThresholdValue2       : CHAIN  : {TempSensorThresholdIndex2} {entSensorThresholdValue}
+TempSensorThresholdRelation2    : CHAIN  : {TempSensorThresholdIndex2} {entSensorThresholdRelationOp}
+TempSensorThresholdRelationValue2 : REGSUB : {TempSensorThresholdRelation2} /(.*)/$1 {TempSensorThresholdValue2}/
+
+TempSensorThresholdIndex3       : REGSUB : {TempRowIndex} /(.*)/$1.3/
+TempSensorThresholdValue3       : CHAIN  : {TempSensorThresholdIndex3} {entSensorThresholdValue}
+TempSensorThresholdRelation3    : CHAIN  : {TempSensorThresholdIndex3} {entSensorThresholdRelationOp}
+TempSensorThresholdRelationValue3 : REGSUB : {TempSensorThresholdRelation3} /(.*)/$1 {TempSensorThresholdValue3}/
+
+ValueIsBelowThreshold1a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation1}{TempSensorThresholdValue1}||0/
+ValueIsBelowThreshold1          : REGSUB : {ValueIsBelowThreshold1a} /(.*)/$1/ee
+ValueIsBelowThreshold2a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation2}{TempSensorThresholdValue2}||0/
+ValueIsBelowThreshold2          : REGSUB : {ValueIsBelowThreshold2a} /(.*)/$1/ee
+ValueIsBelowThreshold3a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation3}{TempSensorThresholdValue3}||0/
+ValueIsBelowThreshold3          : REGSUB : {ValueIsBelowThreshold3a} /(.*)/$1/ee

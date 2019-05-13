@@ -36,7 +36,7 @@ our $VERSION = '0.13';
 #%name: _to_string
 #%syntax: _to_string
 #%summary: Recursively generates a string representation of the settings hash
-#%returns: a string in .ini format 
+#%returns: a string in .ini format
 
 sub _to_string{
 	my($self) = @_;
@@ -90,12 +90,12 @@ sub _parse_settings_file{
 	foreach(@_){
 		# Get rid of starting/ending whitespace
 		s/^\s*(.*)\s*$/$1/;
-		
+
 		#Delete comments
 		($_) = split(/[;#]/,$_);
 		#Skip if there's no data
 		next if((! defined($_)) || $_ eq '');
-		/^\s*(.*?)\s*=\s*(['"]|)(.*)\2\s*/ && do {	
+		/^\s*(.*?)\s*=\s*(['"]|)(.*)\2\s*/ && do {
 			my($key,$val) = ($1,$3);
 			next if($key eq '' || $val eq '');
 			if(! defined($subentry) || $subentry =~ /^\s*$/){
@@ -107,7 +107,7 @@ sub _parse_settings_file{
 		};
 		# Select a new entry if this is such a line
 		/\[(.*?)\]/ && do{
-			
+
 			$_ = $1;
 			($entry,$subentry) = split('::');
 			if(! defined($subentry) || $subentry =~ /^\s*$/){
@@ -145,7 +145,7 @@ Config::Abstract::Ini - Perl extension for handling ini style files
  because you couldn't be bothered?  Config::Abstract::Ini solves
  that  for  you, giving you an object in  exchange for the
  name of your settings file.
- 
+
  For compatibility with other config file formats, Ini can
  understand  hierarchical ini files using double colons as
  delimiters.  Just make sure you don't create name clashes
@@ -161,19 +161,19 @@ Config::Abstract::Ini - Perl extension for handling ini style files
  thisssetting = that
  thatsetting=this
  ;end of ini
- 
- 
+
+
  use Config::Abstract::Ini;
  my $settingsfile = 'testdata.ini';
  my $settings = new Config::Abstract::Ini($Settingsfile);
- 
+
  # Get all settings
  my %allsettings = $settings->get_all_settings;
- 
- # Get a subsection (called an entry here, but it's 
+
+ # Get a subsection (called an entry here, but it's
  # whatever's beneath a [section] header)
  my %entry = $settings->get_entry('myentry');
- 
+
  # Get a specific setting from an entry
  my $value = $settings->get_entry_setting('myentry',
                                           'thissetting');
@@ -203,11 +203,11 @@ Config::Abstract::Ini - Perl extension for handling ini style files
  use Config::Abstract::Ini;
  my $settingsfile = 'test2.ini';
  my $ini = new Config::Abstract::Ini($Settingsfile);
- 
+
  my %book = $ini->get_entry('book');
  my %chap1 = $ini->get_entry_setting('book','chapter1');
  my $chap1title = $chapter1{'title'};
- 
+
  # Want to see the inifile?
  # If you can live without comments and blank lines ;),
  # try this:

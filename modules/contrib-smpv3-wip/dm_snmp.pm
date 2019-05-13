@@ -145,7 +145,7 @@ require Exporter;
 
        # Create a shortcut
         my $tmpl    = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
-        #my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'}; 
+        #my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'};
 
        # Determine what type of snmp version we are using
        # Use the highest snmp variable type we find amongst all our tests
@@ -259,7 +259,7 @@ require Exporter;
             else {
               print "failed thaw on $dev\n";
               next;
-            } 
+            }
 
            # Sift through returned errors
             for my $error (keys %{$returned{'error'}}) {
@@ -269,7 +269,7 @@ require Exporter;
              # Incrememnt our fail counter if the query died fatally
               ++$g{'fail'}{$dev} if $fatal;
             }
-            delete $returned{'error'}; 
+            delete $returned{'error'};
 
            # Go through and extract our maxrep values
             for my $oid (keys %{$returned{'maxrep'}}) {
@@ -336,7 +336,7 @@ require Exporter;
           else {
             $snmp_input->{$dev}{'retries'} = $g{'snmptries'};
           }
-          
+
          # set out timeout
           $snmp_input->{$dev}{'timeout'} = $g{'snmptimeout'};
 
@@ -402,7 +402,7 @@ require Exporter;
             else {
               print "failed thaw for ping of fork $fork\n";
               next;
-            } 
+            }
             if (defined $returned{'pong'}) {
               $g{'forks'}{$fork}{'time'} = time;
               do_log("Fork $fork responded to ping request $returned{'ping'} with $returned{'pong'} at $g{'forks'}{$fork}{'time'}",4) if $g{'debug'};
@@ -463,7 +463,7 @@ require Exporter;
       my $pid;
 
      # Find our next available placeholder
-      for (sort {$a <=> $b} keys %{$g{'forks'}}) 
+      for (sort {$a <=> $b} keys %{$g{'forks'}})
         {++$num and next if defined $g{'forks'}{$num}; last}
       do_log("Starting fork number $num") if $g{'debug'};
 
@@ -515,7 +515,7 @@ require Exporter;
     my $sock = $g{'forks'}{$fork_num}{'PS'};
 
     DEVICE: while(1) { # We should never leave this loop
-     # Our outbound data hash 
+     # Our outbound data hash
       my %data_out = ();
 
      # Heres a blocking call
@@ -547,7 +547,7 @@ require Exporter;
 
         }
         $serialized .= $string_in if defined $string_in;
-        
+
       } until $serialized =~ s/\nEOF\n$//s;
       do_log("DEBUG SNMP($fork_num): Got EOF in message, attempting to thaw",4) if $g{'debug'};
 
@@ -591,14 +591,14 @@ require Exporter;
       my ($SessionNew,$SessionNewError) ;
 
       if(!defined $data_in{'nonreps'} and !defined $data_in{'reps'}) {
-        my $error_str = 
+        my $error_str =
           "No oids to query for $dev, skipping";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);
         next DEVICE;
       }
       elsif(!defined $snmp_ver) {
-        my $error_str = 
+        my $error_str =
           "No snmp version found for $dev";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);
@@ -616,14 +616,14 @@ require Exporter;
          $options{translate}    = "0" ;
 
         ($SessionNew,$SessionNewError) = Net::SNMP->session(%options) ;
-      } 
+      }
       elsif ( $snmp_ver =~ /^2c?$/ ) {
          my %options ;
          $options{hostname}     = $host ;
          $options{port}         = $snmp_port ;
          $options{version}      = 'v2c';
          $options{community}    = $snmp_cid ;
-         $options{maxmsgsize}   = 65535 ;
+         $options{maxmsgsize}   = 8000 ;
          $options{retries}      = $retries ;
          $options{timeout}      = $timeout ;
          $options{translate}    = "0" ;
@@ -646,10 +646,10 @@ require Exporter;
 
          ($SessionNew,$SessionNewError) = Net::SNMP->session(%options) ;
       }
-     
+
      # Whoa, we dont support this version of SNMP
       else {
-        my $error_str = 
+        my $error_str =
           "Unsupported SNMP version for $dev ($snmp_ver)";
         $data_out{'error'}{$error_str} = 1;
         send_data($sock, \%data_out);

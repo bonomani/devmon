@@ -5,7 +5,7 @@ cefcModuleResetReasonTxt                   : SWITCH : {cefcModuleResetReason} 1=
 entPhysicalClassTxt                        : SWITCH : {entPhysicalClass} 1=Other,2=Unknown,3=Chassis,4=Backplane,5=Container,6=Power Supply,7=Fan,8=Sensor,9=Module,10=Port,11=Stack,12=CPU
 
 entPhysicalIndex                           : INDEX  : {entPhysicalParentRelPos}
-entRelPosAndIndex                          : REGSUB : {entPhysicalParentRelPos} /^(.+)$/$1.'('.sprintf('%4s', {entPhysicalIndex}).')'/e 
+entRelPosAndIndex                          : REGSUB : {entPhysicalParentRelPos} /^(.+)$/$1.'('.sprintf('%4s', {entPhysicalIndex}).')'/e
 
 entRelPosAndIndexCollec                    : COLTRE : {entPhysicalContainedIn} {entRelPosAndIndex} : . , l( )
 entRelPosCollec                            : REGSUB : {entRelPosAndIndexCollec} /\(\s*\w+\s*\)//g
