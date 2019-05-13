@@ -14,11 +14,14 @@ For an overview of how Devmon works, please see the OVERVIEW file.
 
   2. Unpack the Devmon tarball into your preferred directory.  I
      typically use /var/xymon/server/ext/devmon, but it is totally 
-     up to you. I added also a specfic folder for centos in
-     devmon/extra/centos with scripts for systemd linux (can  
+     up to you. I added also a specfic folder for systemd (centos)
+     in devmon/extra with scripts for systemd linux (can  
      probably be usefull for ubuntu install that work with systemd 
 
-     Templates are in devmon/templates
+     Templates should be in devmon/templates
+
+     AND Follow the QUICK_INSTALLATION guide in this folder (docs)
+     AND come back letter to verify that you dont miss anything!
 
   3. Edit the devmon.cfg file.  For a single node installation, the
      options you want to pay particular attention to are: 
