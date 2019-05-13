@@ -1,0 +1,2 @@
+TempC : yellow : > 48 : Temperature is warm
+TempC : red : > 53 : Temperature is critical

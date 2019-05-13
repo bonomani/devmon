@@ -1,0 +1,3 @@
+sysUpTimeClean  : REGSUB        : {sysUpTimeRaw} /Timeticks:.*(\d+).*/$1/
+sysUpTimeSecs   : MATH          : {sysUpTimeClean} / 100
+UpTimeTxt	: ELAPSED	: {sysUpTimeSecs}
