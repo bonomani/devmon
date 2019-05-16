@@ -1,2 +1,1 @@
-ifPri : ignore : .+Nu.+|.+Vl.+
-
+ifPri : ignore : ^\S*Nu.+|^\S*Vl.+
