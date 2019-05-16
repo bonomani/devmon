@@ -1,4 +1,0 @@
-vendor	: cisco
-model	: 1900
-snmpver	: 2
-sysdesc : C1900

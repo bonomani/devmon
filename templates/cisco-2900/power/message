@@ -1,3 +1,0 @@
-TABLE:
-PSU|Source|State
-{ciscoEnvMonSupplyStatusDescr}|{PsuSource}|{PsuStatus.color}{PsuStatus}

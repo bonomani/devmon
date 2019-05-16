@@ -1,8 +1,0 @@
-{UpTime.color}Up for: {UpTimeTxt}
-{sysReloadReason.color}Last reboot due to: {sysReloadReason}
-
-{sysDescr}
-
-TABLE:rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
-CPU|Load
-{CPUIndex}|{cpmCPUTotal5minRev.color}{cpmCPUTotal5minRev}%{cpmCPUTotal5minRev.errors}

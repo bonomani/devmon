@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: C1900-C2800-C2900
+snmpver	: 2
+sysdesc : Cisco.*(?:C1900|C2800|C2801|C2811|C2821|C2900|C2951)

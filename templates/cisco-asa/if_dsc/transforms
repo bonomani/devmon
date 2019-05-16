@@ -9,8 +9,8 @@ ifOutDps	: DELTA		: {ifOutDiscards}
 # Perform percentage calculations
 ifInDscPct	: MATH		: ({ifInDps} / {ifInPps}) x 100
 ifOutDscPct	: MATH		: ({ifOutDps} / {ifOutPps}) x 100
-ifInStat        : BEST          : {ifInDscPct},{ifInDps}
-ifOutStat       : BEST          : {ifOutDscPct},{ifOutDps}
+ifInDscStat     : BEST          : {ifInDscPct},{ifInDps}
+ifOutDscStat    : BEST          : {ifOutDscPct},{ifOutDps}
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
 ifIndex         : INDEX         : {ifName}

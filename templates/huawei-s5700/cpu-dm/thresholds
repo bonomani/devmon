@@ -4,4 +4,4 @@ UpTime                  : red		: <600                                  : Device 
 UpTime                  : yellow	: <5000                                 : Device rebooted recently. System uptime: {UpTimeTxt}
 UpTime                  : green		:	                                :
 
-hwSysRebootReason       : yellow        : 1,2,3,4,5                             : Device reload reason : {hwSysRebootReason}
+hwSysRebootReason       : yellow        : 2,3,4,5                             : Device reload reason : {hwSysRebootReason}

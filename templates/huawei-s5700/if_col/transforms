@@ -5,7 +5,7 @@ ifOutPkts     	: MATH          : {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {
 
 # Do delta transform on all counters
 ifOutPps       	: DELTA         : {ifOutPkts}
-ifOutCps	: DELTA		: {hwIfEtherStatOutCollisionPkts}
+ifOutCps	: DELTA		: {ifOutCollisions}
 
 # Compute the real packets per second inclidung collision
 ifOutCPps	: MATH		: {ifOutCps} + {ifOutPps}

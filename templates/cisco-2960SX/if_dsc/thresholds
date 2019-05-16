@@ -2,8 +2,10 @@
 # oid name      : color         : limit : Error message
 ifInDscPct      : yellow        : 1     : {ifDescr}{ifAliasBox} - Low input ratio of discard rate to total traffic rate: {ifInDscPct}%
 ifInDscPct      : red           : 5     : {ifDescr}{ifAliasBox} - High input ratio of discard rate to total traffic rate: {ifInDscPct}%
+ifInDscPct      : green         : NaN   :
 ifOutDscPct     : yellow        : 1     : {ifDescr}{ifAliasBox} - Low output ratio of discard rate to total traffic rate: {ifOutDscPct}%
 ifOutDscPct     : red           : 5     : {ifDescr}{ifAliasBox} - High output ratio of discard rate to total traffic rate: {ifOutDscPct}%
+ifOutDscPct     : green         : NaN
 
 ifInDps         : yellow        : 2     : {ifDescr}{ifAliasBox} - Low input discard rate: {ifInDps}p/s
 ifInDps         : red           : 10    : {ifDescr}{ifAliasBox} - High input discard rate: {ifInDps}p/s

@@ -27,5 +27,5 @@ ValueIsBelowThreshold1a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresh
 ValueIsBelowThreshold1          : REGSUB : {ValueIsBelowThreshold1a} /(.*)/$1/ee
 ValueIsBelowThreshold2a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation2}{TempSensorThresholdValue2}||0/
 ValueIsBelowThreshold2          : REGSUB : {ValueIsBelowThreshold2a} /(.*)/$1/ee
-ValueIsBelowThreshold3a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation3}{TempSensorThresholdValue3}||0/
+ValueIsBelowThreshold3a         : REGSUB : {TempValue} /(.*)/($1{TempSensorThresholdRelation3}{TempSensorThresholdValue3})? 1 : 0 /
 ValueIsBelowThreshold3          : REGSUB : {ValueIsBelowThreshold3a} /(.*)/$1/ee
