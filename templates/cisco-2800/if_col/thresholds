@@ -1,4 +1,0 @@
-# Create thresholds for all the error rate counters
-# oid name	: color		: limit	: Error message
-ifOutColPct	: yellow	: 2	: {ifDescr}{ifAliasBox} - Low output collision rate ({ifOutColPct}%)
-ifOutColPct	: red		: 40	: {ifDescr}{ifAliasBox} - High output collision rate ({ifOutColPct}%)

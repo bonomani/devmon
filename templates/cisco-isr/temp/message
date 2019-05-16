@@ -5,3 +5,6 @@ Id|Description|Temp|State|Thresh1|Thresh2|Thresh3
 
 #{TempIndex}|{TempDescr}|{TempValue}|{TempStatus}|{ValueIsBelowThreshold1.color}{TempSensorThresholdRelation1}{TempSensorThresholdValue1}{ValueIsBelowThreshold1.errors}|{ValueIsBelowThreshold2.color}{TempSensorThresholdRelation2}{TempSensorThresholdValue2}{ValueIsBelowThreshold2.errors}|{ValueIsBelowThreshold3.color}{TempSensorThresholdRelation3}{TempSensorThresholdValue3}{ValueIsBelowThreshold3.errors}|{TempSensorThresholdIndex3.color}{TempSensorThresholdValue3.color}{TempSensorThresholdRelation3.color}
 
+#TABLE:
+#-1-|-2-|-3-|-4-
+#{entSensorThresholdValue}|{entSensorThresholdRelation} 

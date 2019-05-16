@@ -2,7 +2,7 @@ ifDescr                 : .1.3.6.1.2.1.2.2.1.2          : branch
 #ifName                 : .1.3.6.1.2.1.31.1.1.1.1       : branch
 ifAlias                 : .1.3.6.1.2.1.31.1.1.1.18      : branch
 
-hwIfEtherStatOutCollisionPkts : .1.3.6.1.4.1.2011.5.25.41.1.6.1.1.29     : branch
+ifOutCollisions         : .1.3.6.1.4.1.2011.5.25.41.1.6.1.1.29     : branch
 dot3StatsDuplexStatus   : .1.3.6.1.2.1.10.7.2.1.19      : branch
 
 ifHCOutUcastPkts        : .1.3.6.1.2.1.31.1.1.1.11      : branch

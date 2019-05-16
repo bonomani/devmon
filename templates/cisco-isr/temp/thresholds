@@ -1,9 +1,15 @@
-# oid name                   : color         : limit    : Error message
-ValueIsBelowThreshold1       : red           : 1        : {TempIndex} {TempDescr} - Threshold1 reached
-ValueIsBelowThreshold1       : green         : 0        :
-ValueIsBelowThreshold2       : yellow        : 1        : {TempIndex} {TempDescr} - Threshold2 reached
-ValueIsBelowThreshold2       : green         : 0        : 
-ValueIsBelowThreshold2       : blue          :          :
-ValueIsBelowThreshold3       : red           : 1        : {TempIndex} {TempDescr} - Threshold3 reached
-ValueIsBelowThreshold3       : green         : 0        : 
-ValueIsBelowThreshold3       : blue          :          : 
+# oid name                       : color         : limit    : Error message
+TempSensorThresholdValue2        : clear        :          : Missing threshold relation for index {TempSensorThresholdIndex2}
+TempSensorThresholdRelation2     : clear        :          : Missing threshold value for index {TempSensorThresholdIndex2}
+TempSensorThresholdValue3        : clear        :          : Missing threshold relation for index {TempSensorThresholdIndex3}
+TempSensorThresholdRelation3     : clear        :          : Missing threshold value for index {TempSensorThresholdIndex3}
+
+ValueIsBelowThreshold1           : red          : 1        : {TempIndex} {TempDescr} - Threshold1 reached
+ValueIsBelowThreshold1           : green        : 0        :
+ValueIsBelowThreshold2           : yellow       : 1        : {TempIndex} {TempDescr} - Threshold2 reached
+ValueIsBelowThreshold2           : green        : 0        : 
+#ValueIsBelowThreshold2          : blue         :          :
+ValueIsBelowThreshold3           : red          : 1        : {TempIndex} {TempDescr} - Threshold3 reached
+ValueIsBelowThreshold3           : green        : 0        : 
+#ValueIsBelowThreshold3          : blue         :          : 
+

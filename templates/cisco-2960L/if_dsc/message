@@ -1,12 +1,15 @@
 <b>Discards:</b>
 Rates are packets per second
 Traffic percentages(%) are ratio of discard rate to total traffic rate
-Input alarm thresholds   : Best of
+
+Input alarm status       : Best of ...
 - Discard in rate        : yellow={ifInDps.thresh:yellow}p/s, red={ifInDps.thresh:red}p/s
 - Ratio to total traffic : yellow={ifInDscPct.thresh:yellow}%, red={ifInDscPct.thresh:red}%
-Output alarm thresholds  : Best of
+
+Output alarm status      : Best of ...
 - Discard out rate       : yellow={ifOutDps.thresh:yellow}p/s, red={ifOutDps.thresh:red}p/s
 - Ratio to total traffic : yellow={ifOutDscPct.thresh:yellow}%, red={ifOutDscPct.thresh:red}%
+
 TABLE:rrd(DS:ds0:ifInDiscards:COUNTER; DS:ds1:ifOutDiscards:COUNTER)
 Ifc name|Discards in|Rate in (traffic%)|Discards out|Rate out (traffic%)
-{ifPri}{ifAliasBox}|{ifInDiscards}|{ifInStat.color}{ifInDps} ({ifInDscPct}%){ifInStat.errors}|{ifOutDiscards}|{ifOutStat.color}{ifOutDps} ({ifOutDscPct}%){ifOutStat.errors}
+{ifPri}{ifAliasBox}|{ifInDiscards}|{ifInDscStat.color}{ifInDps} ({ifInDscPct}%){ifInDscStat.errors}|{ifOutDiscards}|{ifOutDscStat.color}{ifOutDps} ({ifOutDscPct}%){ifOutDscStat.errors}

@@ -2,5 +2,5 @@
 Input traffic:  yellow={ifInLoad.thresh:yellow}%, red={ifInLoad.thresh:red}%
 Output traffic: yellow={ifOutLoad.thresh:yellow}%, red={ifOutLoad.thresh:red}%
 TABLE:rrd(DS:ds0:ifHCInOctets:COUNTER; DS:ds1:ifHCOutOctets:COUNTER)
-Ifc name|Ifc Speed|Rate in (load %)|Rate out (load %)
-{ifPri}{ifAliasBox}|{ifSpeed}|{ifInLoad.color}{ifInSpeed} ({ifInLoad}%){ifInLoad.errors}|{ifOutLoad.color}{ifOutSpeed} ({ifOutLoad}%){ifOutLoad.errors}
+Ifc name|Ifc Speed|Rate in|Load%|Rate out|Load%
+{ifPri}{ifAliasBox}|{ifSpeed}|{ifInSpeed}|{ifInLoad.color}{ifInLoad}%{ifInLoad.errors}|{ifOutSpeed}|{ifOutLoad.color}{ifOutLoad}%{ifOutLoad.errors}

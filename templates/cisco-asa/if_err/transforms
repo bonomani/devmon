@@ -12,6 +12,6 @@ ifInErrTraf	: MATH		: ({ifInErrPps} / {ifInPps}) x 100
 ifOutErrTraf	: MATH		: ({ifOutErrPps} / {ifOutPps}) x 100
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-ifIndex         : INDEX         : {ifName}
-ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifName}/e
+ifIndex         : INDEX         : {ifDescr}
+ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
 

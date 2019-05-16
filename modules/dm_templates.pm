@@ -31,7 +31,7 @@ require Exporter;
   *g = \%dm_config::g;
 
  # Global array and hash by descending priority/severity
-   my %colors = ('red' => 5, 'yellow' => 4, 'clear' => 3, 'green' => 2, 'blue' => 1);
+   my %colors = ('red' => 6, 'yellow' => 5, 'clear' => 4, 'purple' => 3, 'green' => 2, 'blue' => 1);
    my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
    my $color_list = join '|', @color_order;
 
@@ -350,14 +350,13 @@ require Exporter;
      # Seperate variable and assigned value (colon delimited)
       my ($var, $val) = split /\s*:\s*/, $line, 2;
       $var = lc $var;
-
      # Make sure we got all our variables and they are non-blank and valid
       if (!defined $val) {
         do_log("Syntax error: Undefined value in $specs_file at line $.", 0);
         next ;
       } else {
         # Trim right (left done by split)
-        do_log("Syntax warning: Trailing space(s) in $specs_file at line $.", 0) if $val =~ s/\s+$//;
+        do_log("Syntax warning: Trailing space(s) in $specs_file at line $.", 0) if $val =~ s/\s$//;
         if ($val eq '') {
           do_log("Syntax error: Missing spec value in $specs_file at line $.", 0);
           next;
@@ -431,7 +430,7 @@ require Exporter;
         next;
       } else {
        # Trim right (left done by split)
-        do_log("Syntax warning: Trailing space(s) in $oid_file at line $.", 0) if $repeat =~ s/\s+$//;
+        do_log("Syntax warning: Trailing space(s) in $oid_file at line $.", 0) if $repeat =~ s/\s$//;
         if ($repeat eq '') {
           do_log("Syntax error: Missing repeater type in $oid_file at line $.", 0);
           next;
@@ -536,7 +535,7 @@ require Exporter;
         next;
       } else {
        # Trim right (left done by split)
-        do_log("Syntax warning: Trailing space(s) in $trans_file at line $l_num", 0) if $func_data =~ s/\s+$//;
+        do_log("Syntax warning: Trailing space(s) in $trans_file at line $l_num", 0) if $func_data =~ s/\s$//;
         if ($func_data eq '') {
           do_log("Syntax error: Missing function data in $trans_file at line $l_num", 0);
           next;
@@ -852,13 +851,28 @@ require Exporter;
           and delete $trans{$oid} and next
           if !defined $tmpl->{'oids'}{$dep_oid} and !defined $trans{$dep_oid};
 
-        $deps->{$oid}{$dep_oid} = {};
+#        $deps->{$oid}{$dep_oid} = {};
+        $deps->{$dep_oid}{$oid} = {};
       }
     }
 
-   # Find dependency loops (tricky!)
-    my $val = find_deps($deps, \%trans, $path);
-    return 0 if $val == 0;
+#   # Find dependency loops (tricky!)
+#    my $val = find_deps($deps, \%trans, $path);
+#    return 0 if $val == 0;
+   # Complete the list of dependecies to include those OIDs which do not depend
+   # on another OID, and which are not used in any transformation rule. They too
+   # should be included in the sorted list, used to evaluate the OIDs.
+    for my $oid ( keys %trans ) {
+      next			if $trans{$oid}{'data'}=~ m/\{.+?\}/ ;
+      next			if exists $deps->{$oid} ;
+      $deps->{$oid}= {} ;		# Create entry
+    }  # of for
+
+   # Sort the OIDs in a order in which they need to be calculated. At the same
+   # time any dependency loop is found and reported.
+    my $val = sort_oid( $deps );
+    return 0			unless defined $val;
+    $tmpl->{'sort'} = $val;
 
    # Now add the translations to the global hash
     for my $oid (keys %trans) {
@@ -923,6 +937,63 @@ require Exporter;
     return 1;
   }
 
+  #
+  # Function sort-oid sorts the OIDs used in the transformations in a order
+  # in which they are to be calculated: each OID is sorted after the OIDs it
+  # depends on.
+  # At the same time, it checks the dependencies for any circular chains. If no
+  # such chain is found, this function returns a reference to the sorted list of
+  # OIDs. If at least one circular chain is found, the returned value is undef.
+  #
+  # This function uses the topological sort method.
+  #
+  sub sort_oid($) {
+    my $deps= $_[0] ;
+    my @Sorted= () ;			# Sorted list of OIDs
+    my %Cnt= () ;			# Dependency counters
+    my ($oid,$mods) ;			# Loop control variables
+  
+   #
+   # Build table %Cnt. It specifies for each OID the number of other OIDs which
+   # are needed to compute the OID.
+   #
+    foreach $oid ( keys %$deps ) {
+      $Cnt{$oid}= 0		unless exists $Cnt{$oid} ;
+      foreach ( keys %{$$deps{$oid}} ) {
+	$Cnt{$_}= 0		unless exists $Cnt{$_} ;
+	$Cnt{$_}++ ;
+      }  # of foreach
+    }  # of foreach
+  
+   #
+   # Sort the OIDs. If for a given OID no other OIDs are needed to compute its
+   # value, move that OID to the sorted list and decrease the counts of each OID
+   # which is computed using this OID. This process is repeated until no OIDs can
+   # be moved any more. Any remaining OIDs, mentioned in %Cnt, must be in a
+   # circular chain of dependencies.
+   #
+    $mods= 1 ;				# End-of-loop indicator
+    while ( $mods > 0 ) {
+      $mods= 0 ;				# Preset mod-count of this pass
+      foreach $oid ( keys %Cnt ) {
+	next			unless $Cnt{$oid} == 0 ;
+	if ( exists $$deps{$oid} ) {
+	  $Cnt{$_}--		foreach keys %{$$deps{$oid}} ;
+	  $mods++ ;			# A counter is changed
+	}  # of if
+	push @Sorted, $oid ;		# Move OID to sorted list
+	delete $Cnt{$oid} ;
+      }  # of foreach
+    }  # of while
+  
+    if ( keys %Cnt ) {
+      do_log( "The following OIDs are in one or more circular depency chains: " .
+	      join(', ',sort keys %Cnt), 0 ) ;
+      return undef ;			# Circular dependency chain found
+    } else {
+      return \@Sorted ;			# No circular dependency chains found
+    }  # of else
+  }  # of sort_oid
 
 
  # Subroutine to read in the thresholds file
@@ -930,7 +1001,7 @@ require Exporter;
     my ($dir, $tmpl) = @_;
 
    # Define our valid transforms functions
-    my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1);
+    my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1, 'purple', =>1);
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
@@ -940,7 +1011,6 @@ require Exporter;
     open FILE, "$thresh_file"
       or do_log("Failed to open $thresh_file ($!), skipping this test.", 0)
       and return 0;
-
    # Go through file, read in oids
     while (my $line = <FILE>) {
       chomp $line;
@@ -983,14 +1053,14 @@ require Exporter;
       if (!defined $msg) {
         if (!defined $threshold) {
          # Trim right (left done by split)
-          do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $color  =~ s/\s+$//;
+          do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $color  =~ s/\s$//;
         } else {
          # Trim right (left done by split)
-          do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $threshold =~ s/\s+$//;
+          do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $threshold =~ s/\s$//;
         }
       } else {
        # Trim right (left done by split)
-        do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $msg  =~ s/\s+$//;
+        do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $msg  =~ s/\s$//;
       }
 
      # Validate oid
@@ -1078,7 +1148,7 @@ require Exporter;
         next;
       } else {
        # Trim right (left done by split)
-        do_log("Syntax warning: Trailing space(s) in $except_file at line $.", 0) if $data =~ s/\s+$//;
+        do_log("Syntax warning: Trailing space(s) in $except_file at line $.", 0) if $data =~ s/\s$//;
         if ($data eq '') {
           do_log("Syntax error: Missing typption data $except_file at line $.", 0);
           next;
