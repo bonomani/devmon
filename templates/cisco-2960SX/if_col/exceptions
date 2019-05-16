@@ -1,1 +1,1 @@
-ifPri : ignore : .+Nu.+
+ifPri : ignore : ^\S*Nu.+
