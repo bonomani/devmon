@@ -160,6 +160,7 @@ FEEDBACK ALWAYS APPRECIATED
  I know we are in a stressed world and sometime when we expressed ourself to 
  improve things, the message is not undestand: This is not my case: I will
  always thanks you for your remarks even the message is not clear ! 
+ Please use the github ISSUES to communicate even it is not a bug !
 
 Remarks on the oid term: 
  The use of the term 'oid' sometimes in conjunction with the terms 'index' or 'values'.  
@@ -216,8 +217,8 @@ Major improvement
     - Original errors val are accumulated and propagate in debug mode
  
 - New transforms:
-  - WARNING    : THE USE OF THIS TRANSFORM BREAKS COMPATIBILTY WITH 
-                ORIGINAL CODEi (of course!), SO USE WITH MODERATION !
+  WARNING: THE USE OF THIS TRANSFORM BREAKS COMPATIBILTY WITH 
+           ORIGINAL CODEi (of course!), SO USE WITH MODERATION !
 
   - COLTRE     : To collect data when there are "parent" oid values   
   - SORT       : To sort in an increasing order (num or txt, default = txt)
