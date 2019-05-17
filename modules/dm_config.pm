@@ -31,6 +31,8 @@ require dm_templates;
 use IO::File;
 use FindBin;
 
+use Getopt::Long ;
+
 # Load initial program values; only called once at program init
 sub initialize {
    autoflush STDOUT 1;
@@ -228,27 +230,43 @@ sub initialize {
    $SIG{HUP} = \&reopen_log;
 
    # Parse command line options
-   my($syncconfig,$synctemps,$resetowner,$readhosts);
-   $syncconfig = $synctemps = $resetowner = $readhosts = 0;
-   while ($_ = shift @ARGV) {
-      if(/^-v+$/)                 { $g{verbose} = tr/v/v/                   }
-      elsif(/^-c$/)               { $g{configfile} = shift @ARGV or usage() }
-      elsif(/^-d/)                { $g{dbfile} = shift @ARGV or usage()     }
-      elsif(/^-f$/)               { $g{daemonize} = 0                       }
-      elsif(/^-p$/)               { $g{print_msg} = 1                       }
-      elsif(/^-1$/)               { $g{print_msg} = 1;
-         $g{verbose}   = 2;
-         $g{debug}     = 1;
-         $g{oneshot}   = 1                       }
-      elsif(/^-h$/)               { $g{hostonly} = shift @ARGV or usage();
-         $g{daemonize} = 0;                      }
-      elsif(/^--debug$/)          { $g{debug} = 1                           }
-      elsif(/^--syncconfig$/)     { $syncconfig = 1                           }
-      elsif(/^--synctemplates$/)  { $synctemps  = 1                           }
-      elsif(/^--resetowners$/)    { $resetowner = 1                           }
-      elsif(/^--readbbhosts$/)    { $readhosts  = 1                           }
-      else { usage () }
-   }
+   my($syncconfig,$synctemps,$resetowner,$readhosts,$oneshot);
+	$syncconfig = $synctemps = $resetowner = $readhosts = 0;
+
+   GetOptions (
+         "verbose+"        => \$g{verbose},
+         "configfile=s"    => \$g{configfile},
+         "dbfile=s"        => \$g{dbfile},
+         "foreground"      => \$g{foreground},
+         "print_msg"       => \$g{print_msg},
+         "1"               => \$oneshot ,
+         "hostonly=s"      => \$g{hostonly} ,
+         "debug"           => \$g{debug},
+         "syncconfig"      => \$syncconfig,
+         "synctemplates"   => \$synctemps,
+         "resetowners"     => \$resetowner,
+         "readbbhosts"     => \$readhosts
+      ) or usage () ;
+
+	# Check / fix command line options
+	# The original code used -f to set daemonize=0
+	if ( $g{foreground} ) {
+		$g{daemonize} = 0 ;
+	}
+	# If we check only 1 host, do not daemonize
+	if ( $g{hostonly} ) {
+		$g{daemonize} = 0 ;
+	}
+	# Undocumented option.
+	if ( $oneshot ) {
+    	$g{verbose}   = 2 ;
+     	$g{debug}     = 1 ;
+     	$g{oneshot}   = 1 ;
+	}
+   # Dont daemonize if we are printing messages
+	if ( $g{print_msg} ) {
+   	$g{daemonize} = 0 
+	}
 
    # Now read in our local config info from our file
    read_local_config();
@@ -264,11 +282,6 @@ sub initialize {
    dm_templates::sync_templates() if $synctemps;
    reset_ownerships()             if $resetowner;
    read_bb_hosts()                if $readhosts;
-
-
-
-   # Dont daemonize if we are printing messages
-   $g{daemonize} = 0 if $g{print_msg};
 
    # Open the log file
    open_log();
@@ -2095,23 +2108,22 @@ sub usage {
    "Usage: devmon [arguments]\n" .
    "\n" .
    "  Arguments:\n" .
-   "   -c       Specify config file location\n" .
-   "   -d       Specify database file location\n" .
-   "   -f       Run in foreground.  Prevents running in daemon mode.\n" .
-   "   -h       Poll only hosts matching the pattern that follows.\n" .
-   "   -p       Print message.  Don't send message to display server.\n" .
-   "            print it to stdout\n" .
-   "   -v       Verbose mode.  The more v's, the more vebose logging.\n" .
-   "   --debug  Print debug output (this can be quite extensive).\n" .
+   "   -c[onfigfile]  Specify config file location\n" .
+   "   -db[file]      Specify database file location\n" .
+   "   -f[oregrond]   Run in foreground. Prevents running in daemon mode\n" .
+   "   -h[ostonly]    Poll only hosts matching the pattern that follows\n" .
+   "   -p[rint]       Don't send message to display server but print it on stdout\n" .
+   "   -v[erbose]     Verbose mode. The more v's, the more vebose logging\n" .
+   "   -de[bug]       Print debug output (this can be quite extensive)\n" .
    "\n" .
    "  Mutually exclusive arguments:\n" .
-   "   --readbbhosts   Read in data from the BigBrother/Hobbit hosts file\n" .
-   "   --syncconfig    Update multinode DB with the global config options\n" .
-   "                   configured on this local node.\n" .
-   "   --synctemplates Update multinode device templates with the template\n" .
-   "                   data on this local node.\n" .
-   "   --resetowners   Reset multinode device ownership data.  This will\n" .
-   "                   cause all nodes to recalculate ownership data.\n" .
+   "   -r[eadbbhosts]   Read in data from the BigBrother/Hobbit hosts file\n" .
+   "   -syncc[onfig]    Update multinode DB with the global config options\n" .
+   "                    configured on this local node\n" .
+   "   -synct[emplates] Update multinode device templates with the template\n" .
+   "                    data on this local node\n" .
+   "   -r[esetowners]   Reset multinode device ownership data.  This will\n" .
+   "                    cause all nodes to recalculate ownership data\n" .
    "\n";
 }
 
