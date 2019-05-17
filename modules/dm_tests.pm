@@ -1979,7 +1979,7 @@ require Exporter;
       if($padding_length eq 'auto') {
         my $maxlength = 0;
         my %value_length;
-        while (my ($key, $value) = each $trg_h->{'val'}) {
+        while (my ($key, $value) = each %{$trg_h->{'val'}}) {
           $value_length{$key} = length($value);
           if ($maxlength < $value_length{$key}) {
 	    $maxlength = $value_length{$key};
@@ -1995,7 +1995,7 @@ require Exporter;
         }
       }
       else {
-        while (my ($key, $value) = each $trg_h->{'val'}) {
+        while (my ($key, $value) = each %{$trg_h->{'val'}}) {
           if($padding_type eq 'l') {
             $trg_h->{'val'}{$key} = $padding_char x ($padding_length - length($trg_h->{'val'}{$key})) . $trg_h->{'val'}{$key};
           }
