@@ -148,30 +148,32 @@ Thanks for all the work done and also all patch/ideas submitted !
 Special thanks to W. Nelis and the devmon admins and devs !
 Please feel free to fork again and ask for support !
 
-ALL PATCH FROM SOURCEFORGE ARE NOW INTERGRATED IN THIS RELEASE
-This fork is an friendly one (is it possible?), mainly make devmon move again
-A cooperation with original devs is desired and asked 
-To help the reinjection of this code to the original one, no major  
-code restructuration was done: you can still easely compare both code,
-but this will limit the possible improvements. I waiting for your feedback
+ALL PATCH FROM SOURCEFORGE ARE INTERGRATED IN THIS RELEASE
+This fork is an friendly one (Yes, I think it is possible ! ),
+mainly to push devmon to move again as I think it is great product with
+a huge potetntial. Xymon is also a amazing product ! I used it for years.
+A cooperation with original devs is desired and asked. To help the 
+reinjection of this code or parts of it to the original one, no major  
+code restructuration was done: you can still easely compare both codes,
+but this will limit the possible improvements. I am waiting for your feedback
 on how to continue. 
 
 FEEDBACK ALWAYS APPRECIATED
- I know we are in a stressed world and sometime when we expressed ourself to 
- improve things, the message is not undestand: This is not my case: I will
+ I know we are in a stressing world and sometime when we expressed ourself to 
+ improve things, the message is not understood: This is not my case: I will
  always thanks you for your remarks even the message is not clear ! 
- Please use the github ISSUES to communicate even it is not a bug !
+ So do not hesitate and use the github ISSUES to communicate even it is not a bug !
 
 Remarks on the oid term: 
- The use of the term 'oid' sometimes in conjunction with the terms 'index' or 'values'.  
- In a leaf type oid, only on result is expexted so there is no need to have 
- an index notion, but we could have one, even it is not relevant 
- - Mathematicly: snmp{oid}=oid_value{oid_index}=oid_value
+ The use of the term 'oid' sometimes confusing and it is used also in conjunction with
+ the terms 'index' or 'values'. In a leaf type oid, only on result is expexted so there
+ is no need to have an index notion, but we could have one, even it is not relevant 
+ - Mathematicaly: snmp{oid}=oid_value{oid_index}=oid_value
  In a branch an oid each leaf have an index (ithe form is ususally a integer,
  but could be integer dot integer dot .... same as the the oid itself 
- - Mathematicly: snmp{oid}=oid_value(s){oid_index(es)} 
+ - Mathematicaly: snmp{oid}=oid_value(s){oid_index(es)} 
  For simplicity the term oid (even it is not) is also used after being transformed
- - Mathematicly: oidX=transform(oidY) or oidX = snmp(oidY)
+ - Mathematicaly: oidX=transform(oidY) or oidX = snmp(oidY)
                  
  Conclusion: the oid term is use in 3 contexts: 
  - "oid" standalone term is the what it is polled through snmp or transformed
@@ -184,7 +186,7 @@ Remarks on the oid term:
 Major improvement
 - Improved User-Friendliness
   - Mainly on configuration and template creation
-  - The 'Blue' color for test that are 'Disabled' and for fun !
+  - Add the 'Blue' color for test that are 'Disabled' and for fun !
   - Error reporting
     - Improved syntax of template error detection
     - Error propagation (see below)
