@@ -198,6 +198,56 @@
   the value stored in memory might arbitrarily be from one SNMP
   variable or another.
 
+  ----------------------------------
+  -- The 'oid' concept
+  ----------------------------------
+
+
+ The use of the term 'oid' is enlarged in this software 
+ to make it a key concept that should be understood 
+ It can be confusing, so if you thin a sentence is not clear, please report it to us and we will try to clarify it 
+
+ What is the standard?
+ An example: This is an oid.1.3.4.6.9.4.3.1.20.3
+ We can do an "snmpget" query 1 value on this oid:
+  snmpget -v2c c public MYDEVICE .1.3.4.6.9.
+                                            ^ Remark that it is not the OID in the example 
+  snmpget answer:                .1.3.4.6.9.4.3.1.20.3 = 8732588786
+                                              ^ Remark that ^ we recieve 2 infomations!
+                                 <-  oid -><- index -> =<  result  >
+
+ The result and the index are 2 different informaton that we get!
+
+ Concept of OID is extended in devmon and this is some explaination
+
+ In a leaf type oid (snmpget), only 1 result is expected. This correspond to a 'snmpget' request There is no need to have an index notion (but we could have one), even it is not relevant
+ - Mathematicaly: snmp{oid}=oid_value{oid_index}=oid_value : 1 value
+
+ In a branch type oid (snmpgwalk), each leaf have an index (the form is ususally a integer, but it could be integer dot integer....(1.3.4.6) same format as the the oid itself!
+ - Mathematicaly: snmp{oid}=oid_values{oid_indexes}        : 1 to n values
+
+ For simplicity the term oid is also used for the name of the result of a transform or a snmp polling (even it is not anymore) as it shared the format
+ - Mathematicaly: oidX=transform{oidY} and also oidX=snmp{oidY}
+
+ Transform can have multiple oids:
+ - Mathematicaly: oidX=transform{oidY, ..., oidZ}
+
+The "primary oid" is the first sources oids
+ - Mathematicaly prim_oid = oidY
+
+The result indexes ar the "intersection" of sources oid indexes (There is currently any exception of this rule but it could change)
+ - Mathematically oidX indexes = oidY indexes ∩ oidZ indexes ∩ ...
+
+ Conclusion: Be clear, specific and consistent
+ - "source oid(s)" is/are what is polled or transformeda (multiple values is allowed )
+ - "target oid" is the result after a transformation or a polling
+ - "oid indexes" are the the indexes returned by snmp
+ - "oid values" are the results that correspond to their indexes
+ - Use a triplet like "source oids value"
+ - Use "source(or target) oid" includes value and indexes: We use the perl "hash" variable
+   type to store it.
+ - oid standalone is a source or target oid
+
 
   ----------------------------------
   -- The 'transforms' file
