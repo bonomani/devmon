@@ -198,10 +198,9 @@ sub oid_hash {
 
          # Apply thresholds
          apply_thresh_rep($oids, $thr, $oid);
-      }
 
       # Otherwise its just a normal non-repeater
-      else {
+      } else {
          my $val  = $snmp->{$num}{val};
          my $time = $snmp->{$num}{time};
 
@@ -241,14 +240,12 @@ sub transform {
          if ($@ eq "Timeout\n") {
             do_log("Timed out waiting for $trans_type transform " .
                "on oid $oid for $device to complete.");
-         }
-         else {
+         } else {
             do_log("Got unexpected error while performing $trans_type " .
                "transform on oid $oid for $device: $@");
          }
       }
-   }
-   else {
+   } else {
       # Theoretically we should never get here, but whatever
       do_log("Undefined transform type '$trans_type' found for $device", 0)
          and return;
@@ -300,21 +297,18 @@ sub trans_delta {
                if($limit) {
                   $delta = ($this_data + ($limit - $last_data)) /
                   ($this_time - $last_time);
-               }
                # If the last value was less than 2^32, assume the counter was 32bit
-               elsif($last_data < 4294967296) {
+               } elsif($last_data < 4294967296) {
                   $delta = ($this_data + (4294967296 - $last_data)) /
                   ($this_time - $last_time);
-               }
                # Otherwise the counter was 64bit...
                # In this case, a counter wrap is highly unlikely. A reset of the
                # counters is a much more likely reason for this (apparent) wrap.
-               elsif($last_data < 18446744073709551616) {
+               } elsif($last_data < 18446744073709551616) {
                   $delta = $this_data /  ($this_time - $last_time);
-               }
 
                # Otherwise something is seriously wrong
-               else {
+               } else {
                   do_log("Data type too large for leaf $leaf of  ".
                      "$dep_oid on $device.", 0);
                   $oid_h->{val}{$leaf}   = 'Too large';
@@ -326,10 +320,9 @@ sub trans_delta {
 
                do_log("Counterwrap on $oid.$leaf on $device (this: $this_data " .
                   "last: $last_data delta: $delta",0) if $g{debug};
-            }
 
             # Otherwise do normal delta calc
-            else {
+            } else {
                $delta = ($this_data - $last_data) /
                ($this_time - $last_time);
             }
@@ -339,10 +332,9 @@ sub trans_delta {
 
             $oid_h->{val}{$leaf}   = $delta;
             $oid_h->{time}{$leaf}  = time;
-         }
 
          # No history; throw wait message
-         else {
+         } else {
             $oid_h->{val}{$leaf}   = 'wait';
             $oid_h->{time}{$leaf}  = time;
             $oid_h->{color}{$leaf} = 'green';
@@ -356,10 +348,9 @@ sub trans_delta {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       my $this_data = $dep_oid_h->{val};
       my $this_time = $dep_oid_h->{time};
@@ -378,20 +369,17 @@ sub trans_delta {
             if($limit) {
                $delta = ($this_data + ($limit - $last_data)) /
                ($this_time - $last_time);
-            }
-            elsif($last_data < 4294967296) {
+            } elsif($last_data < 4294967296) {
                $delta = ($this_data + (4294967296 - $last_data)) /
                ($this_time - $last_time);
-            }
             # Otherwise the counter was 64bit...
             # In this case, a counter wrap is highly unlikely. A reset of the
             # counters is a much more likely reason for this (apparent) wrap.
-            elsif($last_data < 18446744073709551616) {
+            } elsif($last_data < 18446744073709551616) {
                $delta = $this_data / ($this_time - $last_time) ;
-            }
 
             # Otherwise something is seriously wrong
-            else {
+            } else {
                do_log("Data type too large for $dep_oid on $device.", 0);
                $oid_h->{val}   = 'Too large';
                $oid_h->{time}  = time;
@@ -402,10 +390,9 @@ sub trans_delta {
 
             do_log("Counterwrap on $oid on $device (this: $this_data " .
                "last: $last_data delta: $delta",0) if $g{debug};
-         }
 
          # Otherwise do normal delta calc
-         else {
+         } else {
             $delta = ($this_data - $last_data) /
             ($this_time - $last_time);
          }
@@ -416,10 +403,9 @@ sub trans_delta {
 
          # Now apply our threshold to this data
          apply_thresh($oids, $thr, $oid);
-      }
 
       # No history; throw wait message
-      else {
+      } else {
          $oid_h->{val}   = 'wait';
          $oid_h->{time}  = time;
          $oid_h->{color} = 'green';
@@ -505,10 +491,9 @@ sub trans_math {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       # All of our non-reps were substituted earlier, so we can just eval
       my $result = eval $expr;
@@ -594,7 +579,7 @@ sub trans_statistic {
       }
    } else {
       if ( $dep_oid_h->{error} ) {
-         $oid_h->{val}  = $dep_oid_h->{val}   ;
+         $oid_h->{val}  = $dep_oid_h->{val} ;
          $oid_h->{color}= $dep_oid_h->{color} ;
       }  # of if
    }  # of else
@@ -636,10 +621,10 @@ sub trans_statistic {
       # The parent oid is a non-repeater-type oid. The computation of the
       # statistic is trivial in this case.
    } else {
-      $oid_h->{val} = $dep_oid_h->{val}   ;
+      $oid_h->{val} = $dep_oid_h->{val} ;
       $oid_h->{val} = 1 if $statistic eq 'cnt' ;
-      $oid_h->{time}= $dep_oid_h->{time}  ;
-      $oid_h->{msg} = $dep_oid_h->{msg}   ;
+      $oid_h->{time}= $dep_oid_h->{time} ;
+      $oid_h->{msg} = $dep_oid_h->{msg} ;
    }  # of else
 
    apply_thresh( $oids, $thr, $oid ) ;
@@ -668,8 +653,7 @@ sub trans_substr {
          my $string = $dep_oid_h->{val}{$leaf};
          if(defined $length) {
             $oid_h->{val}{$leaf}   = substr $string, $offset, $length;
-         }
-         else {
+         } else {
             $oid_h->{val}{$leaf}   = substr $string, $offset;
          }
 
@@ -678,15 +662,13 @@ sub trans_substr {
          # Apply thresholds
          apply_thresh_rep($oids, $thr, $oid);
       }
-   }
 
    # Otherwise we are a non-repeater oid
-   else {
+   } else {
       my $string = $dep_oid_h->{val};
       if(defined $length) {
          $oid_h->{val} = substr $string, $offset, $length;
-      }
-      else {
+      } else {
          $oid_h->{val} = substr $string, $offset;
       }
       $oid_h->{time}  = time;
@@ -735,8 +717,7 @@ sub trans_and {
                $dep_val = $dep_oid_h->{val}{$leaf};
                $dep_col = $dep_oid_h->{color}{$leaf};
                $dep_msg = $dep_oid_h->{msg}{$leaf};
-            }
-            else {
+            } else {
                $dep_val = $dep_oid_h->{val};
                $dep_col = $dep_oid_h->{color};
                $dep_msg = $dep_oid_h->{msg};
@@ -753,10 +734,9 @@ sub trans_and {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       # Default values
       my $val = 1;
@@ -824,8 +804,7 @@ sub trans_or {
                $dep_val = $dep_oid_h->{val}{$leaf};
                $dep_col = $dep_oid_h->{color}{$leaf};
                $dep_msg = $dep_oid_h->{msg}{$leaf};
-            }
-            else {
+            } else {
                $dep_val = $dep_oid_h->{val};
                $dep_col = $dep_oid_h->{color};
                $dep_msg = $dep_oid_h->{msg};
@@ -842,10 +821,9 @@ sub trans_or {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       # Default values
       my $val = 0;
@@ -902,10 +880,9 @@ sub trans_pack {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       my $packed = $dep_oid_h->{val};
       my @vars = pack $type, $packed;
 
@@ -947,10 +924,9 @@ sub trans_unpack {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       my $packed = $dep_oid_h->{val};
       my @vars = unpack $type, $packed;
 
@@ -994,14 +970,16 @@ sub trans_convert {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       my $val = $dep_oid_h->{val};
       my $int;
-      if($type eq 'oct') {$int = oct $val}
-      else               {$int = hex $val}
+      if($type eq 'oct') {
+         $int = oct $val ;
+      } else {
+         $int = hex $val ;
+      }
       $int = sprintf '%'."$pad.$pad".'d', $int if $pad ne '';
       $oid_h->{val}   = $int;
       $oid_h->{time}  = time;
@@ -1053,8 +1031,9 @@ sub trans_eval {
          # Do our eval and set our time
          my $result = eval($expr);
          $oid_h->{time}{$leaf} = time;
-         if($@ =~ /^Undefined subroutine/) { $result = 0 }
-         elsif($@) {
+         if($@ =~ /^Undefined subroutine/) { 
+            $result = 0 ;
+         } elsif($@) {
             do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)");
             $oid_h->{val}{$leaf}   = 'Failed eval';
             $oid_h->{color}{$leaf} = 'clear';
@@ -1067,17 +1046,17 @@ sub trans_eval {
 
       # Apply thresholds
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       # All of our non-reps were substituted earlier, so we can just eval
       my $result = eval $expr;
       $oid_h->{time} = time;
 
-      if($@ =~ /^Undefined subroutine/) { $result = 0 }
-      elsif($@) {
+      if($@ =~ /^Undefined subroutine/) { 
+         $result = 0 ;
+      } elsif($@) {
          do_log("Failed eval for TRANS_STR on $oid: $expr ($@)");
          $oid_h->{val}   = 'Failed eval';
          $oid_h->{color} = 'clear';
@@ -1137,8 +1116,7 @@ sub trans_best {
                   $oid_h->{msg}{$leaf}       = $dep_oid_h->{msg}{$leaf};
                   $oid_h->{error}{$leaf}     = $dep_oid_h->{error}{$leaf};;
                   $oid_h->{time}{$leaf}      = time;
-               }
-               elsif($dep_oid_h->{color}{$leaf} eq
+               } elsif($dep_oid_h->{color}{$leaf} eq
                   $oid_h->{color}{$leaf}) {
                   $oid_h->{val}{$leaf}     .= $dep_oid_h->{val}{$leaf};
                   if (defined $dep_oid_h->{msg}{$leaf}) {
@@ -1151,8 +1129,7 @@ sub trans_best {
                   $oid_h->{error}{$leaf}    = $dep_oid_h->{error}{$leaf} || $oid_h->{error}{$leaf};
                   $oid_h->{time}{$leaf}     = time;
                }
-            }
-            else {
+            } else {
 
                if(!defined $oid_h->{color}{$leaf} or
                   $colors{$dep_oid_h->{color}} <
@@ -1162,8 +1139,7 @@ sub trans_best {
                   $oid_h->{msg}{$leaf}      = $dep_oid_h->{msg};
                   $oid_h->{error}{$leaf}    = $dep_oid_h->{error};;
                   $oid_h->{time}{$leaf}     = time;
-               }
-               elsif($dep_oid_h->{color} eq
+               } elsif($dep_oid_h->{color} eq
                   $oid_h->{color}{$leaf}) {
                   $oid_h->{val}{$leaf}     .= $dep_oid_h->{val};
                   if (defined $dep_oid_h->{msg}) {
@@ -1179,10 +1155,9 @@ sub trans_best {
             }
          }
       }
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       for my $dep_oid (@dep_oids) {
          my $dep_oid_h = \%{$oids->{$dep_oid}};
 
@@ -1198,8 +1173,7 @@ sub trans_best {
             $oid_h->{msg}      = $dep_oid_h->{msg};
             $oid_h->{error}    = $dep_oid_h->{error};
             $oid_h->{time}     = time;
-         }
-         elsif($dep_oid_h->{color} eq
+         } elsif($dep_oid_h->{color} eq
             $oid_h->{color}) {
             $oid_h->{val}      = $dep_oid_h->{val};
             if (defined $dep_oid_h->{msg}) {
@@ -1250,8 +1224,7 @@ sub trans_worst {
                   $oid_h->{time}{$leaf}  = $dep_oid_h->{time}{$leaf};
                   $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg}{$leaf};
                }
-            }
-            else {
+            } else {
                if(!defined $oid_h->{color}{$leaf} or
                   $colors{$dep_oid_h->{color}} >=
                   $colors{$oid_h->{color}{$leaf}}) {
@@ -1263,10 +1236,9 @@ sub trans_worst {
             }
          }
       }
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       for my $dep_oid (@dep_oids) {
          my $dep_oid_h = \%{$oids->{$dep_oid}};
          if(!defined $oid_h->{color} or
@@ -1317,10 +1289,9 @@ sub trans_elapsed {
          $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg}{$leaf};
 
       }
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       my $s = $dep_oid_h->{val};
       my $d = int ($s / 86400); $s %= 86400;
@@ -1370,10 +1341,9 @@ sub trans_date {
          $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg}{$leaf};
 
       }
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       my ($s,$m,$h,$d,$o,$y) = localtime($dep_oid_h->{val});
 
@@ -1448,10 +1418,9 @@ sub trans_speed {
          $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
          $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg}{$leaf};
       }
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
 
       my $bps = $dep_oid_h->{val};
 
@@ -1513,15 +1482,17 @@ sub trans_switch {
          }
 
          my $then;
-         if(defined $num) { $then = $cases->{$num}{then} }
-         else { $then = $default }
+         if(defined $num) { 
+            $then = $cases->{$num}{then} ;
+         } else { 
+            $then = $default ;
+         }
          while($then =~ /\{(\S+)\}/) {
             my $then_oid = $1;
             my $then_oid_val;
             if($oids->{$then_oid}{repeat}) {
                $then_oid_val = $oids->{$then_oid}{val}{$leaf};
-            }
-            else {$then_oid_val = $oids->{$then_oid}{val}}
+            } else {$then_oid_val = $oids->{$then_oid}{val}}
             if(!defined $then_oid_val) {
                do_log("Missing repeater data for trans_switch on $oid on $device", 0);
                $then_oid_val = 'Undefined';
@@ -1535,10 +1506,9 @@ sub trans_switch {
       }
 
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       my $val = $dep_oid_h->{val};
 
       my $num;
@@ -1560,8 +1530,11 @@ sub trans_switch {
       }
 
       my $then;
-      if(defined $num) { $then = $cases->{$num}{then} }
-      else { $then = $default }
+      if(defined $num) { 
+         $then = $cases->{$num}{then} ;
+      } else { 
+         $then = $default ;
+      }
 
       while($then =~ /\{(\S+)\}/) {
          my $then_oid = $1;
@@ -1570,8 +1543,7 @@ sub trans_switch {
             do_log("Cant switch to a repeater OID when using a non-repeater" .
                "source OID for trans_tswitch on $oid", 0);
             $then_oid_val = 'Undefined';
-         }
-         else {$then_oid_val = $oids->{$then_oid}{val}}
+         } else {$then_oid_val = $oids->{$then_oid}{val}}
          if(!defined $then_oid_val) {
             do_log("Missing repeater data for trans_switch on $oid on $device", 0);
             $then_oid_val = 'Undefined';
@@ -1629,8 +1601,11 @@ sub trans_tswitch {
          }
 
          my $then;
-         if(defined $num) { $then = $cases->{$num}{then} }
-         else { $then = $default }
+         if(defined $num) { 
+            $then = $cases->{$num}{then} ;
+         } else { 
+            $then = $default ;
+         }
          while($then =~ /\{(\S+)\}/) {
             my $then_oid = $1;
             my $then_oid_val;
@@ -1640,8 +1615,9 @@ sub trans_tswitch {
                   $oid_h->{color}{$leaf} = $oids->{$then_oid}{color}{$leaf};
                   $oid_h->{msg}{$leaf} = $oids->{$then_oid}{msg}{$leaf};
                }
+            } else {
+               $then_oid_val = $oid_h->{val};
             }
-            else {$then_oid_val = $oid_h->{val}}
             if(!defined $then_oid_val) {
                do_log("Missing repeater data for trans_tswitch on $oid on $device", 0);
                $then_oid_val = 'Undefined';
@@ -1659,10 +1635,9 @@ sub trans_tswitch {
       }
 
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       my $val = $dep_oid_h->{val};
 
       my $num;
@@ -1684,8 +1659,11 @@ sub trans_tswitch {
       }
 
       my $then;
-      if(defined $num) { $then = $cases->{$num}{then} }
-      else { $then = $default }
+      if(defined $num) { 
+         $then = $cases->{$num}{then} ;
+      } else { 
+         $then = $default ;
+      }
       while($then =~ /\{(\S+)\}/) {
          my $then_oid = $1;
          my $then_oid_val;
@@ -1693,8 +1671,7 @@ sub trans_tswitch {
             do_log("Cant switch to a repeater OID when using a non-repeater" .
                "source OID for trans_tswitch on $oid", 0);
             $then_oid_val = 'Undefined';
-         }
-         else {
+         } else {
             $then_oid_val = $oids->{$then_oid}{val};
             if(!defined $oid_h->{color}) {
                $oid_h->{color} = $oids->{$then_oid}{color};
@@ -1779,10 +1756,9 @@ sub trans_regsub {
 
       # Now apply our threshold to this data
       apply_thresh_rep($oids, $thr, $oid);
-   }
 
    # Otherwise we are a single entry datum
-   else {
+   } else {
       # All of our non-reps were substituted earlier, so we can just eval
       my $exp_val = $oids->{$main_oid}{val};
       my $result = eval "\$exp_val =~ s$expr";
@@ -1858,10 +1834,9 @@ sub trans_chain {
       apply_thresh($oids, $thr, $oid);
 
       return;
-   }
 
    # Both source and target are repeaters.  Go go go!
-   else {
+   } else {
       for my $leaf (keys %{$src_h->{val}}) {
 
          # Skip if our source oid is freaky-deaky
@@ -1937,18 +1912,15 @@ sub trans_coltre {
          while (my ($key, $value) = each %value_length) {
             if($padding_type eq 'l') {
                $trg_h->{val}{$key} = $padding_char x ($maxlength - $value_length{$key}) . $trg_h->{val}{$key};
-            }
-            else {
+            } else {
                $trg_h->{val}{$key} .= $padding_char x ($maxlength - $value_length{$key});
             }
          }
-      }
-      else {
+      } else {
          while (my ($key, $value) = each %{$trg_h->{val}}) {
             if($padding_type eq 'l') {
                $trg_h->{val}{$key} = $padding_char x ($padding_length - length($trg_h->{val}{$key})) . $trg_h->{val}{$key};
-            }
-            else {
+            } else {
                $trg_h->{val}{$key} .= $padding_char x ($padding_length - length($trg_h->{val}{$key}));
             }
          }
@@ -1963,20 +1935,18 @@ sub trans_coltre {
       $oid_h->{time}   = time;
       $oid_h->{color}  = 'yellow';
       $oid_h->{error}  = 1;
-   }
 
    # Our target MUST be a repeater type oid
-   elsif(!$trg_h->{repeat}) {
+   } elsif(!$trg_h->{repeat}) {
       do_log("Trying to COLTRE a non-repeater 2nd oid on $device ($@)", 0);
       $oid_h->{repeat} = 0;
       $oid_h->{val}    = 'Failed coltre';
       $oid_h->{time}   = time;
       $oid_h->{color}  = 'yellow';
       $oid_h->{error}  = 1;
-   }
 
    # Both source and target are repeaters.  Go go go!
-   else {
+   } else {
       my $isfirst = 1;
       for my $leaf ( sort { $src_h->{val}{$a} <=> $src_h->{val}{$b} } keys %{$src_h->{val}}) {
 
@@ -2024,9 +1994,7 @@ sub trans_sort {
    if(!$src_h->{repeat}) {
       do_log("Trying to SORT a non-repeater source on $device ($@)", 0);
       return;
-   }
-
-   else {
+   } else {
       # Tag the target as a repeater
       $oid_h->{repeat} = 2;
       if ($sort eq 'txt') {
@@ -2050,8 +2018,7 @@ sub trans_sort {
             $oid_h->{color}{$leaf}  = $src_h->{color}{$leaf};
             $oid_h->{error}{$leaf}  = $src_h->{error}{$leaf};
          }
-      }
-      elsif ($sort eq 'num') {
+      } elsif ($sort eq 'num') {
          my $pad = 1;
          for my $leaf ( sort { $src_h->{val}{$a} <=>  $src_h->{val}{$b} } keys %{$src_h->{val}})  {
 
@@ -2074,8 +2041,7 @@ sub trans_sort {
             $oid_h->{color}{$leaf}  = $src_h->{color}{$leaf};
             $oid_h->{error}{$leaf}  = $src_h->{error}{$leaf};
          }
-      }
-      else {
+      } else {
          for my $leaf (keys %{$src_h->{val}}) {
 
             # Skip if our source oid is freaky-deaky
@@ -2130,9 +2096,7 @@ sub trans_index {
    if(!$src_h->{repeat}) {
       do_log("Trying to index a non-repeater source on $device ($@)", 0);
       return;
-   }
-
-   else {
+   } else {
       # Tag the target as a repeater
       $oid_h->{repeat} = 2;
       for my $leaf (keys %{$src_h->{val}}) {
@@ -2188,9 +2152,7 @@ sub trans_match {
    if(!$src_h->{repeat}) {
       do_log("Trying to index a non-repeater source on $device ($@)", 0);
       return;
-   }
-
-   else {
+   } else {
       # Tag the target as a repeater
       $oid_h->{repeat} = 2;
       my $idx = 0;
@@ -2260,10 +2222,9 @@ sub render_msg {
       "\n\nCould not locate template for this device.\n"     .
       "Please check devmon logs.\n\n"                         .
       "Devmon version $g{version} running on $g{nodename}\n";
-   }
 
    # Do we have a hobbit color, and if so, is it green?
-   elsif(defined $g{hobbit_color}{$device} and
+   } elsif(defined $g{hobbit_color}{$device} and
       $g{hobbit_color}{$device} ne 'green') {
       my $bbname = ucfirst $g{bbtype};
       return "status $bb_host.$test clear $now" .
@@ -2303,8 +2264,7 @@ sub render_msg {
          # Add our html header if necessary
          if(defined $t_opts{nonhtml}||defined $t_opts{plain}) {
             $table = '';
-         }
-         else {
+         } else {
             my $border = (defined $t_opts{border}) ? $t_opts{border}[0] : 1;
             my $pad    = (defined $t_opts{pad}) ? $t_opts{pad}[0] : 5;
             $table = "<table border=$border cellpadding=$pad>\n";
@@ -2316,12 +2276,19 @@ sub render_msg {
                my ($header,$name,$all,$dir,$pri,$do_max);
                my @datasets;
                for my $rrd_opt (split /\s*;\s*/, $rrd_data) {
-                  if($rrd_opt eq 'all')             { $all = 1           }
-                  elsif($rrd_opt eq 'dir')          { $dir = 1           }
-                  elsif($rrd_opt eq 'max')          { $do_max = 1        }
-                  elsif($rrd_opt =~ /^name:(\S+)$/) { $name = $1         }
-                  elsif($rrd_opt =~ /^pri:(\S+)$/)  { $pri = $1          }
-                  elsif($rrd_opt =~ /^DS:(\S+)$/)   { push @datasets, $1 }
+                  if($rrd_opt eq 'all') { 
+                     $all = 1 ;
+                  } elsif($rrd_opt eq 'dir') { 
+                     $dir = 1 ;
+                  } elsif($rrd_opt eq 'max') { 
+                     $do_max = 1 ;
+                  } elsif($rrd_opt =~ /^name:(\S+)$/) { 
+                     $name = $1 ;
+                  } elsif($rrd_opt =~ /^pri:(\S+)$/) { 
+                     $pri = $1 ;
+                  } elsif($rrd_opt =~ /^DS:(\S+)$/) { 
+                     push @datasets, $1 ;
+                  }
                }
 
                $name = $test if !defined $name;
@@ -2362,12 +2329,10 @@ sub render_msg {
             if(defined $t_opts{nonhtml}) {
                $table .= "$line\n";
                $line =~ s/\|/:/g;
-            }
-            elsif (defined $t_opts{plain}) {
+            } elsif (defined $t_opts{plain}) {
                $table .= "$line\n";
                $line =~ s/\|/ /g;
-            }
-            else {
+            } else {
                $line =~ s/\|/<\/th><th>/g;
                $table .= "<tr><th>$line</th></tr>\n";
             }
@@ -2378,9 +2343,13 @@ sub render_msg {
          my $alarm_ints = '';
 
          # Replace our separaters with html
-         if(defined $t_opts{nonhtml}) {$line =~ s/\|/:/g}
-         elsif(defined $t_opts{plain}) {$line =~ s/\|/ /g}
-         else                           {$line =~ s/\|/<\/td><td>/g}
+         if(defined $t_opts{nonhtml}) {
+            $line =~ s/\|/:/g;
+         } elsif(defined $t_opts{plain}) {
+            $line =~ s/\|/ /g;
+         } else {
+            $line =~ s/\|/<\/td><td>/g;
+         }
 
          # Make the first oid (from left to right) the primary one
          my $pri = $1 if $line =~ /\{(.+?)\}/;
@@ -2437,15 +2406,13 @@ sub render_msg {
                my %temphash = %{$oids->{$t_opts{sort}[0]}{val}};
                @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
             }
-         }
          # If the primary oids leaves are non-numeric, then we cant sort it
          # numerically, we'll have to resort to a cmp
-         elsif ($oids->{$pri}{repeat} == 2) {
+         } elsif ($oids->{$pri}{repeat} == 2) {
             my @unsorted = keys %{$oids->{$pri}{val}};
             @table_leaves = leaf_sort(\@unsorted);
-         }
          # Otherwise sort them numerically ascending
-         else {
+         } else {
             @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{val}};
          }
 
@@ -2537,18 +2504,16 @@ sub render_msg {
                      # If this test has a worse color, use it for the global color
                      $worst_color = $color if !defined $worst_color or
                      $colors{$worst_color} < $colors{$color};
-                  }
 
                   # Display threshold messages if we get the msg flag
-                  elsif ($flag eq 'msg') {
+                  } elsif ($flag eq 'msg') {
                      my $substr = $oid_h->{msg}{$leaf};
                      $substr = 'Undefined' if !defined $substr;
                      $row_data =~ s/\{$root\}/$substr/;
-                  }
 
                   # This flag only causes errors (with the color) to be displayed
                   # Will also modify global color type
-                  elsif ($flag eq 'errors') {
+                  } elsif ($flag eq 'errors') {
                      $row_data =~ s/\{$root\}//;
 
                      next if $color eq 'green' or $color eq 'blue';
@@ -2564,10 +2529,9 @@ sub render_msg {
 
                      # Now add it to our msg
                      $errors .= "&$color $oid_msg\n";
-                  }
 
                   # Display color threshold value
-                  elsif ($flag =~ /^thresh\:(\w+)$/i) {
+                  } elsif ($flag =~ /^thresh\:(\w+)$/i) {
                      my $th_col = lc $1;
                      my $thresh = (defined $dev->{thresh}{$test}{$oid}{$th_col}) ?
                      $dev->{thresh}{$test}{$oid}{$th_col} :
@@ -2575,16 +2539,14 @@ sub render_msg {
 
                      $thresh = 'Undefined' if !defined $thresh;
                      $row_data =~ s/\{$root\}/$thresh/;
-                  }
 
                   # Uknown flag
-                  else {
+                  } else {
                      do_msg("Unknown flag ($flag) for $oid on $device\n");
                   }
-               }
 
                # Otherwise just display the oid val
-               else {
+               } else {
                   my $substr = $oids->{$root}{repeat} ? $oids->{$root}{val}{$leaf} : $oids->{$root}{val};
                   $substr = 'Undefined' if !defined $substr;
                   $row_data =~ s/\{$root\}/$substr/;
@@ -2601,8 +2563,7 @@ sub render_msg {
             # Finished with this row (signified by the primary leaf id)
             if(defined $t_opts{nonhtml} || defined $t_opts{plain}) {
                $table .= "$row_data\n";
-            }
-            else {
+            } else {
                $table .= "<tr><td>$row_data</td></tr>\n";
             }
 
@@ -2612,15 +2573,17 @@ sub render_msg {
 
          # If we are display alarms, fix the message up to look nice
          if(!defined $t_opts{noalarmsmsg}) {
-            if($alarm_ints ne '') {$alarm_ints =~ s/(.+),/Alarming on ($1)\n/s}
-            else {$alarm_ints = "Not alarming on any values\n"}
+            if($alarm_ints ne '') {
+               $alarm_ints =~ s/(.+),/Alarming on ($1)\n/s;
+            } else {
+               $alarm_ints = "Not alarming on any values\n";
+            }
          }
 
          # Put the alarm ints on bottom if requested to do so
          if(defined $t_opts{alarmsonbottom}) {
             $msg = join '', ($msg,$table,$alarm_ints);
-         }
-         else {
+         } else {
             $msg = join '', ($msg,$alarm_ints,$table);
          }
 
@@ -2648,8 +2611,7 @@ sub render_msg {
                   my $val = $oids->{$oid}{val}{$leaf};
                   if (defined $val) {
                      $val = ($val =~ /^[+-]?\d+(\.\d+)?/) ? int $val : 'U';
-                  }
-                  else {
+                  } else {
                      $val = 'U';
                   }
                   $temp_data .= "$val:";
@@ -2673,11 +2635,8 @@ sub render_msg {
          # Clear our table status
          $table = undef;
 
-      } # End table data processing
-
-
       # Not table data, so it should be a non-repeater type variable
-      else {
+      } else {
 
          for my $root ($line =~ /\{(.+?)\}/g) {
 
@@ -2703,18 +2662,15 @@ sub render_msg {
                   $worst_color = $color if !defined $worst_color or
                   $colors{$worst_color} < $colors{$color};
                   $line =~ s/\{$root\}/\&$color /;
-               }
-
-               elsif ($flag eq 'msg') {
+               } elsif ($flag eq 'msg') {
                   my $data = $oid_h->{msg};
                   $data = "Undefined" if !defined $data;
                   $data = parse_deps($oids, $data, undef);
                   $line =~ s/\{$root\}/$data/;
-               }
 
                # This flag only causes errors (with the color) to be displayed
                # Can also modifies global color
-               elsif ($flag eq 'errors') {
+               } elsif ($flag eq 'errors') {
                   #              $line =~ s/\{$root\}/#ERRORONLY#/;
 
                   # Skip this value if it is green
@@ -2738,10 +2694,9 @@ sub render_msg {
 
                   # Now add it to our msg
                   $errors .= "&$color $oid_msg\n";
-               }
 
                # Display color threshold value
-               elsif ($flag =~ /^thresh:($color_list)$/i) {
+               } elsif ($flag =~ /^thresh:($color_list)$/i) {
                   my $th_col = lc $1;
                   my $thresh = (defined $dev->{thresh}{$test}{$oid}{$th_col}) ?
                   $dev->{thresh}{$test}{$oid}{$th_col} :
@@ -2749,16 +2704,13 @@ sub render_msg {
 
                   $thresh = 'Undefined' if !defined $thresh;
                   $line   =~ s/\{$root\}/$thresh/;
-               }
 
                # Unknown flag
-               else {
+               } else {
                   do_log("Unknown flag ($flag) for $oid on $device\n");
                }
 
-            }
-
-            else {
+            } else {
                my $val = $oid_h->{val};
                $val = "Unknown" if !defined $val;
 
@@ -2808,8 +2760,7 @@ sub render_msg {
    if($worst_color eq 'clear') {
       $g{numclears}{$device}{$test} = time
       if !defined $g{numclears}{$device}{$test};
-   }
-   else {
+   } else {
       # Clear our clear counter if this message wasnt clear
       delete $g{numclears}{$device}{$test}
       if defined $g{numclears}{$device}
@@ -2851,12 +2802,10 @@ sub check_alarms {
    if(defined $dev->{except}{$test}{$oid}{noalarm}) {
       my $match = $dev->{except}{$test}{$oid}{noalarm};
       return 1 if $val =~ /^(?:$match)$/;
-   }
-   elsif(defined $dev->{except}{all}{$oid}{noalarm}) {
+   } elsif(defined $dev->{except}{all}{$oid}{noalarm}) {
       my $match = $dev->{except}{all}{$oid}{noalarm};
       return 1 if $val =~ /^(?:$match)$/;
-   }
-   elsif(defined $tmpl->{oids}{$oid}{except}{noalarm}) {
+   } elsif(defined $tmpl->{oids}{$oid}{except}{noalarm}) {
       my $match = $tmpl->{oids}{$oid}{except}{noalarm};
       return 1 if $val =~ /^(?:$match)$/;
    }
@@ -2864,12 +2813,10 @@ sub check_alarms {
    if(defined $dev->{except}{$test}{$oid}{alarm}) {
       my $match = $dev->{except}{$test}{$oid}{alarm};
       return 1 if $val !~ /^(?:$match)$/;
-   }
-   elsif(defined $dev->{except}{all}{$oid}{alarm}) {
+   } elsif(defined $dev->{except}{all}{$oid}{alarm}) {
       my $match = $dev->{except}{all}{$oid}{alarm};
       return 1 if $val !~ /^(?:$match)$/;
-   }
-   elsif(defined $tmpl->{oids}{$oid}{except}{alarm}) {
+   } elsif(defined $tmpl->{oids}{$oid}{except}{alarm}) {
       my $match = $tmpl->{oids}{$oid}{except}{alarm};
       return 1 if $val !~ /^(?:$match)$/;
    }
@@ -2903,12 +2850,10 @@ sub parse_deps {
          # Evaluate flag type
          if($flag eq 'color') {
             $val = "&" . $oid_h->{color}{$leaf} . " ";
-         }
-         elsif ($flag eq 'msg') {
+         } elsif ($flag eq 'msg') {
             my $depmsg = $oid_h->{msg}{$leaf};
             $val = parse_deps($oids,$depmsg, $leaf, $depth);
-         }
-         else {
+         } else {
             $val = $oid_h->{val}{$leaf};
          }
 
@@ -2916,19 +2861,16 @@ sub parse_deps {
             do_log("Missing msg data for $dep_oid on leaf $leaf", 1);
             $val = 'Undefined';
          }
-      }
 
       # Not a repeater
-      else {
+      } else {
          # Evaluate flag type
          if($flag eq 'color') {
             $val = "&" . $oid_h->{color} . " ";
-         }
-         elsif ($flag eq 'msg') {
+         } elsif ($flag eq 'msg') {
             my $depmsg = $oid_h->{msg};
             $val = parse_deps($oids,$depmsg, undef, $depth);
-         }
-         else {
+         } else {
             $val = $oid_h->{val};
          }
          if(!defined $val) {
@@ -2985,9 +2927,8 @@ sub apply_thresh {
             # This is the most common threshold definition and handling it separately
             if ( $thresh =~ /^([+-]?\d+(?:\.\d+)?)$/ ) {
                last if $oid_val >= $1 ;
-            }
             # Look for a numeric threshold preceeded by a comparison operator.
-            elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+            } elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
                my ($op, $limit) = ($1, $2);
                last if $op eq '<'  and $oid_val < $limit;
                last if $op eq '>=' and $oid_val >= $limit;
@@ -2996,16 +2937,14 @@ sub apply_thresh {
                last if $op eq '!'  and $oid_val != $limit;
                last if $op eq '>'  and $oid_val > $limit;
             }
-         }
 
          # Look for negated test, must be string based
-         elsif($thresh =~ /^\!(\s*)(.+)$/) {
+         } elsif($thresh =~ /^\!(\s*)(.+)$/) {
             my ($thresh) = ($2);
             last unless $oid_val =~ /$thresh/;
-         }
 
          # Okay, its not numeric or negated, it must be string based
-         else {
+         } else {
             # Do our automatching for blank thresholds
             last if $thresh eq '_AUTOMATCH_';
             last if $oid_val =~ /$thresh/;
@@ -3073,9 +3012,8 @@ sub apply_thresh_rep {
                # This is the most common threshold definition and handling it separately
                if ( $thresh =~ /^([+-]?\d+(?:\.\d+)?)$/ ) {
                   last if $oid_val >= $1 ;
-               }
                # Look for a numeric threshold preceeded by a comparison operator.
-               elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+               } elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
                   my ($op, $limit) = ($1, $2);
                   last if $op eq '<'  and $oid_val < $limit;
                   last if $op eq '>=' and $oid_val >= $limit;
@@ -3084,15 +3022,13 @@ sub apply_thresh_rep {
                   last if $op eq '!'  and $oid_val != $limit;
                   last if $op eq '>'  and $oid_val > $limit;
                }
-            }
             # Look for negated test, must be string based
-            elsif($thresh =~ /^\!(\s*)(.+)$/) {
+            } elsif($thresh =~ /^\!(\s*)(.+)$/) {
                my ($thresh) = ($2);
                last unless $oid_val =~ /$thresh/;
-            }
 
             # Okay, its not numeric or negated, it must be string based
-            else {
+            } else {
                # Do our automatching for blank thresholds
                #last if $thresh eq '_AUTOMATCH_';
                last if $oid_val =~ /$thresh/;
@@ -3195,15 +3131,13 @@ sub validate_deps {
                $oid_h->{color}{$leaf} = 'yellow';
                $oid_h->{error}{$leaf} = 1;
                next LEAF;
-            }
-            elsif($val eq 'wait') {
+            } elsif($val eq 'wait') {
                $oid_h->{val}{$leaf}   = 'wait';
                $oid_h->{time}{$leaf}  = time;
                $oid_h->{color}{$leaf} = 'green';
                $oid_h->{error}{$leaf} = 1;
                next LEAF;
-            }
-            elsif($error) {
+            } elsif($error) {
 
                # Find de worst color
                if(!defined $oid_h->{color}{$leaf} or
@@ -3218,8 +3152,7 @@ sub validate_deps {
                   }
                   $oid_h->{color}{$leaf}   = $color;
                   $oid_h->{msg}{$leaf}     = $msg;
-               }
-               elsif ($oid_h->{color}{$leaf} eq $color) {
+               } elsif ($oid_h->{color}{$leaf} eq $color) {
                   if($g{debug}) {
                      $oid_h->{val}{$leaf}  .= "|". $val . '<-inherited';
                   } else {
@@ -3236,8 +3169,7 @@ sub validate_deps {
                $oid_h->{error}{$leaf}     = 1;
                $oid_h->{time}{$leaf}      = time;
                next;
-            }
-            elsif(defined $regex and $val !~ /$regex/) {
+            } elsif(defined $regex and $val !~ /$regex/) {
                $oid_h->{val}{$leaf}   = "$val mismatch $regex";
                $oid_h->{time}{$leaf}  = time;
                $oid_h->{color}{$leaf} = 'yellow';
@@ -3262,10 +3194,9 @@ sub validate_deps {
       return 0 if $all_error;
 
       return 1;
-   }
 
    # Non repeater
-   else {
+   } else {
 
       # Parse our parent oids
       for my $dep_oid (@$dep_arr) {
@@ -3279,14 +3210,12 @@ sub validate_deps {
             $oid_h->{color} = 'yellow';
             $oid_h->{error} = 1;
             next;
-         }
-         elsif($val eq 'wait') {
+         } elsif($val eq 'wait') {
             $oid_h->{val}   = 'wait';
             $oid_h->{time}  = time;
             $oid_h->{color} = 'green';
             $oid_h->{error} = 1;
-         }
-         elsif($oids->{$dep_oid}{error}) {
+         } elsif($oids->{$dep_oid}{error}) {
 
             # Find de worst color
             if(!defined $oid_h->{color} or
@@ -3301,8 +3230,7 @@ sub validate_deps {
                }
                $oid_h->{color}  = $oids->{$dep_oid}{color};
                $oid_h->{msg}    = $oids->{$dep_oid}{msg};
-            }
-            elsif ($oid_h->{color} eq $oids->{$dep_oid}{color}) {
+            } elsif ($oid_h->{color} eq $oids->{$dep_oid}{color}) {
                if($g{debug}) {
                   $oid_h->{val} .= "|". $oids->{$dep_oid}{val} . '<-inherited';
                } else {
@@ -3319,8 +3247,7 @@ sub validate_deps {
             $oid_h->{error}   = 1;
             $oid_h->{time}    = time;
             next;
-         }
-         elsif(defined $regex and $val !~ /$regex/) {
+         } elsif(defined $regex and $val !~ /$regex/) {
             $oid_h->{val}   = "$val mismatch(=~) $regex";
             $oid_h->{time}  = time;
             $oid_h->{color} = 'yellow';

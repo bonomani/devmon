@@ -38,8 +38,11 @@ my $color_list = join '|', @color_order;
 # Read templates from DB or from disk, depending on our multinode type
 sub read_templates {
    do_log('DEBUG TEMPLATES: running read_templates()',0) if $g{debug};
-   if($g{multinode} eq 'yes') { read_template_db()    }
-   else                         { read_template_files() }
+   if($g{multinode} eq 'yes') { 
+      read_template_db() ;
+   } else { 
+      read_template_files() ;
+   }
 
    # Do various post-load template mucking
    post_template_load();
@@ -267,30 +270,41 @@ sub post_template_load {
                      if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) {
                         my ($if, $then) = ($1, $2);
                         my $type = '';
-                        if($if =~ /^'(.+)'$/) {$type = 'str'; $if = $1}
-                        elsif($if =~ /^"(.+)"$/) {$type = 'reg'; $if = $1}
+                        if($if =~ /^'(.+)'$/) {
+                           $type = 'str'; 
+                           $if = $1
+                        } elsif($if =~ /^"(.+)"$/) {
+                           $type = 'reg'; 
+                           $if = $1
+                        }
                         $cases->{++$case_num}{if} = $if;
                         $cases->{$case_num}{type} = $type;
                         $cases->{$case_num}{then} = $then;
 
-                     }
-                     elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
+                     } elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
                         my ($if, $then) = ($1, $2);
                         my $type = '';
-                        if($if =~ /^\d+$/) {$type = 'num'}
-                        elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/)
-                        {$type = 'gt'; $if = $1}
-                        elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/)
-                        {$type = 'gte'; $if = $1}
-                        elsif($if =~ /^<\s*([+-]?\d+(?:\.\d+)?)$/)
-                        {$type = 'lt'; $if = $1}
-                        elsif($if =~ /^<=\s*([+-]?\d+(?:\.\d+)?)$/)
-                        {$type = 'lte'; $if = $1}
-                        elsif
-                        ($if =~ /^([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)$/)
-                        {$type = 'rng'; $if = "$1-$2"}
-
-                        elsif($if =~ /^default$/i) {$default = $then; next}
+                        if($if =~ /^\d+$/) {
+                           $type = 'num'
+                        } elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/) {
+                           $if = $1;
+                           $type = 'gt'; 
+                        } elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/) {
+                           $if = $1;
+                           $type = 'gte'; 
+                        } elsif($if =~ /^<\s*([+-]?\d+(?:\.\d+)?)$/) {
+                           $if = $1;
+                           $type = 'lt'; 
+                        } elsif($if =~ /^<=\s*([+-]?\d+(?:\.\d+)?)$/) {
+                           $if = $1;
+                           $type = 'lte'; 
+                        } elsif ( $if =~ /^([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)$/) {
+                           $if = "$1-$2";
+                           $type = 'rng'; 
+                        } elsif($if =~ /^default$/i) {
+                           $default = $then; 
+                           next;
+                        }
                         $cases->{++$case_num}{if} = $if;
                         $cases->{$case_num}{type} = $type;
                         $cases->{$case_num}{then} = $then;
@@ -353,9 +367,8 @@ sub read_specs_file {
          if ($val eq '') {
             do_log("Syntax error: Missing spec value in $specs_file at line $.", 0);
             next;
-         }
          # Check our snmp version
-         elsif($var eq 'snmpver') {
+         } elsif($var eq 'snmpver') {
             $val = '2' if $val eq '2c';
             if ($val !~ /^1|2$/) {
                do_log("Syntax error: Bad snmp version ($val) in $specs_file, line $." .
@@ -425,9 +438,8 @@ sub read_oids_file {
          if ($repeat eq '') {
             do_log("Syntax error: Missing repeater type in $oid_file at line $.", 0);
             next;
-         }
          # Make sure repeater variable is valid
-         elsif ($repeat !~ /^leaf$|^branch$/) {
+         } elsif ($repeat !~ /^leaf$|^branch$/) {
             do_log("Syntax error: Invalid repeater type '$repeat' for $oid in $oid_file", 0);
             next;
          }
@@ -734,17 +746,28 @@ sub read_transforms_file {
                do_log("Bad SWITCH value pair ($val) at $trans_file, line $l_num",0)
                   and next if !defined $if;
                my $type;
-               if($if =~ /^\d+$/) {$type = 'num'}
-               elsif($if =~ /^>\s*\d+(\.\d+)?$/)  {$type = 'gt'}
-               elsif($if =~ /^>=\s*\d+(\.\d+)?$/) {$type = 'gte'}
-               elsif($if =~ /^<\s*\d+(\.\d+)?$/)  {$type = 'lt'}
-               elsif($if =~ /^<=\s*\d+(\.\d+)?$/) {$type = 'lte'}
-               elsif($if =~ /^\d+(\.\d+)?\s*-\s*\d+(\.\d+)?$/) {$type = 'rng'}
-               elsif($if =~ /^'(.+)'$/) {$type = 'str'}
-               elsif($if =~ /^"(.+)"$/) {$type = 'reg'}
-               elsif($if =~ /^default$/i) {$type = 'default'}
-               do_log("Bad SWITCH case type ($if) at $trans_file, line $l_num",0)
-                  and next if !defined $type;
+               if($if =~ /^\d+$/) {
+                  $type = 'num';
+               } elsif($if =~ /^>\s*\d+(\.\d+)?$/)  {
+                  $type = 'gt';
+               } elsif($if =~ /^>=\s*\d+(\.\d+)?$/) {
+                  $type = 'gte';
+               } elsif($if =~ /^<\s*\d+(\.\d+)?$/)  {
+                  $type = 'lt';
+               } elsif($if =~ /^<=\s*\d+(\.\d+)?$/) {
+                  $type = 'lte';
+               } elsif($if =~ /^\d+(\.\d+)?\s*-\s*\d+(\.\d+)?$/) {
+                  $type = 'rng';
+               } elsif($if =~ /^'(.+)'$/) {
+                  $type = 'str';
+               } elsif($if =~ /^"(.+)"$/) {
+                  $type = 'reg';
+               } elsif($if =~ /^default$/i) {
+                  $type = 'default';
+               } else {
+                  do_log("Bad SWITCH case type ($if) at $trans_file, line $l_num",0);
+                  next ;
+               }
 
                $temp2 .= $val
             }
@@ -767,17 +790,28 @@ sub read_transforms_file {
                do_log("Bad TSWITCH value pair ($val) at $trans_file, " .
                   "line $l_num",0) and next if !defined $if;
                my $type;
-               if($if =~ /^\d+$/) {$type = 'num'}
-               elsif($if =~ /^>\s*\d+(\.\d+)?$/)  {$type = 'gt'}
-               elsif($if =~ /^>=\s*\d+(\.\d+?)$/) {$type = 'gte'}
-               elsif($if =~ /^<\s*\d+(\.\d+)?$/)  {$type = 'lt'}
-               elsif($if =~ /^<=\s*\d+(\.\d+)?$/) {$type = 'lte'}
-               elsif($if =~ /^\d+(\.\d+)?\s*-\s*\d+(\.\d+)?$/) {$type = 'rng'}
-               elsif($if =~ /^'(.+)'$/) {$type = 'str'}
-               elsif($if =~ /^"(.+)"$/) {$type = 'reg'}
-               elsif($if =~ /^default$/i) {$type = 'default'}
-               do_log("Bad TSWITCH case type ($if) at $trans_file, line $l_num",0)
-                  and next if !defined $type;
+               if($if =~ /^\d+$/) {
+                  $type = 'num'
+               } elsif($if =~ /^>\s*\d+(\.\d+)?$/)  {
+                  $type = 'gt'
+               } elsif($if =~ /^>=\s*\d+(\.\d+?)$/) {
+                  $type = 'gte'
+               } elsif($if =~ /^<\s*\d+(\.\d+)?$/)  {
+                  $type = 'lt'
+               } elsif($if =~ /^<=\s*\d+(\.\d+)?$/) {
+                  $type = 'lte'
+               } elsif($if =~ /^\d+(\.\d+)?\s*-\s*\d+(\.\d+)?$/) {
+                  $type = 'rng'
+               } elsif($if =~ /^'(.+)'$/) {
+                  $type = 'str'
+               } elsif($if =~ /^"(.+)"$/) {
+                  $type = 'reg'
+               } elsif($if =~ /^default$/i) {
+                  $type = 'default'
+               } else {
+                  do_log("Bad TSWITCH case type ($if) at $trans_file, line $l_num",0);
+                  next ;
+               }
 
                $temp2 .= $val
             }
@@ -1020,9 +1054,8 @@ sub read_thresholds_file {
          if ($color eq '') {
             do_log("Syntax error: Missing color value in $thresh_file at line $.", 0);
             next;
-         }
          # Validate colors
-         elsif (!defined $colors{$color}) {
+         } elsif (!defined $colors{$color}) {
             do_log("Syntax error: Invalid color value in $thresh_file at line $.", 0);
             next;
          }
@@ -1120,9 +1153,8 @@ sub read_exceptions_file {
          if ($type eq '') {
             do_log("Syntax error: Missing oid value in $except_file at line $.", 0);
             next;
-         }
          # Validate exception type
-         elsif (!defined $excepts{$type}) {
+         } elsif (!defined $excepts{$type}) {
             do_log("Syntax error: Invalid exception type '$type' for $oid in $except_file", 0);
             next;
          }
@@ -1245,20 +1277,19 @@ sub read_message_file {
                $opt eq 'border' or
                $opt eq 'pad' or
                $opt eq 'noalarmsmsg' or
-               $opt eq 'alarmsonbottom') {}
-            elsif($opt eq 'rrd') {
+               $opt eq 'alarmsonbottom') {
+            } elsif($opt eq 'rrd') {
                for my $rrd_opt (@{$t_opts{$opt}}) {
                   my $got_ds = 0;
                   for my $sub_opt (split /\s*;\s*/, $rrd_opt) {
-                     if(lc $sub_opt eq 'all')    {}
-                     elsif(lc $sub_opt eq 'dir') {}
-                     elsif(lc $sub_opt eq 'max') {}
-                     elsif(lc $sub_opt =~ /^name:(\S+)$/) {}
-                     elsif(lc $sub_opt =~ /^pri:(\S+)$/) {
+                     if(lc $sub_opt eq 'all')    {
+                     } elsif(lc $sub_opt eq 'dir') {
+                     } elsif(lc $sub_opt eq 'max') {
+                     } elsif(lc $sub_opt =~ /^name:(\S+)$/) {
+                     } elsif(lc $sub_opt =~ /^pri:(\S+)$/) {
                         do_log("Undefined rrd oid '$1' at $msg_file line $.")
                            and return 0 if !defined $tmpl->{oids}{$1};
-                     }
-                     elsif($sub_opt =~ /^DS:(\S+)$/) {
+                     } elsif($sub_opt =~ /^DS:(\S+)$/) {
                         my ($ds,$oid,$type,$time,$min,$max) = split /:/, $1;
                         do_log("Invalid rrd ds name '$ds' at $msg_file line $.")
                            and return 0 if defined $ds and $ds =~ /\W/;
@@ -1283,8 +1314,7 @@ sub read_message_file {
                            defined $max and $max ne '' and $max <= $min) or
                         (defined $max and $max ne '' and $max < 0);
                         $got_ds = 1;
-                     }
-                     else {
+                     } else {
                         do_log("Bad rrd option '$sub_opt' at $msg_file line $.");
                         return 0;
                      }
@@ -1293,8 +1323,7 @@ sub read_message_file {
                   do_log("No dataset included for RRD at $msg_file line $.")
                      and return 0 if !$got_ds;
                }
-            }
-            else {
+            } else {
                do_log("Invalid option '$opt' for table at line $. in $msg_file");
                return 0;
             }

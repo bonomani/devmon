@@ -265,7 +265,7 @@ sub initialize {
 	}
    # Dont daemonize if we are printing messages
 	if ( $g{print_msg} ) {
-   	$g{daemonize} = 0 
+   	$g{daemonize} = 0 ;
 	}
 
    # Now read in our local config info from our file
@@ -391,10 +391,9 @@ sub time_test {
       do_log("Exceeded cycle time ($poll_time seconds).", 0);
       $g{sleep_time} = 0;
       quit(0) if $g{oneshot};
-   }
 
    # Otherwise calculate our sleep time
-   else {
+   } else {
       quit(0) if $g{oneshot};
       $g{sleep_time} = -$exceeded;
       $g{sleep_time} = 0 if $g{sleep_time} < 0;  # just in case!
@@ -488,8 +487,7 @@ sub sync_servers {
       my $dev_tests;
       if($tests eq 'all') {
          $dev_tests = scalar keys %{$g{templates}{$vendor}{$model}{tests}};
-      }
-      else {
+      } else {
          $dev_tests = ($tests =~ tr/,/,/) + 1;
       }
 
@@ -592,10 +590,9 @@ sub sync_servers {
 
          do_log("Init complete: $my_num_tests tests loaded, " .
             "avg $avg_tests_node tests per node", 0);
-      }
 
       # Okay, we're not at init, so lets see if we can find any available tests
-      else {
+      } else {
 
          for my $count (sort nd keys %available_devices) {
 
@@ -624,8 +621,7 @@ sub sync_servers {
                # Log where this device came from
                if($old_owner == 0) {
                   do_log("Got $device ($my_num_tests/$avg_tests_node tests)");
-               }
-               else {
+               } else {
                   my $old_name = $g{node_status}{nodes}{$old_owner}{name};
                   $old_name = "unknown" if !defined $old_name;
                   do_log("Recovered $device from node $old_owner($old_name) " .
@@ -654,10 +650,9 @@ sub sync_servers {
       db_do("update nodes set need_tests=$num_tests_needed " .
          "where node_num=$g{my_nodenum}");
 
-   }
 
    # If we dont need any tests, lets see if we can donate any tests
-   elsif ($my_num_tests > $avg_tests_node) {
+   } elsif ($my_num_tests > $avg_tests_node) {
 
       my $tests_they_need;
       my $biggest_test_needed = 0;
@@ -738,31 +733,27 @@ sub update_nodes {
       if($active ne 'y') {
          $g{node_status}{inactive}{$node_num} = 1;
          next NODE;
-      }
 
       # Check to see if this host has died (i.e. exceeded deadtime)
-      elsif($heartbeat + $g{deadtime} < time) {
+      } elsif($heartbeat + $g{deadtime} < time) {
          do_log("Node $node_num($name) has died!")
          if !defined $old_status{dead}{$node_num};
          $g{node_status}{dead}{$node_num} = time;
-      }
 
       # Now check and see if it was previously dead and has returned
-      elsif(defined $old_status{dead}{$node_num}) {
+      } elsif(defined $old_status{dead}{$node_num}) {
          my $up_duration = time - $old_status{dead}{$node_num};
          if ($up_duration > ($g{deadtime} * 2)) {
             $g{node_status}{active}{$node_num} = 1;
             do_log("Node $node_num($name) has returned! " .
                "Up $up_duration secs",0);
-         }
-         else {
+         } else {
             $g{node_status}{dead}{$node_num}
             = $old_status{dead}{$node_num};
          }
-      }
 
       # If it passed, add it to the active sub-hash
-      else {
+      } else {
          $g{node_status}{active}{$node_num} = 1;
       }
    }
@@ -800,10 +791,9 @@ sub cluster_connect {
 
       # Do the db add
       db_do("insert into nodes values ('$nodename',$nodenum,'y',$now,0,'n')");
-   }
 
    # If we are in the table, update our activity and heartbeat columns
-   else {
+   } else {
       db_do("update nodes set active='y', heartbeat=$now " .
          "where node_num=$nodenum" );
    }
@@ -814,8 +804,11 @@ sub cluster_connect {
 
 # Sub to load/reload global configuration data
 sub read_global_config {
-   if($g{multinode} eq 'yes') { read_global_config_db()   }
-   else                         { read_global_config_file() }
+   if($g{multinode} eq 'yes') {
+      read_global_config_db();
+   } else {
+      read_global_config_file();
+   }
 }
 
 # Read in the local config parameters from the config file
@@ -1040,8 +1033,7 @@ sub do_log {
    my $ts = ts();
    if (defined $g{log} and $g{log} ne '') {
       $g{log}->print("$ts $msg\n") if $g{verbose} >= $verbosity;;
-   }
-   else {
+   } else {
       print "$ts $msg\n" if $g{verbose} >= $verbosity;;
       return 1;
    }
@@ -1243,8 +1235,7 @@ sub read_bb_hosts {
       if($bbfile eq $g{bbhosts}) {
          open BBFILE, $bbfile or
          log_fatal("Unable to open bb-hosts file '$g{bbhosts}' ($!)", 0);
-      }
-      else {
+      } else {
          open BBFILE, $bbfile or
          do_log("Unable to open file '$g{bbhosts}' ($!)", 0) and
          next FILEREAD;
@@ -1275,10 +1266,9 @@ sub read_bb_hosts {
             my $dir = $1;
             do_log("Looking for bb-hosts files in $dir",3) if $g{debug};
             find(sub {push @bbfiles,$File::Find::name},$dir);
-         }
 
          # Else see if this line matches the ip/host bb-hosts format
-         elsif($line =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+(\S+)(.*)$/i) {
+         } elsif($line =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+(\S+)(.*)$/i) {
             my ($ip, $host, $bbopts) = ($1, $2, $3);
 
             # Skip if the NET tag does not match this site
@@ -1569,9 +1559,7 @@ sub read_bb_hosts {
                         do_log("$host changed from a $old_vendor $old_model " .
                            "to a $vendor $model",1);
                      }
-                  }
-
-                  else {
+                  } else {
                      do_log("Discovered $host as a $vendor $model",1);
                   }
                   last NEWMATCH;
@@ -1666,9 +1654,7 @@ sub read_bb_hosts {
                         do_log("$host changed from a $old_vendor $old_model " .
                            "to a $vendor $model",1);
                      }
-                  }
-
-                  else {
+                  } else {
                      do_log("Discovered $host as a $vendor $model",1);
                   }
                   last CUSTOMMATCH;
@@ -1694,8 +1680,7 @@ sub read_bb_hosts {
       if(defined $old_hosts{$host}) {
          # Couldnt query pre-existing host, maybe temporarily unresponsive?
          %{$new_hosts{$host}} = %{$old_hosts{$host}};
-      }
-      else {
+      } else {
          # Throw a log message complaining
          do_log("Could not query device: $host",0);
       }
@@ -1744,14 +1729,12 @@ sub read_bb_hosts {
                      if (defined $val and defined $old_val and $val ne $old_val) {
                         db_do("update custom_threshs set val='$val' where " .
                            "host='$host' and test='$test' and color='$color'");
-                     }
-                     elsif(defined $val and !defined $old_val) {
+                     } elsif(defined $val and !defined $old_val) {
                         db_do("delete from custom_threshs where " .
                            "host='$host' and test='$test' and color='$color'");
                         db_do("insert into custom_threshs values " .
                            "('$host','$test','$oid','$color','$val')");
-                     }
-                     elsif(!defined $val and defined $old_val) {
+                     } elsif(!defined $val and defined $old_val) {
                         db_do("delete from custom_threshs where " .
                            "host='$host' and test='$test' and color='$color'");
                      }
@@ -1769,14 +1752,12 @@ sub read_bb_hosts {
                      if (defined $val and defined $old_val and $val ne $old_val) {
                         db_do("update custom_excepts set data='$val' where " .
                            "host='$host' and test='$test' and type='$type'");
-                     }
-                     elsif(defined $val and !defined $old_val) {
+                     } elsif(defined $val and !defined $old_val) {
                         db_do("delete from custom_excepts where " .
                            "host='$host' and test='$test' and type='$type'");
                         db_do("insert into custom_excepts values " .
                            "('$host','$test','$oid','$type','$val')");
-                     }
-                     elsif(!defined $val and defined $old_val) {
+                     } elsif(!defined $val and defined $old_val) {
                         db_do("delete from custom_excepts where " .
                            "host='$host' and test='$test' and type='$type'");
                      }
@@ -1790,10 +1771,9 @@ sub read_bb_hosts {
                   }
                }
             }
-         }
 
          # If it wasnt pre-existing, go ahead and insert it
-         else {
+         } else {
             db_do("delete from devices where name='$host'");
             db_do("insert into devices values ('$host','$ip','$vendor'," .
                "'$model','$tests','$cid',0)");
@@ -1830,10 +1810,9 @@ sub read_bb_hosts {
          db_do("delete from custom_threshs where host='$host'");
          db_do("delete from custom_excepts where host='$host'");
       }
-   }
 
    # Or write it to our dbfile if we arent in multinode mode
-   else {
+   } else {
 
       # Textual abbreviations
       my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'purple' => 'p', 'blue' => 'b' );
@@ -1931,10 +1910,9 @@ sub read_hosts {
          $hosts{$name}{thresh}{$test}{$oid}{$color}  = $val
          if defined $hosts{$name};
       }
-   }
 
    # Singlenode
-   else {
+   } else {
 
       # Hashes containing textual shortcuts for bb exception & thresholds
       my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
@@ -2060,14 +2038,12 @@ sub do_fork {
    FORK: {
       if (defined($pid = fork)) {
          return $pid;
-      }
 
       # If we are out of process space, wait 1 second, then try 4 more times
-      elsif ($! =~ /No more process/ and ++$tries < 5) {
+      } elsif ($! =~ /No more process/ and ++$tries < 5) {
          sleep 1;
          redo FORK;
-      }
-      elsif($! ne '') {
+      } elsif($! ne '') {
          log_fatal("Can't fork: $!",0);
       }
    }
