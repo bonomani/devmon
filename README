@@ -165,20 +165,42 @@ FEEDBACK ALWAYS APPRECIATED
  So do not hesitate and use the github ISSUES to communicate even it is not a bug !
 
 Remarks on the oid term: 
- The use of the term 'oid' sometimes confusing and it is used also in conjunction with
- the terms 'index' or 'values'. In a leaf type oid, only on result is expexted so there
- is no need to have an index notion, but we could have one, even it is not relevant 
- - Mathematicaly: snmp{oid}=oid_value{oid_index}=oid_value
- In a branch an oid each leaf have an index (ithe form is ususally a integer,
- but could be integer dot integer dot .... same as the the oid itself 
- - Mathematicaly: snmp{oid}=oid_value(s){oid_index(es)} 
- For simplicity the term oid (even it is not) is also used after being transformed
- - Mathematicaly: oidX=transform(oidY) or oidX = snmp(oidY)
+ The use of the term 'oid' is sometimes confusing as it is used also in conjunction with
+ the terms 'index' or 'values': 
+ In a leaf type oid, only 1 result is expexted. There is no need to have an index notion 
+ (but we could have one), even it is not relevant 
+ - Mathematicaly: snmp{oid}=oid_value{oid_index}=oid_value : 1 value
+
+ In a branch type oid, each leaf have an index (the form is ususally a integer,
+ but could be integer dot integer....(1.3.4.6) same format as the the oid itself 
+ - Mathematicaly: snmp{oid}=oid_values{oid_indexes}          1 to n values
+
+ For simplicity the term oid is also used for the name of the result of a transform 
+ or a snmp polling (even it is not anymore) as it shared the format 
+ - Mathematicaly: oidX=transform{oidY} and also oidX=snmp{oidY}
+
+ Transform can have multiple oids: 
+ - Mathematicaly: oidX=transform{oidY, ..., oidZ
+
+The "primary oid" is the first sources oids
+ - Mathematicaly prim_oid = oidY
+
+The result indexes ar the "intersection" of sources oid index
+ - (There is currently no exception in the rule above but it could change)
+ - Mathematically oidX indexes = oidY indexes ∩ oidZ indexes ∩ ... 
                  
- Conclusion: the oid term is use in 3 contexts: 
- - "oid" standalone term is the what it is polled through snmp or transformed
+ Conclusion: Be precise: 3 Levels  : 
+ - "oid" standalone should should be completed to be precise when needed! 
+ - "source oid(s)" should replace the standalone term
+ - "target oid" is the result after a transformation or a polling
  - "oid indexes" are the the indexes returned by snmp
  - "oid values" are the results corresponding each to an index
+ Be precise: 
+ - Use a triplet like "source oids value" 
+ - Use "source(or target) oid" includes value and indexes: We use the perl "hash" variable
+   type to store it.
+ - oid standalone is a source or target oid
+
  I will try to alway be precise on this as this is needed to have a complete
  understanding. 
 
@@ -203,7 +225,6 @@ Major improvement
       - Display a table based on sorted oid values 
       - Works in conjonction with the 'SORT' transform (see below: 
         new transforms) 
-       
   - Runtime graph for devmon Xymon test 'dm' (thanks to W. Nelis)
     to check the performance through the time
 
