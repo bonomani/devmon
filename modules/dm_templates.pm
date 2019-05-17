@@ -37,8 +37,8 @@ my $color_list = join '|', @color_order;
 
 # Read templates from DB or from disk, depending on our multinode type
 sub read_templates {
-   do_log('DEBUG TEMPLATES: running read_templates()',0) if $g{'debug'};
-   if($g{'multinode'} eq 'yes') { read_template_db()    }
+   do_log('DEBUG TEMPLATES: running read_templates()',0) if $g{debug};
+   if($g{multinode} eq 'yes') { read_template_db()    }
    else                         { read_template_files() }
 
    # Do various post-load template mucking
@@ -52,14 +52,14 @@ sub read_template_db {
    my $read_temps = 'n';
 
    # Only do a read if we need to (empty temp hash or update flag set true)
-   my $num_templates = scalar (keys %{$g{'templates'}});
+   my $num_templates = scalar (keys %{$g{templates}});
    return if ($num_templates != 0 and
-      $g{'node_status'}{'nodes'}{$g{'my_nodenum'}}{'read_temps'} eq 'n');
+      $g{node_status}{nodes}{$g{my_nodenum}}{read_temps} eq 'n');
 
    do_log('Reading template data from DB',1);
 
    # Reset templates
-   %{$g{'templates'}} = ();
+   %{$g{templates}} = ();
 
    # Read in our model index
    my @models = db_get_array('id,vendor,model,snmpver,sysdesc ' .
@@ -70,8 +70,8 @@ sub read_template_db {
       $model_index{$id} = { 'vendor'  => $vendor,
          'model'   => $model };
 
-      $g{'templates'}{$vendor}{$model}{'snmpver'} = $snmpver;
-      $g{'templates'}{$vendor}{$model}{'sysdesc'} = $sysdesc;
+      $g{templates}{$vendor}{$model}{snmpver} = $snmpver;
+      $g{templates}{$vendor}{$model}{sysdesc} = $sysdesc;
    }
 
    # Read in our test index
@@ -79,8 +79,8 @@ sub read_template_db {
    for my $row (@tests) {
       my ($id, $mod_id, $test) = @$row;
 
-      $test_index{$id} = { 'vendor'  => $model_index{$mod_id}{'vendor'},
-         'model'   => $model_index{$mod_id}{'model'},
+      $test_index{$id} = { 'vendor'  => $model_index{$mod_id}{vendor},
+         'model'   => $model_index{$mod_id}{model},
          'test'    => $test };
    }
 
@@ -92,16 +92,16 @@ sub read_template_db {
    for my $oid_row (@results) {
       my ($id,$name,$num,$repeat, $trans_type, $trans_data) = @$oid_row;
 
-      my $vendor = $test_index{$id}{'vendor'};
-      my $model  = $test_index{$id}{'model'};
-      my $test   = $test_index{$id}{'test'};
+      my $vendor = $test_index{$id}{vendor};
+      my $model  = $test_index{$id}{model};
+      my $test   = $test_index{$id}{test};
 
-      my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+      my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
-      $tmpl->{'oids'}{$name}{'number'}     = $num if defined $num;
-      $tmpl->{'oids'}{$name}{'repeat'}     = $repeat if defined $repeat;
-      $tmpl->{'oids'}{$name}{'trans_type'} = $trans_type if defined $trans_type;
-      $tmpl->{'oids'}{$name}{'trans_data'} = $trans_data if defined $trans_data;
+      $tmpl->{oids}{$name}{number}     = $num if defined $num;
+      $tmpl->{oids}{$name}{repeat}     = $repeat if defined $repeat;
+      $tmpl->{oids}{$name}{trans_type} = $trans_type if defined $trans_type;
+      $tmpl->{oids}{$name}{trans_data} = $trans_data if defined $trans_data;
    }
 
    # Read thresholds from the database
@@ -112,14 +112,14 @@ sub read_template_db {
    for my $oid_row (@results) {
       my ($id,$oid,$color,$thresh,$msg) = @$oid_row;
 
-      my $vendor = $test_index{$id}{'vendor'};
-      my $model  = $test_index{$id}{'model'};
-      my $test   = $test_index{$id}{'test'};
+      my $vendor = $test_index{$id}{vendor};
+      my $model  = $test_index{$id}{model};
+      my $test   = $test_index{$id}{test};
 
-      my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+      my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
-      $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'val'} = $thresh;
-      $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'msg'} = $msg if defined $msg;
+      $tmpl->{oids}{$oid}{thresh}{$color}{val} = $thresh;
+      $tmpl->{oids}{$oid}{thresh}{$color}{msg} = $msg if defined $msg;
    }
 
    # Read exceptions from the database
@@ -128,13 +128,13 @@ sub read_template_db {
    for my $oid_row (@results) {
       my ($id,$oid,$type,$data) = @$oid_row;
 
-      my $vendor = $test_index{$id}{'vendor'};
-      my $model  = $test_index{$id}{'model'};
-      my $test   = $test_index{$id}{'test'};
+      my $vendor = $test_index{$id}{vendor};
+      my $model  = $test_index{$id}{model};
+      my $test   = $test_index{$id}{test};
 
-      my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+      my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
-      $tmpl->{'oids'}{$oid}{'except'}{$type} = $data;
+      $tmpl->{oids}{$oid}{except}{$type} = $data;
    }
 
    # Read messages from database
@@ -143,30 +143,30 @@ sub read_template_db {
    for my $oid_row (@results) {
       my ($id,$msg) = @$oid_row;
 
-      my $vendor = $test_index{$id}{'vendor'};
-      my $model  = $test_index{$id}{'model'};
-      my $test   = $test_index{$id}{'test'};
+      my $vendor = $test_index{$id}{vendor};
+      my $model  = $test_index{$id}{model};
+      my $test   = $test_index{$id}{test};
 
-      my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+      my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
       # Convert newline placeholders
       $msg =~ s/\\n/\n/;
       $msg =~ s/~~n/\\n/;
 
-      $tmpl->{'msg'} = $msg;
+      $tmpl->{msg} = $msg;
    }
 
    # Now update our read_temps flag in the node config DB
-   db_do("update nodes set read_temps='n' where node_num=$g{'my_nodenum'}");
+   db_do("update nodes set read_temps='n' where node_num=$g{my_nodenum}");
 }
 
 # Read in user-definable templates from disk
 sub read_template_files {
    # Reset templates
-   %{$g{'templates'}} = ();
+   %{$g{templates}} = ();
 
    # Get all dirs in templates subdir
-   my $template_dir = $g{'homedir'} . "/templates";
+   my $template_dir = $g{homedir} . "/templates";
    opendir TEMPLATES, $template_dir or
    log_fatal("Unable to open template directory ($!)",0);
 
@@ -188,8 +188,8 @@ sub read_template_files {
       !defined $snmpver or !defined $sysdesc;
 
       # Our model specific snmp info
-      $g{'templates'}{$vendor}{$model}{'snmpver'} = $snmpver;
-      $g{'templates'}{$vendor}{$model}{'sysdesc'} = $sysdesc;
+      $g{templates}{$vendor}{$model}{snmpver} = $snmpver;
+      $g{templates}{$vendor}{$model}{sysdesc} = $sysdesc;
 
       # Now go though our subdirs which contain our tests
       opendir MODELDIR, $dir or
@@ -201,15 +201,15 @@ sub read_template_files {
          next if !-d $testdir or $test =~ /^\..*$/; # . and .svn or .cvs
 
          # Barf if we are trying to define a pre-existing template
-         if(defined $g{'templates'}{$vendor}{$model}{'tests'}{$test}) {
+         if(defined $g{templates}{$vendor}{$model}{tests}{$test}) {
             do_log("Attempting to redefine $vendor/$model/$test template " .
                "when reading data from $dir.");
             next TEST;
          }
 
          # Create template shortcut
-         $g{'templates'}{$vendor}{$model}{'tests'}{$test} = {};
-         $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+         $g{templates}{$vendor}{$model}{tests}{$test} = {};
+         $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
          # Read in the other files files, if all previous reads have succeeded
          read_oids_file($testdir, $tmpl) and
@@ -219,31 +219,31 @@ sub read_template_files {
          read_message_file($testdir, $tmpl);
 
          # Make sure we dont have any partial templates hanging around
-         delete $g{'templates'}{$vendor}{$model}{'tests'}{$test}
-         if !defined $tmpl->{'msg'};
+         delete $g{templates}{$vendor}{$model}{tests}{$test}
+         if !defined $tmpl->{msg};
 
          do_log("DEBUG TEMPLATES: read $vendor:$model:$test template")
-         if $g{'debug'};
+         if $g{debug};
       }
 
       # If we dont have any tests, delete the model info
-      delete $g{'templates'}{$vendor}{$model}
-      if (scalar keys %{$g{'templates'}{$vendor}{$model}{'tests'}}) == 0;
+      delete $g{templates}{$vendor}{$model}
+      if (scalar keys %{$g{templates}{$vendor}{$model}{tests}}) == 0;
    }
    return;
 }
 
 # Do various post-load stuff on templates
 sub post_template_load {
-   do_log('DEBUG TEMPLATES: running post_template_load()', 0) if $g{'debug'};
-   for my $vendor (keys %{$g{'templates'}}) {
-      for my $model (keys %{$g{'templates'}{$vendor}}) {
-         for my $test (keys %{$g{'templates'}{$vendor}{$model}{'tests'}}) {
-            my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+   do_log('DEBUG TEMPLATES: running post_template_load()', 0) if $g{debug};
+   for my $vendor (keys %{$g{templates}}) {
+      for my $model (keys %{$g{templates}{$vendor}}) {
+         for my $test (keys %{$g{templates}{$vendor}{$model}{tests}}) {
+            my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
-            PTL_OID: for my $oid (keys %{$tmpl->{'oids'}}) {
-               my $oid_h = \%{$tmpl->{'oids'}{$oid}};
-               my $trans_type = $oid_h->{'trans_type'};
+            PTL_OID: for my $oid (keys %{$tmpl->{oids}}) {
+               my $oid_h = \%{$tmpl->{oids}{$oid}};
+               my $trans_type = $oid_h->{trans_type};
 
                # For now we arent doing anything to non-translated oids; skip them
                next if !defined $trans_type;
@@ -252,16 +252,16 @@ sub post_template_load {
                # to do it on a per-oid basis later
                if($trans_type eq 'switch' or $trans_type eq 'tswitch') {
                   my ($dep_oid, $switch_data) = ($1, $2) if
-                  $oid_h->{'trans_data'} =~ /\{(.+?)}\s*(.+)/;
+                  $oid_h->{trans_data} =~ /\{(.+?)}\s*(.+)/;
                   next if !defined $dep_oid;
 
-                  $oid_h->{'trans_edata'} = {};
-                  my $trans_data = \%{$oid_h->{'trans_edata'}};
-                  my $cases      = \%{$trans_data->{'cases'}};
+                  $oid_h->{trans_edata} = {};
+                  my $trans_data = \%{$oid_h->{trans_edata}};
+                  my $cases      = \%{$trans_data->{cases}};
                   my $case_num   = 0;
                   my $default;
 
-                  $trans_data->{'dep_oid'} = $dep_oid;
+                  $trans_data->{dep_oid} = $dep_oid;
 
                   for my $val_pair (split /\s*,\s*/, $switch_data) {
                      if( $val_pair =~ /^\s*(["'].*["'])\s*=\s*(.*?)\s*$/) {
@@ -269,9 +269,9 @@ sub post_template_load {
                         my $type = '';
                         if($if =~ /^'(.+)'$/) {$type = 'str'; $if = $1}
                         elsif($if =~ /^"(.+)"$/) {$type = 'reg'; $if = $1}
-                        $cases->{++$case_num}{'if'} = $if;
-                        $cases->{$case_num}{'type'} = $type;
-                        $cases->{$case_num}{'then'} = $then;
+                        $cases->{++$case_num}{if} = $if;
+                        $cases->{$case_num}{type} = $type;
+                        $cases->{$case_num}{then} = $then;
 
                      }
                      elsif( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/) {
@@ -291,9 +291,9 @@ sub post_template_load {
                         {$type = 'rng'; $if = "$1-$2"}
 
                         elsif($if =~ /^default$/i) {$default = $then; next}
-                        $cases->{++$case_num}{'if'} = $if;
-                        $cases->{$case_num}{'type'} = $type;
-                        $cases->{$case_num}{'then'} = $then;
+                        $cases->{++$case_num}{if} = $if;
+                        $cases->{$case_num}{type} = $type;
+                        $cases->{$case_num}{then} = $then;
 
                      } else {
                         do_log("Could not parse $dep_oid : ".uc($trans_type)." option '$val_pair'");
@@ -302,10 +302,10 @@ sub post_template_load {
                   }
 
                   # Sort our case numbers this once
-                  @{$trans_data->{'case_nums'}} = sort {$a <=> $b} keys %$cases;
+                  @{$trans_data->{case_nums}} = sort {$a <=> $b} keys %$cases;
 
                   # Make sure we have a default value
-                  $trans_data->{'default'} = $default || 'Unknown';
+                  $trans_data->{default} = $default || 'Unknown';
                }
 
             }
@@ -377,10 +377,10 @@ sub read_specs_file {
          and return 0 if !defined $val or $val eq '';
    }
    # Now return out anon hash ref
-   my $vendor  = $vars{'vendor'};
-   my $model   = $vars{'model'};
-   my $snmpver = $vars{'snmpver'};
-   my $sysdesc = $vars{'sysdesc'};
+   my $vendor  = $vars{vendor};
+   my $model   = $vars{model};
+   my $snmpver = $vars{snmpver};
+   my $sysdesc = $vars{sysdesc};
    return ($vendor, $model, $snmpver, $sysdesc);
 }
 
@@ -435,7 +435,7 @@ sub read_oids_file {
 
       # Make sure this oid hasnt been defined before
       do_log("$oid defined more than once in $oid_file", 0) and next
-      if defined $tmpl->{'oids'}{$oid};
+      if defined $tmpl->{oids}{$oid};
 
       # Make repeater variable boolean
       $repeat = ($repeat eq 'branch') ? 1 : 0;
@@ -444,11 +444,11 @@ sub read_oids_file {
       $number =~ s/^\.//;
 
       # Assign variables to global hash
-      $tmpl->{'oids'}{$oid}{'number'} = $number;
-      $tmpl->{'oids'}{$oid}{'repeat'} = $repeat;
+      $tmpl->{oids}{$oid}{number} = $number;
+      $tmpl->{oids}{$oid}{repeat} = $repeat;
 
       # Reverse oid map
-      $tmpl->{'map'}{$number} = $oid;
+      $tmpl->{map}{$number} = $oid;
    }
 
    close FILE;
@@ -535,7 +535,7 @@ sub read_transforms_file {
       # TODO: Would be nice to check that if it was defined
       # before, both oid are realy the same
       do_log("Cant redefine $oid  in $trans_file", 0) and next
-      if defined $tmpl->{'oids'}{$oid};
+      if defined $tmpl->{oids}{$oid};
 
       # Make sure function is a real one and that it is formatted correctly
       # 1. It is already trimed both sides
@@ -822,8 +822,8 @@ sub read_transforms_file {
       }
 
       # Stick in our temporary hash
-      $trans{$oid}{'data'} = $func_data;
-      $trans{$oid}{'type'} = $func_type;
+      $trans{$oid}{data} = $func_data;
+      $trans{$oid}{type} = $func_type;
 
       # Adjust our line number if we had continuation character
       $l_num += $adjust;
@@ -831,14 +831,14 @@ sub read_transforms_file {
 
    # Now go through our translations and make sure all the dependent oids exist
    for my $oid (keys %trans) {
-      my $data = $trans{$oid}{'data'};
+      my $data = $trans{$oid}{data};
       while($data =~ s/\{(.+?)\}//) {
          my $dep_oid = $1;
 
          # Validate oid
          do_log("Undefined oid '$dep_oid' referenced in $trans_file", 0)
             and delete $trans{$oid} and next
-         if !defined $tmpl->{'oids'}{$dep_oid} and !defined $trans{$dep_oid};
+         if !defined $tmpl->{oids}{$dep_oid} and !defined $trans{$dep_oid};
 
          #        $deps->{$oid}{$dep_oid} = {};
          $deps->{$dep_oid}{$oid} = {};
@@ -852,7 +852,7 @@ sub read_transforms_file {
    # on another OID, and which are not used in any transformation rule. They too
    # should be included in the sorted list, used to evaluate the OIDs.
    for my $oid ( keys %trans ) {
-      next			if $trans{$oid}{'data'}=~ m/\{.+?\}/ ;
+      next			if $trans{$oid}{data}=~ m/\{.+?\}/ ;
       next			if exists $deps->{$oid} ;
       $deps->{$oid}= {} ;		# Create entry
    }  # of for
@@ -861,14 +861,14 @@ sub read_transforms_file {
    # time any dependency loop is found and reported.
    my $val = sort_oid( $deps );
    return 0			unless defined $val;
-   $tmpl->{'sort'} = $val;
+   $tmpl->{sort} = $val;
 
    # Now add the translations to the global hash
    for my $oid (keys %trans) {
-      my $type = $trans{$oid}{'type'};
-      my $data = $trans{$oid}{'data'};
-      $tmpl->{'oids'}{$oid}{'trans_type'} = $type;
-      $tmpl->{'oids'}{$oid}{'trans_data'} = $data;
+      my $type = $trans{$oid}{type};
+      my $data = $trans{$oid}{data};
+      $tmpl->{oids}{$oid}{trans_type} = $type;
+      $tmpl->{oids}{$oid}{trans_data} = $data;
    }
 
    return 1;
@@ -898,7 +898,7 @@ sub find_deps {
       # See if this variable is preset in the translation hash
       if(defined $trans->{$oid}) {
          # If it is, see if it has other oids that it depends on
-         my $data = $trans->{$oid}{'data'};
+         my $data = $trans->{$oid}{data};
          while($data =~ s/\{(.+?)\}//) {
 
             # It depends on other oids; iterate into them to make sure that
@@ -1051,7 +1051,7 @@ sub read_thresholds_file {
 
       # Validate oid
       do_log("Undefined oid '$oid' referenced in $thresh_file at line $.", 0)
-         and next if !defined $tmpl->{'oids'}{$oid};
+         and next if !defined $tmpl->{oids}{$oid};
 
 
       # Validate any oids in the message
@@ -1061,12 +1061,12 @@ sub read_thresholds_file {
          $oid=~ s/\..+$//;     # Remove flag, if any
          do_log("Undefined oid '$1' referenced in " .
             "$thresh_file at line $.", 0)
-         if !defined $tmpl->{'oids'}{$oid};
+         if !defined $tmpl->{oids}{$oid};
       }
 
       # Add the threshold to the global hash
-      $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'val'} = $threshold;
-      $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'msg'} = $msg;
+      $tmpl->{oids}{$oid}{thresh}{$color}{val} = $threshold;
+      $tmpl->{oids}{$oid}{thresh}{$color}{msg} = $msg;
    }
    close FILE;
 
@@ -1141,14 +1141,14 @@ sub read_exceptions_file {
       # Make sure we dont have an except defined twice
       do_log("Exception for $oid redefined in $except_file at " .
          "line $.",0) and next
-      if defined $tmpl->{'oids'}{$oid}{'except'}{$type};
+      if defined $tmpl->{oids}{$oid}{except}{$type};
 
       # Validate oid
       do_log("Undefined oid '$oid' in $except_file at line $.", 0)
-         and next if !defined $tmpl->{'oids'}{$oid};
+         and next if !defined $tmpl->{oids}{$oid};
 
       # Add the threshold to the global hash
-      $tmpl->{'oids'}{$oid}{'except'}{$type} = $data;
+      $tmpl->{oids}{$oid}{except}{$type} = $data;
 
    }
 
@@ -1191,7 +1191,7 @@ sub read_message_file {
 
          do_log("Undefined oid '$oid' at line $. of $msg_file, " .
             "skipping this test.", 0) and return 0
-         if !defined $tmpl->{'oids'}{$oid};
+         if !defined $tmpl->{oids}{$oid};
       }
 
       # If we have seen a table header, try and read in the info
@@ -1214,7 +1214,7 @@ sub read_message_file {
                $oid =~ s/\.($oid_tags)$//;
                do_log ("Undefined oid '$oid' at line $. of " .
                   "$msg_file, skipping this test.", 0)
-                  and return 0 if !defined $tmpl->{'oids'}{$oid};
+                  and return 0 if !defined $tmpl->{oids}{$oid};
             }
          }
 
@@ -1256,7 +1256,7 @@ sub read_message_file {
                      elsif(lc $sub_opt =~ /^name:(\S+)$/) {}
                      elsif(lc $sub_opt =~ /^pri:(\S+)$/) {
                         do_log("Undefined rrd oid '$1' at $msg_file line $.")
-                           and return 0 if !defined $tmpl->{'oids'}{$1};
+                           and return 0 if !defined $tmpl->{oids}{$1};
                      }
                      elsif($sub_opt =~ /^DS:(\S+)$/) {
                         my ($ds,$oid,$type,$time,$min,$max) = split /:/, $1;
@@ -1265,7 +1265,7 @@ sub read_message_file {
                         do_log("No RRD oid defined at $msg_file line $.")
                            and return 0 if !defined $oid;
                         do_log("Undefined rrd oid '$oid' at $msg_file line $.")
-                           and return 0 if !defined $tmpl->{'oids'}{$oid};
+                           and return 0 if !defined $tmpl->{oids}{$oid};
                         do_log("Bad rrd datatype '$type' at $msg_file line $.")
                            and return 0 if defined $type and $type ne ''
                            and $type !~ /^(GAUGE|COUNTER|DERIVE|ABSOLUTE)$/;
@@ -1306,7 +1306,7 @@ sub read_message_file {
    }
 
    # Assign the msg
-   $tmpl->{'msg'} = $msg;
+   $tmpl->{msg} = $msg;
 
    close FILE;
    return 1;
@@ -1320,7 +1320,7 @@ sub sync_templates {
 
    # Make sure we are in multinode mode
    die "--synctemplates flag only applies if you have the local 'MULTINODE'\n" .
-   "option set to 'YES'\n" if $g{'multinode'} ne 'yes';
+   "option set to 'YES'\n" if $g{multinode} ne 'yes';
 
    # Read templates in from disk
    read_template_files();
@@ -1342,22 +1342,22 @@ sub sync_templates {
    db_do("delete from template_messages");
 
    # Create our template index
-   for my $vendor (sort keys %{$g{'templates'}}) {
+   for my $vendor (sort keys %{$g{templates}}) {
 
-      for my $model (sort keys %{$g{'templates'}{$vendor}}) {
+      for my $model (sort keys %{$g{templates}{$vendor}}) {
          # Increment our model index number
          ++$model_id;
 
          # Add our test index info
-         my $snmpver = $g{'templates'}{$vendor}{$model}{'snmpver'};
-         my $sysdesc = $g{'templates'}{$vendor}{$model}{'sysdesc'};
+         my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
+         my $sysdesc = $g{templates}{$vendor}{$model}{sysdesc};
 
          # Make the sysdesc mysql-safe
          db_do("insert into template_models values " .
             "($model_id, '$vendor','$model',$snmpver,'$sysdesc')");
 
          # Now go through all our tests and add them
-         for my $test (sort keys %{$g{'templates'}{$vendor}{$model}{'tests'}}) {
+         for my $test (sort keys %{$g{templates}{$vendor}{$model}{tests}}) {
             # Increment our test index number
             ++$test_id;
 
@@ -1365,16 +1365,16 @@ sub sync_templates {
             db_do("insert into template_tests values ($test_id, $model_id,'$test')");
 
             # Template shortcut
-            my $tmpl = \%{$g{'templates'}{$vendor}{$model}{'tests'}{$test}};
+            my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
             # Insert our oids into the DB
-            for my $oid (keys %{$tmpl->{'oids'}}) {
+            for my $oid (keys %{$tmpl->{oids}}) {
 
                # Prepare our data for insert
-               my $number = $tmpl->{'oids'}{$oid}{'number'};
-               my $repeat = $tmpl->{'oids'}{$oid}{'repeat'};
-               my $t_type = $tmpl->{'oids'}{$oid}{'trans_type'};
-               my $t_data = $tmpl->{'oids'}{$oid}{'trans_data'};
+               my $number = $tmpl->{oids}{$oid}{number};
+               my $repeat = $tmpl->{oids}{$oid}{repeat};
+               my $t_type = $tmpl->{oids}{$oid}{trans_type};
+               my $t_data = $tmpl->{oids}{$oid}{trans_data};
                $number = (defined $number) ? "'$number'" : 'NULL';
                $repeat = (defined $repeat) ? "'$repeat'" : 'NULL';
                $t_type = (defined $t_type) ? "'$t_type'" : 'NULL';
@@ -1385,11 +1385,11 @@ sub sync_templates {
                   "($test_id, '$oid', $number, $repeat, $t_type, $t_data)");
 
                # Insert our thresholds into the DB
-               for my $color (keys %{$tmpl->{'oids'}{$oid}{'thresh'}}) {
+               for my $color (keys %{$tmpl->{oids}{$oid}{thresh}}) {
 
                   # Prepare our data for insert
-                  my $val = $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'val'};
-                  my $txt = $tmpl->{'oids'}{$oid}{'thresh'}{$color}{'msg'};
+                  my $val = $tmpl->{oids}{$oid}{thresh}{$color}{val};
+                  my $txt = $tmpl->{oids}{$oid}{thresh}{$color}{msg};
 
                   $txt = (defined $txt) ? "'$txt'" : 'NULL';
 
@@ -1400,10 +1400,10 @@ sub sync_templates {
 
 
                # Insert our exceptions into the DB
-               for my $type (keys %{$tmpl->{'oids'}{$oid}{'except'}}) {
+               for my $type (keys %{$tmpl->{oids}{$oid}{except}}) {
 
                   # Prepare our data for insert
-                  my $data = $tmpl->{'oids'}{$oid}{'except'}{$type};
+                  my $data = $tmpl->{oids}{$oid}{except}{$type};
 
                   # Insert our thresholds into DB
                   db_do("insert into template_exceptions values " .
@@ -1414,7 +1414,7 @@ sub sync_templates {
 
 
             # Now insert our messages into the DB
-            my $msg = $tmpl->{'msg'};
+            my $msg = $tmpl->{msg};
 
             # Convert newlines into placeholders
             $msg =~ s/\\n/~~n/;
