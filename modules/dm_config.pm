@@ -37,6 +37,12 @@ use Sys::Hostname;
 sub initialize {
    autoflush STDOUT 1;
 
+   # Make sure we are started with correct environment
+   if ( defined $ENV{XYMSRV} and $ENV{XYMSRV} ne '' ) {
+   } else {
+      log_fatal("XYMSRV variable not found, make sure xymonserver.cfg is loaded: start from tasks.cfg or prepend with xymoncmd", 0);
+   }
+
    %g = (
       # General variables
       'version'       => $_[0], # set in main script now
