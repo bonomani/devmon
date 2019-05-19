@@ -1,14 +1,31 @@
+=====================================================================
+Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.3
+======================================================================
+
 SEE END OF FILE for current STATUS and ROADMAP! 
 THIS IS NOT AN OFFICIAL VERSION from the original developers:
 - Look at SourceForge version for it 
-- Previous modifications (2018) of this version were reported to be less stable than the SF one, but only template were modify at that time .....
+- Previous modifications (2018) of this version were reported to be less
+  stable than the SF one, but only template were modify at that time .....
 - Use it at your one risk !
-- Cisco templates have been largly modifyed to fit my own needs
+- Cisco templates are modifyed to fit my own needs
+
 THIS VERSION SHOULD BE AS STABLE AS THE SOURCEFORGE ONE IF YOU DONT USE THE 
 NEW TEMPLATES, but you will not benefit of all the work done !
 
+20.05.2019 Bruno Manzoni
+======================================================================
 
-Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.3
+UPDATE included from Stef Coene                                                                     
+                                                                                           
+I changed this version of devmon and did the following:                                    
+- remove all refererences bb/hobbit/BigBrother                                             
+- use Getopt::Long for command line parsing                                                
+- use Sys::Hostname to get the hostname                                                    
+                                                                                           
+======================================================================                                                                                           
+======================================================================
+                         Original ReadMe
 =====================================================================
 
   This program is free software; you can redistribute it and/or modify
@@ -45,7 +62,7 @@ Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.3
   might be added at a later date).
 
   Devmon determines which hosts to query based on information
-  from the display server's bb-hosts file, which allows you
+  from the display server's hosts.cfg file, which allows you
   to manage all of your monitoring facilities from a single file.
 
   Devmon can either run in a single-node configuration, a
@@ -158,8 +175,8 @@ FEEDBACK ALWAYS APPRECIATED
  always thanks you for your remarks even the message is not clear ! 
  So do not hesitate and use the github ISSUES to communicate even it is not a bug !
 
-Remarks on the oid term 
-As it key concept and as it is also extended some way I create a section in the /devmon/docs/TEMPLATE to explain it more clear: a must read..
+REMARK ON THE OID TERM 
+As it "key" concept and as it is also extended in some way I created a section in the /devmon/docs/TEMPLATE to explain it more clearly: a must read..
 
 Major improvement
 - Improved User-Friendliness
