@@ -1189,7 +1189,8 @@ sub read_hosts_cfg {
 
    # Hashes containing textual shortcuts for Xymon exception & thresholds
    my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
-   my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm', 'na' => 'noalarm' );
+   my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm',
+      'na' => 'noalarm' );
 
    # Read in templates, cause we'll need them
    db_connect();
@@ -1221,131 +1222,169 @@ sub read_hosts_cfg {
    my $etcdir  = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
    $etcdir = $g{homedir} if !defined $etcdir;
 
-   # We need the location of the xymoncfg command
-   my $xymoncfg = $ENV{XYMON} . "cfg" ;
+   FILEREAD: do {
+      my $hostscfg = shift @hostscfg;
+      next if !defined $hostscfg; # In case next FILEREAD bypasses the while
 
-   # This commands returned the full hosts.cfg
-   foreach my $line (`$xymoncfg -net $g{hostscfg}`) {
-      chomp $line ;
+      # Die if we fail to open our Xymon root file, warn for all others
+      if($hostscfg eq $g{hostscfg}) {
+         open HOSTSCFG, $hostscfg or
+         log_fatal("Unable to open hosts.cfg file '$g{hostscfg}' ($!)", 0);
+      } else {
+         open HOSTSCFG, $hostscfg or
+         do_log("Unable to open file '$g{hostscfg}' ($!)", 0) and
+         next FILEREAD;
+      }
 
-      if($line =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+(\S+)(.*)$/i) {
-         my ($ip, $host, $xymonopts) = ($1, $2, $3);
+      # Now interate through our file and suck out the juicy bits
+      FILELINE: while ( my $line= <HOSTSCFG> ) {
+         chomp $line;
 
-         # Skip if the NET tag does not match this site
-         do_log("Checking if $xymonopts matches NET:" . $g{XYMONNETWORK} . ".",5) if $g{debug};
-         if ($g{XYMONNETWORK} ne '') {
-            if ($xymonopts !~ / NET:$g{XYMONNETWORK}/) {
-               do_log("The NET for $host is not $g{XYMONNETWORK}. Skipping.",3);
-               next;
-            }
+         while ( $line=~ s/\\$//  and  ! eof(HOSTSCFG) ) {
+            $line.= <HOSTSCFG> ;            # Merge with next line
+            chomp $line ;
+         }  # of while
+
+         # First see if this is an include statement
+         if($line =~ /^\s*(?:disp|net)?include\s+(.+)$/i) {
+            my $file = $1;
+            # Tack on our etc dir if this isnt an absolute path
+            $file = "$etcdir/$file" if $file !~ /^\//;
+            # Add the file to our read array
+            push @hostscfg, $file;
          }
 
-         # See if we can find our xymontag to let us know this is a devmon host
-         if($xymonopts =~ /$g{xymontag}(:\S+|\s+|$)/) {
-            my $options = $1;
-            $options = '' if !defined $options or $options =~ /^\s+$/;
-            $options =~ s/,\s+/,/; # Remove spaces in a comma-delimited list
-            $options =~ s/^://;
+         # Similarly, but different, for directory
+         if($line =~ /^\s*directory\s+(\S+)$/i) {
+            require File::Find;
+            import File::Find;
+            my $dir = $1;
+            do_log("Looking for hosts.cfg files in $dir",3) if $g{debug};
+            find(sub {push @hostscfg,$File::Find::name},$dir);
 
-            # Skip the .default. host, defined
-            do_log("Can't use Devmon on the .default. host, sorry.",0)
-               and next if $host eq '.default.';
+         # Else see if this line matches the ip/host hosts.cfg format
+         } elsif($line =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+(\S+)(.*)$/i) {
+            my ($ip, $host, $xymonopts) = ($1, $2, $3);
 
-            # If this IP is 0.0.0.0, try and get IP from DNS
-            if($ip eq '0.0.0.0') {
-               my (undef, undef, undef, undef, @addrs) = gethostbyname $host;
-               do_log("Unable to resolve DNS name for host '$host'",0)
-                  and next FILELINE if !@addrs;
-               $ip = join '.', unpack('C4', $addrs[0]);
-            }
-
-            # Make sure we dont have duplicates
-            if(defined $hosts_cfg{$host}) {
-               my $old = $hosts_cfg{$host}{ip};
-               do_log("Refusing to redefine $host from '$old' to '$ip'",0);
-               next;
-            }
-
-            # See if we have a custom cid
-            if($options =~ s/(?:,|^)cid\((\S+?)\),?//) {
-               $hosts_cfg{$host}{cid} = $1;
-               $custom_cids = 1;
-            }
-
-            # See if we have a custom IP
-            if($options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\),?//) {
-               $ip = $1;
-            }
-
-            # See if we have a custom port
-            if($options =~ s/(?:,|^)port\((\d+?)\),?//) {
-               $hosts_cfg{$host}{port} = $1;
-            }
-
-            # Look for vendor/model override
-            if($options =~ s/(?:,|^)model\((\S+?)\),?//) {
-               my ($vendor, $model) = split /;/, $1, 2;
-               do_log("Syntax error in model() option for $host",0) and next
-               if !defined $vendor or !defined $model;
-               do_log("Unknown vendor in model() option for $host",0) and next
-               if !defined $g{templates}{$vendor};
-               do_log("Unknown model in model() option for $host",0) and next
-               if !defined $g{templates}{$vendor}{$model};
-               $hosts_cfg{$host}{vendor} = $vendor;
-               $hosts_cfg{$host}{model}  = $model;
-            }
-
-            # Read custom exceptions
-            if($options =~ s/(?:,|^)except\((\S+?)\)//) {
-               for my $except (split /,/, $1) {
-                  my @args = split /;/, $except;
-                  do_log("Invalid exception clause for $host",0) and next
-                  if scalar @args < 3;
-                  my $test = shift @args;
-                  my $oid  = shift @args;
-                  for my $valpair (@args) {
-                     my ($sc, $val) = split /:/, $valpair, 2;
-                     my $type = $exc_sc{$sc}; # Process shortcut text
-                     do_log("Unknown exception shortcut '$sc' for $host") and next
-                     if !defined $type;
-                     $hosts_cfg{$host}{except}{$test}{$oid}{$type} = $val;
-                  }
+            # Skip if the NET tag does not match this site
+            do_log("Checking if $xymonopts matches NET:" . $g{XYMONNETWORK} . ".",5) if $g{debug};
+            if ($g{XYMONNETWORK} ne '') {
+               if ($xymonopts !~ / NET:$g{XYMONNETWORK}/) {
+                  do_log("The NET for $host is not $g{XYMONNETWORK}. Skipping.",3);
+                  next;
                }
             }
 
-            # Read custom thresholds
-            if($options =~ s/(?:,|^)thresh\((\S+?)\)//) {
-               for my $thresh (split /,/, $1) {
-                  my @args = split /;/, $thresh;
-                  do_log("Invalid threshold clause for $host",0) and next
-                  if scalar @args < 3;
-                  my $test = shift @args;
-                  my $oid  = shift @args;
-                  for my $valpair (@args) {
-                     my ($sc, $val) = split /:/, $valpair, 2;
-                     my $type = $thr_sc{$sc}; # Process shortcut text
-                     do_log("Unknown exception shortcut '$sc' for $host") and next
-                     if !defined $type;
-                     $hosts_cfg{$host}{thresh}{$test}{$oid}{$type} = $val;
+            # See if we can find our xymontag to let us know this is a devmon host
+            if($xymonopts =~ /$g{xymontag}(:\S+|\s+|$)/) {
+               my $options = $1;
+               $options = '' if !defined $options or $options =~ /^\s+$/;
+               $options =~ s/,\s+/,/; # Remove spaces in a comma-delimited list
+               $options =~ s/^://;
+
+               # Skip the .default. host, defined
+               do_log("Can't use Devmon on the .default. host, sorry.",0)
+                  and next if $host eq '.default.';
+
+               # If this IP is 0.0.0.0, try and get IP from DNS
+               if($ip eq '0.0.0.0') {
+                  my (undef, undef, undef, undef, @addrs) = gethostbyname $host;
+                  do_log("Unable to resolve DNS name for host '$host'",0)
+                     and next FILELINE if !@addrs;
+                  $ip = join '.', unpack('C4', $addrs[0]);
+               }
+
+               # Make sure we dont have duplicates
+               if(defined $hosts_cfg{$host}) {
+                  my $old = $hosts_cfg{$host}{ip};
+                  do_log("Refusing to redefine $host from '$old' to '$ip'",0);
+                  next;
+               }
+
+               # See if we have a custom cid
+               if($options =~ s/(?:,|^)cid\((\S+?)\),?//) {
+                  $hosts_cfg{$host}{cid} = $1;
+                  $custom_cids = 1;
+               }
+
+               # See if we have a custom IP
+               if($options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\),?//) {
+                  $ip = $1;
+               }
+
+               # See if we have a custom port
+               if($options =~ s/(?:,|^)port\((\d+?)\),?//) {
+                  $hosts_cfg{$host}{port} = $1;
+               }
+
+               # Look for vendor/model override
+               if($options =~ s/(?:,|^)model\((\S+?)\),?//) {
+                  my ($vendor, $model) = split /;/, $1, 2;
+                  do_log("Syntax error in model() option for $host",0) and next
+                  if !defined $vendor or !defined $model;
+                  do_log("Unknown vendor in model() option for $host",0) and next
+                  if !defined $g{templates}{$vendor};
+                  do_log("Unknown model in model() option for $host",0) and next
+                  if !defined $g{templates}{$vendor}{$model};
+                  $hosts_cfg{$host}{vendor} = $vendor;
+                  $hosts_cfg{$host}{model}  = $model;
+               }
+
+               # Read custom exceptions
+               if($options =~ s/(?:,|^)except\((\S+?)\)//) {
+                  for my $except (split /,/, $1) {
+                     my @args = split /;/, $except;
+                     do_log("Invalid exception clause for $host",0) and next
+                     if scalar @args < 3;
+                     my $test = shift @args;
+                     my $oid  = shift @args;
+                     for my $valpair (@args) {
+                        my ($sc, $val) = split /:/, $valpair, 2;
+                        my $type = $exc_sc{$sc}; # Process shortcut text
+                        do_log("Unknown exception shortcut '$sc' for $host") and next
+                        if !defined $type;
+                        $hosts_cfg{$host}{except}{$test}{$oid}{$type} = $val;
+                     }
                   }
                }
+
+               # Read custom thresholds
+               if($options =~ s/(?:,|^)thresh\((\S+?)\)//) {
+                  for my $thresh (split /,/, $1) {
+                     my @args = split /;/, $thresh;
+                     do_log("Invalid threshold clause for $host",0) and next
+                     if scalar @args < 3;
+                     my $test = shift @args;
+                     my $oid  = shift @args;
+                     for my $valpair (@args) {
+                        my ($sc, $val) = split /:/, $valpair, 2;
+                        my $type = $thr_sc{$sc}; # Process shortcut text
+                        do_log("Unknown exception shortcut '$sc' for $host") and next
+                        if !defined $type;
+                        $hosts_cfg{$host}{thresh}{$test}{$oid}{$type} = $val;
+                     }
+                  }
+               }
+
+               # Default to all tests if they arent defined
+               my $tests = $1 if $options =~ s/(?:,|^)tests\((\S+?)\)//;
+               $tests = 'all' if !defined $tests;
+
+               do_log("Unknown devmon option ($options) on line " .
+                  "$. of $hostscfg",0) and next if $options ne '';
+
+               $hosts_cfg{$host}{ip}    = $ip;
+               $hosts_cfg{$host}{tests} = $tests;
+
+               # Incremement our host counter, used to tell if we should bother
+               # trying to query for new hosts...
+               ++$hosts_left;
             }
-
-            # Default to all tests if they arent defined
-            my $tests = $1 if $options =~ s/(?:,|^)tests\((\S+?)\)//;
-            $tests = 'all' if !defined $tests;
-
-            do_log("Unknown devmon option ($options) on line $.",0) and next if $options ne '';
-
-            $hosts_cfg{$host}{ip}    = $ip;
-            $hosts_cfg{$host}{tests} = $tests;
-
-            # Incremement our host counter, used to tell if we should bother
-            # trying to query for new hosts...
-            ++$hosts_left;
          }
       }
-   }
+      close HOSTSCFG;
+
+   } while @hostscfg; # End of do {} loop
 
    # Gather our existing hosts
    my %old_hosts = read_hosts();
