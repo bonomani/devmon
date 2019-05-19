@@ -1057,9 +1057,9 @@ sub db_connect {
    # Dont need this if we are not in multinode mode
    return if $g{multinode} ne 'yes';
 
-   # Load the DBI module if we havent initilized yet
-   if(!$g{initilized}) {
-      require DBI if !$g{initilized};
+   # Load the DBI module if we havent initiliazed yet
+   if(!$g{initiliazed}) {
+      require DBI if !$g{initiliazed};
       DBI->import();
    }
 
