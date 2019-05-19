@@ -65,11 +65,22 @@ sub poll_devices {
    # we dont want to waste time querying devices that are down
    do_log("Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport},1);
    %{$g{xymon_color}} = ();
-   foreach (`$ENV{XYMON} $g{dispserv} "xymondboard test=^$g{pingcolumn}\$ fields=hostname,color,line1"`) {
-      my ($device,$color,$line1) = split /\|/;
-      my ($l1col) = ($line1 =~ /^(\w+)/);
-      do_log("DEBUG SNMP: $device has Xymon status $color ($l1col)",2) if $g{debug};
-      $g{xymon_color}{$device} = $color ne "blue" && $color || $l1col;
+   my $sock = IO::Socket::INET->new (
+      PeerAddr => $g{dispserv},
+      PeerPort => $g{dispport},
+      Proto    => 'tcp',
+      Timeout  => 10,
+   );
+
+   if(defined $sock) {
+      print $sock "xymondboard test=^$g{pingcolumn}\$ fields=hostname,color,line1";
+      shutdown($sock, 1);
+      while(<$sock>) {
+         my ($device,$color,$line1) = split /\|/;
+         my ($l1col) = ($line1 =~ /^(\w+)/);
+         do_log("DEBUG SNMP: $device has Xymon status $color ($l1col)",2) if $g{debug};
+         $g{xymon_color}{$device} = $color ne "blue" && $color || $l1col;
+      }
    }
 
    # Build our query hash
