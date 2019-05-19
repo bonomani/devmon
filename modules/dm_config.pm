@@ -2035,12 +2035,12 @@ sub usage {
    "   -de[bug]       Print debug output (this can be quite extensive)\n" .
    "\n" .
    "  Mutually exclusive arguments:\n" .
-   "   -r[eadhostscfg]   Read in data from the Xymon hosts.cfg file\n" .
+   "   -re[adhostscfg]   Read in data from the Xymon hosts.cfg file\n" .
    "   -syncc[onfig]    Update multinode DB with the global config options\n" .
    "                    configured on this local node\n" .
    "   -synct[emplates] Update multinode device templates with the template\n" .
    "                    data on this local node\n" .
-   "   -r[esetowners]   Reset multinode device ownership data.  This will\n" .
+   "   -re[setowners]   Reset multinode device ownership data.  This will\n" .
    "                    cause all nodes to recalculate ownership data\n" .
    "\n";
 }
