@@ -2,3 +2,5 @@ ifInLoad	: yellow	: 75	: {ifName}{ifAliasBox} load is high
 ifInLoad	: red		: 95	: {ifName}{ifAliasBox} load is very high
 ifOutLoad	: yellow	: 75	: {ifName}{ifAliasBox} load is high
 ifOutLoad	: red		: 95	: {ifName}{ifAliasBox} load is very high
+ifInLoad : green : NaN
+ifOutLoad : green : NaN

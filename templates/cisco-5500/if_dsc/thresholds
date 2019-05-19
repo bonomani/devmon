@@ -4,3 +4,5 @@ ifInDscPct	: yellow	: 5	: {ifName} - High input discard rate. ({ifInDscPct}%)
 ifInDscPct	: red		: 10	: {ifName} - Very high input discard rate. ({ifInDscPct}%)
 ifOutDscPct	: yellow	: 5	: {ifName} - High output discard rate ({ifOutDscPct}%)
 ifOutDscPct	: red		: 10	: {ifName} - Very high output discard rate ({ifOutDscPct}%)
+ifInDscPct : green : NaN
+ifOutDscPct : green : NaN

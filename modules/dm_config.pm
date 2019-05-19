@@ -1209,7 +1209,7 @@ sub read_bb_hosts {
          }
       }
 
-      do_log("Saw $num_vendor vendors, $num_model models, " .
+      do_log("DEBUG TEMPLATE: Saw $num_vendor vendors, $num_model models, " .
          "$num_descs sysdescs & $num_temps templates",0);
    }
 
@@ -1260,7 +1260,7 @@ sub read_bb_hosts {
             require File::Find;
             import File::Find;
             my $dir = $1;
-            do_log("Looking for bb-hosts files in $dir",3) if $g{debug};
+            do_log("DEBUG READHOSTSCFG: Looking for bb-hosts files in $dir",3) if $g{debug};
             find(sub {push @bbfiles,$File::Find::name},$dir);
          }
 
@@ -1269,7 +1269,7 @@ sub read_bb_hosts {
             my ($ip, $host, $bbopts) = ($1, $2, $3);
 
             # Skip if the NET tag does not match this site
-            do_log("Checking if $bbopts matches NET:" . $g{bblocation} . ".",5) if $g{debug};
+            do_log("DEBUG READHOSTSCFG; Checking if options: $bbopts matches NET:" . $g{bblocation} . ".",5) if $g{debug};
             if ($g{bblocation} ne '') {
                if ($bbopts !~ / NET:$g{bblocation}/) {
                   do_log("The NET for $host is not $g{bblocation}. Skipping.",3);
@@ -1382,8 +1382,10 @@ sub read_bb_hosts {
                # trying to query for new hosts...
                ++$hosts_left;
             }
+            do_log("DEBUG READHOSTSCFG: host $host ip $ip",5) if $g{debug};
          }
       }
+      do_log ("DEBUG READHOSTSCFG: Nb of hosts discovered in hosts.cfg: $hosts_left",4) if $g{debug};
       close BBFILE;
 
    } while @bbfiles; # End of do {} loop
@@ -1576,7 +1578,6 @@ sub read_bb_hosts {
 
       # Now query hosts without custom cids
       for my $cid (split /,/, $g{snmpcids}) {
-
          # Dont bother if we dont have any hosts left to query
          next if $hosts_left < 1;
 
@@ -1826,6 +1827,7 @@ sub read_bb_hosts {
       my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'purple' => 'p', 'blue' => 'b' );
       my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao',
          'noalarm' => 'na' );
+      do_log("DBFILE: $g{dbfile}");
       open HOSTFILE, ">$g{dbfile}"
          or log_fatal("Unable to write to dbfile '$g{dbfile}' ($!)",0);
 
@@ -1870,7 +1872,7 @@ sub read_bb_hosts {
             $excepts .= ',' if ($excepts !~ /,$/);
          }
          $excepts =~ s/,$//;
-
+         do_log ("$host\e$ip\e$vendor\e$model\e$tests\e$cid\e" ."$threshes\e$excepts\n");
          print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e" .
          "$threshes\e$excepts\n";
       }
@@ -1886,10 +1888,11 @@ sub read_bb_hosts {
 sub read_hosts {
    my %hosts = ();
 
-   do_log("DEBUG CFG: running read_hosts",0) if $g{debug};
+   do_log("DEBUG READHOSTSDB: running read_hosts",0) if $g{debug};
 
    # Multinode
    if($g{multinode} eq 'yes') {
+      do_log("DEBUG READHOSTSDB: Multimode server",4) if $g{debug};
       my @arr = db_get_array("name,ip,vendor,model,tests,cid from devices");
       for my $host (@arr) {
          my ($name,$ip,$vendor,$model,$tests,$cid) = @$host;
@@ -1903,6 +1906,7 @@ sub read_hosts {
          $hosts{$name}{tests}  = $tests;
          $hosts{$name}{cid}    = $cid;
          $hosts{$name}{port}   = $port;
+         do_log("DEBUG READHOSTSDB: Host in DB $ip $vendor $model $tests $cid $port",5) if $g{debug};
       }
 
       @arr = db_get_array("host,test,oid,type,data from custom_excepts");
@@ -1922,6 +1926,7 @@ sub read_hosts {
 
    # Singlenode
    else {
+      do_log("DEBUG READHOSTSDB: Single mode server",4) if $g{debug};
 
       # Hashes containing textual shortcuts for bb exception & thresholds
       my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
@@ -1989,6 +1994,7 @@ sub read_hosts {
          $numtests += ($tests =~ tr/,/,/) + 1;
       }
       close HOSTS;
+      do_log("DEBUG READHOSTSDB: $numdevs devices in DB") if $g{debug};
 
       $g{numdevs}      = $numdevs;
       $g{numtests}     = $numtests;

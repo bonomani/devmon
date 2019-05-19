@@ -1,0 +1,28 @@
+grep -r MATH templates/ | egrep -e '[}1234567890]\s*\/\s*[{]' | grep -v archive| awk  '{print $1}' | sed 's/:/\//' | awk -F/  '{print $1"/"$2"/"$3" "$5}' | grep -v " #" > result_div0
+echo "Oid in transform that can be divided by 0                                                               :" `cat result_div0 | wc -l` 
+
+grep -r green templates/ | awk  '{print $1}' | sed 's/:/\//' | awk -F/  '{print $1"/"$2"/"$3" "$5}' | grep -v " #" > result_green
+echo "Oid in threshold that have a green color                                                                :" `cat result_green | wc -l`
+
+awk 'NR==FNR{A[$1]++;next}A[$1]' result_green  result_div0 > result_green_in_div0 
+echo "Oid in threshold that have a green color and a transform with div by 0                                  :" `cat result_green_in_div0 | wc -l`
+
+grep -r green templates/ | egrep -e "(:\s+:|NaN)"  | awk  '{print $1}' | sed 's/:/\//' | awk -F/  '{print $1"/"$2"/"$3" "$5}' | grep -v " #" > result_green_compliant
+echo "Oid in threshold that have a green color with a compliant thresh                                        :" `cat result_green_compliant | wc -l`
+
+awk 'FNR==NR{a[$1]++;next}!a[$1]' result_green result_div0  > result_green_not_in_div0
+echo "Oid in threshold that have a green color and a transform with div by 0 and dont have a green thresh     :" `cat result_green_not_in_div0 | wc -l`
+
+awk 'FNR==NR{a[$1]++;next}!a[$1]' result_green_compliant result_green_in_div0 > result_green_compliant_in_div0
+echo "Oid in threshold that have a green color and a transform with div by 0 and dont green compliant thresh  :" `cat result_green_compliant_in_div0 | wc -l`
+
+echo
+echo Prepraring a file that you will have to execute to modify the template dir in this folder: do_modify
+cat result_green_not_in_div0 | awk '{print "echo "$2" : green : NaN >> "$1"/thresholds"}' > do_modify
+echo Done, also you should make this file executable
+echo chmod +x do_modify
+echo ./do_modify
+echo
+echo "I will not prepare a file with the non compliant thresholde, you will have do to it manually look at the file: result_green_compliant_in_div0" 
+echo
+echo After you executed the do_modify script, you can try again this script !

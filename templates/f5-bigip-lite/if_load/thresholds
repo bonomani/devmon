@@ -2,3 +2,5 @@ ifInLoad	: yellow	: 80 	: {ifDescr} load is high
 ifInLoad	: red		: 90	: {ifDescr} load is very high
 ifOutLoad	: yellow	: 80	: {ifDescr} load is high
 ifOutLoad	: red		: 90	: {ifDescr} load is very high
+ifInLoad : green : NaN
+ifOutLoad : green : NaN

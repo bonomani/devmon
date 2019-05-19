@@ -1,0 +1,9 @@
+This is a tool to modify you template threshold file to catch error done by NaN number
+When we make rate ther is often a division that can be a NaN number. We choose apply an
+error but to make it green with this script, but you can also change the color (default to clear)
+
+Instrtuction
+1. Place all your templates (or part of it), in the template folder located in this script folder
+2. Execute the script:do_add_NaN_thresholds (this will generate a script also in this script folder 
+3. Execute the script generated: do_modify (this will modify the templates that you place in this script folder)
+4. The template are modified, you will have now to move them back your in the right folder

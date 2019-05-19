@@ -2,3 +2,5 @@ ifInLoad	: yellow	: 75	: Load is high
 ifInLoad	: red		: 95	: Load is very high
 ifOutLoad	: yellow	: 75	: Load is high
 ifOutLoad	: red		: 95	: Load is very high
+ifInLoad : green : NaN
+ifOutLoad : green : NaN

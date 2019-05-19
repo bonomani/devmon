@@ -23,6 +23,7 @@ require Exporter;
 
 # Modules
 use strict;
+use Data::Dumper;
 require dm_config;
 dm_config->import();
 
@@ -168,11 +169,13 @@ sub read_template_files {
    # Get all dirs in templates subdir
    my $template_dir = $g{homedir} . "/templates";
    opendir TEMPLATES, $template_dir or
-   log_fatal("Unable to open template directory ($!)",0);
+   log_fatal("Template error: Unable to open template directory ($!)",0);
 
    my @dirs;
    for my $entry (readdir TEMPLATES) {
       my $dir = "$template_dir/$entry";
+      do_log ("Template error: Folder $dir is not readable, skipping this template", 0)
+        and next if !-r $dir;
       push @dirs, $dir if -d $dir and $entry !~ /^\..*$/; # . and .svn or .cvs
    }
 
@@ -193,12 +196,15 @@ sub read_template_files {
 
       # Now go though our subdirs which contain our tests
       opendir MODELDIR, $dir or
-      log_fatal("Unable to open template directory ($!)",0);
+      #  log_fatal("Unable to open template directory ($!)",0);
+      do_log ("Template error: Unable to open template directory ($!), skipping this template", 0)
+        and next MODEL;
 
       TEST: for my $test (readdir MODELDIR) {
          # Only if this is a test dir
          my $testdir = "$dir/$test";
          next if !-d $testdir or $test =~ /^\..*$/; # . and .svn or .cvs
+         do_log("Template error: Unable to read test folder $dir/$test, skipping this test",0 ) and next TEST if !-r "$dir/$test";
 
          # Barf if we are trying to define a pre-existing template
          if(defined $g{templates}{$vendor}{$model}{tests}{$test}) {
@@ -323,11 +329,11 @@ sub read_specs_file {
 
    # Define the file; make sure it exists and is readable
    my $specs_file = "$dir/specs";
-   do_log ("Missing 'specs' file in $dir, skipping this test.", 0)
-      and return 0 if !-e $specs_file;
+   #do_log ("Missing 'specs' file in $dir, skipping this test.", 0)
+   #   and return 0 if !-e $specs_file;
 
    open FILE, "$specs_file"
-      or do_log("Failed to open $specs_file ($!), skipping this test.", 0)
+      or do_log("Template error: Failed to open $specs_file ($!), skipping this test.", 0)
       and return 0;
 
    # Define our applicable variables
@@ -390,10 +396,10 @@ sub read_oids_file {
 
    # Define the file; make sure it exists and is readable
    my $oid_file = "$dir/oids";
-   do_log ("Missing 'oids' file in $dir, skipping this test.", 0)
-      and return 0 if !-e $oid_file;
+   #do_log ("Missing 'oids' file in $dir, skipping this test.", 0)
+   #   and return 0 if !-e $oid_file;
    open FILE, "$oid_file"
-      or do_log("Failed to open $oid_file ($!), skipping this test.", 0)
+      or do_log("Template error: Failed to open $oid_file ($!), skipping this test.", 0)
       and return 0;
 
    # Go through file, read in oids
@@ -468,10 +474,10 @@ sub read_transforms_file {
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
    my $trans_file = "$dir/transforms";
-   do_log ("Missing 'transforms' file in $dir, skipping this test.", 0)
-      and return 0 if !-e $trans_file;
+   #do_log ("Missing 'transforms' file in $dir, skipping this test.", 0)
+   #   and return 0 if !-e $trans_file;
    open FILE, "$trans_file"
-      or do_log("Failed to open $trans_file ($!), skipping this test.", 0)
+      or do_log("Template error: Failed to open $trans_file ($!), skipping this test.", 0)
       and return 0;
 
    # Go through file, read in oids
@@ -992,10 +998,10 @@ sub read_thresholds_file {
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
    my $thresh_file = "$dir/thresholds";
-   do_log("Missing 'thresholds' file in $dir, skipping this test.", 0)
-      and return 0 if !-e $thresh_file;
+   #do_log("Missing 'thresholds' file in $dir, skipping this test.", 0)
+   #   and return 0 if !-e $thresh_file;
    open FILE, "$thresh_file"
-      or do_log("Failed to open $thresh_file ($!), skipping this test.", 0)
+      or do_log("Template error: Failed to open $thresh_file ($!), skipping this test.", 0)
       and return 0;
    # Go through file, read in oids
    while (my $line = <FILE>) {
@@ -1087,8 +1093,8 @@ sub read_exceptions_file {
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
    my $except_file = "$dir/exceptions";
-   do_log ("Missing 'exceptions' file in $dir, skipping this test.", 0)
-      and return 0 if !-e $except_file;
+   #do_log ("Missing 'exceptions' file in $dir, skipping this test.", 0)
+   #   and return 0 if !-e $except_file;
    open FILE, "$except_file"
       or do_log("Failed to open $except_file ($!), skipping this test.", 0)
       and return 0;
@@ -1166,11 +1172,11 @@ sub read_message_file {
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
    my $msg_file = "$dir/message";
-   do_log ("Missing 'message' file in $dir, skipping this test.", 0)
-      and return 0 if !-e $msg_file;
+   #do_log ("Missing 'message' file in $dir, skipping this test.", 0)
+   #   and return 0 if !-e $msg_file;
 
    open FILE, "$msg_file"
-      or do_log("Failed to open $msg_file ($!), skipping this test.", 0)
+      or do_log("Template error: Failed to open $msg_file ($!), skipping this test.", 0)
       and return 0;
 
    # Go through file, read in oids

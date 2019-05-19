@@ -192,7 +192,6 @@ sub snmp_query {
 
    # Check the status of any currently running forks
    &check_forks();
-
    # Start forks if needed
    #fork_queries() if keys %{$g{forks}} < $g{numforks};
    fork_queries() if (keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs} ) ;
@@ -440,8 +439,8 @@ sub snmp_query {
 # Start our forked query processes, if needed
 sub fork_queries {
    # Close our DB handle to avoid forked sneakiness
+   
    $g{dbh}->disconnect() if defined $g{dbh} and $g{dbh} ne '';
-
    # We should only enter this loop if we are below numforks
    #    while(keys %{$g{forks}} < $g{numforks}) {
    while(keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs}) {
