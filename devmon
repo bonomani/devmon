@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 our $VERSION = '0.3.1-beta1';
-#    Devmon: An SNMP data collecteor & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Devmon: An SNMP data collecteor & page generator for the
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #
 #    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/devmon $
@@ -14,42 +14,39 @@ our $VERSION = '0.3.1-beta1';
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
 
- # Global Modules
-  use strict;
+# Global Modules
+use strict;
 
- # Devmon specific modules
-  use FindBin;
-  use lib "$FindBin::Bin/modules";
-  use dm_config;
-  use dm_templates;
-  use dm_snmp;
-  use dm_tests;
-  use dm_msg;
+# Devmon specific modules
+use FindBin;
+use lib "$FindBin::Bin/modules";
+use dm_config;
+use dm_templates;
+use dm_snmp;
+use dm_tests;
+use dm_msg;
 
- # Do start-up housekeeping
-  initialize($VERSION);
+# Do start-up housekeeping
+initialize($VERSION);
 
- # Enter main loop
-  do_log("Entering poll loop", 0);
-  while (1) {
-
+# Enter main loop
+do_log("Entering poll loop", 0);
+while (1) {
    # Read in template data
-    read_templates();
+   read_templates();
 
    # Load/reload test data & do failover recover
-    sync_servers();
+   sync_servers();
 
    # Now collect SNMP data
-    poll_devices();
+   poll_devices();
 
    # Now do tests
-    tests(); 
-    
+   tests(); 
+
    # Now send messages
-    send_msgs(); 
+   send_msgs(); 
 
    # Do time tests and then sleep
-    time_test();
-
-  }
-
+   time_test();
+}
