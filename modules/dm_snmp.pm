@@ -3,8 +3,8 @@ require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(poll_devices snmp_query);
 
-#    Devmon: An SNMP data collector & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Devmon: An SNMP data collector & page generator for the
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
 #
@@ -17,7 +17,6 @@ require Exporter;
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
 
 # Modules
 use strict;
@@ -62,29 +61,15 @@ sub poll_devices {
    my %snmp_input = ();
    %{$g{snmp_data}} = ();
 
-   # Query our hobbit server for device reachability status
+   # Query our Xymon server for device reachability status
    # we dont want to waste time querying devices that are down
-   # Note: this doesn't work for the original BigBrother server
-   if($g{bbtype} eq 'hobbit' or $g{bbtype} eq 'xymon') {
-      do_log("Getting device status from $g{bbtype} at " . $g{dispserv} . ":" . $g{dispport},1);
-      %{$g{hobbit_color}} = ();
-      my $sock = IO::Socket::INET->new (
-         PeerAddr => $g{dispserv},
-         PeerPort => $g{dispport},
-         Proto    => 'tcp',
-         Timeout  => 10,
-      );
-
-      if(defined $sock) {
-         print $sock "hobbitdboard test=^conn\$ fields=hostname,color,line1";
-         shutdown($sock, 1);
-         while(<$sock>) {
-            my ($device,$color,$line1) = split /\|/;
-            my ($l1col) = ($line1 =~ /^(\w+)/);
-            do_log("DEBUG SNMP: $device has $g{bbtype} status $color ($l1col)",2) if $g{debug};
-            $g{hobbit_color}{$device} = $color ne "blue" && $color || $l1col;
-         }
-      }
+   do_log("Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport},1);
+   %{$g{xymon_color}} = ();
+   foreach (`$ENV{XYMON} $g{dispserv} "xymondboard test=^$g{pingcolumn}\$ fields=hostname,color,line1"`) {
+      my ($device,$color,$line1) = split /\|/;
+      my ($l1col) = ($line1 =~ /^(\w+)/);
+      do_log("DEBUG SNMP: $device has Xymon status $color ($l1col)",2) if $g{debug};
+      $g{xymon_color}{$device} = $color ne "blue" && $color || $l1col;
    }
 
    # Build our query hash
@@ -93,11 +78,11 @@ sub poll_devices {
       # Skip this device if we werent able to reach it during update_indexes
       # next unless $indexes->{$device}{reachable};
 
-      # Skip this device if we are running a hobbit server and the
+      # Skip this device if we are running a Xymon server and the
       # server thinks that it isnt reachable
-      if(defined $g{hobbit_color}{$device} and
-         $g{hobbit_color}{$device} ne 'green') {
-         do_log("$device has a non-green $g{bbtype} status, skipping SNMP.", 2);
+      if(defined $g{xymon_color}{$device} and
+         $g{xymon_color}{$device} ne 'green') {
+         do_log("$device has a non-green Xymon status, skipping SNMP.", 2);
          next QUERYHASH;
       }
 
@@ -157,10 +142,9 @@ sub poll_devices {
                # repeats to populate our repeater value
                $snmp_input{$device}{reps}{$number} =
                $g{max_rep_hist}{$device}{$number};
-            }
 
             # Otherwise this is a nonrepeater (leaf)
-            else {
+            } else {
                $snmp_input{$device}{nonreps}{$number} = 1;
             }
          }
@@ -219,8 +203,11 @@ sub snmp_query {
                   alarm 15;
                   do {
                      my $read = $g{forks}{$fork}{CS}->getline();
-                     if(defined $read and $read ne '') {$data_in .= $read}
-                     else {select undef, undef, undef, 0.001}
+                     if (defined $read and $read ne '') {
+                        $data_in .= $read;
+                     } else {
+                        select undef, undef, undef, 0.001;
+                     }
                   } until $data_in =~ s/\nEOF\n$//s;
                   alarm 0;
                };
@@ -244,8 +231,7 @@ sub snmp_query {
                   $g{fail}{$dev} = 0;
                   # increment the per-fork polled device counter
                   $g{forks}{$fork}{polled}++;
-               }
-               else {
+               } else {
                   print "failed thaw on $dev\n";
                   next;
                }
@@ -273,10 +259,9 @@ sub snmp_query {
                # Now put our fork into an idle state
                --$active_forks;
                delete $g{forks}{$fork}{dev};
-            }
 
             # No data, lets make sure we're not hung
-            else {
+            } else {
                my $pid = $g{forks}{$fork}{pid};
                # See if we've exceeded our max poll time
                if((time - $g{forks}{$fork}{time}) > $g{maxpolltime}) {
@@ -293,10 +278,9 @@ sub snmp_query {
                   # as if thise host is causing snmp problems, it could wonk
                   # our poll time
                   ++$g{fail}{$dev};
-               }
 
                # We havent exceeded our poll time, but make sure its still live
-               elsif (!kill 0, $pid) {
+               } elsif (!kill 0, $pid) {
                   # Whoops, looks like our fork died somewhow
                   do_log("Fork $fork ($pid) died polling $dev",0);
                   close $g{forks}{$fork}{CS} or do_log("Closing socket to fork $fork failed: $!",1);
@@ -321,8 +305,7 @@ sub snmp_query {
                my $retries = $g{snmptries} - $g{fail}{$dev};
                $retries = 1 if $retries < 1;
                $snmp_input->{$dev}{retries} = $retries;
-            }
-            else {
+            } else {
                $snmp_input->{$dev}{retries} = $g{snmptries};
             }
 
@@ -368,8 +351,11 @@ sub snmp_query {
                      alarm 5;
                      do {
                         my $read = $g{forks}{$fork}{CS}->getline();
-                        if(defined $read and $read ne '') {$data_in .= $read}
-                        else {select undef, undef, undef, 0.001}
+                        if(defined $read and $read ne '') {
+                           $data_in .= $read ;
+                        } else {
+                           select undef, undef, undef, 0.001 ;
+                        }
                      } until $data_in =~ s/\nEOF\n$//s;
                      alarm 0;
                   };
@@ -387,8 +373,7 @@ sub snmp_query {
                   if (defined $hashref) {
                      do_log("DEBUG SNMP: Dethawing data for ping of fork $fork",4) if $g{debug};
                      %returned = %{ thaw($data_in) };
-                  }
-                  else {
+                  } else {
                      print "failed thaw for ping of fork $fork\n";
                      next;
                   }
@@ -471,8 +456,7 @@ sub fork_queries {
          $g{forks}{$num}{pid} = $pid;
          $g{forks}{$num}{time} = time;
          $g{forks}{$num}{CS}->blocking(0);
-      }
-      elsif(defined $pid) {
+      } elsif(defined $pid) {
          # Child code here
          $g{parent} = 0;              # We arent the parent any more...
          do_log("DEBUG SNMP: Fork $num using sockets $g{forks}{$num}{PS} <-> $g{forks}{$num}{CS} for IPC") if $g{debug};
@@ -483,8 +467,7 @@ sub fork_queries {
          $0 = "devmon-$num";                 # Remove our 'master' tag
          fork_sub($num);                # Enter our neverending query loop
          exit;                   # We should never get here, but just in case
-      }
-      else {
+      } else {
          do_log("Error spawning snmp worker fork ($!)",0);
       }
    }
@@ -578,24 +561,20 @@ sub fork_sub {
          $data_out{error}{$error_str} = 1;
          send_data($sock, \%data_out);
          next DEVICE;
-      }
-      elsif(!defined $snmp_ver) {
+      } elsif(!defined $snmp_ver) {
          my $error_str =
          "No snmp version found for $dev";
          $data_out{error}{$error_str} = 1;
          send_data($sock, \%data_out);
          next DEVICE;
-      }
-      elsif($snmp_ver eq '1') {
+      } elsif($snmp_ver eq '1') {
          $session = SNMPv1_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
-      }
-      elsif($snmp_ver =~ /^2c?$/) {
+      } elsif($snmp_ver =~ /^2c?$/) {
          $session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
          $session->{use_getbulk} = 1;
-      }
 
       # Whoa, we dont support this version of SNMP
-      else {
+      } else {
          my $error_str =
          "Unsupported SNMP version for $dev ($snmp_ver)";
          $data_out{error}{$error_str} = 1;
@@ -665,8 +644,7 @@ sub fork_sub {
                   $data_out{$oid}{val}  = $value;
                   $data_out{$oid}{time} = time;
                }
-            }
-            else {
+            } else {
                my $snmp_err;
                ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
                my $error_str = "snmpget $dev ($snmp_err)";
@@ -710,8 +688,7 @@ sub fork_sub {
                $data_out{error}{$error_str} = 0;
                ++$failed_query;
             }
-         }
-         else {
+         } else {
             # Record our maxrep value for our next poll cycle
             $data_out{maxrep}{$oid} = $num_reps + 1;
          }
