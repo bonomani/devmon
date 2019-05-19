@@ -2,7 +2,7 @@ package dm_config;
 require Exporter;
 @ISA	   = qw(Exporter);
 @EXPORT    = qw(initialize sync_servers time_test do_log db_connect
-bin_path na nd db_get db_get_array db_do log_fatal);
+na nd db_get db_get_array db_do log_fatal);
 @EXPORT_OK = qw(%c);
 
 #    Devmon: An SNMP data collector & page generator for the BigBrother &
@@ -2031,27 +2031,6 @@ sub do_fork {
          log_fatal("Can't fork: $!",0);
       }
    }
-}
-
-# Find path to a binary file on the system
-sub bin_path {
-   my ($bin) = @_;
-
-   # Determine where we should search for binaries
-   my @pathdirs;
-   @pathdirs = split /:/, $ENV{PATH} if defined $ENV{PATH};
-   @pathdirs = ('/bin','/usr/bin','/usr/local/bin') if $#pathdirs == -1;
-
-   # Now iterate through our dirs, and return if we find a binary
-   for my $dir (@pathdirs) {
-
-      # Remove any trailing slashes
-      $dir =~ s/(.+)\/$/$1/;
-      return "$dir/$bin" if -x "$dir/$bin";
-   }
-
-   # Didnt find it, return undef
-   return undef;
 }
 
 # Sub called by sort, returns results numerically ascending
