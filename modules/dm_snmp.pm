@@ -4,7 +4,7 @@ require Exporter;
 @EXPORT = qw(poll_devices snmp_query);
 
 #    Devmon: An SNMP data collector & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
 #
@@ -17,7 +17,6 @@ require Exporter;
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
 
 # Modules
 use strict;
@@ -62,28 +61,25 @@ sub poll_devices {
    my %snmp_input = ();
    %{$g{snmp_data}} = ();
 
-   # Query our hobbit server for device reachability status
+   # Query our Xymon server for device reachability status
    # we dont want to waste time querying devices that are down
-   # Note: this doesn't work for the original BigBrother server
-   if($g{bbtype} eq 'hobbit' or $g{bbtype} eq 'xymon') {
-      do_log("Getting device status from $g{bbtype} at " . $g{dispserv} . ":" . $g{dispport},1);
-      %{$g{hobbit_color}} = ();
-      my $sock = IO::Socket::INET->new (
-         PeerAddr => $g{dispserv},
-         PeerPort => $g{dispport},
-         Proto    => 'tcp',
-         Timeout  => 10,
-      );
+   do_log("Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport},1);
+   %{$g{xymon_color}} = ();
+   my $sock = IO::Socket::INET->new (
+      PeerAddr => $g{dispserv},
+      PeerPort => $g{dispport},
+      Proto    => 'tcp',
+      Timeout  => 10,
+   );
 
-      if(defined $sock) {
-         print $sock "hobbitdboard test=^conn\$ fields=hostname,color,line1";
-         shutdown($sock, 1);
-         while(<$sock>) {
-            my ($device,$color,$line1) = split /\|/;
-            my ($l1col) = ($line1 =~ /^(\w+)/);
-            do_log("DEBUG SNMP: $device has $g{bbtype} status $color ($l1col)",2) if $g{debug};
-            $g{hobbit_color}{$device} = $color ne "blue" && $color || $l1col;
-         }
+   if(defined $sock) {
+      print $sock "xymondboard test=^conn\$ fields=hostname,color,line1";
+      shutdown($sock, 1);
+      while(<$sock>) {
+         my ($device,$color,$line1) = split /\|/;
+         my ($l1col) = ($line1 =~ /^(\w+)/);
+         do_log("DEBUG SNMP: $device has Xymon status $color ($l1col)",2) if $g{debug};
+         $g{xymon_color}{$device} = $color ne "blue" && $color || $l1col;
       }
    }
 
@@ -93,11 +89,11 @@ sub poll_devices {
       # Skip this device if we werent able to reach it during update_indexes
       # next unless $indexes->{$device}{reachable};
 
-      # Skip this device if we are running a hobbit server and the
+      # Skip this device if we are running a Xymon server and the
       # server thinks that it isnt reachable
-      if(defined $g{hobbit_color}{$device} and
-         $g{hobbit_color}{$device} ne 'green') {
-         do_log("$device has a non-green $g{bbtype} status, skipping SNMP.", 2);
+      if(defined $g{xymon_color}{$device} and
+         $g{xymon_color}{$device} ne 'green') {
+         do_log("$device has a non-green Xymon status, skipping SNMP.", 2);
          next QUERYHASH;
       }
 

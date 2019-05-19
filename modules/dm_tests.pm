@@ -4,7 +4,7 @@ require Exporter;
 @EXPORT = qw(tests make_ifc_array);
 
 #    Devmon: An SNMP data collector & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007 Francois Lacroix
 #
@@ -17,7 +17,6 @@ require Exporter;
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
 
 # Modules
 use strict;
@@ -89,10 +88,10 @@ sub tests {
          # from going insane when we start doing transforms
          oid_hash($oids, $device, $tmpl, $thr);
 
-         # Check to see if this device was unreachable in hobbit
+         # Check to see if this device was unreachable in xymon
          # If so, dont bother doing transforms or rendering the message
-         if(!defined $g{hobbit_color}{$device} or
-            $g{hobbit_color}{$device} eq 'green') {
+         if(!defined $g{xymon_color}{$device} or
+            $g{xymon_color}{$device} eq 'green') {
 
             # If the value is not yet calculated, perform the transformation.
             # Otherwise this is polled oid, then perform the threshold
@@ -179,7 +178,7 @@ sub oid_hash {
       if (!defined $num or !defined $snmp->{$num}
             or !defined $snmp->{$num}{val} )
       {
-         do_log("No SNMP data found for $oid on $device", 0) if ($g{hobbit_color}{$device} eq 'green');
+         do_log("No SNMP data found for $oid on $device", 0) if ($g{xymon_color}{$device} eq 'green');
          next
       }
 
@@ -478,7 +477,7 @@ sub trans_math {
                $oid_h->{val}{$leaf}   = 'NaN';
             } else {
                $oid_h->{val}{$leaf}   = $@;
-            } 
+            }
             do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
             $oid_h->{color}{$leaf} = 'clear';
             $oid_h->{error}{$leaf} = 1;
@@ -1031,7 +1030,7 @@ sub trans_eval {
          # Do our eval and set our time
          my $result = eval($expr);
          $oid_h->{time}{$leaf} = time;
-         if($@ =~ /^Undefined subroutine/) { 
+         if($@ =~ /^Undefined subroutine/) {
             $result = 0 ;
          } elsif($@) {
             do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)");
@@ -1054,7 +1053,7 @@ sub trans_eval {
       my $result = eval $expr;
       $oid_h->{time} = time;
 
-      if($@ =~ /^Undefined subroutine/) { 
+      if($@ =~ /^Undefined subroutine/) {
          $result = 0 ;
       } elsif($@) {
          do_log("Failed eval for TRANS_STR on $oid: $expr ($@)");
@@ -1098,7 +1097,6 @@ sub trans_best {
 
       for my $leaf (keys %{$oids->{$oid_h->{pri_oid}}{val}}) {
 
-
          # Go through each parent oid for this leaf
          for my $dep_oid (@dep_oids) {
             my $dep_oid_h = \%{$oids->{$dep_oid}};
@@ -1108,7 +1106,7 @@ sub trans_best {
             next if ($dep_oid_h->{error}{$leaf} && $dep_oid_h->{color}{$leaf} eq 'blue');
 
             if($dep_oid_h->{repeat}) {
-               if(!defined $oid_h->{color}{$leaf} or 
+               if(!defined $oid_h->{color}{$leaf} or
                   $colors{$dep_oid_h->{color}{$leaf}} <
                   $colors{$oid_h->{color}{$leaf}}) {
                   $oid_h->{val}{$leaf}       = $dep_oid_h->{val}{$leaf};
@@ -1482,9 +1480,9 @@ sub trans_switch {
          }
 
          my $then;
-         if(defined $num) { 
+         if(defined $num) {
             $then = $cases->{$num}{then} ;
-         } else { 
+         } else {
             $then = $default ;
          }
          while($then =~ /\{(\S+)\}/) {
@@ -1530,9 +1528,9 @@ sub trans_switch {
       }
 
       my $then;
-      if(defined $num) { 
+      if(defined $num) {
          $then = $cases->{$num}{then} ;
-      } else { 
+      } else {
          $then = $default ;
       }
 
@@ -1601,9 +1599,9 @@ sub trans_tswitch {
          }
 
          my $then;
-         if(defined $num) { 
+         if(defined $num) {
             $then = $cases->{$num}{then} ;
-         } else { 
+         } else {
             $then = $default ;
          }
          while($then =~ /\{(\S+)\}/) {
@@ -1659,9 +1657,9 @@ sub trans_tswitch {
       }
 
       my $then;
-      if(defined $num) { 
+      if(defined $num) {
          $then = $cases->{$num}{then} ;
-      } else { 
+      } else {
          $then = $default ;
       }
       while($then =~ /\{(\S+)\}/) {
@@ -1731,7 +1729,7 @@ sub trans_regsub {
       for my $leaf (keys %{$oids->{$oid_h->{pri_oid}}{val}}) {
 
          # Skip if there was a dependency error for this leaf
-         next if $oid_h->{error}{$leaf}; 
+         next if $oid_h->{error}{$leaf};
 
          # Update our dep_val values so that when we eval the expression it
          # will use the values of the proper leaf of the parent repeater oids
@@ -1809,7 +1807,6 @@ sub trans_chain {
       $oid_h->{color}  = 'yellow';
       $oid_h->{error}  = 1;
    }
-
 
    # If our target is a repeater, and our source is a non-repeater,
    # then our transform oid will consequently be a non-repeater
@@ -1984,7 +1981,7 @@ sub trans_sort {
 
    # Extract all our our parent oids from the expression, first
    my ($src_oid) = $expr =~ /^\{(.+)\}$/;
-   validate_deps($device, $oids, $oid, [$src_oid]) 
+   validate_deps($device, $oids, $oid, [$src_oid])
       or return;
 
    do_log("Transforming $src_oid to $oid via 'sort' transform",0) if $g{debug};
@@ -2085,7 +2082,7 @@ sub trans_index {
    my ($src_oid) = $oid_h->{trans_data} =~ /^\{(.+)\}$/;
 
    # Validate our dependencies
-   validate_deps($device, $oids, $oid, [$src_oid]) 
+   validate_deps($device, $oids, $oid, [$src_oid])
       or return;
 
    do_log("Transforming $src_oid to $oid via index transform",0) if $g{debug};
@@ -2207,32 +2204,29 @@ sub render_msg {
    # Hash shortcut
    my $msg_template = $tmpl->{msg};
    my $dev          = \%{$g{dev_data}{$device}};
-   my $bb_host      = $device;
-   $bb_host =~ s/\./,/g;
+   my $hostname     = $device;
+   $hostname =~ s/\./,/g;
 
    do_log("DEBUG TEST: Rendering $test message for $device") if $g{debug};
 
    # Build readable timestamp
-   my $now= $g{bbdateformat} ?  strftime($g{bbdateformat},localtime) : scalar(localtime) ;
+   my $now= $g{xymondateformat} ?  strftime($g{xymondateformat},localtime) : scalar(localtime) ;
 
    # No message template?
    if(!defined $msg_template) {
-
-      return "status $bb_host.$test clear $now" .
+      return "status $hostname.$test clear $now" .
       "\n\nCould not locate template for this device.\n"     .
       "Please check devmon logs.\n\n"                         .
       "Devmon version $g{version} running on $g{nodename}\n";
 
-   # Do we have a hobbit color, and if so, is it green?
-   } elsif(defined $g{hobbit_color}{$device} and
-      $g{hobbit_color}{$device} ne 'green') {
-      my $bbname = ucfirst $g{bbtype};
-      return "status $bb_host.$test clear $now" .
-      "\n\n$bbname reports this device is unreachable.\n"        .
+   # Do we have a xymon color, and if so, is it green?
+   } elsif(defined $g{xymon_color}{$device} and
+      $g{xymon_color}{$device} ne 'green') {
+      return "status $hostname.$test clear $now" .
+      "\n\nXymon reports this device is unreachable.\n"        .
       "Suspending this test until reachability is restored\n\n" .
       "Devmon version $g{version} running on $g{nodename}\n";
    }
-
 
    # Our outbound message
    my $msg         = '';
@@ -2276,17 +2270,17 @@ sub render_msg {
                my ($header,$name,$all,$dir,$pri,$do_max);
                my @datasets;
                for my $rrd_opt (split /\s*;\s*/, $rrd_data) {
-                  if($rrd_opt eq 'all') { 
+                  if($rrd_opt eq 'all') {
                      $all = 1 ;
-                  } elsif($rrd_opt eq 'dir') { 
+                  } elsif($rrd_opt eq 'dir') {
                      $dir = 1 ;
-                  } elsif($rrd_opt eq 'max') { 
+                  } elsif($rrd_opt eq 'max') {
                      $do_max = 1 ;
-                  } elsif($rrd_opt =~ /^name:(\S+)$/) { 
+                  } elsif($rrd_opt =~ /^name:(\S+)$/) {
                      $name = $1 ;
-                  } elsif($rrd_opt =~ /^pri:(\S+)$/) { 
+                  } elsif($rrd_opt =~ /^pri:(\S+)$/) {
                      $pri = $1 ;
-                  } elsif($rrd_opt =~ /^DS:(\S+)$/) { 
+                  } elsif($rrd_opt =~ /^DS:(\S+)$/) {
                      push @datasets, $1 ;
                   }
                }
@@ -2464,7 +2458,6 @@ sub render_msg {
                next T_LEAF if defined $ignore and $val =~ /^(?:$ignore)$/;
                next T_LEAF if defined $only and $val !~ /^(?:$only)$/;
 
-
                # If we arent alarming on a value, its green by default
                $color = 'blue' if !$alarm;
 
@@ -2494,7 +2487,7 @@ sub render_msg {
                # See if we have a valid flag, if so, replace the
                # place holder with flag data, if not, just replace
                # it with the oid value.  Also modify the global color
-               # Display a bb/hobbit color string (i.e. "&red ")
+               # Display a Xymon color string (i.e. "&red ")
                if(defined $flag) {
                   if($flag eq 'color') {
 
@@ -2683,7 +2676,6 @@ sub render_msg {
                      $line=~ s/\{$root\}// ;
                   }
 
-
                   # Get oid msg and replace any inline oid dependencies
                   my $oid_msg = $oid_h->{msg};
                   $oid_msg = parse_deps($oids, $oid_msg, undef);
@@ -2747,8 +2739,8 @@ sub render_msg {
    # Add our errors
    $msg = join "\n", ($errors, $msg) if $errors ne '';
 
-   # Now add our header so bb/hobbit can determine the page color
-   $msg = "status $bb_host.$test $worst_color $now" .
+   # Now add our header so xymon can determine the page color
+   $msg = "status $hostname.$test $worst_color $now" .
    "$extrastatus\n\n$msg";
 
    # Add our oh-so-stylish devmon footer
@@ -2831,7 +2823,6 @@ sub parse_deps {
    # Try to guard against recursion loops
    $depth = 1 if !defined $depth;
    return "Recursion limit exceeded." if ++$depth > 10;
-
 
    # Make sure we have a message to parse!
    return "Undefined msg" if !defined $msg;
@@ -3096,7 +3087,7 @@ sub validate_deps {
    for my $dep_oid (@$dep_arr) {
       if($oids->{$dep_oid}{repeat}) {
          $oid_h->{pri_oid} = $dep_oid;
-         $oid_h->{repeat}  = $oids->{$dep_oid}{repeat}; 
+         $oid_h->{repeat}  = $oids->{$dep_oid}{repeat};
          last;
       }
    }
@@ -3119,12 +3110,12 @@ sub validate_deps {
             $dep_oid_h->{error}{$leaf} : $dep_oid_h->{error};
             my $color = ($dep_oid_h->{repeat}) ?
             $dep_oid_h->{color}{$leaf} : $dep_oid_h->{color};
-            my $msg = ($dep_oid_h->{repeat}) ? 
+            my $msg = ($dep_oid_h->{repeat}) ?
             $dep_oid_h->{msg}{$leaf} : $dep_oid_h->{mgs};
 
             if(!defined $val) {
-               # We should never be here with an undef val as it 
-               # should be alread treated: severity increase to yellow  
+               # We should never be here with an undef val as it
+               # should be alread treated: severity increase to yellow
 
                $oid_h->{val}{$leaf}   = 'parent data missing';
                $oid_h->{time}{$leaf}  = time;
@@ -3157,8 +3148,8 @@ sub validate_deps {
                      $oid_h->{val}{$leaf}  .= "|". $val . '<-inherited';
                   } else {
                      $oid_h->{val}{$leaf}  .= "|". $val;
-                  } 
-                  if (defined $msg) {               
+                  }
+                  if (defined $msg) {
                      if (defined $oid_h->{msg}{$leaf} ) {
                         $oid_h->{msg}{$leaf}  .= " & ". $msg;
                      } else {
@@ -3185,7 +3176,7 @@ sub validate_deps {
             # Throw one error message
             do_log("Error '$oid_h->{val}{$leaf}' while parsing '$dep_oid' for '$leaf' on $device",5) if $oid_h->{error}{$leaf};
          }
-         # Throw one error message per leaf, to prevent log bloat    
+         # Throw one error message per leaf, to prevent log bloat
          do_log("Error(s) '$oid_h->{val}{$leaf}' while parsing '$leaf' on $device",4) if $oid_h->{error}{$leaf};
 
          # Only return an error value all of the dependent oids leaves failed
@@ -3253,7 +3244,7 @@ sub validate_deps {
             $oid_h->{color} = 'yellow';
             $oid_h->{error} = 1;
             next;
-         } else { 
+         } else {
             # No errors.  Over the line! Mark it zero, dude
             $oid_h->{error} = 0;
 

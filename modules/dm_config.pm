@@ -6,7 +6,7 @@ bin_path na nd db_get db_get_array db_do log_fatal);
 @EXPORT_OK = qw(%c);
 
 #    Devmon: An SNMP data collector & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
 #
@@ -19,7 +19,6 @@ bin_path na nd db_get db_get_array db_do log_fatal);
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
 
 # The global option hash. Be afraid!
 use vars qw(%g);
@@ -55,9 +54,9 @@ sub initialize {
       'active'        => '',
       'pidfile'       => '',
       'logfile'       => '',
-      'bbhosts'       => '',
-      'bbtag'         => '',
-      'bblocation'    => '',
+      'hostscfg'       => '',
+      'xymontag'         => '',
+      'XYMONNETWORK'    => '',
       'nodename'      => '',
       'log'           => '',
 
@@ -69,7 +68,7 @@ sub initialize {
       'dsn'           => '',
       'dbh'           => '',
 
-      # BB combo variables
+      # Xymon combo variables
       'dispserv'      => '',
       'msgsize'       => 0,
       'msgsleep'      => 0,
@@ -109,7 +108,7 @@ sub initialize {
       'fails'         => {},
       'max_rep_hist'  => {},
       'node_status'   => {},
-      'hobbit_color'  => {},
+      'xymon_color'  => {},
       'test_results'  => [],
 
       # User-definable variable controls
@@ -123,15 +122,15 @@ sub initialize {
          'regex'   => 'yes|no',
          'set'     => 0,
          'case'    => 0 },
-      'bbhosts'   => { 'default' => (defined $ENV{HOSTSCFG} and $ENV{HOSTSCFG} ne '') ? $ENV{HOSTSCFG} :(defined $ENV{BBHOSTS} and $ENV{BBHOSTS} ne '') ? $ENV{BBHOSTS} : '/home/hobbit/server/etc/bb-hosts',
+      'hostscfg'   => { 'default' => (defined $ENV{HOSTSCFG} and $ENV{HOSTSCFG} ne '') ? $ENV{HOSTSCFG} :(defined $ENV{HOSTSCFG} and $ENV{HOSTSCFG} ne '') ? $ENV{HOSTSCFG} : '/home/xymon/server/etc/hosts.cfg',
          'regex'   => '.+',
          'set'     => 0,
          'case'    => 1 },
-      'bblocation'     => { 'default' => (defined $ENV{XYMONNETWORK} and $ENV{XYMONNETWORK} ne '') ? $ENV{XYMONNETWORK} : (defined $ENV{BBLOCATION} and $ENV{BBLOCATION} ne '') ? $ENV{BBLOCATION} : '',
+      'XYMONNETWORK'     => { 'default' => (defined $ENV{XYMONNETWORK} and $ENV{XYMONNETWORK} ne '') ? $ENV{XYMONNETWORK} : '',
          'regex'   => '\w+',
          'set'     => 0,
          'case'    => 1 },
-      'bbtag'     => { 'default' => 'DEVMON',
+      'xymontag'     => { 'default' => 'DEVMON',
          'regex'   => '\w+',
          'set'     => 0,
          'case'    => 1 },
@@ -171,19 +170,15 @@ sub initialize {
 
    # Our global options
    %{$g{globals}} = (
-      'bbtype'      => { 'default' => 'xymon',
-         'regex'   => 'bb|hobbit|xymon',
-         'set'     => 0,
-         'case'    => 0 },
-      'dispserv'    => { 'default' => (defined $ENV{XYMSRV} and $ENV{XYMSRV} ne '' ) ? $ENV{XYMSRV} : (defined $ENV{BBDISP} and $ENV{BBDISP} ne '') ? $ENV{BBDISP} : 'localhost',
+      'dispserv'    => { 'default' => (defined $ENV{XYMSRV} and $ENV{XYMSRV} ne '' ) ? $ENV{XYMSRV} : 'localhost',
          'regex'   => '\S+',
          'set'     => 0,
          'case'    => 0 },
-      'dispport'    => { 'default' => (defined $ENV{XYMONDPORT} and $ENV{XYMONDPORT} ne '') ? $ENV{XYMONDPORT} : (defined $ENV{BBPORT} and $ENV{BBPORT} ne '') ? $ENV{BBPORT} :  1984,
+      'dispport'    => { 'default' => (defined $ENV{XYMONDPORT} and $ENV{XYMONDPORT} ne '') ? $ENV{XYMONDPORT} : 1984,
          'regex'   => '\d+',
          'set'     => 0,
          'case'    => 0 },
-      'bbdateformat' => { 'default' => (defined $ENV{XYMONDATEFORMAT} and $ENV{XYMONDATEFORMAT} ne '') ? $ENV{XYMONDATEFORMAT} : (defined $ENV{BBDATEFORMAT} and $ENV{BBDATEFORMAT} ne '') ? $ENV{BBDATEFORMAT} : '',
+      'xymondateformat' => { 'default' => (defined $ENV{XYMONDATEFORMAT} and $ENV{XYMONDATEFORMAT} ne '') ? $ENV{XYMONDATEFORMAT} : '',
          'regex'   => '.+',
          'set'     => 0,
          'case'    => 1 },
@@ -245,7 +240,7 @@ sub initialize {
          "syncconfig"      => \$syncconfig,
          "synctemplates"   => \$synctemps,
          "resetowners"     => \$resetowner,
-         "readbbhosts"     => \$readhosts
+         "readhostscfg"     => \$readhosts
       ) or usage () ;
 
 	# Check / fix command line options
@@ -281,7 +276,7 @@ sub initialize {
    sync_global_config()           if $syncconfig;
    dm_templates::sync_templates() if $synctemps;
    reset_ownerships()             if $resetowner;
-   read_bb_hosts()                if $readhosts;
+   read_hosts_cfg()               if $readhosts;
 
    # Open the log file
    open_log();
@@ -291,7 +286,6 @@ sub initialize {
 
    # Set our pid
    $g{mypid} = $$;
-
 
    # PID file handling
    if($g{daemonize}) {
@@ -328,7 +322,7 @@ sub initialize {
       if $nodename =~ /not found|permission denied/i;
 
       # Remove domain info, if any
-      # Hobbit best practice is to use fqdn, if the user doesnt want it
+      # Xymon best practice is to use fqdn, if the user doesnt want it
       # we assume they have set NODENAME correctly in devmon.cfg
       # $nodename =~ s/\..*//;
       chomp $nodename;
@@ -355,7 +349,7 @@ sub initialize {
    do_log("---Initilizing devmon...",0);
    do_log("Verbosity level: $g{verbose}",1);
    do_log("Logging to $g{logfile}",1);
-   do_log("Node $g{my_nodenum} reporting to $g{bbtype} at $g{dispserv}",0);
+   do_log("Node $g{my_nodenum} reporting to Xymon at $g{dispserv}",0);
    do_log("Running under process id: $g{mypid}",0);
 
    # Dump some configs in debug mode
@@ -367,7 +361,6 @@ sub initialize {
          do_log(sprintf("DEBUG CONFIG: local %s: %s",$_,$g{$_}));
       }
    }
-
 
    # We are now initialized
    $g{initialized} = 1;
@@ -649,7 +642,6 @@ sub sync_servers {
       $num_tests_needed = 0 if $num_tests_needed < 0;
       db_do("update nodes set need_tests=$num_tests_needed " .
          "where node_num=$g{my_nodenum}");
-
 
    # If we dont need any tests, lets see if we can donate any tests
    } elsif ($my_num_tests > $avg_tests_node) {
@@ -1182,16 +1174,16 @@ sub sync_global_config {
    &quit(0);
 }
 
-# Read in from the bb-hosts file, snmp query hosts to discover their
+# Read in from the hosts.cfg file, snmp query hosts to discover their
 # vendor and model type, then add them to the DB
-sub read_bb_hosts {
-   my %bb_hosts;
+sub read_hosts_cfg {
+   my %hosts_cfg;
    my %new_hosts;
    my $sysdesc_oid = '1.3.6.1.2.1.1.1.0';
    my $custom_cids = 0;
    my $hosts_left  = 0;
 
-   # Hashes containing textual shortcuts for bb exception & thresholds
+   # Hashes containing textual shortcuts for Xymon exception & thresholds
    my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
    my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm',
       'na' => 'noalarm' );
@@ -1218,35 +1210,34 @@ sub read_bb_hosts {
          "$num_descs sysdescs & $num_temps templates",0);
    }
 
-   do_log("SNMP querying all hosts in bb-hosts file, please wait...",1);
+   do_log("SNMP querying all hosts in hosts.cfg file, please wait...",1);
 
-   # Now open the bb-hosts file and read it in
-   # Also read in any other host files that are included in the bb-hosts
-   my @bbfiles = ($g{bbhosts});
-   my $etcdir  = $1 if $g{bbhosts} =~ /^(.+)\/.+?$/;
+   # Now open the hosts.cfg file and read it in
+   # Also read in any other host files that are included in the hosts.cfg
+   my @hostscfg = ($g{hostscfg});
+   my $etcdir  = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
    $etcdir = $g{homedir} if !defined $etcdir;
 
    FILEREAD: do {
+      my $hostscfg = shift @hostscfg;
+      next if !defined $hostscfg; # In case next FILEREAD bypasses the while
 
-      my $bbfile = shift @bbfiles;
-      next if !defined $bbfile; # In case next FILEREAD bypasses the while
-
-      # Die if we fail to open our bb root file, warn for all others
-      if($bbfile eq $g{bbhosts}) {
-         open BBFILE, $bbfile or
-         log_fatal("Unable to open bb-hosts file '$g{bbhosts}' ($!)", 0);
+      # Die if we fail to open our Xymon root file, warn for all others
+      if($hostscfg eq $g{hostscfg}) {
+         open HOSTSCFG, $hostscfg or
+         log_fatal("Unable to open hosts.cfg file '$g{hostscfg}' ($!)", 0);
       } else {
-         open BBFILE, $bbfile or
-         do_log("Unable to open file '$g{bbhosts}' ($!)", 0) and
+         open HOSTSCFG, $hostscfg or
+         do_log("Unable to open file '$g{hostscfg}' ($!)", 0) and
          next FILEREAD;
       }
 
       # Now interate through our file and suck out the juicy bits
-      FILELINE: while ( my $line= <BBFILE> ) {
+      FILELINE: while ( my $line= <HOSTSCFG> ) {
          chomp $line;
 
-         while ( $line=~ s/\\$//  and  ! eof(BBFILE) ) {
-            $line.= <BBFILE> ;            # Merge with next line
+         while ( $line=~ s/\\$//  and  ! eof(HOSTSCFG) ) {
+            $line.= <HOSTSCFG> ;            # Merge with next line
             chomp $line ;
          }  # of while
 
@@ -1256,7 +1247,7 @@ sub read_bb_hosts {
             # Tack on our etc dir if this isnt an absolute path
             $file = "$etcdir/$file" if $file !~ /^\//;
             # Add the file to our read array
-            push @bbfiles, $file;
+            push @hostscfg, $file;
          }
 
          # Similarly, but different, for directory
@@ -1264,24 +1255,24 @@ sub read_bb_hosts {
             require File::Find;
             import File::Find;
             my $dir = $1;
-            do_log("Looking for bb-hosts files in $dir",3) if $g{debug};
-            find(sub {push @bbfiles,$File::Find::name},$dir);
+            do_log("Looking for hosts.cfg files in $dir",3) if $g{debug};
+            find(sub {push @hostscfg,$File::Find::name},$dir);
 
-         # Else see if this line matches the ip/host bb-hosts format
+         # Else see if this line matches the ip/host hosts.cfg format
          } elsif($line =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+(\S+)(.*)$/i) {
-            my ($ip, $host, $bbopts) = ($1, $2, $3);
+            my ($ip, $host, $xymonopts) = ($1, $2, $3);
 
             # Skip if the NET tag does not match this site
-            do_log("Checking if $bbopts matches NET:" . $g{bblocation} . ".",5) if $g{debug};
-            if ($g{bblocation} ne '') {
-               if ($bbopts !~ / NET:$g{bblocation}/) {
-                  do_log("The NET for $host is not $g{bblocation}. Skipping.",3);
+            do_log("Checking if $xymonopts matches NET:" . $g{XYMONNETWORK} . ".",5) if $g{debug};
+            if ($g{XYMONNETWORK} ne '') {
+               if ($xymonopts !~ / NET:$g{XYMONNETWORK}/) {
+                  do_log("The NET for $host is not $g{XYMONNETWORK}. Skipping.",3);
                   next;
                }
             }
 
-            # See if we can find our bbtag to let us know this is a devmon host
-            if($bbopts =~ /$g{bbtag}(:\S+|\s+|$)/) {
+            # See if we can find our xymontag to let us know this is a devmon host
+            if($xymonopts =~ /$g{xymontag}(:\S+|\s+|$)/) {
                my $options = $1;
                $options = '' if !defined $options or $options =~ /^\s+$/;
                $options =~ s/,\s+/,/; # Remove spaces in a comma-delimited list
@@ -1300,15 +1291,15 @@ sub read_bb_hosts {
                }
 
                # Make sure we dont have duplicates
-               if(defined $bb_hosts{$host}) {
-                  my $old = $bb_hosts{$host}{ip};
+               if(defined $hosts_cfg{$host}) {
+                  my $old = $hosts_cfg{$host}{ip};
                   do_log("Refusing to redefine $host from '$old' to '$ip'",0);
                   next;
                }
 
                # See if we have a custom cid
                if($options =~ s/(?:,|^)cid\((\S+?)\),?//) {
-                  $bb_hosts{$host}{cid} = $1;
+                  $hosts_cfg{$host}{cid} = $1;
                   $custom_cids = 1;
                }
 
@@ -1319,7 +1310,7 @@ sub read_bb_hosts {
 
                # See if we have a custom port
                if($options =~ s/(?:,|^)port\((\d+?)\),?//) {
-                  $bb_hosts{$host}{port} = $1;
+                  $hosts_cfg{$host}{port} = $1;
                }
 
                # Look for vendor/model override
@@ -1331,8 +1322,8 @@ sub read_bb_hosts {
                   if !defined $g{templates}{$vendor};
                   do_log("Unknown model in model() option for $host",0) and next
                   if !defined $g{templates}{$vendor}{$model};
-                  $bb_hosts{$host}{vendor} = $vendor;
-                  $bb_hosts{$host}{model}  = $model;
+                  $hosts_cfg{$host}{vendor} = $vendor;
+                  $hosts_cfg{$host}{model}  = $model;
                }
 
                # Read custom exceptions
@@ -1348,7 +1339,7 @@ sub read_bb_hosts {
                         my $type = $exc_sc{$sc}; # Process shortcut text
                         do_log("Unknown exception shortcut '$sc' for $host") and next
                         if !defined $type;
-                        $bb_hosts{$host}{except}{$test}{$oid}{$type} = $val;
+                        $hosts_cfg{$host}{except}{$test}{$oid}{$type} = $val;
                      }
                   }
                }
@@ -1366,7 +1357,7 @@ sub read_bb_hosts {
                         my $type = $thr_sc{$sc}; # Process shortcut text
                         do_log("Unknown exception shortcut '$sc' for $host") and next
                         if !defined $type;
-                        $bb_hosts{$host}{thresh}{$test}{$oid}{$type} = $val;
+                        $hosts_cfg{$host}{thresh}{$test}{$oid}{$type} = $val;
                      }
                   }
                }
@@ -1376,10 +1367,10 @@ sub read_bb_hosts {
                $tests = 'all' if !defined $tests;
 
                do_log("Unknown devmon option ($options) on line " .
-                  "$. of $bbfile",0) and next if $options ne '';
+                  "$. of $hostscfg",0) and next if $options ne '';
 
-               $bb_hosts{$host}{ip}    = $ip;
-               $bb_hosts{$host}{tests} = $tests;
+               $hosts_cfg{$host}{ip}    = $ip;
+               $hosts_cfg{$host}{tests} = $tests;
 
                # Incremement our host counter, used to tell if we should bother
                # trying to query for new hosts...
@@ -1387,9 +1378,9 @@ sub read_bb_hosts {
             }
          }
       }
-      close BBFILE;
+      close HOSTSCFG;
 
-   } while @bbfiles; # End of do {} loop
+   } while @hostscfg; # End of do {} loop
 
    # Gather our existing hosts
    my %old_hosts = read_hosts();
@@ -1404,8 +1395,8 @@ sub read_bb_hosts {
    do_log("Querying pre-existing hosts",1) if %old_hosts;
 
    for my $host (keys %old_hosts) {
-      # If they dont exist in the new bbhosts, skip 'em
-      next if !defined $bb_hosts{$host};
+      # If they dont exist in the new hostscfg, skip 'em
+      next if !defined $hosts_cfg{$host};
 
       my $vendor  = $old_hosts{$host}{vendor};
       my $model   = $old_hosts{$host}{model};
@@ -1414,7 +1405,7 @@ sub read_bb_hosts {
       next if !defined $g{templates}{$vendor}{$model};
 
       my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
-      $snmp_input{$host}{dev_ip} = $bb_hosts{$host}{ip};
+      $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
       $snmp_input{$host}{cid}    = $old_hosts{$host}{cid};
       $snmp_input{$host}{port}   = $old_hosts{$host}{port};
       $snmp_input{$host}{dev}    = $host;
@@ -1435,14 +1426,14 @@ sub read_bb_hosts {
       next OLDHOST if $sysdesc eq 'UNDEFINED';
 
       # Catch vendor/models override with the model() option
-      if(defined $bb_hosts{$host}{vendor}) {
-         %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+      if(defined $hosts_cfg{$host}{vendor}) {
+         %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
          $new_hosts{$host}{cid}    = $old_hosts{$host}{cid};
          $new_hosts{$host}{port}   = $old_hosts{$host}{port};
 
          --$hosts_left;
-         do_log("Discovered $host as a $bb_hosts{$host}{vendor} " .
-            "$bb_hosts{$host}{model}",2);
+         do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
+            "$hosts_cfg{$host}{model}",2);
          next OLDHOST;
       }
 
@@ -1463,7 +1454,7 @@ sub read_bb_hosts {
             }
 
             # We got a match, assign the pertinent data
-            %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+            %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
             $new_hosts{$host}{cid}    = $old_hosts{$host}{cid};
             $new_hosts{$host}{port}   = $old_hosts{$host}{port};
             $new_hosts{$host}{vendor} = $vendor;
@@ -1493,16 +1484,16 @@ sub read_bb_hosts {
          %{$g{snmp_data}} = ();
          %snmp_input = ();
 
-         for my $host (sort keys %bb_hosts) {
+         for my $host (sort keys %hosts_cfg) {
             # Skip if they dont have a custom cid
-            next if !defined $bb_hosts{$host}{cid};
+            next if !defined $hosts_cfg{$host}{cid};
             # Skip if they have already been succesfully queried
             next if defined $new_hosts{$host};
 
             # Throw together our query data
-            $snmp_input{$host}{dev_ip} = $bb_hosts{$host}{ip};
-            $snmp_input{$host}{cid}    = $bb_hosts{$host}{cid};
-            $snmp_input{$host}{port}   = $bb_hosts{$host}{port};
+            $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
+            $snmp_input{$host}{cid}    = $hosts_cfg{$host}{cid};
+            $snmp_input{$host}{port}   = $hosts_cfg{$host}{port};
             $snmp_input{$host}{dev}    = $host;
             $snmp_input{$host}{ver}    = $snmpver;
 
@@ -1524,19 +1515,18 @@ sub read_bb_hosts {
             next NEWHOST if $sysdesc eq 'UNDEFINED';
 
             # Catch vendor/models override with the model() option
-            if(defined $bb_hosts{$host}{vendor}) {
-               %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+            if(defined $hosts_cfg{$host}{vendor}) {
+               %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
                --$hosts_left;
 
-               do_log("Discovered $host as a $bb_hosts{$host}{vendor} " .
-                  "$bb_hosts{$host}{model}",2);
+               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
+                  "$hosts_cfg{$host}{model}",2);
                last NEWHOST;
             }
 
             # Try and match sysdesc
             NEWMATCH: for my $vendor (keys %{$g{templates}}) {
                NEWMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
-
 
                   # Skip if this host doesnt match the regex
                   my $regex = $g{templates}{$vendor}{$model}{sysdesc};
@@ -1546,7 +1536,7 @@ sub read_bb_hosts {
                   }
 
                   # We got a match, assign the pertinent data
-                  %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+                  %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
                   $new_hosts{$host}{vendor} = $vendor;
                   $new_hosts{$host}{model}  = $model;
                   --$hosts_left;
@@ -1569,8 +1559,8 @@ sub read_bb_hosts {
             # Make sure we were able to get a match
             if(!defined $new_hosts{$host}) {
                do_log("No matching templates for device: $host",0);
-               # Delete the bbhosts key so we dont throw another error later
-               delete $bb_hosts{$host};
+               # Delete the hostscfg key so we dont throw another error later
+               delete $hosts_cfg{$host};
             }
          }
       }
@@ -1588,13 +1578,13 @@ sub read_bb_hosts {
          %snmp_input = ();
 
          # And query the devices that havent yet responded to previous cids
-         for my $host (sort keys %bb_hosts) {
+         for my $host (sort keys %hosts_cfg) {
 
             # Dont query this host if we already have succesfully done so
             next if defined $new_hosts{$host};
 
-            $snmp_input{$host}{dev_ip} = $bb_hosts{$host}{ip};
-            $snmp_input{$host}{port}   = $bb_hosts{$host}{port};
+            $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
+            $snmp_input{$host}{port}   = $hosts_cfg{$host}{port};
             $snmp_input{$host}{cid}    = $cid;
             $snmp_input{$host}{dev}    = $host;
             $snmp_input{$host}{ver}    = $snmpver;
@@ -1617,13 +1607,13 @@ sub read_bb_hosts {
             next CUSTOMHOST if $sysdesc eq 'UNDEFINED';
 
             # Catch vendor/models override with the model() option
-            if(defined $bb_hosts{$host}{vendor}) {
-               %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+            if(defined $hosts_cfg{$host}{vendor}) {
+               %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
                $new_hosts{$host}{cid}    = $cid;
                --$hosts_left;
 
-               do_log("Discovered $host as a $bb_hosts{$host}{vendor} " .
-                  "$bb_hosts{$host}{model}",2);
+               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
+                  "$hosts_cfg{$host}{model}",2);
                next CUSTOMHOST;
             }
 
@@ -1640,7 +1630,7 @@ sub read_bb_hosts {
                   }
 
                   # We got a match, assign the pertinent data
-                  %{$new_hosts{$host}}        = %{$bb_hosts{$host}};
+                  %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
                   $new_hosts{$host}{cid}    = $cid;
                   $new_hosts{$host}{vendor} = $vendor;
                   $new_hosts{$host}{model}  = $model;
@@ -1664,17 +1654,17 @@ sub read_bb_hosts {
             # Make sure we were able to get a match
             if(!defined $new_hosts{$host}) {
                do_log("No matching templates for device: $host",0);
-               # Delete the bbhosts key so we dont throw another error later
-               delete $bb_hosts{$host};
+               # Delete the hostscfg key so we dont throw another error later
+               delete $hosts_cfg{$host};
             }
          }
       }
    }
 
-   # Go through our bb-hosts and see if we failed any queries on the
+   # Go through our hosts.cfg and see if we failed any queries on the
    # devices;  if they were previously defined, just leave them be
    # at let them go clear.  If they are new, drop a log message
-   for my $host (keys %bb_hosts) {
+   for my $host (keys %hosts_cfg) {
       next if defined $new_hosts{$host};
 
       if(defined $old_hosts{$host}) {
@@ -1802,7 +1792,7 @@ sub read_bb_hosts {
          }
       }
 
-      # Delete any hosts not in the bb hosts file
+      # Delete any hosts not in the xymon hosts.cfg file
       for my $host (keys %old_hosts) {
          next if defined $new_hosts{$host};
          do_log("Removing stale host '$host' from DB",2);
@@ -1914,7 +1904,7 @@ sub read_hosts {
    # Singlenode
    } else {
 
-      # Hashes containing textual shortcuts for bb exception & thresholds
+      # Hashes containing textual shortcuts for Xymon exception & thresholds
       my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
       my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm',
          'na' => 'noalarm' );
@@ -2079,7 +2069,7 @@ sub nd { $b <=> $a }
 # Print help
 sub usage {
    die
-   "Devmon v$g{version}, a device monitor for BigBrother/Hobbit\n" .
+   "Devmon v$g{version}, a device monitor for Xymon\n" .
    "\n" .
    "Usage: devmon [arguments]\n" .
    "\n" .
@@ -2093,7 +2083,7 @@ sub usage {
    "   -de[bug]       Print debug output (this can be quite extensive)\n" .
    "\n" .
    "  Mutually exclusive arguments:\n" .
-   "   -r[eadbbhosts]   Read in data from the BigBrother/Hobbit hosts file\n" .
+   "   -r[eadhostscfg]   Read in data from the Xymon hosts.cfg file\n" .
    "   -syncc[onfig]    Update multinode DB with the global config options\n" .
    "                    configured on this local node\n" .
    "   -synct[emplates] Update multinode device templates with the template\n" .

@@ -4,7 +4,7 @@ require Exporter;
 @EXPORT = qw(send_msgs);
 
 #    Devmon: An SNMP data collector & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #
 #    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/modules/dm_msg.pm $
@@ -17,7 +17,6 @@ require Exporter;
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
 
-
 # Modules
 use strict;
 use Socket;
@@ -28,7 +27,7 @@ use dm_config;
 use vars qw(%g);
 *g = \%dm_config::g;
 
-# Send our test results to the BB/Hobbit server
+# Send our test results to the Xymon server
 sub send_msgs {
    $g{msgxfrtime} = time;
    $g{sentmsgsize} = 0;
@@ -187,7 +186,6 @@ sub send_msgs {
 
    $g{msgxfrtime} = time - $g{msgxfrtime};
 
-
    # Now send our dm status message!
    if(!$g{print_msg}) {
       my $dm_msg = dm_stat_msg();
@@ -248,23 +246,23 @@ sub dm_stat_msg {
 
    my $message = "devmon, version $g{version}\n" .
       "\n" .
-      "Node name:        $g{nodename}\n" .
-      "Node number:      $g{my_nodenum}\n" .
-      "Process ID:       $g{mypid}\n" .
+      "Node name:           $g{nodename}\n" .
+      "Node number:         $g{my_nodenum}\n" .
+      "Process ID:          $g{mypid}\n" .
       "\n" .
-      "Cycle time:       $g{cycletime} [s]\n".
-      "Dead time:        $g{deadtime} [s]\n" .
+      "Cycle time:          $g{cycletime} [s]\n".
+      "Dead time:           $g{deadtime} [s]\n" .
       "\n" .
-      "Polled devices:   $g{numdevs}\n" .
-      "Polled tests:     $g{numtests}\n" .
-      "Avg tests/node:   $g{avgtestsnode}\n" .
-      "# clear msgs:     $num_clears\n" .
-      "BB msg xfer size: $g{sentmsgsize}\n" .
+      "Polled devices:      $g{numdevs}\n" .
+      "Polled tests:        $g{numtests}\n" .
+      "Avg tests/node:      $g{avgtestsnode}\n" .
+      "# clear msgs:        $num_clears\n" .
+      "Xymon msg xfer size: $g{sentmsgsize}\n" .
       "\n" .
-      "SNMP test time:   $snmp_poll_time\n" .
-      "Test logic time:  $test_time\n" .
-      "BB msg xfer time: $msg_xfr_time\n" .
-      "This poll period: $this_poll_time\n" .
+      "SNMP test time:      $snmp_poll_time\n" .
+      "Test logic time:     $test_time\n" .
+      "Xymon msg xfer time: $msg_xfr_time\n" .
+      "This poll period:    $this_poll_time\n" .
       "Avg poll time:   ";
 
    # Calculate avg poll time over the last 5 poll cycles
@@ -308,11 +306,10 @@ sub dm_stat_msg {
       "PollTime : $this_poll_time\n" .
       "-->" ;
 
-
    # Add the header
    my $host = $g{nodename};
    $host =~ s/\./,/g; # Dont forget our FQDN stuff
-   my $now = $g{bbdateformat} ? strftime($g{bbdateformat},localtime) : scalar(localtime);
+   my $now = $g{xymondateformat} ? strftime($g{xymondateformat},localtime) : scalar(localtime);
    $message = "status $host.dm $color $now\n\n$message\n";
 
    return $message;

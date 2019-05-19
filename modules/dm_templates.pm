@@ -5,7 +5,7 @@ require Exporter;
 @EXPORT_OK = qw(%c);
 
 #    Devmon: An SNMP data collector & page generator for the BigBrother &
-#    Hobbit network monitoring systems
+#    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
 #
@@ -18,8 +18,6 @@ require Exporter;
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
-
 
 # Modules
 use strict;
@@ -38,9 +36,9 @@ my $color_list = join '|', @color_order;
 # Read templates from DB or from disk, depending on our multinode type
 sub read_templates {
    do_log('DEBUG TEMPLATES: running read_templates()',0) if $g{debug};
-   if($g{multinode} eq 'yes') { 
+   if($g{multinode} eq 'yes') {
       read_template_db() ;
-   } else { 
+   } else {
       read_template_files() ;
    }
 
@@ -271,10 +269,10 @@ sub post_template_load {
                         my ($if, $then) = ($1, $2);
                         my $type = '';
                         if($if =~ /^'(.+)'$/) {
-                           $type = 'str'; 
+                           $type = 'str';
                            $if = $1
                         } elsif($if =~ /^"(.+)"$/) {
-                           $type = 'reg'; 
+                           $type = 'reg';
                            $if = $1
                         }
                         $cases->{++$case_num}{if} = $if;
@@ -288,21 +286,21 @@ sub post_template_load {
                            $type = 'num'
                         } elsif($if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/) {
                            $if = $1;
-                           $type = 'gt'; 
+                           $type = 'gt';
                         } elsif($if =~ /^>=\s*([+-]?\d+(?:\.\d+)?)$/) {
                            $if = $1;
-                           $type = 'gte'; 
+                           $type = 'gte';
                         } elsif($if =~ /^<\s*([+-]?\d+(?:\.\d+)?)$/) {
                            $if = $1;
-                           $type = 'lt'; 
+                           $type = 'lt';
                         } elsif($if =~ /^<=\s*([+-]?\d+(?:\.\d+)?)$/) {
                            $if = $1;
-                           $type = 'lte'; 
+                           $type = 'lte';
                         } elsif ( $if =~ /^([+-]?\d+(?:\.\d+)?)\s*-\s*([+-]?\d+(?:\.\d+)?)$/) {
                            $if = "$1-$2";
-                           $type = 'rng'; 
+                           $type = 'rng';
                         } elsif($if =~ /^default$/i) {
-                           $default = $then; 
+                           $default = $then;
                            next;
                         }
                         $cases->{++$case_num}{if} = $if;
@@ -475,7 +473,6 @@ sub read_transforms_file {
    my %trans = ();
    my $deps  = {};
    my $path  = [];
-
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
@@ -1015,7 +1012,6 @@ sub sort_oid($) {
    }  # of else
 }
 
-
 # Subroutine to read in the thresholds file
 sub read_thresholds_file {
    my ($dir, $tmpl) = @_;
@@ -1085,7 +1081,6 @@ sub read_thresholds_file {
       # Validate oid
       do_log("Undefined oid '$oid' referenced in $thresh_file at line $.", 0)
          and next if !defined $tmpl->{oids}{$oid};
-
 
       # Validate any oids in the message
       my $tmp = $msg;
@@ -1188,7 +1183,7 @@ sub read_exceptions_file {
    return 1;
 }
 
-# Read in the message that will be sent to the hobbit server
+# Read in the message that will be sent to the xymon server
 sub read_message_file {
    my ($dir, $tmpl) = @_;
 
@@ -1427,7 +1422,6 @@ sub sync_templates {
                      "($test_id,'$oid','$color','$val',$txt)");
                }
 
-
                # Insert our exceptions into the DB
                for my $type (keys %{$tmpl->{oids}{$oid}{except}}) {
 
@@ -1440,7 +1434,6 @@ sub sync_templates {
                }
 
             } # End of for my $oid
-
 
             # Now insert our messages into the DB
             my $msg = $tmpl->{msg};

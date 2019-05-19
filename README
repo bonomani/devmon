@@ -45,7 +45,7 @@ Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.1
   might be added at a later date).
 
   Devmon determines which hosts to query based on information
-  from the display server's bb-hosts file, which allows you
+  from the display server's hosts.cfg file, which allows you
   to manage all of your monitoring facilities from a single file.
 
   Devmon can either run in a single-node configuration, a
