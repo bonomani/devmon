@@ -5,3 +5,5 @@ ifInErrPct	: yellow	: 1	: {ifName}{ifAliasBox} - High input error rate ({ifInErr
 ifInErrPct	: red		: 5	: {ifName}{ifAliasBox} - Very high input error rate ({ifInErrPct}%)
 ifOutErrPct	: yellow	: 1	: {ifName}{ifAliasBox} - High output error rate ({ifOutErrPct}%)
 ifOutErrPct	: red		: 5	: {ifName}{ifAliasBox} - Very high output error rate ({ifOutErrPct}%)
+ifInErrPct : green : NaN
+ifOutErrPct : green : NaN

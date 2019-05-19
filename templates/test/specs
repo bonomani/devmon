@@ -1,0 +1,4 @@
+vendor	: devmon
+model	: testdisable
+snmpver	: 2
+sysdesc : devmontest
