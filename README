@@ -1,3 +1,22 @@
+UPDATE from Stef Coene
+I forked this from https://github.com/bonomani/devmon
+He included most of the patches that he found.
+
+I changed this version of devmon and did the following:
+- remove all refererences bb/hobbit/BigBrother
+- check for the variable XYMSRV so run devmon from tasks.cfg or prepend with xymoncmd
+- switch from socket to xymon binary to communicate with the xymon server
+- use Getopt::Long for command line parsing
+- don't parse hosts.cfg by hand but use xymoncfg command to dump the full hosts.cfg
+- use Sys::Hostname to get the hostname
+
+I hope that this will inspire the original author for ideas how devmon can be improved.
+
+
+Stef Coene
+
+=====================================================================
+
 SEE END OF FILE for current STATUS and ROADMAP! 
 THIS IS NOT AN OFFICIAL VERSION form the original developers:
 - Look at SourceForge version
