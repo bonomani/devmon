@@ -3,7 +3,7 @@ require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(send_msgs);
 
-#    Devmon: An SNMP data collector & page generator for the BigBrother &
+#    Devmon: An SNMP data collector & page generator for the
 #    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #
@@ -94,14 +94,14 @@ sub send_msgs {
          unlink $messagefile ;
 
          # Start with a new combo message
-         $message = "combo\n" . $msg ;
+         $message = "combo\n" . $msg . "\n" ;
 
       # Looks good, append the msg
       } else {
          if ( $message eq "" ) {
             $message .= "combo\n";
          }
-         $message .= $msg;
+         $message .= $msg . "\n";
       }
    }
 

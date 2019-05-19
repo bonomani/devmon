@@ -5,7 +5,7 @@ require Exporter;
 na nd db_get db_get_array db_do log_fatal);
 @EXPORT_OK = qw(%c);
 
-#    Devmon: An SNMP data collector & page generator for the BigBrother &
+#    Devmon: An SNMP data collector & page generator for the
 #    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix

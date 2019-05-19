@@ -3,7 +3,7 @@ require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(poll_devices snmp_query);
 
-#    Devmon: An SNMP data collector & page generator for the BigBrother &
+#    Devmon: An SNMP data collector & page generator for the
 #    Xymon network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
