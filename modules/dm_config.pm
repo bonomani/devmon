@@ -30,7 +30,8 @@ require dm_templates;
 use IO::File;
 use FindBin;
 
-use Getopt::Long ;
+use Getopt::Long;
+use Sys::Hostname;
 
 # Load initial program values; only called once at program init
 sub initialize {
@@ -313,23 +314,16 @@ sub initialize {
 
    # Autodetect our nodename on user request
    if($g{nodename} eq 'HOSTNAME') {
-      my $hostname_bin = bin_path('hostname');
-
-      die "Unable to find 'hostname' command!\n" if !defined $hostname_bin;
-      my $nodename = `$hostname_bin`;
-      chomp $nodename;
-      die "Error executing $hostname_bin"
-      if $nodename =~ /not found|permission denied/i;
+      my $hostname = hostname();
 
       # Remove domain info, if any
       # Xymon best practice is to use fqdn, if the user doesnt want it
       # we assume they have set NODENAME correctly in devmon.cfg
-      # $nodename =~ s/\..*//;
-      chomp $nodename;
+      # $hostname =~ s/\..*//;
 
-      $g{nodename} = $nodename;
+      $g{nodename} = $hostname;
 
-      do_log("Nodename autodetected as $nodename", 2);
+      do_log("Nodename autodetected as $hostname", 2);
    }
 
    # Make sure we have a nodename
