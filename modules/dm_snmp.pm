@@ -73,7 +73,7 @@ sub poll_devices {
    );
 
    if(defined $sock) {
-      print $sock "xymondboard test=^$g{pingcolumn}\$ fields=hostname,color,line1";
+      print $sock "xymondboard test=^conn\$ fields=hostname,color,line1";
       shutdown($sock, 1);
       while(<$sock>) {
          my ($device,$color,$line1) = split /\|/;
