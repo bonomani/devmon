@@ -346,7 +346,7 @@ sub initialize {
    read_global_config();
 
    # Throw out a little info to the log
-   do_log("---Initilizing devmon...",0);
+   do_log("---Initializing devmon...",0);
    do_log("Verbosity level: $g{verbose}",1);
    do_log("Logging to $g{logfile}",1);
    do_log("Node $g{my_nodenum} reporting to Xymon at $g{dispserv}",0);
