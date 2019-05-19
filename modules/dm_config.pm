@@ -1858,7 +1858,7 @@ sub read_hosts_cfg {
    &quit(0);
 }
 
-# Read hosts in from mysql DB in multinode mode, or else from disk
+# Read hosts.cfg in from mysql DB in multinode mode, or else from disk
 sub read_hosts {
    my %hosts = ();
 
@@ -1869,7 +1869,11 @@ sub read_hosts {
       my @arr = db_get_array("name,ip,vendor,model,tests,cid from devices");
       for my $host (@arr) {
          my ($name,$ip,$vendor,$model,$tests,$cid) = @$host;
-         next if ($g{hostonly} ne '' and $name !~ /$g{hostonly}/);
+
+         # Filter if requested
+         if ($g{hostonly} ne '' and $name !~ /$g{hostonly}/) {
+            next ;
+         }
 
          my $port = $1 if $cid =~ s/::(\d+)$//;
 
@@ -1897,33 +1901,37 @@ sub read_hosts {
 
    # Singlenode
    } else {
+      # Check if the hosts file even exists
+      return %hosts if !-e $g{dbfile};
 
       # Hashes containing textual shortcuts for Xymon exception & thresholds
       my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
-      my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm',
-         'na' => 'noalarm' );
+      my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm', 'na' => 'noalarm' );
+
       # Statistic variables (done here in singlenode, instead of syncservers)
       my $numdevs = 0;
       my $numtests = 0;
 
-      # Check if the hosts file even exists
-      return %hosts if !-e $g{dbfile};
-
       # Open and read in data
-      open HOSTS, $g{dbfile} or
-      log_fatal("Unable to open host file: $g{dbfile} ($!)", 0);
+      open DBFILE, $g{dbfile} or
+         log_fatal("Unable to open host file: $g{dbfile} ($!)", 0);
 
-      my $num;
-      FILELINE: for my $line (<HOSTS>) {
+      my $linenumber = 0;
+      FILELINE: for my $line (<DBFILE>) {
          chomp $line;
-         my ($name,$ip,$vendor,$model,$tests,$cid,$threshes,$excepts)
-         = split /\e/, $line;
-         ++$num;
+         my ($name,$ip,$vendor,$model,$tests,$cid,$threshes,$excepts) = split /\e/, $line;
+         ++$linenumber;
 
-         do_log("Invalid entry in host file at line $num.",0) and next
-         if !defined $cid;
+         if ( !defined $cid ) {
+            do_log("Invalid entry in host file at line $linenumber.",0) ;
+            next;
+         }
 
-         next if ($g{hostonly} ne '' and $name !~ /$g{hostonly}/);
+         # Filter if requested
+         if ($g{hostonly} ne '' and $name !~ /$g{hostonly}/) {
+            next ;
+         }
+
          my $port = $1 if $cid =~ s/::(\d+)$//;
 
          $hosts{$name}{ip}     = $ip;
@@ -1963,7 +1971,7 @@ sub read_hosts {
          ++$numdevs;
          $numtests += ($tests =~ tr/,/,/) + 1;
       }
-      close HOSTS;
+      close DBFILE;
 
       $g{numdevs}      = $numdevs;
       $g{numtests}     = $numtests;
