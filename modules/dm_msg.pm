@@ -19,6 +19,7 @@ require Exporter;
 
 # Modules
 use strict;
+use Socket;
 use POSIX qw/ strftime /;
 use dm_config;
 
@@ -37,6 +38,9 @@ sub send_msgs {
 
    # Determine the address we are connecting to
    my $host = $g{dispserv};
+   my $addr = inet_aton($host)
+      or do_log("Can't resolve display server $host ($!)",0) and return;
+   my $p_addr = sockaddr_in($g{dispport}, $addr);
 
    # Print messages to stdout if requested
    if($g{print_msg} and defined $g{test_results}) {
@@ -51,82 +55,159 @@ sub send_msgs {
    }
 
    my $msg_sent = 0;
+   do_log("DEBUG: Looping through messages for this socket",3) if $g{debug};
+   # Run until we are out of messages to send
+   SOCKLOOP: while(@{$g{test_results}}) {
 
-   my $message = "" ;
+      # Rest for a moment so we dont overwhelm our display server
+      select undef, undef, undef, $g{msgsleep} / 1000;
 
-   MSGLOOP: foreach my $msg (@{$g{test_results}}) {
-      # Make sure this is a valid message
-      if(!defined $msg or $msg eq '') {
-         do_log("Error: dm_msg trying to send a blank message!",0);
-         next MSGLOOP;
-      }
-
-      $msg_sent++;
-      my $msg_size = length $msg;
-      $g{sentmsgsize} += $msg_size;
-
-      # Make sure the message itself isnt too big
-      if($msg_size > $g{msgsize}) {
-         # Nuts, this is a huge message, bigger than our msg size. Well want
-         # to send it by itself to minimize how much it gets truncated
-         $msg_size = length $msg;
-
-         # Okay, we are clear, send the message
-         do_log("DEBUG: Printing single combo message ($msg_sent of $nummsg), size $msg_size",3) if $g{debug};
-         my $messagefile = "/tmp/devmon_message_$msg_sent.msg" ;
-         open (TEMP,">",$messagefile) ;
-         print TEMP $msg ;
-         close TEMP ;
-         `$ENV{XYMON} $g{dispserv} "@" < $messagefile` ;
-         unlink $messagefile ;
-
-         do_log("DEBUG: Finished printing single combo message",3) if $g{debug};
-
-      # Now make sure that this msg wont cause our current combo msg to
-      # exceed the msgsize limit
-      } elsif($msg_size + length $message > $g{msgsize}) {
-         # Send the messages we already have collected
-         my $messagefile = "/tmp/devmon_message_$msg_sent.msg" ;
-         open (TEMP,">",$messagefile) ;
-         print TEMP $message ;
-         close TEMP ;
-         `$ENV{XYMON} $g{dispserv} "@" < $messagefile` ;
-         unlink $messagefile ;
-
-         # Start with a new combo message
-         $message = "combo\n" . $msg . "\n" ;
-
-      # Looks good, append the msg
-      } else {
-         if ( $message eq "" ) {
-            $message .= "combo\n";
+      # Open our socket to the host
+      do_log("DEBUG: Opening socket to $host:$g{dispport}",3) if $g{debug};
+      eval {
+         local $SIG{ALRM} = sub { die "Socket timed out\n" };
+         alarm 10;
+         socket(SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp'))
+            or do_log("Failed to create socket ($!)",0) and
+         $g{msgxfrtime} = time - $g{msgxfrtime} and return;
+         alarm 0;
+         local $SIG{ALRM} = sub { die "Connect timed out\n" };
+         alarm 10;
+         if (!connect(SOCK, $p_addr)) {
+            do_log("Can't connect to display server $host ($!)",0);
+            $g{msgxfrtime} = time - $g{msgxfrtime};
+            close SOCK;
+            return;
          }
-         $message .= $msg . "\n";
+         alarm 0;
+      };
+      if ($@) {
+         do_log("Timed out connecting to display server: $!",0);
+         return;
       }
-   }
 
-   # Send the last messages we collected
-   if ( defined $message ) {
-      my $messagefile = "/tmp/devmon_message_$msg_sent.msg" ;
-      open (TEMP,">",$messagefile) ;
-      print TEMP $message ;
-      close TEMP ;
-      `$ENV{XYMON} $g{dispserv} "@" < $messagefile` ;
-      unlink $messagefile ;
-   }
+      # Tell the display server that we are sending a combo msg
+      eval {
+         local $SIG{ALRM} = sub { die "Print timed out\n" };
+         alarm 10;
+         print SOCK "combo\n";
+         alarm 0;
+      };
+      if ($@) {
+         do_log("Timed out printing to display server: $!",0);
+         close SOCK;
+         return;
+      }
+
+      # Now print to this socket until we hit the max msg size
+      do_log("DEBUG: Looping through messages to build a combo",3) if $g{debug};
+      my $msg_size = 0;
+      MSGLOOP: while($msg_size < $g{msgsize}
+            and @{$g{test_results}}) {
+         my $msg = shift @{$g{test_results}};
+         $msg_sent++;
+         # Make sure this is a valid message
+         if(!defined $msg or $msg eq '') {
+            do_log("Error: dm_msg trying to send a blank message!",0);
+            next MSGLOOP;
+         }
+
+         # Make sure the message itself isnt too big
+         if(length $msg > $g{msgsize}) {
+
+            # Nuts, this is a huge message, bigger than our msg size. Well want
+            # to send it by itself to minimize how much it gets truncated
+            if($msg_size == 0) {
+               $msg_size = length $msg;
+               # Okay, we are clear, send the message
+               eval {
+                  local $SIG{ALRM} = sub { die "Printing message timed out\n" };
+                  alarm 10;
+                  do_log("DEBUG: Printing single combo message ($msg_sent of $nummsg), size $msg_size",3) if $g{debug};
+                  print SOCK "$msg\n";
+                  do_log("DEBUG: Finished printing single combo message",3) if $g{debug};
+                  alarm 0;
+               };
+               if ($@) {
+                  do_log("Timed out printing to display server: $@ - $!",0);
+                  close SOCK;
+                  return;
+               }
+
+            # Not an empty combo msg, wait till our new socket is open
+            } else {
+               unshift @{$g{test_results}}, $msg;
+               $msg_sent--;
+            }
+
+            # Either way, open a new socket
+            $g{sentmsgsize} += $msg_size;
+            do_log("DEBUG: Closing socket, $msg_size sent",3) if $g{debug};
+            close SOCK;
+            next SOCKLOOP;
+
+         # Now make sure that this msg wont cause our current combo msg to
+         # exceed the msgsize limit
+         } elsif($msg_size + length $msg > $g{msgsize}) {
+
+            # Whoops, looks like it does;  wait for the next socket
+            unshift @{$g{test_results}}, $msg;
+            $msg_sent--;
+            $g{sentmsgsize} += $msg_size;
+            do_log("DEBUG: Closing socket, $msg_size sent",3) if $g{debug};
+            close SOCK;
+            next SOCKLOOP;
+
+         # Looks good, print the msg
+         } else {
+            my $thismsgsize = length $msg;
+            do_log("DEBUG: Printing message ($msg_sent of $nummsg), size $thismsgsize to existing combo",3) if $g{debug};
+            eval {
+               local $SIG{ALRM} = sub { die "Printing message timed out\n" };
+               alarm 10;
+               print SOCK "$msg\n";
+               alarm 0;
+            };
+            if ($@) {
+               do_log("Timed out printing to display server: $!",0);
+               close SOCK;
+               return;
+            }
+            $msg_size += length $msg;
+            do_log("DEBUG: Finished printing message to existing combo ($msg_size so far)",3) if $g{debug};
+         }
+
+      } # End MSGLOOP
+
+      $g{sentmsgsize} += $msg_size;
+      do_log("DEBUG: Closing socket, $msg_size sent",3) if $g{debug};
+      close SOCK;
+   } # END SOCKLOOP
 
    $g{msgxfrtime} = time - $g{msgxfrtime};
 
    # Now send our dm status message!
    if(!$g{print_msg}) {
       my $dm_msg = dm_stat_msg();
+      my $msgsize = length $dm_msg;
+      do_log("DEBUG: Connecting and sending dm message ($msgsize)",3) if $g{debug};
+      eval {
+         local $SIG{ALRM} = sub { die "Connecting and sending dm message timed out\n" };
+         alarm 10;
+         socket(SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp'))
+            or do_log("Failed to create socket ($!)",0) and return;
+         connect(SOCK, $p_addr)
+            or do_log("Can't connect to display server ($!)",0) and return;
 
-      my $messagefile = "/tmp/devmon_dm.msg" ;
-      open (TEMP,">",$messagefile) ;
-      print TEMP $dm_msg ;
-      close TEMP ;
-      `$ENV{XYMON} $g{dispserv} "@" < $messagefile` ;
-      unlink $messagefile ;
+         print SOCK "$dm_msg\n";
+         close SOCK;
+         alarm 0;
+      };
+      if ($@) {
+         do_log("Timed out connecting and sending dm: $!",0);
+         close SOCK;
+         return;
+      }
    }
 
    do_log("Done sending messages",2);
