@@ -503,7 +503,7 @@ sub trans_math {
       if($@) {
          do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
          $oid_h->{val}   = 'NaN';
-         $oid_h->{color} = 'Clear';
+         $oid_h->{color} = 'clear';
          $oid_h->{error} = 0;
       }
 
