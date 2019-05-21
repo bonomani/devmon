@@ -29,7 +29,7 @@ use vars qw(%g);
 *g = \%dm_config::g;
 
 # Global array and hash by descending priority/severity
-my %colors = ('red' => 6, 'yellow' => 5, 'clear' => 4, 'purple' => 3, 'green' => 2, 'blue' => 1);
+my %colors = ('red' => 6, 'yellow' => 5, 'clear' => 4, 'green' => 2, 'blue' => 1);
 my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
 my $color_list = join '|', @color_order;
 
@@ -1017,7 +1017,7 @@ sub read_thresholds_file {
    my ($dir, $tmpl) = @_;
 
    # Define our valid transforms functions
-   my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1, 'purple', =>1);
+   my %colors = ('red' => 1, 'yellow' => 1, 'green' => 1, 'clear' => 1, 'blue' => 1);
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too

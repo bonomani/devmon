@@ -1188,7 +1188,7 @@ sub read_hosts_cfg {
    my $hosts_left  = 0;
 
    # Hashes containing textual shortcuts for Xymon exception & thresholds
-   my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
+   my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'b' => 'blue' );
    my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm', 'na' => 'noalarm' );
 
    # Read in templates, cause we'll need them
@@ -1770,7 +1770,7 @@ sub read_hosts_cfg {
    } else {
 
       # Textual abbreviations
-      my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'purple' => 'p', 'blue' => 'b' );
+      my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'blue' => 'b' );
       my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao',
          'noalarm' => 'na' );
       open HOSTFILE, ">$g{dbfile}"
@@ -1876,7 +1876,7 @@ sub read_hosts {
       return %hosts if !-e $g{dbfile};
 
       # Hashes containing textual shortcuts for Xymon exception & thresholds
-      my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
+      my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'b' => 'blue' );
       my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm', 'na' => 'noalarm' );
 
       # Statistic variables (done here in singlenode, instead of syncservers)

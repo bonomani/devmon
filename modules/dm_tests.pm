@@ -30,7 +30,7 @@ use vars qw(%g);
 *g = \%dm_config::g;
 
 # Global array and hash by descending priority/severity
-my %colors = ('red' => 6, 'yellow' => 5, 'clear' => 4, 'purple' => 3, 'green' => 2, 'blue' =>1);
+my %colors = ('red' => 6, 'yellow' => 5, 'clear' => 4, 'green' => 2, 'blue' =>1);
 my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
 my $color_list = join '|', @color_order;
 
