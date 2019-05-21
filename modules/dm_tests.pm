@@ -474,12 +474,8 @@ sub trans_math {
          #elsif($@) {
          if($@) {
             chomp $@ ;
-            if($@ =~ /^Illegal division by zero/) {
-               $oid_h->{val}{$leaf}   = 'NaN';
-            } else {
-               $oid_h->{val}{$leaf}   = $@;
-            }
             do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
+            $oid_h->{val}{$leaf}   = 'NaN';
             $oid_h->{color}{$leaf} = 'clear';
             $oid_h->{error}{$leaf} = 1;
             next;
