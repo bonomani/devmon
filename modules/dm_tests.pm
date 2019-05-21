@@ -470,14 +470,16 @@ sub trans_math {
          my $result = eval($expr);
          $oid_h->{time}{$leaf} = time;
 
-         #if($@ =~ /^Illegal division by zero/) { $result = 0 }
-         #elsif($@) {
          if($@) {
             chomp $@ ;
             do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
             $oid_h->{val}{$leaf}   = 'NaN';
-            $oid_h->{color}{$leaf} = 'clear';
-            $oid_h->{error}{$leaf} = 1;
+            if($@ =~ /^Illegal division by zero/) {
+               $oid_h->{color}{$leaf} = 'clear';
+            } else {
+               $oid_h->{color}{$leaf} = 'yellow';
+               $oid_h->{error}{$leaf} = 1;
+            }
          } else {
             $result = sprintf $print_mask, $result;
             $oid_h->{val}{$leaf}  = $result;
@@ -501,8 +503,12 @@ sub trans_math {
          chomp $@ ;
          do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
          $oid_h->{val}   = 'NaN';
-         $oid_h->{color} = 'clear';
-         $oid_h->{error} = 0;
+         if($@ =~ /^Illegal division by zero/) {
+            $oid_h->{color} = 'clear';
+         } else {
+            $oid_h->{color} = 'yellow';
+            $oid_h->{error} = 1;
+         }
       } else {
          $result = sprintf $print_mask, $result;
          $oid_h->{val}  = $result;
