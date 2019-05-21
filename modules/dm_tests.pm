@@ -2952,7 +2952,7 @@ sub apply_thresh {
    }
 
    # Check to make sure to assign a color by default
-   $oids->{$oid}{color} = 'green';
+   $oids->{$oid}{color} = 'green' if ! defined $oids->{$oid}{color};
 }
 
 # Apply thresholds to a supplied repeater oid, save in the oids hash
