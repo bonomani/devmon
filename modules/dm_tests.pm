@@ -503,10 +503,11 @@ sub trans_math {
          $oid_h->{val}   = 'NaN';
          $oid_h->{color} = 'clear';
          $oid_h->{error} = 0;
+      } else {
+         $result = sprintf $print_mask, $result;
+         $oid_h->{val}  = $result;
       }
 
-      $result = sprintf $print_mask, $result;
-      $oid_h->{val}  = $result;
 
       # Now apply our threshold to this data
       apply_thresh($oids, $thr, $oid);
