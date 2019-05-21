@@ -473,6 +473,7 @@ sub trans_math {
          #if($@ =~ /^Illegal division by zero/) { $result = 0 }
          #elsif($@) {
          if($@) {
+            chomp $@ ;
             if($@ =~ /^Illegal division by zero/) {
                $oid_h->{val}{$leaf}   = 'NaN';
             } else {
@@ -501,6 +502,7 @@ sub trans_math {
       #if($@ =~ /^Illegal division by zero/) { $result = 0 }
       #elsif($@) {
       if($@) {
+         chomp $@ ;
          do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
          $oid_h->{val}   = 'NaN';
          $oid_h->{color} = 'clear';
