@@ -1168,7 +1168,7 @@ sub read_exceptions_file {
          # Trim right (left done by split)
          do_log("Syntax warning: Trailing space(s) in $except_file at line $.", 0) if $data =~ s/\s$//;
          if ($data eq '') {
-            do_log("Syntax error: Missing typption data $except_file at line $.", 0);
+            do_log("Syntax error: Missing exception data $except_file at line $.", 0);
             next;
          }
       }
