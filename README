@@ -263,11 +263,15 @@ Minor bugs resolved
 - Deleted threshold remain undeleted
 
 Version details
-0.3.1 Beta r256.1 is the first version with keeping most format from the source in sourceforge to easely reinject code/part of it to the original one
+0.3.1 Beta r256.1 is the first version with keeping most format from the source in sourceforge to easely reinject this code or part of 
+it to the original one
 BREAKING CHANGES
- - Division by zero was replace by 0, but this is not 0. This now replaced by NaN. To remain green you should add to your threshold file the following:
-    {oid} : green : NaN :
-   There is a script to modify your template in devmon/extra/add_NaN_thresholds
+ - The result of a division by zero was replaced by 0, but this is not 0. This now replaced by NaN. To remain green you should add 
+   to your threshold file the following:
+   {oid} : green : NaN :
+   There is a script to modify your template in devmon/extra/add_NaN_thresholds: all template with this version are already updated
+   This will also breaks also the BEST transform results as they will be "clear" and not green and they will raise an alamr (Current WIP)
+     Thanks to Stef Coene for its feedback
  - Devmon now send runtime data to Xymon to be graphed: look at the quick installation guide in the folder /devmon/extra
 0.3.1 Beta r256.2 Major code cleaning (thank to Stef Coene)
 0.3.2 Beta r256.3 After code cleaning - Current Master branch
