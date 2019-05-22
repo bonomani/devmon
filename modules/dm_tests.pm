@@ -30,7 +30,7 @@ use vars qw(%g);
 *g = \%dm_config::g;
 
 # Global array and hash by descending priority/severity
-my %colors = ('red' => 6, 'yellow' => 5, 'clear' => 4, 'green' => 2, 'blue' =>1);
+my %colors = ('red' => 6, 'yellow' => 5, 'green' => 4, 'clear' => 2, 'blue' =>1);
 my @color_order = sort {$colors{$b} <=> $colors{$a}} keys %colors;
 my $color_list = join '|', @color_order;
 
@@ -570,7 +570,7 @@ sub trans_statistic {
             last ;
          } elsif ( $dep_oid_h->{error}{$leaf} ) {
             $oid_h->{val}  = 'inherited' ;
-            $oid_h->{color}= 'clear' ;
+            $oid_h->{color}= $oid_h->{color}{$leaf} ;
             $oid_h->{error}= 1 ;
             last ;
          } elsif ( $statistic ne 'cnt' and $val !~ m/^[-+]?\d+(?:\.\d+)?$/ ) {
@@ -1039,7 +1039,7 @@ sub trans_eval {
          } elsif($@) {
             do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)");
             $oid_h->{val}{$leaf}   = 'Failed eval';
-            $oid_h->{color}{$leaf} = 'clear';
+            $oid_h->{color}{$leaf} = 'yellow';
             $oid_h->{error}{$leaf} = 1;
             next;
          }
@@ -1062,7 +1062,7 @@ sub trans_eval {
       } elsif($@) {
          do_log("Failed eval for TRANS_STR on $oid: $expr ($@)");
          $oid_h->{val}   = 'Failed eval';
-         $oid_h->{color} = 'clear';
+         $oid_h->{color} = 'yellow';
          $oid_h->{error} = 1;
       }
 
@@ -2218,7 +2218,7 @@ sub render_msg {
 
    # No message template?
    if(!defined $msg_template) {
-      return "status $hostname.$test clear $now" .
+      return "status $hostname.$test yellow $now" .
       "\n\nCould not locate template for this device.\n"     .
       "Please check devmon logs.\n\n"                         .
       "Devmon version $g{version} running on $g{nodename}\n";
@@ -2364,8 +2364,8 @@ sub render_msg {
          # Make sure we have leaf data for our primary oid
          if(!defined $oids->{$pri}{val}) {
             do_log("Missing repeater data for $pri for $test msg on $device", 0);
-            $msg .= "&clear Missing repeater data for primary OID $pri\n";
-            $worst_color = 'clear';
+            $msg .= "&yellow Missing repeater data for primary OID $pri\n";
+            $worst_color = 'yellow';
             next;
          }
 
@@ -2513,7 +2513,7 @@ sub render_msg {
                   } elsif ($flag eq 'errors') {
                      $row_data =~ s/\{$root\}//;
 
-                     next if $color eq 'green' or $color eq 'blue';
+                     next if $color eq 'green' or $color eq 'blue' $color eq 'clear' ;
 
                      # Get oid msg and replace any inline oid dependencies
                      my $oid_msg = $oid_h->{msg}{$leaf};
