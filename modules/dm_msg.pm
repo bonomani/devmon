@@ -263,7 +263,7 @@ sub dm_stat_msg {
       "Test logic time:     $test_time\n" .
       "Xymon msg xfer time: $msg_xfr_time\n" .
       "This poll period:    $this_poll_time\n" .
-      "Avg poll time:   ";
+      "Avg poll time:      ";
 
    # Calculate avg poll time over the last 5 poll cycles
    my $num_polls = scalar @{$g{avgpolltime}};
