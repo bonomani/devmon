@@ -2513,7 +2513,7 @@ sub render_msg {
                   } elsif ($flag eq 'errors') {
                      $row_data =~ s/\{$root\}//;
 
-                     next if $color eq 'green' or $color eq 'blue' $color eq 'clear' ;
+                     next if $color eq 'green' or $color eq 'blue' or $color eq 'clear' ;
 
                      # Get oid msg and replace any inline oid dependencies
                      my $oid_msg = $oid_h->{msg}{$leaf};
