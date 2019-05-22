@@ -1092,6 +1092,12 @@ sub trans_best {
    # Use a non-repeater type if we havent set it yet
    $oid_h->{repeat} ||= 0;
 
+   # Go through each parent oid and mark the as dependant of this threshold 
+   # transform. This is need to be able to calculate to worst threshold
+   for my $dep_oid (@dep_oids) {
+       $oids->{$dep_oid}->{ttrans}{$oid} = ();
+   }
+
    # Do repeater-type oids
    if($oid_h->{repeat}) {
 
@@ -1100,6 +1106,14 @@ sub trans_best {
          # Go through each parent oid for this leaf
          for my $dep_oid (@dep_oids) {
             my $dep_oid_h = \%{$oids->{$dep_oid}};
+            
+            # Add to the parent oid this threshold transform oid as a dependency
+            # This is need to be able to calculate to whorst threshold 
+            # so we had an empty hash
+            #$dep_oid_h->{ttrans}{$oid} = ();
+            #my $test = keys $dep_oid_h->{ttrans}{$oid};
+            #do_log("DDDD $test");
+            # push @$dep_oid_h->{ttrans}, $oid; 
 
             # Skip if there was a dependency error for this parent oid leaf
             # and if it is disable (blue)
@@ -2236,6 +2250,38 @@ sub render_msg {
    my $table       = undef;
    my $extrastatus = '';
    my (%t_opts,%rrd);
+   
+   # Find all oids that participate in the worst color computation
+   # in a line
+   my %alarm_oids;
+   while ($msg_template =~ /\{([a-zA-z0-9-_.]+?)\.(?:color|errors)\}/g) {
+      $alarm_oids{$1} = ();
+   }
+
+   # Loop over the alarm oid and best/worst dependency (the oid is used
+   # in a best/worst tranform) and if a best/worst transfor exist on the same
+   # line, the oid do not have to raide an alarm, so mark it witch 'cwc'
+   my %compute_worst_color ;
+
+   ALARM_OID: foreach my $alarm_oid (keys %alarm_oids) {
+      $compute_worst_color{$alarm_oid} = 1;
+      my $dep_tt_oids  = \%{$oids->{$alarm_oid}->{ttrans}};
+
+      foreach my $dep_tt_oid (keys $dep_tt_oids) {
+         if (exists $alarm_oids{$dep_tt_oid}) {
+
+            # Mark this oid has not having to participate in the
+            # worst color computation
+            do_log("Render msg: $alarm_oid of $test on $device do not compute worst color ",5) if $g{debug};
+            do_log("Render msg: $alarm_oid of $test on $device will not participate in worst color computation",0);
+
+            $compute_worst_color{$alarm_oid} = 0;
+            next ALARM_OID;
+         }
+      }
+   }
+
+ 
 
    # Go through message template line by line
    MSG_LINE: for my $line (split /\n/, $msg_template) {
@@ -2449,16 +2495,16 @@ sub render_msg {
                # dont include this leaf row if the data for this
                # oid matches, if it is an 'only' type, ONLY include
                # this leaf row if the data matches
-               my $ignore = $dev->{except}{$test}{$oid}{ignore} ||
-               $dev->{except}{all}{$oid}{ignore}            ||
-               $tmpl->{oids}{$oid}{except}{ignore};
-               my $only = $dev->{except}{$test}{$oid}{only}     ||
-               $dev->{except}{all}{$oid}{only}              ||
-               $tmpl->{oids}{$oid}{except}{only};
+               my $ignore = $dev->{except}{$test}{$oid}{ignore}
+                         || $dev->{except}{all}{$oid}{ignore}
+                         || $tmpl->{oids}{$oid}{except}{ignore};
+               my $only = $dev->{except}{$test}{$oid}{only}
+                       || $dev->{except}{all}{$oid}{only}
+                       || $tmpl->{oids}{$oid}{except}{only};
                next T_LEAF if defined $ignore and $val =~ /^(?:$ignore)$/;
                next T_LEAF if defined $only and $val !~ /^(?:$only)$/;
 
-               # If we arent alarming on a value, its green by default
+               # If we arent alarming on a value, its blue by default
                $color = 'blue' if !$alarm;
 
                # Keep track of our primary value
@@ -2495,8 +2541,11 @@ sub render_msg {
                      $row_data =~ s/\{$root\}/&$color /;
 
                      # If this test has a worse color, use it for the global color
-                     $worst_color = $color if !defined $worst_color or
-                     $colors{$worst_color} < $colors{$color};
+                     # but verify first that this test should compute the worst color
+                     if ($compute_worst_color{$oid}) {
+                        $worst_color = $color if !defined $worst_color
+                        or $colors{$worst_color} < $colors{$color};
+                     }
 
                   # Display threshold messages if we get the msg flag
                   } elsif ($flag eq 'msg') {
@@ -2505,7 +2554,7 @@ sub render_msg {
                      $row_data =~ s/\{$root\}/$substr/;
 
                   # This flag only causes errors (with the color) to be displayed
-                  # Will also modify global color type
+                  # Will also modify global color type lag if it is alarming
                   } elsif ($flag eq 'errors') {
                      $row_data =~ s/\{$root\}//;
 
@@ -2517,11 +2566,13 @@ sub render_msg {
                      $oid_msg = parse_deps($oids, $oid_msg, $leaf);
 
                      # If this test has a worse color, use it for the global color
-                     $worst_color = $color if !defined $worst_color or
-                     $colors{$worst_color} < $colors{$color};
-
-                     # Now add it to our msg
-                     $errors .= "&$color $oid_msg\n";
+                     # but verify first that this test should compute the worst color
+                     if ($compute_worst_color{$oid}) {
+                        $worst_color = $color if !defined $worst_color or
+                        $colors{$worst_color} < $colors{$color};
+                     }    
+                       # Now add it to our msg
+                       $errors .= "&$color $oid_msg\n";
 
                   # Display color threshold value
                   } elsif ($flag =~ /^thresh\:(\w+)$/i) {
@@ -2533,7 +2584,7 @@ sub render_msg {
                      $thresh = 'Undefined' if !defined $thresh;
                      $row_data =~ s/\{$root\}/$thresh/;
 
-                  # Uknown flag
+                  # Unknown flag
                   } else {
                      do_msg("Unknown flag ($flag) for $oid on $device\n");
                   }
@@ -2652,9 +2703,13 @@ sub render_msg {
 
                if($flag eq 'color') {
                   # If this test has a worse color, use it for the global color
-                  $worst_color = $color if !defined $worst_color or
-                  $colors{$worst_color} < $colors{$color};
+                  # but verify first that this test should compute the worst color
+                  if ($compute_worst_color{$oid}) {
+                    $worst_color = $color if !defined $worst_color 
+                    or $colors{$worst_color} < $colors{$color};
+                  }
                   $line =~ s/\{$root\}/\&$color /;
+
                } elsif ($flag eq 'msg') {
                   my $data = $oid_h->{msg};
                   $data = "Undefined" if !defined $data;
@@ -2667,25 +2722,29 @@ sub render_msg {
                   #              $line =~ s/\{$root\}/#ERRORONLY#/;
 
                   # Skip this value if it is green
-                  #              next if !defined $color or $color eq 'green' or $color eq 'blue';
-                  if ( ! defined $color  or  $color eq 'green' or $color eq 'blue') {
-                     $line= '#ERRORONLY#'    if $line eq "{$root}" ;
-                     $line=~ s/\{$root\}// ;
-                     next ;
-                  } else {
-                     $line=~ s/\{$root\}// ;
-                  }
+                  next if !defined $color or $color eq 'green' or $color eq 'blue';
+                  #if ( ! defined $color  or  $color eq 'green' or $color eq 'blue') {
+                  #   $line= '#ERRORONLY#'    if $line eq "{$root}" ;
+                  #   $line=~ s/\{$root\}// ;
+                  #   next ;
+                  #} else {
+                  #   $line=~ s/\{$root\}// ;
+                  #}
 
                   # Get oid msg and replace any inline oid dependencies
                   my $oid_msg = $oid_h->{msg};
                   $oid_msg = parse_deps($oids, $oid_msg, undef);
 
                   # If this test has a worse color, use it for the global color
-                  $worst_color = $color if !defined $worst_color or
-                  $colors{$worst_color} < $colors{$color};
+                  # but verify first that this test should compute the worst color
+                  if ($compute_worst_color{$oid}) {
+                    $worst_color = $color if !defined $worst_color or
+                    $colors{$worst_color} < $colors{$color};
+                  }
 
                   # Now add it to our msg
                   $errors .= "&$color $oid_msg\n";
+                  
 
                # Display color threshold value
                } elsif ($flag =~ /^thresh:($color_list)$/i) {
