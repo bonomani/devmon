@@ -143,7 +143,7 @@ sub initialize {
          'regex'   => '[\w\.-]+',
          'set'     => 0,
          'case'    => 1 },
-      'pidfile'   => { 'default' => '/var/run/devmon.pid',
+      'pidfile'   => { 'default' => '/var/run/devmon/devmon.pid',
          'regex'   => '.+',
          'set'     => 0,
          'case'    => 1 },
