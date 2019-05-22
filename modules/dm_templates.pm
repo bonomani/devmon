@@ -911,6 +911,7 @@ sub read_transforms_file {
    return 1;
 }
 
+# CAN BE REMOVED: REPLACE BY SORT
 # Build a dependency tree for translated oids and find any loops
 # or missing oids that defined ones may be dependent on
 sub find_deps {
