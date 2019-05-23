@@ -20,25 +20,27 @@ require Exporter;
 
 # Modules
 use strict;
-use BER;
+#use BER;
 use Socket;
 use IO::Handle;
 use IO::Select;
 use IO::Socket::INET;
-use SNMP_Session;
+#use SNMP_Session;
 use POSIX ":sys_wait_h";
 use Math::BigInt;
 use Storable qw(nfreeze thaw);
 use dm_config;
 
+use SNMP;
+
 # Our global variable hash
 use vars qw(%g);
 *g = \%dm_config::g;
 
-my $max_pdu_len = 16384;  # default is 8000
+#my $max_pdu_len = 16384;  # default is 8000
 # Set some of our global SNMP variables
-$BER::pretty_print_timeticks = 0;
-$SNMP_Session::suppress_warnings = $g{debug} ? 0 : 1;
+#$BER::pretty_print_timeticks = 0;
+#$SNMP_Session::suppress_warnings = $g{debug} ? 0 : 1;
 
 # Fiddle with some of our storable settings to correct byte order...
 $Storable::interwork_56_64bit = 1;
@@ -569,10 +571,28 @@ sub fork_sub {
          send_data($sock, \%data_out);
          next DEVICE;
       } elsif($snmp_ver eq '1') {
-         $session = SNMPv1_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
+         #$session = SNMPv1_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
+         $session = new SNMP::Session(
+               Version     => 1,
+               DestHost    => $host,
+               Community   => $snmp_cid,
+               RemotePort  => $snmp_port,
+               Retries     => $retries,
+               Timeout     => $timeout*1000000,
+               UseNumeric  => 1
+            );
       } elsif($snmp_ver =~ /^2c?$/) {
-         $session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
-         $session->{use_getbulk} = 1;
+         #$session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
+         #$session->{use_getbulk} = 1;
+         $session = new SNMP::Session(
+               Version     => 2,
+               DestHost    => $host,
+               Community   => $snmp_cid,
+               RemotePort  => $snmp_port,
+               Retries     => $retries,
+               Timeout     => $timeout*1000000,
+               UseNumeric  => 1
+            );
 
       # Whoa, we dont support this version of SNMP
       } else {
@@ -583,6 +603,46 @@ sub fork_sub {
          next DEVICE;
       }
 
+      # How to test that the session is ok?
+      #my $val = $session->get('.1.3.6.1.2.1.1.1.0');
+      #print "val=$val\n" if $val;
+      #if ( $session->{ErrorStr} ) {
+      #   print "host=$host Error: $session->{ErrorStr}\n";
+      #}
+
+      foreach my $oid (sort keys %{$data_in{nonreps}}) {
+         next if defined $data_out{error} ;
+
+         my $vb = new SNMP::Varbind([".$oid"]);
+         my $val = $session->get($vb);
+         if ( $val ) {
+            $data_out{$oid}{val}  = $val;
+            $data_out{$oid}{time} = time;
+         } else {
+            $data_out{error}{$session->{ErrorStr}} = 1;
+            last ;
+         }
+      }
+
+      foreach my $oid (sort keys %{$data_in{reps}}) {
+         next if defined $data_out{error} ;
+
+         my $vb = new SNMP::Varbind([".$oid"]);
+         my $val ;
+         # for (INITIALIZE; TEST; STEP) {
+         for ( $val = $session->getnext($vb);
+               $vb->tag eq ".$oid" and not $session->{ErrorNum} ;
+               $val = $session->getnext($vb)
+            ) {
+            $data_out{$oid}{val}{$vb->iid} = $val;
+            $data_out{$oid}{time}{$vb->iid} = time;
+            $data_out{maxrep}{$oid} ++ ;
+         }
+      }
+
+      send_data($sock, \%data_out);
+
+=comment
       # Set our retries & timeouts
       SNMP_Session::set_retries($session, $retries);
       SNMP_Session::set_timeout($session, $timeout);
@@ -708,7 +768,10 @@ sub fork_sub {
 
       # Now are done gathering data, close the session and return our hash
       $session->close();
+      print Data::Dumper->Dumper (\%data_out) ;
+
       send_data($sock, \%data_out);
+=cut
    }
 }
 
