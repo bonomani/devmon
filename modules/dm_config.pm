@@ -103,6 +103,7 @@ sub initialize {
       'snmptimeout'   => 0,
       'snmptries'     => 0,
       'snmpcids'      => '',
+      'snmpusers'     => '',
 
       # Now our global data subhashes
       'templates'     => {},
@@ -141,6 +142,10 @@ sub initialize {
          'set'     => 0,
          'case'    => 1 },
       'snmpcids'  => { 'default' => 'public,private',
+         'regex'   => '\S+',
+         'set'     => 0,
+         'case'    => 1 },
+      'snmpusers'  => { 'default' => 'xymon,monitoring',
          'regex'   => '\S+',
          'set'     => 0,
          'case'    => 1 },
@@ -413,7 +418,6 @@ sub sync_servers {
    if($g{multinode} ne 'yes') {
       %{$g{dev_data}} = read_hosts();
       return;
-
    }
 
    # First things first, update heartbeat info
