@@ -257,7 +257,8 @@ sub initialize {
          "syncconfig"      => \$syncconfig,
          "synctemplates"   => \$synctemps,
          "resetowners"     => \$resetowner,
-         "readhostscfg"     => \$readhosts
+         "readhostscfg"    => \$readhosts,
+         "skiphosts"       => \$g{skiphosts}
       ) or usage () ;
 
 	# Check / fix command line options
@@ -1187,10 +1188,9 @@ sub sync_global_config {
 # vendor and model type, then add them to the DB
 sub read_hosts_cfg {
    my %hosts_cfg;
+   my %hosts_cfg_cid; # this holds a list of hosts and the custom cid for the hosts
    my %new_hosts;
    my $sysdesc_oid = '1.3.6.1.2.1.1.1.0';
-   my $custom_cids = 0;
-   my $hosts_left  = 0;
 
    # Hashes containing textual shortcuts for Xymon exception & thresholds
    my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'b' => 'blue' );
@@ -1218,15 +1218,22 @@ sub read_hosts_cfg {
          "$num_descs sysdescs & $num_temps templates",0);
    }
 
-   do_log("SNMP querying all hosts in hosts.cfg file, please wait...",1);
+   # Put together our query hash
+   my %snmp_input;
 
-   # We need the location of the xymoncfg command
+   # Get snmp query params from global conf
+   read_global_config();
+
+   do_log("1: Parse hosts.cfg file for DEVMON options",1);
+
+   # We need the location of the xymoncfg command to get the hosts.cfg file
    my $xymoncfg = $ENV{XYMON} . "cfg" ;
 
    # This commands returned the full hosts.cfg
    foreach my $line (`$xymoncfg -net $g{hostscfg}`) {
       chomp $line ;
 
+      # Find device lines
       if($line =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+(\S+)(.*)$/i) {
          my ($ip, $host, $xymonopts) = ($1, $2, $3);
 
@@ -1253,9 +1260,8 @@ sub read_hosts_cfg {
             # If this IP is 0.0.0.0, try and get IP from DNS
             if($ip eq '0.0.0.0') {
                my (undef, undef, undef, undef, @addrs) = gethostbyname $host;
-               do_log("Unable to resolve DNS name for host '$host'",0)
-                  and next FILELINE if !@addrs;
-               $ip = join '.', unpack('C4', $addrs[0]);
+               do_log("Unable to resolve DNS name for host '$host'",0) and next FILELINE if !@addrs;
+               $ip = join '.', unpack('C4', $addrs[0]); # Use first address
             }
 
             # Make sure we don't have duplicates
@@ -1268,7 +1274,7 @@ sub read_hosts_cfg {
             # See if we have a custom cid
             if($options =~ s/(?:,|^)cid\((\S+?)\),?//) {
                $hosts_cfg{$host}{cid} = $1;
-               $custom_cids = 1;
+               $hosts_cfg_cid{$host} = $hosts_cfg{$host}{cid} ;
             }
 
             # See if we have a custom IP
@@ -1339,287 +1345,313 @@ sub read_hosts_cfg {
             $hosts_cfg{$host}{ip}    = $ip;
             $hosts_cfg{$host}{tests} = $tests;
 
-            # Incremement our host counter, used to tell if we should bother
-            # trying to query for new hosts...
-            ++$hosts_left;
+            my @log ;
+            foreach my $key (sort keys %{$hosts_cfg{$host}}) {
+               push @log, "$key=$hosts_cfg{$host}{$key}" ;
+            }
+            my $log = join ", ", @log ;
+            do_log("Found $host: $log",1);
          }
       }
    }
 
    # Gather our existing hosts
-   my %old_hosts = read_hosts();
-
-   # Put together our query hash
-   my %snmp_input;
-
-   # Get snmp query params from global conf
-   read_global_config();
+   my %old_hosts ;
+   if ( defined $g{skiphosts} ) {
+      do_log("2: Option skiphosts found so skip reading old hosts.db file",1);
+   } else {
+      do_log("2a: Read old hosts.db file",1);
+      %old_hosts = read_hosts();
+   }
 
    # First go through our existing hosts and see if they answer snmp
-   do_log("Querying pre-existing hosts",1) if %old_hosts;
+   if ( %old_hosts ) {
+      do_log("2b: Querying pre-existing hosts.db entries",1) ;
 
-   for my $host (keys %old_hosts) {
-      # If they don't exist in the new hostscfg, skip 'em
-      next if !defined $hosts_cfg{$host};
+      # Loop the previous list of hosts
+      for my $host (keys %old_hosts) {
+         # If they don't exist in the new hostscfg, skip 'em
+         next if !defined $hosts_cfg{$host};
 
-      my $vendor  = $old_hosts{$host}{vendor};
-      my $model   = $old_hosts{$host}{model};
+         my $vendor  = $old_hosts{$host}{vendor};
+         my $model   = $old_hosts{$host}{model};
 
-      # If their template doesn't exist any more, skip 'em
-      next if !defined $g{templates}{$vendor}{$model};
+         # If their template doesn't exist any more, skip 'em
+         next if !defined $g{templates}{$vendor}{$model};
 
-      my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
-      $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-      $snmp_input{$host}{cid}  = $old_hosts{$host}{cid};
-      $snmp_input{$host}{port} = $old_hosts{$host}{port};
-      $snmp_input{$host}{dev}  = $host;
-      $snmp_input{$host}{ver}  = $snmpver;
+         $snmp_input{$host}{dev}    = $host;
+         $snmp_input{$host}{ip}     = $hosts_cfg{$host}{ip};
+         $snmp_input{$host}{port}   = $old_hosts{$host}{port};
+         $snmp_input{$host}{ver}    = $old_hosts{$host}{ver};
+         $snmp_input{$host}{cid}    = $old_hosts{$host}{cid} ;
 
-      # Add our sysdesc oid
-      $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
-   }
-
-   # Throw data to our query forks
-   dm_snmp::snmp_query(\%snmp_input);
-
-   # Now go through our resulting snmp-data
-   OLDHOST: for my $host (keys %{$g{snmp_data}}) {
-      my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-      $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-      do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{debug};
-      next OLDHOST if $sysdesc eq 'UNDEFINED';
-
-      # Catch vendor/models override with the model() option
-      if(defined $hosts_cfg{$host}{vendor}) {
-         %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
-         $new_hosts{$host}{cid}    = $old_hosts{$host}{cid};
-         $new_hosts{$host}{port}   = $old_hosts{$host}{port};
-
-         --$hosts_left;
-         do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
-            "$hosts_cfg{$host}{model}",2);
-         next OLDHOST;
+         # Add our sysdesc oid
+         $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
       }
 
-      # Okay, we have a sysdesc, lets see if it matches any of our templates
-      OLDMATCH: for my $vendor (keys %{$g{templates}}) {
-         OLDMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
-            my $regex = $g{templates}{$vendor}{$model}{sysdesc};
+      #print "%snmp_input:\n" ;print Data::Dumper->Dumper(\%snmp_input) ;
 
-            # Careful /w those empty regexs
-            do_log("Regex for $vendor/$model appears to be empty.",0)
-               and next if !defined $regex;
+      # Throw data to our query forks
+      dm_snmp::snmp_query(\%snmp_input);
 
-            # Skip if this host doesn't match the regex
-            if ($sysdesc !~ /$regex/) {
-               do_log("$host did not match $vendor : $model : $regex", 4)
-               if $g{debug};
-               next OLDMODEL;
-            }
+      # Now go through our resulting snmp-data
+      for my $host (keys %{$g{snmp_data}}) {
+         my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
 
-            # We got a match, assign the pertinent data
-            %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
+         # We need a sysdesc
+         if ( ! defined $sysdesc ) {
+            do_log("No sysdesc for $host sysdesc",0);
+
+         # Catch vendor/models override with the model() option
+         } elsif(defined $hosts_cfg{$host}{vendor}) {
+            %{$new_hosts{$host}}      = %{$hosts_cfg{$host}};
             $new_hosts{$host}{cid}    = $old_hosts{$host}{cid};
             $new_hosts{$host}{port}   = $old_hosts{$host}{port};
-            $new_hosts{$host}{vendor} = $vendor;
-            $new_hosts{$host}{model}  = $model;
 
-            --$hosts_left;
-            do_log("Discovered $host as a $vendor $model",2);
-            last OLDMATCH;
+            do_log("Discovered $host as a predefined $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}",1);
+            delete $hosts_cfg{$host} ;
+
+         } else {
+            # Okay, we have a sysdesc, lets see if it matches any of our templates
+            VENDOR: for my $vendor (keys %{$g{templates}}) {
+               MODEL: for my $model (keys %{$g{templates}{$vendor}}) {
+                  my $regex = $g{templates}{$vendor}{$model}{sysdesc};
+
+                  # Careful /w those empty regexs
+                  if (!defined $regex or $regex eq '' ) {
+                     do_log("Regex for $vendor/$model appears to be empty.",0);
+                     next MODEL;
+                  }
+
+
+                  # Skip if this host doesn't match the regex
+                  if ($sysdesc !~ /$regex/) {
+                     do_log("$host did not match $vendor / $model : $regex", 4) if $g{debug};
+                     next MODEL;
+                  }
+   
+                  # We got a match, assign the pertinent data
+                  %{$new_hosts{$host}}      = %{$hosts_cfg{$host}};
+                  $new_hosts{$host}{cid}    = $old_hosts{$host}{cid};
+                  $new_hosts{$host}{port}   = $old_hosts{$host}{port};
+                  $new_hosts{$host}{ver}    = $old_hosts{$host}{ver};
+                  $new_hosts{$host}{vendor} = $vendor;
+                  $new_hosts{$host}{model}  = $model;
+   
+                  do_log("Discovered $host as a $vendor / $model with sysdesc=$sysdesc",1);
+                  delete $hosts_cfg{$host} ;
+                  last VENDOR;
+               }
+            }
          }
       }
    }
 
-   # Now go through each cid from most common to least
-   my @snmpvers = (2, 1);
+   #print "%hosts_cfg:\n" ;print Data::Dumper->Dumper(\%hosts_cfg) ;
 
-   # For our new hosts, query them first with snmp v2, then v1 if v2 fails
-   for my $snmpver (@snmpvers) {
+   # If we have some new, not yet discovered hosts
+   if ( %hosts_cfg ) {
+      do_log("3: Scanning still not detected hosts",1);
+      # For our new hosts, query them first with snmp 3, v2, then v1
+      for my $snmpver (3,2,1) {
 
-      # Don't bother if we don't have any hosts left to query
-      next if $hosts_left < 1;
+         # ! the first and second part of this for loop shares the same code
 
-      # First query hosts with custom cids
-      if($custom_cids) {
-         do_log("Querying new hosts /w custom cids using snmp v$snmpver",1);
-
-         # Zero out our data in and data out hashes
-         %{$g{snmp_data}} = ();
-         %snmp_input = ();
-
-         for my $host (sort keys %hosts_cfg) {
-            # Skip if they don't have a custom cid
-            next if !defined $hosts_cfg{$host}{cid};
-            # Skip if they have already been succesfully queried
-            next if defined $new_hosts{$host};
-
-            # Throw together our query data
-            $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-            $snmp_input{$host}{cid}  = $hosts_cfg{$host}{cid};
-            $snmp_input{$host}{port} = $hosts_cfg{$host}{port};
-            $snmp_input{$host}{dev}  = $host;
-            $snmp_input{$host}{ver}  = $snmpver;
-
-            # Add our sysdesc oid
-            $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
-         }
-
-         # Reset our failed hosts
-         $g{fail} = {};
-
-         # Throw data to our query forks
-         dm_snmp::snmp_query(\%snmp_input);
-
-         # Now go through our resulting snmp-data
-         NEWHOST: for my $host (keys %{$g{snmp_data}}) {
-            my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-            $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-            do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{debug};
-            next NEWHOST if $sysdesc eq 'UNDEFINED';
-
-            # Catch vendor/models override with the model() option
-            if(defined $hosts_cfg{$host}{vendor}) {
-               %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
-               --$hosts_left;
-
-               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
-                  "$hosts_cfg{$host}{model}",2);
-               last NEWHOST;
-            }
-
-            # Try and match sysdesc
-            NEWMATCH: for my $vendor (keys %{$g{templates}}) {
-               NEWMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
-
-                  # Skip if this host doesn't match the regex
-                  my $regex = $g{templates}{$vendor}{$model}{sysdesc};
-                  if ($sysdesc !~ /$regex/) {
-                     do_log("$host did not match $vendor : $model : $regex", 0) if $g{debug};
-                     next NEWMODEL;
-                  }
-
-                  # We got a match, assign the pertinent data
-                  %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
-                  $new_hosts{$host}{vendor} = $vendor;
-                  $new_hosts{$host}{model}  = $model;
-                  --$hosts_left;
-
-                  # If they are an old host, they probably changes models...
-                  if(defined $old_hosts{$host}) {
-                     my $old_vendor = $old_hosts{$host}{vendor};
-                     my $old_model  = $old_hosts{$host}{model};
-                     if($vendor ne $old_vendor or $model ne $old_model) {
-                        do_log("$host changed from a $old_vendor $old_model " .
-                           "to a $vendor $model",1);
-                     }
-                  } else {
-                     do_log("Discovered $host as a $vendor $model",1);
-                  }
-                  last NEWMATCH;
-               }
-            }
-
-            # Make sure we were able to get a match
-            if(!defined $new_hosts{$host}) {
-               do_log("No matching templates for device: $host",0);
-               # Delete the hostscfg key so we don't throw another error later
-               delete $hosts_cfg{$host};
-            }
-         }
-      }
-
-      # Now query hosts without custom cids
-      for my $cid (split /,/, $g{snmpcids}) {
-
-         # Don't bother if we don't have any hosts left to query
-         next if $hosts_left < 1;
-
-         do_log("Querying new hosts using cid '$cid' and snmp v$snmpver",1);
-
-         # Zero out our data in and data out hashes
-         %{$g{snmp_data}} = ();
-         %snmp_input = ();
-
-         # And query the devices that haven't yet responded to previous cids
-         for my $host (sort keys %hosts_cfg) {
-
+         # %hosts_cfg_cid holds a list of hosts and the custom cid for that host
+         foreach my $host (sort keys %hosts_cfg_cid) {
+            # Zero out our data in and data out hashes
+            %{$g{snmp_data}} = ();
+            %snmp_input = ();
+            $g{fail} = {}; # Reset our failed hosts
+   
             # Don't query this host if we already have succesfully done so
             next if defined $new_hosts{$host};
 
             $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
             $snmp_input{$host}{port} = $hosts_cfg{$host}{port};
-            $snmp_input{$host}{cid}  = $cid;
+            $snmp_input{$host}{cid}  = $hosts_cfg_cid{$host};
             $snmp_input{$host}{dev}  = $host;
             $snmp_input{$host}{ver}  = $snmpver;
 
             # Add our sysdesc oid
             $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
-         }
 
-         # Reset our failed hosts
-         $g{fail} = {};
+            my $hosts = join ", ", sort keys %snmp_input ;
+            do_log("Querying new hosts using '$hosts_cfg_cid{$host}' and snmp v$snmpver: $hosts",1);
 
-         # Throw data to our query forks
-         dm_snmp::snmp_query(\%snmp_input);
+            #print "%snmp_input:\n" ;print Data::Dumper->Dumper(\%snmp_input) ;
+            # Throw data to our query forks
+            dm_snmp::snmp_query(\%snmp_input);
 
-         # Now go through our resulting snmp-data
-         CUSTOMHOST: for my $host (keys %{$g{snmp_data}}) {
-            my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-            $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-            do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{debug};
-            next CUSTOMHOST if $sysdesc eq 'UNDEFINED';
+            # Now go through our resulting snmp-data
+            for my $host (keys %{$g{snmp_data}}) {
+               my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
 
-            # Catch vendor/models override with the model() option
-            if(defined $hosts_cfg{$host}{vendor}) {
-               %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
-               $new_hosts{$host}{cid}    = $cid;
-               --$hosts_left;
+               # We need a sysdesc
+               if ( ! defined $sysdesc ) {
+                  do_log("No sysdesc for $host sysdesc",0);
 
-               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
-                  "$hosts_cfg{$host}{model}",2);
-               next CUSTOMHOST;
-            }
+               # Catch vendor/models override with the model() option
+               } elsif (defined $hosts_cfg{$host}{vendor}) {
+                  %{$new_hosts{$host}}       = %{$hosts_cfg{$host}};
+                  $new_hosts{$host}{ver}     = $snmpver;
+                  $new_hosts{$host}{cid}     = $hosts_cfg_cid{$host};
 
-            # Try and match sysdesc
-            CUSTOMMATCH: for my $vendor (keys %{$g{templates}}) {
-               CUSTOMMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
+                  do_log("Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}",2);
+                  delete $hosts_cfg{$host} ;
 
-                  # Skip if this host doesn't match the regex
-                  my $regex = $g{templates}{$vendor}{$model}{sysdesc};
-                  if ($sysdesc !~ /$regex/) {
-                     do_log("$host did not match $vendor : $model : $regex", 0)
-                     if $g{debug};
-                     next CUSTOMMODEL;
-                  }
+               } else {
+                  # Okay, we have a sysdesc, lets see if it matches any of our templates
+                  VENDOR: for my $vendor (keys %{$g{templates}}) {
+                     MODEL: for my $model (keys %{$g{templates}{$vendor}}) {
+                        my $regex = $g{templates}{$vendor}{$model}{sysdesc};
 
-                  # We got a match, assign the pertinent data
-                  %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
-                  $new_hosts{$host}{cid}    = $cid;
-                  $new_hosts{$host}{vendor} = $vendor;
-                  $new_hosts{$host}{model}  = $model;
-                  --$hosts_left;
+                        # Careful /w those empty regexs
+                        if (!defined $regex or $regex eq '' ) {
+                           do_log("Regex for $vendor/$model appears to be empty.",0);
+                           next MODEL;
+                        }
 
-                  # If they are an old host, they probably changed models...
-                  if(defined $old_hosts{$host}) {
-                     my $old_vendor = $old_hosts{$host}{vendor};
-                     my $old_model  = $old_hosts{$host}{model};
-                     if($vendor ne $old_vendor or $model ne $old_model) {
-                        do_log("$host changed from a $old_vendor $old_model " .
-                           "to a $vendor $model",1);
+                        # Skip if this host doesn't match the regex
+                        if ($sysdesc !~ /$regex/) {
+                           do_log("$host did not match $vendor / $model : $regex", 4) if $g{debug};
+                           next MODEL;
+                        }
+
+                        # We got a match, assign the pertinent data
+                        %{$new_hosts{$host}}      = %{$hosts_cfg{$host}};
+                        $new_hosts{$host}{cid}    = $cid_user;
+                        $new_hosts{$host}{vendor} = $vendor;
+                        $new_hosts{$host}{ver}    = $snmpver;
+                        $new_hosts{$host}{model}  = $model;
+   
+                        # If they are an old host, they probably changed models...
+                        if(defined $old_hosts{$host}) {
+                           my $old_vendor = $old_hosts{$host}{vendor};
+                           my $old_model  = $old_hosts{$host}{model};
+                           if($vendor ne $old_vendor or $model ne $old_model) {
+                              do_log("$host changed from a $old_vendor / $old_model to a $vendor / $model",1);
+                           }
+                        } else {
+                           do_log("Discovered $host as a $vendor $model with sysdesc=$sysdesc",1);
+                        }
+                        delete $hosts_cfg{$host} ;
+                        last VENDOR;
                      }
-                  } else {
-                     do_log("Discovered $host as a $vendor $model",1);
                   }
-                  last CUSTOMMATCH;
+
+                  # Make sure we were able to get a match
+                  if (!defined $new_hosts{$host}) {
+                     do_log("No matching templates for device: $host",0);
+                     # Delete the hostscfg key so we don't throw another error later
+                     delete $hosts_cfg{$host};
+                  }
                }
             }
+         }
 
-            # Make sure we were able to get a match
-            if(!defined $new_hosts{$host}) {
-               do_log("No matching templates for device: $host",0);
-               # Delete the hostscfg key so we don't throw another error later
-               delete $hosts_cfg{$host};
+         # Depending on the version we have SecName or Community
+         my $cid_user_list ;
+         if ( $snmpver eq "3" ) {
+            $cid_user_list = $g{snmpusers} ;
+         } else {
+            $cid_user_list = $g{snmpcids} ;
+         }
+
+         foreach my $cid_user (split /,/, $cid_user_list) {
+            last if ! %hosts_cfg ; # Skip if all hosts are found
+
+            # Zero out our data in and data out hashes
+            %{$g{snmp_data}} = ();
+            %snmp_input = ();
+            $g{fail} = {}; # Reset our failed hosts
+   
+            # And query the devices that haven't yet responded to previous users
+            for my $host (sort keys %hosts_cfg) {
+               # Don't query this host if we already have succesfully done so
+               next if defined $new_hosts{$host};
+
+               $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
+               $snmp_input{$host}{port} = $hosts_cfg{$host}{port};
+               $snmp_input{$host}{cid}  = $cid_user ;
+               $snmp_input{$host}{dev}  = $host;
+               $snmp_input{$host}{ver}  = $snmpver;
+
+               # Add our sysdesc oid
+               $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
+            }
+
+            my $hosts = join ", ", sort keys %snmp_input ;
+            do_log("Querying new hosts using '$cid_user' and snmp v$snmpver: $hosts",1);
+
+            #print "%snmp_input:\n" ;print Data::Dumper->Dumper(\%snmp_input) ;
+            # Throw data to our query forks
+            dm_snmp::snmp_query(\%snmp_input);
+
+            # Now go through our resulting snmp-data
+            for my $host (keys %{$g{snmp_data}}) {
+               my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
+
+               # We need a sysdesc
+               if ( ! defined $sysdesc ) {
+                  do_log("No sysdesc for $host sysdesc",0);
+
+               # Catch vendor/models override with the model() option
+               } elsif (defined $hosts_cfg{$host}{vendor}) {
+                  %{$new_hosts{$host}}       = %{$hosts_cfg{$host}};
+                  $new_hosts{$host}{ver}     = $snmpver;
+                  $new_hosts{$host}{cid}     = $cid_user;
+
+                  do_log("Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}",2);
+                  delete $hosts_cfg{$host} ;
+
+               } else {
+                  # Okay, we have a sysdesc, lets see if it matches any of our templates
+                  VENDOR: for my $vendor (keys %{$g{templates}}) {
+                     MODEL: for my $model (keys %{$g{templates}{$vendor}}) {
+                        my $regex = $g{templates}{$vendor}{$model}{sysdesc};
+
+                        # Careful /w those empty regexs
+                        if (!defined $regex or $regex eq '' ) {
+                           do_log("Regex for $vendor/$model appears to be empty.",0);
+                           next MODEL;
+                        }
+
+                        # Skip if this host doesn't match the regex
+                        if ($sysdesc !~ /$regex/) {
+                           do_log("$host did not match $vendor / $model : $regex", 4) if $g{debug};
+                           next MODEL;
+                        }
+
+                        # We got a match, assign the pertinent data
+                        %{$new_hosts{$host}}      = %{$hosts_cfg{$host}};
+                        $new_hosts{$host}{cid}    = $cid_user;
+                        $new_hosts{$host}{vendor} = $vendor;
+                        $new_hosts{$host}{ver}    = $snmpver;
+                        $new_hosts{$host}{model}  = $model;
+   
+                        # If they are an old host, they probably changed models...
+                        if(defined $old_hosts{$host}) {
+                           my $old_vendor = $old_hosts{$host}{vendor};
+                           my $old_model  = $old_hosts{$host}{model};
+                           if($vendor ne $old_vendor or $model ne $old_model) {
+                              do_log("$host changed from a $old_vendor / $old_model to a $vendor / $model",1);
+                           }
+                        } else {
+                           do_log("Discovered $host as a $vendor $model with sysdesc=$sysdesc",1);
+                        }
+                        delete $hosts_cfg{$host} ;
+                        last VENDOR;
+                     }
+                  }
+
+                  # Make sure we were able to get a match
+                  if (!defined $new_hosts{$host}) {
+                     do_log("No matching templates for device: $host",0);
+                     # Delete the hostscfg key so we don't throw another error later
+                     delete $hosts_cfg{$host};
+                  }
+               }
             }
          }
       }
@@ -1628,15 +1660,15 @@ sub read_hosts_cfg {
    # Go through our hosts.cfg and see if we failed any queries on the
    # devices;  if they were previously defined, just leave them be
    # at let them go clear.  If they are new, drop a log message
-   for my $host (keys %hosts_cfg) {
-      next if defined $new_hosts{$host};
-
-      if(defined $old_hosts{$host}) {
-         # Couldn't query pre-existing host, maybe temporarily unresponsive?
-         %{$new_hosts{$host}} = %{$old_hosts{$host}};
-      } else {
-         # Throw a log message complaining
-         do_log("Could not query device: $host",0);
+   if (%hosts_cfg) {
+      for my $host (keys %hosts_cfg) {
+         if(defined $old_hosts{$host}) {
+            # Couldn't query pre-existing host, maybe temporarily unresponsive?
+            %{$new_hosts{$host}} = %{$old_hosts{$host}};
+         } else {
+            # Throw a log message complaining
+            do_log("Could not query device: $host",0);
+         }
       }
    }
 
@@ -1764,7 +1796,6 @@ sub read_hosts_cfg {
 
    # Or write it to our dbfile if we aren't in multinode mode
    } else {
-
       # Textual abbreviations
       my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'blue' => 'b' );
       my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao', 'noalarm' => 'na' );
@@ -2029,7 +2060,8 @@ sub usage {
    "   -de[bug]       Print debug output (this can be quite extensive)\n" .
    "\n" .
    "  Mutually exclusive arguments:\n" .
-   "   -re[adhostscfg]   Read in data from the Xymon hosts.cfg file\n" .
+   "   -re[adhostscfg]  Read in data from the Xymon hosts.cfg file\n" .
+   "   -sk[iphosts]     Skip reading hosts.db\n" ;
    "   -syncc[onfig]    Update multinode DB with the global config options\n" .
    "                    configured on this local node\n" .
    "   -synct[emplates] Update multinode device templates with the template\n" .
