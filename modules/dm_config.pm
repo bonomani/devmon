@@ -1220,12 +1220,6 @@ sub read_hosts_cfg {
 
    do_log("SNMP querying all hosts in hosts.cfg file, please wait...",1);
 
-   # Now open the hosts.cfg file and read it in
-   # Also read in any other host files that are included in the hosts.cfg
-   my @hostscfg = ($g{hostscfg});
-   my $etcdir  = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
-   $etcdir = $g{homedir} if !defined $etcdir;
-
    # We need the location of the xymoncfg command
    my $xymoncfg = $ENV{XYMON} . "cfg" ;
 
