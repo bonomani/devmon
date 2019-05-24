@@ -101,10 +101,10 @@ sub poll_devices {
       $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}}
       if $tests eq 'all';
 
-      $snmp_input{$device}{dev_ip}   = $g{dev_data}{$device}{ip};
-      $snmp_input{$device}{cid}      = $g{dev_data}{$device}{cid};
-      $snmp_input{$device}{port}     = $g{dev_data}{$device}{port};
-      $snmp_input{$device}{dev}      = $device;
+      $snmp_input{$device}{ip}   = $g{dev_data}{$device}{ip};
+      $snmp_input{$device}{cid}  = $g{dev_data}{$device}{cid};
+      $snmp_input{$device}{port} = $g{dev_data}{$device}{port};
+      $snmp_input{$device}{dev}  = $device;
 
       do_log("Querying $device for tests $tests", 3);
 
@@ -549,12 +549,12 @@ sub fork_sub {
       my $snmp_cid  = $data_in{cid};
       my $snmp_port = $data_in{port} || 161; # Default to 161 if not specified
       my $snmp_ver  = $data_in{ver};
-      my $dev_ip    = $data_in{dev_ip};
+      my $ip        = $data_in{ip};
       my $dev       = $data_in{dev};
       my $retries   = $data_in{retries};
       my $timeout   = $data_in{timeout};
 
-      my $host = (defined $dev_ip and $dev_ip ne '') ? $dev_ip : $dev;
+      my $host = (defined $p and $ip ne '') ? $ip : $dev;
 
       # Establish SNMP session
       my $session;

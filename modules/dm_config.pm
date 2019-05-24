@@ -1371,11 +1371,11 @@ sub read_hosts_cfg {
       next if !defined $g{templates}{$vendor}{$model};
 
       my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
-      $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
-      $snmp_input{$host}{cid}    = $old_hosts{$host}{cid};
-      $snmp_input{$host}{port}   = $old_hosts{$host}{port};
-      $snmp_input{$host}{dev}    = $host;
-      $snmp_input{$host}{ver}    = $snmpver;
+      $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
+      $snmp_input{$host}{cid}  = $old_hosts{$host}{cid};
+      $snmp_input{$host}{port} = $old_hosts{$host}{port};
+      $snmp_input{$host}{dev}  = $host;
+      $snmp_input{$host}{ver}  = $snmpver;
 
       # Add our sysdesc oid
       $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
@@ -1457,11 +1457,11 @@ sub read_hosts_cfg {
             next if defined $new_hosts{$host};
 
             # Throw together our query data
-            $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
-            $snmp_input{$host}{cid}    = $hosts_cfg{$host}{cid};
-            $snmp_input{$host}{port}   = $hosts_cfg{$host}{port};
-            $snmp_input{$host}{dev}    = $host;
-            $snmp_input{$host}{ver}    = $snmpver;
+            $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
+            $snmp_input{$host}{cid}  = $hosts_cfg{$host}{cid};
+            $snmp_input{$host}{port} = $hosts_cfg{$host}{port};
+            $snmp_input{$host}{dev}  = $host;
+            $snmp_input{$host}{ver}  = $snmpver;
 
             # Add our sysdesc oid
             $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
@@ -1549,11 +1549,11 @@ sub read_hosts_cfg {
             # Don't query this host if we already have succesfully done so
             next if defined $new_hosts{$host};
 
-            $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
-            $snmp_input{$host}{port}   = $hosts_cfg{$host}{port};
-            $snmp_input{$host}{cid}    = $cid;
-            $snmp_input{$host}{dev}    = $host;
-            $snmp_input{$host}{ver}    = $snmpver;
+            $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
+            $snmp_input{$host}{port} = $hosts_cfg{$host}{port};
+            $snmp_input{$host}{cid}  = $cid;
+            $snmp_input{$host}{dev}  = $host;
+            $snmp_input{$host}{ver}  = $snmpver;
 
             # Add our sysdesc oid
             $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
