@@ -1520,7 +1520,7 @@ sub read_hosts_cfg {
 
                         # We got a match, assign the pertinent data
                         %{$new_hosts{$host}}      = %{$hosts_cfg{$host}};
-                        $new_hosts{$host}{cid}    = $cid_user;
+                        $new_hosts{$host}{cid}    = $hosts_cfg_cid{$host};
                         $new_hosts{$host}{vendor} = $vendor;
                         $new_hosts{$host}{ver}    = $snmpver;
                         $new_hosts{$host}{model}  = $model;
