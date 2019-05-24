@@ -88,9 +88,6 @@ sub poll_devices {
          next QUERYHASH;
       }
 
-      my %non_repeaters = ();
-
-      my %repeaters = ();
       my $vendor = $g{dev_data}{$device}{vendor};
       my $model  = $g{dev_data}{$device}{model};
       my $tests  = $g{dev_data}{$device}{tests};
