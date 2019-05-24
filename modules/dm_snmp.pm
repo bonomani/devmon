@@ -385,7 +385,7 @@ sub snmp_query {
                      do_log("Fork $fork responded to ping request $returned{ping} with $returned{pong} at $g{forks}{$fork}{time}",4) if $g{debug};
                      delete $g{forks}{$fork}{pinging};
                   } else {
-                     do_log("Fork $fork didnt send an appropriate response, killing it",4) if $g{debug};
+                     do_log("Fork $fork didn't send an appropriate response, killing it",4) if $g{debug};
                      kill 15, $g{forks}{$fork}{pid} or do_log("Sending $fork TERM signal failed: $!");
                      close $g{forks}{$fork}{CS} or do_log("Closing socket to fork $fork failed: $!");
                      delete $g{forks}{$fork};

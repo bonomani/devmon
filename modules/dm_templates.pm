@@ -185,8 +185,7 @@ sub read_template_files {
       my ($vendor, $model, $snmpver, $sysdesc) = read_specs_file($dir);
 
       # No info? Go to the next one
-      next MODEL if !defined $vendor  or !defined $model or
-      !defined $snmpver or !defined $sysdesc;
+      next MODEL if !defined $vendor or !defined $model or !defined $snmpver or !defined $sysdesc;
 
       # Our model specific snmp info
       $g{templates}{$vendor}{$model}{snmpver} = $snmpver;

@@ -270,7 +270,7 @@ sub initialize {
      	$g{debug}     = 1 ;
      	$g{oneshot}   = 1 ;
 	}
-   # Dont daemonize if we are printing messages
+   # Don't daemonize if we are printing messages
 	if ( $g{print_msg} ) {
    	$g{daemonize} = 0 ;
 	}
@@ -539,7 +539,7 @@ sub sync_servers {
                if ($g{node_status}{nodes}{$node}{need_tests}
                   != $avg_tests_node) {
                   my $name = $g{node_status}{nodes}{$node}{name};
-                  # This node isnt ready for init; sleep then try again
+                  # This node isn't ready for init; sleep then try again
                   do_log("Waiting for node $node($name)",0);
                   sleep 2;
                   update_nodes();
@@ -669,7 +669,7 @@ sub sync_servers {
          # Make sure this test isn't too big
          next if $test_count{$device} > $biggest_test_needed
 
-         # Now make sure that it won't put us under the avg_nodes
+         # Now make sure that it wont put us under the avg_nodes
             or $my_num_tests - $test_count{$device} <= $avg_tests_node;
 
          # Okay, lets assign it to the open pool, then
@@ -1731,16 +1731,14 @@ sub read_hosts_cfg {
          # If it wasn't pre-existing, go ahead and insert it
          } else {
             db_do("delete from devices where name='$host'");
-            db_do("insert into devices values ('$host','$ip','$vendor'," .
-               "'$model','$tests','$cid',0)");
+            db_do("insert into devices values ('$host','$ip','$vendor','$model','$tests','$cid',0)");
 
             # Insert new thresholds
             for my $test (keys %{$new_hosts{$host}{thresh}}) {
                for my $oid (keys %{$new_hosts{$host}{thresh}{$test}}) {
                   for my $color (keys %{$new_hosts{$host}{thresh}{$test}{$oid}}) {
                      my $val = $new_hosts{$host}{thresh}{$test}{$oid}{$color};
-                     db_do("insert into custom_threshs values " .
-                        "('$host','$test','$oid','$color','$val')");
+                     db_do("insert into custom_threshs values ('$host','$test','$oid','$color','$val')");
                   }
                }
             }
@@ -1750,8 +1748,7 @@ sub read_hosts_cfg {
                for my $oid (keys %{$new_hosts{$host}{except}{$test}}) {
                   for my $type (keys %{$new_hosts{$host}{except}{$test}{$oid}}) {
                      my $val = $new_hosts{$host}{except}{$test}{$oid}{$type};
-                     db_do("insert into custom_excepts values " .
-                        "('$host','$test','$oid','$type','$val')");
+                     db_do("insert into custom_excepts values ('$host','$test','$oid','$type','$val')");
                   }
                }
             }
@@ -1772,8 +1769,7 @@ sub read_hosts_cfg {
 
       # Textual abbreviations
       my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'blue' => 'b' );
-      my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao',
-         'noalarm' => 'na' );
+      my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao', 'noalarm' => 'na' );
       open HOSTFILE, ">$g{dbfile}"
          or log_fatal("Unable to write to dbfile '$g{dbfile}' ($!)",0);
 
@@ -1819,8 +1815,7 @@ sub read_hosts_cfg {
          }
          $excepts =~ s/,$//;
 
-         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e" .
-         "$threshes\e$excepts\n";
+         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\n";
       }
 
       close HOSTFILE;

@@ -82,7 +82,7 @@ sub send_msgs {
 
          do_log("DEBUG: Finished printing single combo message",3) if $g{debug};
 
-      # Now make sure that this msg won't cause our current combo msg to
+      # Now make sure that this msg wont cause our current combo msg to
       # exceed the msgsize limit
       } elsif($msg_size + length $message > $g{msgsize}) {
          # Send the messages we already have collected
