@@ -176,13 +176,18 @@ sub snmp_query {
    # Check the status of any currently running forks
    &check_forks();
 
+   my @devices = keys %{$snmp_input};
+
+   # Make sure $g{numdevs} is not 0
+   if ( $g{numdevs} eq "0" ) {
+      $g{numdevs} = $#devices ;
+   }
+
    # Start forks if needed
    #fork_queries() if keys %{$g{forks}} < $g{numforks};
    fork_queries() if (keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs} ) ;
 
    # Now split up our data amongst our forks
-   my @devices = keys %{$snmp_input};
-
    while(@devices or $active_forks) {
       foreach my $fork (sort {$a <=> $b} keys %{$g{forks}}) {
 
