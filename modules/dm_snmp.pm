@@ -102,6 +102,7 @@ sub poll_devices {
       if $tests eq 'all';
 
       $snmp_input{$device}{ip}   = $g{dev_data}{$device}{ip};
+      $snmp_input{$device}{ver}  = $g{dev_data}{$device}{ver};
       $snmp_input{$device}{cid}  = $g{dev_data}{$device}{cid};
       $snmp_input{$device}{port} = $g{dev_data}{$device}{port};
       $snmp_input{$device}{dev}  = $device;
@@ -190,7 +191,6 @@ sub snmp_query {
    # Now split up our data amongst our forks
    while(@devices or $active_forks) {
       foreach my $fork (sort {$a <=> $b} keys %{$g{forks}}) {
-
          # First lets see if our fork is working on a device
          if(defined $g{forks}{$fork}{dev}) {
             my $dev = $g{forks}{$fork}{dev};
@@ -545,72 +545,59 @@ sub fork_sub {
          next DEVICE;
       }
 
-      # Get SNMP variables
-      my $snmp_cid  = $data_in{cid};
-      my $snmp_port = $data_in{port} || 161; # Default to 161 if not specified
-      my $snmp_ver  = $data_in{ver};
-      my $ip        = $data_in{ip};
-      my $dev       = $data_in{dev};
-      my $retries   = $data_in{retries};
-      my $timeout   = $data_in{timeout};
-
-      my $host = (defined $p and $ip ne '') ? $ip : $dev;
-
-      # Establish SNMP session
-      my $session;
-      my $sess_err = 0;
-
+      # Do some basic checking
       if(!defined $data_in{nonreps} and !defined $data_in{reps}) {
          my $error_str =
-         "No oids to query for $dev, skipping";
+         "No oids to query for $data_in{dev}, skipping";
          $data_out{error}{$error_str} = 1;
          send_data($sock, \%data_out);
          next DEVICE;
-      } elsif(!defined $snmp_ver) {
+      } elsif(!defined $data_in{ver}) {
          my $error_str =
-         "No snmp version found for $dev";
-         $data_out{error}{$error_str} = 1;
-         send_data($sock, \%data_out);
-         next DEVICE;
-      } elsif($snmp_ver eq '1') {
-         #$session = SNMPv1_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
-         $session = new SNMP::Session(
-               Version     => 1,
-               DestHost    => $host,
-               Community   => $snmp_cid,
-               RemotePort  => $snmp_port,
-               Retries     => $retries,
-               Timeout     => $timeout*1000000,
-               UseNumeric  => 1
-            );
-      } elsif($snmp_ver =~ /^2c?$/) {
-         #$session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
-         #$session->{use_getbulk} = 1;
-         $session = new SNMP::Session(
-               Version     => 2,
-               DestHost    => $host,
-               Community   => $snmp_cid,
-               RemotePort  => $snmp_port,
-               Retries     => $retries,
-               Timeout     => $timeout*1000000,
-               UseNumeric  => 1
-            );
-
-      # Whoa, we don't support this version of SNMP
-      } else {
-         my $error_str =
-         "Unsupported SNMP version for $dev ($snmp_ver)";
+         "No snmp version found for $data_in{dev}";
          $data_out{error}{$error_str} = 1;
          send_data($sock, \%data_out);
          next DEVICE;
       }
 
-      # How to test that the session is ok?
-      #my $val = $session->get('.1.3.6.1.2.1.1.1.0');
-      #print "val=$val\n" if $val;
-      #if ( $session->{ErrorStr} ) {
-      #   print "host=$host Error: $session->{ErrorStr}\n";
-      #}
+      #print "%data_in:\n" ;print Data::Dumper->Dumper(\%data_in) ;
+      #
+      # Get SNMP variables
+      my %snmpvars ;
+      $snmpvars{RemotePort} = $data_in{port} || 161; # Default to 161 if not specified
+      $snmpvars{DestHost}   = (defined $data_in{ip} and $data_in{ip} ne '') ? $data_in{ip} : $data_in{dev} ;
+      $snmpvars{Timeout}    = $data_in{timeout} * 1000000 ;
+      $snmpvars{Retries}    = $data_in{retries} ;
+
+      $snmpvars{UseNumeric} = 1 ;
+
+      # Establish SNMP session
+      my $session;
+
+      if($data_in{ver} eq '1') {
+         $snmpvars{Version} = 1 ;
+         $snmpvars{Community}  = $data_in{cid} if defined $data_in{cid} ;
+
+      } elsif($data_in{ver} =~ /^2c?$/) {
+         $snmpvars{Version} = 2 ;
+         $snmpvars{Community}  = $data_in{cid} if defined $data_in{cid} ;
+
+      } elsif($data_in{ver} eq '3') {
+         $snmpvars{Version} = 3 ;
+         # We store the security name for v3 als in cid so we keep the same data format
+         $snmpvars{SecName}    = $data_in{cid} if defined $data_in{cid} ;
+
+      # Whoa, we don't support this version of SNMP
+      } else {
+         my $error_str =
+         "Unsupported SNMP version for $data_in{dev} ($data_in{ver})";
+         $data_out{error}{$error_str} = 1;
+         send_data($sock, \%data_out);
+         next DEVICE;
+      }
+
+      #print "%snmpvars:\n" ;print Data::Dumper->Dumper(\%snmpvars) ;
+      $session = new SNMP::Session(%snmpvars) ;
 
       foreach my $oid (sort keys %{$data_in{nonreps}}) {
          next if defined $data_out{error} ;
@@ -642,6 +629,8 @@ sub fork_sub {
          }
       }
 
+      #print "%data_out:\n" ;print Data::Dumper->Dumper(\%data_out) ;
+      #
       send_data($sock, \%data_out);
    }
 }
