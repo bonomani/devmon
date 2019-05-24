@@ -1802,7 +1802,9 @@ sub read_hosts_cfg {
       open HOSTFILE, ">$g{dbfile}"
          or log_fatal("Unable to write to dbfile '$g{dbfile}' ($!)",0);
 
+      #print "%new_hosts:\n" ;print Data::Dumper->Dumper(\%new_hosts) ;
       for my $host (sort keys %new_hosts) {
+         my $ver    = $new_hosts{$host}{ver};
          my $ip     = $new_hosts{$host}{ip};
          my $vendor = $new_hosts{$host}{vendor};
          my $model  = $new_hosts{$host}{model};
@@ -1844,7 +1846,7 @@ sub read_hosts_cfg {
          }
          $excepts =~ s/,$//;
 
-         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\n";
+         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\e$ver\n";
       }
 
       close HOSTFILE;
@@ -1915,7 +1917,7 @@ sub read_hosts {
       my $linenumber = 0;
       FILELINE: for my $line (<DBFILE>) {
          chomp $line;
-         my ($name,$ip,$vendor,$model,$tests,$cid,$threshes,$excepts) = split /\e/, $line;
+         my ($name,$ip,$vendor,$model,$tests,$cid,$threshes,$excepts,$ver) = split /\e/, $line;
          ++$linenumber;
 
          if ( !defined $cid ) {
@@ -1936,6 +1938,7 @@ sub read_hosts {
          $hosts{$name}{tests}  = $tests;
          $hosts{$name}{cid}    = $cid;
          $hosts{$name}{port}   = $port;
+         $hosts{$name}{ver}    = $ver;
 
          if(defined $threshes and $threshes ne '') {
             for my $thresh (split ',', $threshes) {
