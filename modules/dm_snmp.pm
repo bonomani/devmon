@@ -93,13 +93,13 @@ sub poll_devices {
       my $tests  = $g{dev_data}{$device}{tests};
 
       # Make sure we have our device_type info
-      do_log("No vendor/model '$vendor/$model' templates for host " .
-         "$device, skipping.", 0)
+      do_log("No vendor/model '$vendor/$model' templates for host $device, skipping.", 0)
          and next QUERYHASH if !defined $g{templates}{$vendor}{$model};
 
       # If our tests = 'all', create a string with all the tests in it
-      $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}}
-      if $tests eq 'all';
+      if ( $tests eq 'all' ) {
+         $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}} ;
+      }
 
       $snmp_input{$device}{ip}   = $g{dev_data}{$device}{ip};
       $snmp_input{$device}{ver}  = $g{dev_data}{$device}{ver};
@@ -124,8 +124,8 @@ sub poll_devices {
          # Determine what type of snmp version we are using
          # Use the highest snmp variable type we find amongst all our tests
          $snmp_input{$device}{ver} = $snmpver if
-         !defined $snmp_input{$device}{ver} or
-         $snmp_input{$device}{ver} < $snmpver;
+            !defined $snmp_input{$device}{ver} or
+            $snmp_input{$device}{ver} < $snmpver;
 
          # Go through our oids and add them to our repeater/non-repeater hashs
          for my $oid (keys %{$tmpl->{oids}}) {
