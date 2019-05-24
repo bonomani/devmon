@@ -219,7 +219,7 @@ sub read_template_files {
          read_exceptions_file($testdir, $tmpl) and
          read_message_file($testdir, $tmpl);
 
-         # Make sure we dont have any partial templates hanging around
+         # Make sure we don't have any partial templates hanging around
          delete $g{templates}{$vendor}{$model}{tests}{$test}
          if !defined $tmpl->{msg};
 
@@ -227,7 +227,7 @@ sub read_template_files {
          if $g{debug};
       }
 
-      # If we dont have any tests, delete the model info
+      # If we don't have any tests, delete the model info
       delete $g{templates}{$vendor}{$model}
       if (scalar keys %{$g{templates}{$vendor}{$model}{tests}}) == 0;
    }
@@ -246,10 +246,10 @@ sub post_template_load {
                my $oid_h = \%{$tmpl->{oids}{$oid}};
                my $trans_type = $oid_h->{trans_type};
 
-               # For now we arent doing anything to non-translated oids; skip them
+               # For now we aren't doing anything to non-translated oids; skip them
                next if !defined $trans_type;
 
-               # Pre-compute the switch-style case tables, so we dont have
+               # Pre-compute the switch-style case tables, so we don't have
                # to do it on a per-oid basis later
                if($trans_type eq 'switch' or $trans_type eq 'tswitch') {
                   my ($dep_oid, $switch_data) = ($1, $2) if
@@ -443,7 +443,7 @@ sub read_oids_file {
          }
       }
 
-      # Make sure this oid hasnt been defined before
+      # Make sure this oid hasn't been defined before
       do_log("$oid defined more than once in $oid_file", 0) and next
       if defined $tmpl->{oids}{$oid};
 
@@ -540,10 +540,10 @@ sub read_transforms_file {
          }
       }
 
-      # Make sure this oid hasnt been defined before
+      # Make sure this oid hasn't been defined before
       # TODO: Would be nice to check that if it was defined
       # before, both oid are realy the same
-      do_log("Cant redefine $oid  in $trans_file", 0) and next
+      do_log("Can't redefine $oid  in $trans_file", 0) and next
       if defined $tmpl->{oids}{$oid};
 
       # Make sure function is a real one and that it is formatted correctly
@@ -933,7 +933,7 @@ sub find_deps {
          while($data =~ s/\{(.+?)\}//) {
 
             # It depends on other oids; iterate into them to make sure that
-            # they are defined and that we dont loop back and depend on a
+            # they are defined and that we don't loop back and depend on a
             # oid defined somewhere earlier in our path
             my $dep_oid = $1;
             my @temp = @$path;
@@ -1165,7 +1165,7 @@ sub read_exceptions_file {
             next;
          }
       }
-      # Make sure we dont have an except defined twice
+      # Make sure we don't have an except defined twice
       do_log("Exception for $oid redefined in $except_file at " .
          "line $.",0) and next
       if defined $tmpl->{oids}{$oid}{except}{$type};
@@ -1230,7 +1230,7 @@ sub read_message_file {
          # Allow one line of header info
          if ($line !~ /\{.+\}/) {$header = 1; next}
 
-         # Complain if we havent found any oids yet
+         # Complain if we haven't found any oids yet
          do_log("Table definition at line $table_at of $msg_file has no " .
             "OIDs defined. Skipping this test.", 0)
             and return 0 if $header and $line !~ /\{.+\}/;

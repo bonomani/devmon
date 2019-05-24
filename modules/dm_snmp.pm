@@ -64,7 +64,7 @@ sub poll_devices {
    %{$g{snmp_data}} = ();
 
    # Query our Xymon server for device reachability status
-   # we dont want to waste time querying devices that are down
+   # we don't want to waste time querying devices that are down
    do_log("Getting device status from Xymon at $g{dispserv}",1);
    %{$g{xymon_color}} = ();
    foreach (`$ENV{XYMON} $g{dispserv} "xymondboard test=^$g{pingcolumn}\$ fields=hostname,color,line1"`) {
@@ -77,11 +77,11 @@ sub poll_devices {
    # Build our query hash
    QUERYHASH: for my $device (sort keys %{$g{dev_data}}) {
 
-      # Skip this device if we werent able to reach it during update_indexes
+      # Skip this device if we weren't able to reach it during update_indexes
       # next unless $indexes->{$device}{reachable};
 
       # Skip this device if we are running a Xymon server and the
-      # server thinks that it isnt reachable
+      # server thinks that it isn't reachable
       if(defined $g{xymon_color}{$device} and
          $g{xymon_color}{$device} ne 'green') {
          do_log("$device has a non-green Xymon status, skipping SNMP.", 2);
@@ -282,7 +282,7 @@ sub snmp_query {
                   # our poll time
                   ++$g{fail}{$dev};
 
-               # We havent exceeded our poll time, but make sure its still live
+               # We haven't exceeded our poll time, but make sure its still live
                } elsif (!kill 0, $pid) {
                   # Whoops, looks like our fork died somewhow
                   do_log("Fork $fork ($pid) died polling $dev",0);
@@ -455,13 +455,13 @@ sub fork_queries {
       if($pid = fork) {
          # Parent code here
          do_log("Fork number $num started with pid $pid") if $g{debug};
-         close $g{forks}{$num}{PS} or do_log("Closing socket to ourself failed: $!\n"); # dont need to communicate with ourself
+         close $g{forks}{$num}{PS} or do_log("Closing socket to ourself failed: $!\n"); # don't need to communicate with ourself
          $g{forks}{$num}{pid} = $pid;
          $g{forks}{$num}{time} = time;
          $g{forks}{$num}{CS}->blocking(0);
       } elsif(defined $pid) {
          # Child code here
-         $g{parent} = 0;              # We arent the parent any more...
+         $g{parent} = 0;              # We aren't the parent any more...
          do_log("DEBUG SNMP: Fork $num using sockets $g{forks}{$num}{PS} <-> $g{forks}{$num}{CS} for IPC") if $g{debug};
          foreach (sort {$a <=> $b} keys %{$g{forks}}) {
             do_log("DEBUG SNMP: Fork $num closing socket (child $_) $g{forks}{$_}{PS}") if $g{debug};
@@ -594,7 +594,7 @@ sub fork_sub {
                UseNumeric  => 1
             );
 
-      # Whoa, we dont support this version of SNMP
+      # Whoa, we don't support this version of SNMP
       } else {
          my $error_str =
          "Unsupported SNMP version for $dev ($snmp_ver)";
@@ -755,7 +755,7 @@ sub fork_sub {
          }
 
          do_log("DEBUG SNMP($fork_num): Failed queries $failed_query",0) if ($g{debug} and $failed_query gt 0);
-         # We dont want to do every table if we are failing alot of walks
+         # We don't want to do every table if we are failing alot of walks
          if($failed_query > 6) {
             my $error_str =
             "Failed too many queries on $dev, aborting query";
