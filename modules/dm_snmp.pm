@@ -65,7 +65,7 @@ sub poll_devices {
 
    # Query our Xymon server for device reachability status
    # we dont want to waste time querying devices that are down
-   do_log("Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport},1);
+   do_log("Getting device status from Xymon at $g{dispserv}",1);
    %{$g{xymon_color}} = ();
    foreach (`$ENV{XYMON} $g{dispserv} "xymondboard test=^$g{pingcolumn}\$ fields=hostname,color,line1"`) {
       my ($device,$color,$line1) = split /\|/;
