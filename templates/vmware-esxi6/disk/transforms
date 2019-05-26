@@ -1,4 +1,0 @@
-DiskSize : MATH	: {DiskBlocks} x {DiskBlockSize} / 1024 : 0
-DiskSizeUsed : MATH	: {DiskBlocksUsed} x {DiskBlockSize} / 1024 : 0
-DiskAvail : MATH	: {DiskSize} - {DiskSizeUsed} : 0
-DiskPerUse : MATH	: ({DiskSizeUsed} x 100) / {DiskSize} : 0
