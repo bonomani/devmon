@@ -1,6 +1,9 @@
   INSTALLING DEVMON
 =====================================================================
 
+For an QUICK UPGRADE from previous version follow the QUICK_UPGRADE
+ guide in this folder (devmon/docs)
+
 For an overview of how Devmon works, please see the OVERVIEW file.
 
  Single-node installation
@@ -20,7 +23,7 @@ For an overview of how Devmon works, please see the OVERVIEW file.
 
      Templates should be in devmon/templates
 
-     AND Follow the QUICK_INSTALLATION guide in this folder (docs)
+     AND follow the QUICK_INSTALLATION guide in this folder (docs)
      AND come back letter to verify that you dont miss anything!
 
   3. Edit the devmon.cfg file.  For a single node installation, the
