@@ -1,0 +1,3 @@
+TABLE:rrd(DS:ds0:DiskPerUse:GAUGE; )
+Filesystem|1024-blocks|Used|Available|Capacity
+{DiskName}|{DiskSize}|{DiskSizeUsed}|{DiskAvail}|{DiskPerUse.color}{DiskPerUse}%{DiskPerUse.errors} 

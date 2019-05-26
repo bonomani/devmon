@@ -1,4 +1,4 @@
-#hrProcessorLoad         : red          : >70	       : CPU utilization is very high: {cpmCPUTotal5minRev}%
+#hrProcessorLoad         : red          : >99	       : CPU utilization is very high: {cpmCPUTotal5minRev}%
 #hrProcessorLoad         : yellow       : >98	       : CPU utilization is high: {hrProcessorLoad}%
 #hrProcessorLoad         : green        :	       :
 
