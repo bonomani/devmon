@@ -188,8 +188,7 @@ sub snmp_query {
    # Check the status of any currently running forks
    &check_forks();
    # Start forks if needed
-   #fork_queries() if keys %{$g{forks}} < $g{numforks};
-   fork_queries() if (keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs} ) ;
+   fork_queries() if ((keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs}) or (keys %{$g{forks}} == 0 and $g{numdevs} > 2 )) ;
 
    # Now split up our data amongst our forks
    my @devices = keys %{$snmp_input};
@@ -438,8 +437,7 @@ sub fork_queries {
    
    $g{dbh}->disconnect() if defined $g{dbh} and $g{dbh} ne '';
    # We should only enter this loop if we are below numforks
-   #    while(keys %{$g{forks}} < $g{numforks}) {
-   while(keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs}) {
+   while((keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs}) or (keys %{$g{forks}} == 0 and  $g{numdevs} > 2))  {
       my $num = 1;
       my $pid;
 
