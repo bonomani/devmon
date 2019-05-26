@@ -23,7 +23,7 @@ use strict;
 use dm_config;
 use Math::BigInt::Calc;
 use POSIX qw/ strftime / ;
-#use Data::Dumper;
+use Data::Dumper;
 # my $dump = Dumper(\$oids);
 
 # Our global variable hash
@@ -1095,9 +1095,9 @@ sub trans_best {
 
    # Go through each parent oid and mark the as dependant of this threshold 
    # transform. This is need to be able to calculate to worst threshold
-   for my $dep_oid (@dep_oids) {
-       $oids->{$dep_oid}->{ttrans}{$oid} = ();
-   }
+   #for my $dep_oid (@dep_oids) {
+   #    $oids->{$dep_oid}->{ttrans}{$oid} = ();
+   #}
 
    # Do repeater-type oids
    if($oid_h->{repeat}) {
