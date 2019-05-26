@@ -55,9 +55,9 @@ sub initialize {
       'active'        => '',
       'pidfile'       => '',
       'logfile'       => '',
-      'hostscfg'       => '',
-      'xymontag'         => '',
-      'XYMONNETWORK'    => '',
+      'hostscfg'      => '',
+      'xymontag'      => '',
+      'XYMONNETWORK'  => '',
       'nodename'      => '',
       'log'           => '',
 

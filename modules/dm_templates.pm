@@ -229,6 +229,9 @@ sub read_template_files {
          delete $g{templates}{$vendor}{$model}{tests}{$test}
          if !defined $tmpl->{msg};
 
+         # Compute dependencies
+         calc_template_test_deps($tmpl);
+
          do_log("DEBUG TEMPLATES: read $vendor:$model:$test template")
          if $g{debug};
       }
@@ -325,9 +328,7 @@ sub post_template_load {
                   # Make sure we have a default value
                   $trans_data->{default} = $default || 'Unknown';
                }
-
             }
-
          }
       }
    }
@@ -476,9 +477,12 @@ sub read_transforms_file {
    my ($dir, $tmpl) = @_;
 
    # Define our valid transforms functions
-   my %trans = ();
-   my $deps  = {};
-   my $path  = [];
+   my %trans        = ();
+   my $infls        = {};
+   my $deps         = {};
+   my $infls_thresh = {};
+   my $deps_thresh  = {}; 
+   my $path         = [];
 
    # Define the file; make sure it exists and is readable
    # Delete the global hash, too
@@ -877,89 +881,104 @@ sub read_transforms_file {
             and delete $trans{$oid} and next
          if !defined $tmpl->{oids}{$dep_oid} and !defined $trans{$dep_oid};
 
-         #        $deps->{$oid}{$dep_oid} = {};
-         $deps->{$dep_oid}{$oid} = {};
+         # Create influences (contrary of dependecies) hash for the topological sort 
+         $infls->{$dep_oid}{$oid} = {};
+          
+         # Create a direct dependency hash for each oid 
+         $deps->{$oid}{$dep_oid} = {};
+         
+         #  Create influences (contrary of dependecies) hash for global worst thresh calc
+         $infls_thresh->{$dep_oid}{$oid} = {} if $trans{$oid}{type} =~ /^best$|worst/i ;
       }
    }
 
-   #   # Find dependency loops (tricky!)
-   #    my $val = find_deps($deps, \%trans, $path);
-   #    return 0 if $val == 0;
-   # Complete the list of dependecies to include those OIDs which do not depend
-   # on another OID, and which are not used in any transformation rule. They too
-   # should be included in the sorted list, used to evaluate the OIDs.
-   for my $oid ( keys %trans ) {
-      next			if $trans{$oid}{data}=~ m/\{.+?\}/ ;
-      next			if exists $deps->{$oid} ;
-      $deps->{$oid}= {} ;		# Create entry
-   }  # of for
-
-   # Sort the OIDs in a order in which they need to be calculated. At the same
-   # time any dependency loop is found and reported.
-   my $val = sort_oid( $deps );
-   return 0			unless defined $val;
-   $tmpl->{sort} = $val;
-
    # Now add the translations to the global hash
    for my $oid (keys %trans) {
-      my $type = $trans{$oid}{type};
-      my $data = $trans{$oid}{data};
-      $tmpl->{oids}{$oid}{trans_type} = $type;
-      $tmpl->{oids}{$oid}{trans_data} = $data;
+      $tmpl->{oids}{$oid}{trans_type}   = $trans{$oid}{type};
+      $tmpl->{oids}{$oid}{trans_data}   = $trans{$oid}{data};
+      $tmpl->{oids}{$oid}{deps}         = $deps->{$oid};
+      $tmpl->{oids}{$oid}{infls}        = $infls->{$oid};
+      $tmpl->{oids}{$oid}{infls_thresh} = $infls_thresh->{$oid};
    }
 
    return 1;
 }
+sub calc_template_test_deps {
+   my $tmpl           = $_[0]; 
+   my @oids           = keys $tmpl->{oids};
+   my $deps           = {} ;
+   my $infls          = {} ;
+   my %trans_data          ;   #for sort from W. Nelis
+   my $infls_thresh   = {} ;
+   #my %oids_all ;
+   #my @oids_list      = () ;
+   
+   foreach my $oid (@oids) {
+      $deps->{$oid}         = $tmpl->{oids}{$oid}{deps} ; 
+      $infls->{$oid}        = $tmpl->{oids}{$oid}{infls}; 
+      $infls_thresh->{$oid} = $tmpl->{oids}{$oid}{infls_thresh} ;
+      $trans_data{$oid}     = $tmpl->{oids}{$oid}{trans_data} if (exists $tmpl->{oids}{$oid}{trans_data}) ;
+      
 
-# CAN BE REMOVED: REPLACE BY SORT
-# Build a dependency tree for translated oids and find any loops
-# or missing oids that defined ones may be dependent on
-sub find_deps {
-   my ($deps, $trans, $path) = @_;
+      #$oids_all{$oid}      = {};                  #Why not all oids from all test?
+      
+      #@sorted_oids = sort_oids (\@oids, \$deps ); #Why not all oids from all test?
+      #$tmpl->{sorted_oids} = @sorted_oids;        #because this function should not 
+                                                   #be call not per test !
+   }
+   #@oids_list          = keys %oids_all;
 
-   # Our path variable keeps track of where in the tree we are
-   @$path = () if !defined $path;
+   # call the topological sort function to have ordered dependecies from W Nelis
+   my $sorted_oids  = sort_oids (\$infls, \%trans_data);
+   return 0 unless defined $sorted_oids;
+   my @sorted_oids = @{$sorted_oids};
+ 
+   # call the topological sort function to have ordered dependecies WIP
+   # my @sorted_oids = sort_oids2 (\@oids, \$deps, \$infls);
+   
 
-   # pointer variable to act as a placeholder for our current spot in the tree
-   my $pointer = \%{$deps};
-   for my $pt (@$path) {$pointer = \%{$pointer->{$pt}}}
+   # Check that we have a results for each tests (we should never be false) 
+   do_log("Error no sorted oids @sorted_oids?!") if !@sorted_oids;
 
-   # Now iterate through the oids in our current spot in the tree
-   for my $oid (keys %$pointer) {
+   # Add the results as a ref (the supported scalar type) so we can have an 
+   # array into the template hash of hash
+   $tmpl->{sorted_oids} = \@sorted_oids;
 
-      # Update our path
-      push @$path, $oid;
+   # For thresholds calculation
 
-      # Determine our root id, used later for troubleshooting
-      my $root_oid = $path->[0];
-
-      # See if this variable is preset in the translation hash
-      if(defined $trans->{$oid}) {
-         # If it is, see if it has other oids that it depends on
-         my $data = $trans->{$oid}{data};
-         while($data =~ s/\{(.+?)\}//) {
-
-            # It depends on other oids; iterate into them to make sure that
-            # they are defined and that we dont loop back and depend on a
-            # oid defined somewhere earlier in our path
-            my $dep_oid = $1;
-            my @temp = @$path;
-            while (my $path_oid = shift @temp) {
-               next if $path_oid ne $dep_oid;
-               do_log("$root_oid has a looped dependency: " .
-                  join('->', @$path), 0);
-               return 0;
-            }
-            $pointer->{$oid}{$dep_oid} = {}
-            if !defined $pointer->{$oid}{$dep_oid};
-            my $val = find_deps($deps, $trans, $path);
-            return 0 if $val == 0;
+   # For each oids in a test find all oids depencies on and have it in an 
+   # and have it in a sorted list
+   # This is not used now but it can be used later !!! 
+   #my %all_deps_thresh;
+   #for my $oid ( @{$$tmpl{sorted_oids}} ) {
+   #   for my $oid_dep (keys %{$deps_thresh->{$oid}}) {
+   #      if (exists $all_deps_thresh{$oid_dep}) {
+   #         push @{$all_deps_thresh{$oid}}, @{$all_deps_thresh{$oid_dep}};
+   #      } else {
+   #         push @{$all_deps_thresh{$oid}}, $oid_dep;
+   #      }
+   #   $tmpl->{oids}->{$oid}->{sorted_tresh_list} = $all_deps_thresh{$oid};
+   #   }
+   #}
+ 
+   # For each oids in a test find all oids that depend on it and have it in 
+   # in a sorted liste (this is used for the worst_color calc in render_msg 
+   my %all_infls_thresh;
+   for my $oid ( reverse(@sorted_oids) ) {
+   
+      for my $oid_infl (keys %{$infls_thresh->{$oid}}) {
+         if (exists $all_infls_thresh{$oid_infl}) {
+            push @{$all_infls_thresh{$oid}}, @{$all_infls_thresh{$oid_infl}};
+         } else {
+            push @{$all_infls_thresh{$oid}}, $oid_infl;
          }
+      $tmpl->{oids}->{$oid}{sorted_oids_thresh_infls} = $all_infls_thresh{$oid};
       }
-      pop @$path;
    }
 
-   return 1;
+
+
+   return;
 }
 
 # Function sort-oid sorts the OIDs used in the transformations in a order
@@ -968,23 +987,35 @@ sub find_deps {
 # At the same time, it checks the dependencies for any circular chains. If no
 # such chain is found, this function returns a reference to the sorted list of
 # OIDs. If at least one circular chain is found, the returned value is undef.
-#
 # This function uses the topological sort method.
 #
-sub sort_oid($) {
-   my $deps= $_[0] ;
-   my @Sorted= () ;			# Sorted list of OIDs
-   my %Cnt= () ;			# Dependency counters
-   my ($oid,$mods) ;			# Loop control variables
+sub sort_oids($) {
+   my ( $infls_ref, $trans_data_ref ) = @_;
+   my $infls                          = $$infls_ref ;
+   my %trans_data                     = %$trans_data_ref ;
+   my @Sorted                         = () ;               # Sorted list of OIDs
+   my %Cnt                            = () ;               # Dependency counters
+   my ($oid,$mods) ;                    # Loop control variables
+
+   # Complete the list of OIDs to include those OIDs which do not depend
+   # on another OID, like the SET transform. They have to be added for the
+   # this algo to work : Commented as seem not needed !
+
+   #foreach $oid ( keys %trans_data ) {
+   #   next                      if $trans_data{$oid} =~ m/\{.+?\}/ ;
+   #   next                      if exists $infls->{$oid} ;
+   #   $infls->{$oid}= {} ;               # Create entry
+   #   do_log(" entry created for $oid");
+   #}  # of for
 
    #
    # Build table %Cnt. It specifies for each OID the number of other OIDs which
    # are needed to compute the OID.
    #
-   foreach $oid ( keys %$deps ) {
-      $Cnt{$oid}= 0		unless exists $Cnt{$oid} ;
-      foreach ( keys %{$$deps{$oid}} ) {
-         $Cnt{$_}= 0		unless exists $Cnt{$_} ;
+   foreach $oid ( keys %$infls ) {
+      $Cnt{$oid}= 0             unless exists $Cnt{$oid} ;
+      foreach ( keys %{$$infls{$oid}} ) {
+         $Cnt{$_}= 0            unless exists $Cnt{$_} ;
          $Cnt{$_}++ ;
       }  # of foreach
    }  # of foreach
@@ -996,16 +1027,16 @@ sub sort_oid($) {
    # be moved any more. Any remaining OIDs, mentioned in %Cnt, must be in a
    # circular chain of dependencies.
    #
-   $mods= 1 ;				# End-of-loop indicator
+   $mods= 1 ;                          # End-of-loop indicator
    while ( $mods > 0 ) {
-      $mods= 0 ;				# Preset mod-count of this pass
+      $mods= 0 ;                               # Preset mod-count of this pass
       foreach $oid ( keys %Cnt ) {
-         next			unless $Cnt{$oid} == 0 ;
-         if ( exists $$deps{$oid} ) {
-            $Cnt{$_}--		foreach keys %{$$deps{$oid}} ;
-            $mods++ ;			# A counter is changed
+         next                   unless $Cnt{$oid} == 0 ;
+         if ( exists $$infls{$oid} ) {
+            $Cnt{$_}--          foreach keys %{$$infls{$oid}} ;
+            $mods++ ;                  # A counter is changed
          }  # of if
-         push @Sorted, $oid ;		# Move OID to sorted list
+         push @Sorted, $oid ;          # Move OID to sorted list
          delete $Cnt{$oid} ;
       }  # of foreach
    }  # of while
@@ -1013,10 +1044,83 @@ sub sort_oid($) {
    if ( keys %Cnt ) {
       do_log( "The following OIDs are in one or more circular depency chains: " .
          join(', ',sort keys %Cnt), 0 ) ;
-      return undef ;			# Circular dependency chain found
+      return undef ;                   # Circular dependency chain found
    } else {
-      return \@Sorted ;			# No circular dependency chains found
+      return \@Sorted ;                # No circular dependency chains found
    }  # of else
+}
+
+# Optimize dependency calculation more WIP
+sub sort_oids2 {
+   my ( $list_ref, $deps_ref, $infls_ref ) = @_;
+   my @list              = @$list_ref;
+   my $deps              = $$deps_ref;
+   my $infls             = $$infls_ref;
+   my @temp_sorted_list;
+   my @sorted_list;
+   my @stack;
+   my %treated;   # if exists then it is treated, parent info put in value
+                  # to detect cycle (modify of the standard DFM algo)
+   my %nb_deps;
+   my %nb_infls;
+   my $node;
+
+   # Precompute number of deps
+   foreach $node (keys $deps) {
+      $nb_deps{$node} = keys %{$deps->{$node}}; 
+      $nb_infls{$node}  = keys %{$infls->{$node}};
+   }
+  
+   
+   NODE: foreach my $node (@list) {
+      do_log("stage1 Start with $node and list: @sorted_list");
+      #my @toemp2_sorted_list = ();
+
+      if (!exists $treated{$node}) {
+
+         do_log("stage2 $node is not treated");
+         push @stack, $node;
+         $treated{$node} = ();
+
+         while (@stack) {
+            
+            my $stack = shift(@stack);
+            do_log("stage3 Unstack $stack, $nb_deps{$stack} dependencies");
+            
+            foreach my $stack_dep (keys %{$deps->{$stack}}) {
+               do_log("stage4 Start with dependency $stack_dep");
+
+               if (!exists $treated{$stack_dep}) {
+                  do_log("stage5 $stack_dep is not treated, put it on the stack");
+                  unshift @stack, $stack_dep;
+
+                  # Modify version of the DFG algo to contain parent 
+                  $treated{$stack_dep} = $stack;
+               }
+            }
+            # I think I have to creat a tree with the depencies
+            do_log("stage6 $stack has $nb_infls{$stack} influences");
+            foreach my $stack_infl (keys %{$infls->{$stack}}) {
+               do_log("stage7 node $stack influences $stack_infl");
+               $nb_deps{$stack_infl}--;
+               if (exists $deps->{$stack_infl}{$stack}) {
+                   do_log("stage8 decrement node $stack_infl");
+                   $nb_deps{$stack_infl}--;
+                  if ($nb_deps{$stack_infl} == 0 ) {
+                     do_log("stage9 $stack_infl has no more dependcies, put it on the sorted list");
+                     push @sorted_list, $stack_infl;
+                  }
+                  elsif ($nb_deps{$stack_infl}  == -1 ) {
+                     do_log("Loop detected :@sorted_list $stack_infl");
+                  }
+               }  
+            }
+         } 
+         do_log("stage10 @sorted_list");
+      }
+   }
+   do_log("stage11 @sorted_list");
+   return @sorted_list;
 }
 
 # Subroutine to read in the thresholds file
