@@ -2568,7 +2568,7 @@ sub render_msg {
                      # Get oid msg and replace any inline oid dependencies
                      my $oid_msg = $oid_h->{msg}{$leaf};
                      $oid_msg = 'Undefined' if !defined $oid_msg;
-                     #$oid_msg = parse_deps($oids, $oid_msg, $leaf);
+                     $oid_msg = parse_deps($oids, $oid_msg, $leaf);
 
                      # If this test has a worse color, use it for the global color
                      # but verify first that this test should compute the worst color
@@ -2742,7 +2742,7 @@ sub render_msg {
                   # Get oid msg and replace any inline oid dependencies
                   my $oid_msg = $oid_h->{msg};
                   $oid_msg = 'Undefined' if !defined $oid_msg; 
-                  #$oid_msg = parse_deps($oids, $oid_msg, undef);
+                  $oid_msg = parse_deps($oids, $oid_msg, undef);
 
                   # If this test has a worse color, use it for the global color
                   # but verify first that this test should compute the worst color
