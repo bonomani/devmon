@@ -2553,11 +2553,15 @@ sub render_msg {
                   } elsif ($flag eq 'msg') {
                      if ($no_global_wcolor{$oid}) {
                        do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.msg".'}'." in 'message' template",0);
+
+                     # Get oid msg and replace any inline oid dependencies
                      } else {
-                       my $substr = $oid_h->{msg}{$leaf};
-                       $substr = 'Undefined' if !defined $substr;
-                       $row_data =~ s/\{$root\}/$substr/;
+                        my $oid_msg = $oid_h->{msg}{$leaf};
+                        $oid_msg = 'Undefined' if !defined $oid_msg;
+                        $oid_msg = parse_deps($oids, $oid_msg, $leaf)
+                        $row_data =~ s/\{$root\}/$oid_msg/;
                      }
+
                   # This flag only causes errors (with the color) to be displayed
                   # Will also modify global color type lag if it is alarming
                   } elsif ($flag eq 'errors') {
@@ -2565,22 +2569,23 @@ sub render_msg {
 
                      next if $color eq 'green' or $color eq 'blue';
 
-                     # Get oid msg and replace any inline oid dependencies
-                     my $oid_msg = $oid_h->{msg}{$leaf};
-                     $oid_msg = 'Undefined' if !defined $oid_msg;
-                     $oid_msg = parse_deps($oids, $oid_msg, $leaf);
-
                      # If this test has a worse color, use it for the global color
                      # but verify first that this test should compute the worst color
                      if ($no_global_wcolor{$oid}) {
                         do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.errors".'}'." in 'message' template",0);
-                      } else {
+
+                     # Get oid msg and replace any inline oid dependencies
+                     } else {
+                        my $oid_msg = $oid_h->{msg}{$leaf};
+                        $oid_msg = 'Undefined' if !defined $oid_msg;
+                        $oid_msg = parse_deps($oids, $oid_msg, $leaf);
+
                         $worst_color = $color if !defined $worst_color or
                         $colors{$worst_color} < $colors{$color};
                          
                         # Now add it to our msg
                         $errors .= "&$color $oid_msg\n";
-                      }
+                     }
 
                   # Display color threshold value
                   } elsif ($flag =~ /^thresh\:(\w+)$/i) {
@@ -2724,11 +2729,13 @@ sub render_msg {
                } elsif ($flag eq 'msg') {
                   if ($no_global_wcolor{$oid}) {
                      do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.msg".'}'." in 'message' template",0);
+
+                  # Get oid msg and replace any inline oid dependencies
                   } else {
-                     my $data = $oid_h->{msg};
-                     $data = "Undefined" if !defined $data;
-                     #$data = parse_deps($oids, $data, undef);
-                     $line =~ s/\{$root\}/$data/;
+                     my $oid_msg = $oid_h->{msg};
+                     $oid_msg = 'Undefined' if !defined $oid_msg;
+                     $oid_msg = parse_deps($oids, $oid_msg, undef);
+                     line =~ s/\{$root\}/$oid_msg/;
                   }
 
                # This flag only causes errors (with the color) to be displayed
@@ -2739,16 +2746,17 @@ sub render_msg {
                   # Skip this value if it is green or blue
                   next if !defined $color or $color eq 'green' or $color eq 'blue';
 
-                  # Get oid msg and replace any inline oid dependencies
-                  my $oid_msg = $oid_h->{msg};
-                  $oid_msg = 'Undefined' if !defined $oid_msg; 
-                  $oid_msg = parse_deps($oids, $oid_msg, undef);
-
                   # If this test has a worse color, use it for the global color
                   # but verify first that this test should compute the worst color
                   if ($no_global_wcolor{$oid}) {
                      do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.errors".'}'." in 'message' template",0);
+
+                  # Get oid msg and replace any inline oid dependencies
                   } else {
+                     my $oid_msg = $oid_h->{msg};
+                     $oid_msg = 'Undefined' if !defined $oid_msg;
+                     $oid_msg = parse_deps($oids, $oid_msg, undef);
+
                     $worst_color = $color if !defined $worst_color or
                     $colors{$worst_color} < $colors{$color};
  
