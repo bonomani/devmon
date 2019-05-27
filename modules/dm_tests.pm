@@ -2558,7 +2558,7 @@ sub render_msg {
                      } else {
                         my $oid_msg = $oid_h->{msg}{$leaf};
                         $oid_msg = 'Undefined' if !defined $oid_msg;
-                        $oid_msg = parse_deps($oids, $oid_msg, $leaf)
+                        $oid_msg = parse_deps($oids, $oid_msg, $leaf);
                         $row_data =~ s/\{$root\}/$oid_msg/;
                      }
 
@@ -2735,7 +2735,7 @@ sub render_msg {
                      my $oid_msg = $oid_h->{msg};
                      $oid_msg = 'Undefined' if !defined $oid_msg;
                      $oid_msg = parse_deps($oids, $oid_msg, undef);
-                     line =~ s/\{$root\}/$oid_msg/;
+                     $line =~ s/\{$root\}/$oid_msg/;
                   }
 
                # This flag only causes errors (with the color) to be displayed
