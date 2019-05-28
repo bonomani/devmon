@@ -10,10 +10,12 @@ THIS IS NOT AN OFFICIAL VERSION from the original developers:
 - Use it at your one risk !
 - Cisco templates are modifyed to fit my own needs
 
-THIS VERSION SHOULD BE AS STABLE AS THE SOURCEFORGE ONE IF YOU DONT USE THE 
-NEW TEMPLATES, but you will not benefit of all the work done !
+This devmon version should MORE STABLE AS THE SOURCEFORGE ONE ! 
 
-20.05.2019 Bruno Manzoni
+Please FORK it do not CLONE only, so you/we will be able to add your
+contribution easily and discover the power of the git tool !!
+
+28.05.2019 Bruno Manzoni
 ======================================================================
 
 UPDATE included from Stef Coene                                                                     
