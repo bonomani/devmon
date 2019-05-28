@@ -8,7 +8,7 @@ Alarming on (1)
 <tr><th>CPU</th><th>Threshold</th><th>Load</th></tr>
 <tr><td>1</td><td>{hwEntityCpuUsageThreshold}</td><td>{hwEntityCpuUsage.color}{hwEntityCpuUsage}%{hwEntityCpuUsage.errors}</td></tr>
 </table>
-<!--DEVMON RRD: cpu-dm 0 0
+<!--DEVMON RRD: cpu_dm 0 0
 DS:ds0:GAUGE:600:0:U
 1 {hwEntityCpuUsage}
 -->
