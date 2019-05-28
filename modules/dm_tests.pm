@@ -2757,11 +2757,11 @@ sub render_msg {
                      $oid_msg = 'Undefined' if !defined $oid_msg;
                      $oid_msg = parse_deps($oids, $oid_msg, undef);
 
-                    $worst_color = $color if !defined $worst_color or
-                    $colors{$worst_color} < $colors{$color};
+                     $worst_color = $color if !defined $worst_color or
+                     $colors{$worst_color} < $colors{$color};
  
-                    # Now add it to our msg
-                    $errors .= "&$color $oid_msg\n";
+                     # Now add it to our msg
+                     $errors .= "&$color $oid_msg\n";
                   }
                   
 
