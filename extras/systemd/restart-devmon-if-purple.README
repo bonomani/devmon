@@ -1,0 +1,10 @@
+-------------------------------------------------------------------------------
+This is instructions to install a detection alert on xymon do not receive
+messages from devmon anymore 
+-------------------------------------------------------------------------------
+
+
+
+1 Add a the end of alerts.cfg (in Xymon etc folder)
+HOST=xymon SERVICE=dm
+        SCRIPT /var/xymon/server/ext/devmon/extras/systemd/restart-devmon-if-purple COLOR=purple REPEAT=5
