@@ -2418,20 +2418,6 @@ sub render_msg {
             $worst_color = 'yellow';
             next;
          }
-
-         # If the primary oids leaves are non-numeric, then we cant sort it
-         # numerically, we'll have to resort to a cmp
-         # my @table_leaves = ();
-         #
-         #       if($oids->{$pri}{repeat} == 2) {
-         #        my @unsorted = keys %{$oids->{$pri}{val}};
-         #       @table_leaves = leaf_sort(\@unsorted);
-         #    }
-         # Otherwise sort them numerically ascending
-         # else {
-         #   @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{val}};
-         # }
-
          # If table SORT option is set, sort the table by the oid provided
          # This condition should be included on previous ones to be optimized
          # but this is a WIP: it does not apply to rrd graphs which are sorted
@@ -2446,11 +2432,13 @@ sub render_msg {
                my %temphash = %{$oids->{$t_opts{sort}[0]}{val}};
                @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
             }
+
          # If the primary oids leaves are non-numeric, then we cant sort it
          # numerically, we'll have to resort to a cmp
          } elsif ($oids->{$pri}{repeat} == 2) {
             my @unsorted = keys %{$oids->{$pri}{val}};
             @table_leaves = leaf_sort(\@unsorted);
+
          # Otherwise sort them numerically ascending
          } else {
             @table_leaves = sort {$a <=> $b} keys %{$oids->{$pri}{val}};

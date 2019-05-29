@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+This is instructions to install a detection alert on xymon that reload devmon
+in case the hosts.cfg file change
+- script ca probably be improved...
+Alternative:
+- Cron    : schedule a recurring task
+- Inotify : best solution, as change can be detected immediatly, but probably
+   OS dependant
+-------------------------------------------------------------------------------
+1. Add at the end of client-local.cfg
+[xymon.domain.name]
+file:/var/xymon/server/etc/hosts.cfg
+log:/var/log/messages:10240
+
+The log line is not necessary, but we could may be use-it also...WIP
+
+2. Add at the end of analysis.cfg
+HOST=xymon.domain.name
+        FILE /var/xymon/server/etc/hosts.cfg  MTIME>300 yellow
+
+3. Add at the end of alerts.cfg
+
+HOST=xymon.domain.name SERVICE=files
+       SCRIPT /var/xymon/server/ext/devmon/extras/reload_devmon_if_hosts.cfg_changed COLOR=yellow FORMAT=sms REPEAT=5
