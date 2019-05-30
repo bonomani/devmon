@@ -1764,16 +1764,14 @@ sub read_hosts_cfg {
          # If it wasnt pre-existing, go ahead and insert it
          } else {
             db_do("delete from devices where name='$host'");
-            db_do("insert into devices values ('$host','$ip','$vendor'," .
-               "'$model','$tests','$cid',0)");
+            db_do("insert into devices values ('$host','$ip','$vendor','$model','$tests','$cid',0)");
 
             # Insert new thresholds
             for my $test (keys %{$new_hosts{$host}{thresh}}) {
                for my $oid (keys %{$new_hosts{$host}{thresh}{$test}}) {
                   for my $color (keys %{$new_hosts{$host}{thresh}{$test}{$oid}}) {
                      my $val = $new_hosts{$host}{thresh}{$test}{$oid}{$color};
-                     db_do("insert into custom_threshs values " .
-                        "('$host','$test','$oid','$color','$val')");
+                     db_do("insert into custom_threshs values ('$host','$test','$oid','$color','$val')");
                   }
                }
             }
@@ -1783,8 +1781,7 @@ sub read_hosts_cfg {
                for my $oid (keys %{$new_hosts{$host}{except}{$test}}) {
                   for my $type (keys %{$new_hosts{$host}{except}{$test}{$oid}}) {
                      my $val = $new_hosts{$host}{except}{$test}{$oid}{$type};
-                     db_do("insert into custom_excepts values " .
-                        "('$host','$test','$oid','$type','$val')");
+                     db_do("insert into custom_excepts values ('$host','$test','$oid','$type','$val')");
                   }
                }
             }
@@ -1805,8 +1802,7 @@ sub read_hosts_cfg {
 
       # Textual abbreviations
       my %thr_sc = ( 'red' => 'r', 'yellow' => 'y', 'green' => 'g', 'clear' => 'c', 'purple' => 'p', 'blue' => 'b' );
-      my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao',
-         'noalarm' => 'na' );
+      my %exc_sc = ( 'ignore' => 'i', 'only' => 'o', 'alarm' => 'ao', 'noalarm' => 'na' );
       do_log("DBFILE: $g{dbfile}");
       open HOSTFILE, ">$g{dbfile}"
          or log_fatal("Unable to write to dbfile '$g{dbfile}' ($!)",0);
@@ -1852,9 +1848,8 @@ sub read_hosts_cfg {
             $excepts .= ',' if ($excepts !~ /,$/);
          }
          $excepts =~ s/,$//;
-         do_log ("$host\e$ip\e$vendor\e$model\e$tests\e$cid\e" ."$threshes\e$excepts\n");
-         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e" .
-         "$threshes\e$excepts\n";
+         do_log ("$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\n");
+         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\n";
       }
 
       close HOSTFILE;
