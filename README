@@ -1,5 +1,5 @@
 =====================================================================
-Devmon, version 0.3.1-beta1, based on SF r256: VERSION 0.3.1b1.256.3
+Devmon VERSION 0.19.05.30, fork at SF version 0.3.1-beta1 r256
 ======================================================================
 
 SEE END OF FILE for current STATUS and ROADMAP! 
@@ -11,11 +11,13 @@ THIS IS NOT AN OFFICIAL VERSION from the original developers:
 - Cisco templates are modifyed to fit my own needs
 
 This devmon version should MORE STABLE AS THE SOURCEFORGE ONE ! 
+The most stable is the latest branch version: Now it is 0.19.05.30
 
-Please FORK it do not CLONE only, so you/we will be able to add your
-contribution easily and discover the power of the git tool !!
+Please FORK it if you can, so you/we will be able to add your
+contributions / template easily  !!
 
-28.05.2019 Bruno Manzoni
+2019.05 Bruno Manzoni
+
 ======================================================================
 
 UPDATE included from Stef Coene                                                                     
