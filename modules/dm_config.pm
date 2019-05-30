@@ -264,7 +264,7 @@ sub initialize {
      	$g{debug}     = 1 ;
      	$g{oneshot}   = 1 ;
 	}
-   # Dont daemonize if we are printing messages
+   # Don't daemonize if we are printing messages
 	if ( $g{print_msg} ) {
    	$g{daemonize} = 0 ;
 	}
@@ -322,7 +322,7 @@ sub initialize {
       my $hostname = hostname();
 
       # Remove domain info, if any
-      # Xymon best practice is to use fqdn, if the user doesnt want it
+      # Xymon best practice is to use fqdn, if the user doesn't want it
       # we assume they have set NODENAME correctly in devmon.cfg
       # $hostname =~ s/\..*//;
 
@@ -496,7 +496,7 @@ sub sync_servers {
          if defined $custom_excepts{$device};
       }
 
-      # If this test doesnt have an owner, lets add it to the available pool
+      # If this test doesn't have an owner, lets add it to the available pool
       if($owner == 0 or not defined $g{node_status}{active}{$owner}) {
          push @{$available_devices{$dev_tests}}, $device;
       }
@@ -533,7 +533,7 @@ sub sync_servers {
                if ($g{node_status}{nodes}{$node}{need_tests}
                   != $avg_tests_node) {
                   my $name = $g{node_status}{nodes}{$node}{name};
-                  # This node isnt ready for init; sleep then try again
+                  # This node isn't ready for init; sleep then try again
                   do_log("Waiting for node $node($name)",0);
                   sleep 2;
                   update_nodes();
@@ -576,7 +576,7 @@ sub sync_servers {
                if defined $custom_excepts{$device};
             }
 
-            # Make sure we arent out of bounds
+            # Make sure we aren't out of bounds
             $this_node = 0 if $this_node > $#active_nodes;
          }
 
@@ -642,7 +642,7 @@ sub sync_servers {
       db_do("update nodes set need_tests=$num_tests_needed " .
          "where node_num=$g{my_nodenum}");
 
-   # If we dont need any tests, lets see if we can donate any tests
+   # If we don't need any tests, lets see if we can donate any tests
    } elsif ($my_num_tests > $avg_tests_node) {
 
       my $tests_they_need;
@@ -660,10 +660,10 @@ sub sync_servers {
 
       # Now go through the devices and assign any I can
       for my $device (keys %{$g{dev_data}}) {
-         # Make sure this test isnt too big
+         # Make sure this test isn't too big
          next if $test_count{$device} > $biggest_test_needed
 
-         # Now make sure that it wont put us under the avg_nodes
+         # Now make sure that it won't put us under the avg_nodes
             or $my_num_tests - $test_count{$device} <= $avg_tests_node;
 
          # Okay, lets assign it to the open pool, then
@@ -754,7 +754,7 @@ sub update_nodes {
 # Basically this means just updated the nodes table in the database
 # So that our node is listed as active and we have a current heartbeat
 sub cluster_connect {
-   # Dont bother if we arent multinode
+   # Don't bother if we aren't multinode
    return if $g{multinode} ne 'yes';
 
    my $now = time;
@@ -771,7 +771,7 @@ sub cluster_connect {
       $nodenum = $num if $name eq $nodename;
    }
 
-   # If we arent in the table, lets add ourself
+   # If we aren't in the table, lets add ourself
    if(!defined $nodenum) {
 
       # Find the next available num
@@ -839,7 +839,7 @@ sub read_local_config {
       log_fatal("Unknown option '$option' in config file, line $.",0)
       if !defined $g{locals}{$option};
 
-      # If this option isnt case sensitive, lowercase it
+      # If this option isn't case sensitive, lowercase it
       $value = lc $value if !$g{locals}{$option}{case};
 
       # Compare to regex, make sure value is valid
@@ -896,7 +896,7 @@ sub read_global_config_file {
       log_fatal("Unknown option '$option' in config file, line $.",0)
       if !defined $g{globals}{$option};
 
-      # If this option isnt case sensitive, lowercase it
+      # If this option isn't case sensitive, lowercase it
       $value = lc $value if !$g{globals}{$option}{case};
 
       # Compare to regex, make sure value is valid
@@ -988,7 +988,7 @@ sub rewrite_config {
 
 # Open log file
 sub open_log {
-   # Dont open the log if we are not in daemon mode
+   # Don't open the log if we are not in daemon mode
    return if $g{logfile} =~ /^\s*$/ or !$g{daemonize};
 
    $g{log} = new IO::File $g{logfile}, 'a'
@@ -1053,7 +1053,7 @@ sub ts {
 sub db_connect {
    my ($silent) = @_;
 
-   # Dont need this if we are not in multinode mode
+   # Don't need this if we are not in multinode mode
    return if $g{multinode} ne 'yes';
 
    # Load the DBI module if we havent initiliazed yet
@@ -1243,7 +1243,7 @@ sub read_hosts_cfg {
          # First see if this is an include statement
          if($line =~ /^\s*(?:disp|net)?include\s+(.+)$/i) {
             my $file = $1;
-            # Tack on our etc dir if this isnt an absolute path
+            # Tack on our etc dir if this isn't an absolute path
             $file = "$etcdir/$file" if $file !~ /^\//;
             # Add the file to our read array
             push @hostscfg, $file;
@@ -1289,7 +1289,7 @@ sub read_hosts_cfg {
                   $ip = join '.', unpack('C4', $addrs[0]);
                }
 
-               # Make sure we dont have duplicates
+               # Make sure we don't have duplicates
                if(defined $hosts_cfg{$host}) {
                   my $old = $hosts_cfg{$host}{ip};
                   do_log("Refusing to redefine $host from '$old' to '$ip'",0);
@@ -1361,7 +1361,7 @@ sub read_hosts_cfg {
                   }
                }
 
-               # Default to all tests if they arent defined
+               # Default to all tests if they aren't defined
                my $tests = $1 if $options =~ s/(?:,|^)tests\((\S+?)\)//;
                $tests = 'all' if !defined $tests;
 
@@ -1394,13 +1394,13 @@ sub read_hosts_cfg {
    do_log("Querying pre-existing hosts",1) if %old_hosts;
 
    for my $host (keys %old_hosts) {
-      # If they dont exist in the new hostscfg, skip 'em
+      # If they don't exist in the new hostscfg, skip 'em
       next if !defined $hosts_cfg{$host};
 
       my $vendor  = $old_hosts{$host}{vendor};
       my $model   = $old_hosts{$host}{model};
 
-      # If their template doesnt exist any more, skip 'em
+      # If their template doesn't exist any more, skip 'em
       next if !defined $g{templates}{$vendor}{$model};
 
       my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
@@ -1445,7 +1445,7 @@ sub read_hosts_cfg {
             do_log("Regex for $vendor/$model appears to be empty.",0)
                and next if !defined $regex;
 
-            # Skip if this host doesnt match the regex
+            # Skip if this host doesn't match the regex
             if ($sysdesc !~ /$regex/) {
                do_log("$host did not match $vendor : $model : $regex", 4)
                if $g{debug};
@@ -1472,7 +1472,7 @@ sub read_hosts_cfg {
    # For our new hosts, query them first with snmp v2, then v1 if v2 fails
    for my $snmpver (@snmpvers) {
 
-      # Dont bother if we dont have any hosts left to query
+      # Don't bother if we don't have any hosts left to query
       next if $hosts_left < 1;
 
       # First query hosts with custom cids
@@ -1484,7 +1484,7 @@ sub read_hosts_cfg {
          %snmp_input = ();
 
          for my $host (sort keys %hosts_cfg) {
-            # Skip if they dont have a custom cid
+            # Skip if they don't have a custom cid
             next if !defined $hosts_cfg{$host}{cid};
             # Skip if they have already been succesfully queried
             next if defined $new_hosts{$host};
@@ -1527,7 +1527,7 @@ sub read_hosts_cfg {
             NEWMATCH: for my $vendor (keys %{$g{templates}}) {
                NEWMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
 
-                  # Skip if this host doesnt match the regex
+                  # Skip if this host doesn't match the regex
                   my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                   if ($sysdesc !~ /$regex/) {
                      do_log("$host did not match $vendor : $model : $regex", 0) if $g{debug};
@@ -1558,7 +1558,7 @@ sub read_hosts_cfg {
             # Make sure we were able to get a match
             if(!defined $new_hosts{$host}) {
                do_log("No matching templates for device: $host",0);
-               # Delete the hostscfg key so we dont throw another error later
+               # Delete the hostscfg key so we don't throw another error later
                delete $hosts_cfg{$host};
             }
          }
@@ -1567,7 +1567,7 @@ sub read_hosts_cfg {
       # Now query hosts without custom cids
       for my $cid (split /,/, $g{snmpcids}) {
 
-         # Dont bother if we dont have any hosts left to query
+         # Don't bother if we don't have any hosts left to query
          next if $hosts_left < 1;
 
          do_log("Querying new hosts using cid '$cid' and snmp v$snmpver",1);
@@ -1579,7 +1579,7 @@ sub read_hosts_cfg {
          # And query the devices that havent yet responded to previous cids
          for my $host (sort keys %hosts_cfg) {
 
-            # Dont query this host if we already have succesfully done so
+            # Don't query this host if we already have succesfully done so
             next if defined $new_hosts{$host};
 
             $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
@@ -1620,7 +1620,7 @@ sub read_hosts_cfg {
             CUSTOMMATCH: for my $vendor (keys %{$g{templates}}) {
                CUSTOMMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
 
-                  # Skip if this host doesnt match the regex
+                  # Skip if this host doesn't match the regex
                   my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                   if ($sysdesc !~ /$regex/) {
                      do_log("$host did not match $vendor : $model : $regex", 0)
@@ -1653,7 +1653,7 @@ sub read_hosts_cfg {
             # Make sure we were able to get a match
             if(!defined $new_hosts{$host}) {
                do_log("No matching templates for device: $host",0);
-               # Delete the hostscfg key so we dont throw another error later
+               # Delete the hostscfg key so we don't throw another error later
                delete $hosts_cfg{$host};
             }
          }
@@ -1800,7 +1800,7 @@ sub read_hosts_cfg {
          db_do("delete from custom_excepts where host='$host'");
       }
 
-   # Or write it to our dbfile if we arent in multinode mode
+   # Or write it to our dbfile if we aren't in multinode mode
    } else {
 
       # Textual abbreviations

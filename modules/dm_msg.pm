@@ -47,7 +47,7 @@ sub send_msgs {
       print join "\n", @{$g{test_results}};
    }
 
-   # Dont actually send messages if we are printing them
+   # Don't actually send messages if we are printing them
    if($g{print_msg}) {
       $g{msgxfrtime} = time - $g{msgxfrtime};
       print dm_stat_msg();
@@ -59,7 +59,7 @@ sub send_msgs {
    # Run until we are out of messages to send
    SOCKLOOP: while(@{$g{test_results}}) {
 
-      # Rest for a moment so we dont overwhelm our display server
+      # Rest for a moment so we don't overwhelm our display server
       select undef, undef, undef, $g{msgsleep} / 1000;
 
       # Open our socket to the host
@@ -112,7 +112,7 @@ sub send_msgs {
             next MSGLOOP;
          }
 
-         # Make sure the message itself isnt too big
+         # Make sure the message itself isn't too big
          if(length $msg > $g{msgsize}) {
 
             # Nuts, this is a huge message, bigger than our msg size. Well want
@@ -146,7 +146,7 @@ sub send_msgs {
             close SOCK;
             next SOCKLOOP;
 
-         # Now make sure that this msg wont cause our current combo msg to
+         # Now make sure that this msg won't cause our current combo msg to
          # exceed the msgsize limit
          } elsif($msg_size + length $msg > $g{msgsize}) {
 
@@ -308,7 +308,7 @@ sub dm_stat_msg {
 
    # Add the header
    my $host = $g{nodename};
-   $host =~ s/\./,/g; # Dont forget our FQDN stuff
+   $host =~ s/\./,/g; # Don't forget our FQDN stuff
    my $now = $g{xymondateformat} ? strftime($g{xymondateformat},localtime) : scalar(localtime);
    $message = "status $host.dm $color $now\n\n$message\n";
 
