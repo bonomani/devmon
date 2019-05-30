@@ -33,6 +33,11 @@ use FindBin;
 use Getopt::Long;
 use Sys::Hostname;
 
+use Data::Dumper;
+$Data::Dumper::Sortkeys = 1 ; # Sort the keys in the output
+$Data::Dumper::Deepcopy = 1 ; # Enable deep copies of structures
+$Data::Dumper::Indent = 1 ;   # Output in a reasonable style (but no array indexes)
+
 # Load initial program values; only called once at program init
 sub initialize {
    autoflush STDOUT 1;
