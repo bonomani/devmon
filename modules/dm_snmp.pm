@@ -62,7 +62,7 @@ sub poll_devices {
    %{$g{snmp_data}} = ();
 
    # Query our Xymon server for device reachability status
-   # we dont want to waste time querying devices that are down
+   # we don't want to waste time querying devices that are down
    do_log("Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport},1);
    %{$g{xymon_color}} = ();
    my $sock = IO::Socket::INET->new (
@@ -90,7 +90,7 @@ sub poll_devices {
       # next unless $indexes->{$device}{reachable};
 
       # Skip this device if we are running a Xymon server and the
-      # server thinks that it isnt reachable
+      # server thinks that it isn't reachable
       if(defined $g{xymon_color}{$device} and
          $g{xymon_color}{$device} ne 'green') {
          do_log("$device has a non-green Xymon status, skipping SNMP.", 2);
@@ -461,13 +461,13 @@ sub fork_queries {
       if($pid = fork) {
          # Parent code here
          do_log("Fork number $num started with pid $pid") if $g{debug};
-         close $g{forks}{$num}{PS} or do_log("Closing socket to ourself failed: $!\n"); # dont need to communicate with ourself
+         close $g{forks}{$num}{PS} or do_log("Closing socket to ourself failed: $!\n"); # don't need to communicate with ourself
          $g{forks}{$num}{pid} = $pid;
          $g{forks}{$num}{time} = time;
          $g{forks}{$num}{CS}->blocking(0);
       } elsif(defined $pid) {
          # Child code here
-         $g{parent} = 0;              # We arent the parent any more...
+         $g{parent} = 0;              # We aren't the parent any more...
          do_log("DEBUG SNMP: Fork $num using sockets $g{forks}{$num}{PS} <-> $g{forks}{$num}{CS} for IPC") if $g{debug};
          foreach (sort {$a <=> $b} keys %{$g{forks}}) {
             do_log("DEBUG SNMP: Fork $num closing socket (child $_) $g{forks}{$_}{PS}") if $g{debug};
@@ -582,7 +582,7 @@ sub fork_sub {
          $session = SNMPv2c_Session->open($host, $snmp_cid, $snmp_port,$max_pdu_len);
          $session->{use_getbulk} = 1;
 
-      # Whoa, we dont support this version of SNMP
+      # Whoa, we don't support this version of SNMP
       } else {
          my $error_str =
          "Unsupported SNMP version for $dev ($snmp_ver)";
@@ -595,7 +595,7 @@ sub fork_sub {
       SNMP_Session::set_retries($session, $retries);
       SNMP_Session::set_timeout($session, $timeout);
 
-      # We cant recover from a failed snmp connect
+      # We can't recover from a failed snmp connect
       if($sess_err) {
          my $snmp_err;
          ($snmp_err = $SNMP_Session::errmsg) =~ s/\n.*//s;
@@ -703,7 +703,7 @@ sub fork_sub {
          }
 
          do_log("DEBUG SNMP($fork_num): Failed queries $failed_query",0) if ($g{debug} and $failed_query gt 0);
-         # We dont want to do every table if we are failing alot of walks
+         # We don't want to do every table if we are failing alot of walks
          if($failed_query > 6) {
             my $error_str =
             "Failed too many queries on $dev, aborting query";

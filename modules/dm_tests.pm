@@ -90,7 +90,7 @@ sub tests {
          oid_hash($oids, $device, $tmpl, $thr);
 
          # Check to see if this device was unreachable in xymon
-         # If so, dont bother doing transforms or rendering the message
+         # If so, don't bother doing transforms or rendering the message
          if(!defined $g{xymon_color}{$device} or
             $g{xymon_color}{$device} eq 'green') {
 
@@ -115,7 +115,7 @@ sub tests {
    }
 
    # Now store our historical data, if any
-   # Do it device by device so we dont overwrite any data in the dev_hist
+   # Do it device by device so we don't overwrite any data in the dev_hist
    # hash which may still be relevant but which didn't get updated
    # this test cycle
    for my $device (keys %{$g{tmp_hist}}) {
@@ -140,7 +140,7 @@ sub oid_hash {
    # In the current test, the thresholds or the exceptions might be different.
    for my $oid (keys %{$tmpl->{oids}}) {
 
-      # Dont hash an OID more than once
+      # Don't hash an OID more than once
       next if defined $oids->{$oid}{val};
 
       # Put all the info we got on the oid in (sans transform data)
@@ -160,7 +160,7 @@ sub oid_hash {
          delete $oids->{$oid}{except} ;	# Remove old definition
       }
 
-      # We dont have transform data yet, mark it for later and skip
+      # We don't have transform data yet, mark it for later and skip
       if(defined $tmpl->{oids}{$oid}{trans_type}) {
          $oids->{$oid}{transform} = 1;
          $oids->{$oid}{trans_type} = $tmpl->{oids}{$oid}{trans_type};
@@ -1078,7 +1078,7 @@ sub trans_best {
    # Extract all our our parent oids from the expression, first
    my @dep_oids = $oid_h->{trans_data} =~ /\{(.+?)\}/g;
 
-   # Dont Validate our dependencies as this very, very near function
+   # Don't Validate our dependencies as this very, very near function
 
    # Go through our parent oid array, if there are any repeaters
    # set the first one as the primary OID and set the repeat type
@@ -2433,7 +2433,7 @@ sub render_msg {
                @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
             }
 
-         # If the primary oids leaves are non-numeric, then we cant sort it
+         # If the primary oids leaves are non-numeric, then we can't sort it
          # numerically, we'll have to resort to a cmp
          } elsif ($oids->{$pri}{repeat} == 2) {
             my @unsorted = keys %{$oids->{$pri}{val}};
@@ -2480,7 +2480,7 @@ sub render_msg {
                }
 
                # Check the exception types, if it is an 'ignore'
-               # dont include this leaf row if the data for this
+               # don't include this leaf row if the data for this
                # oid matches, if it is an 'only' type, ONLY include
                # this leaf row if the data matches
                my $ignore = $dev->{except}{$test}{$oid}{ignore}
@@ -2494,7 +2494,7 @@ sub render_msg {
                next T_LEAF if defined $ignore and $val =~ /^(?:$ignore)$/;
                next T_LEAF if defined $only and $val !~ /^(?:$only)$/;
 
-               # If we arent alarming on a value, its blue by default
+               # If we aren't alarming on a value, its blue by default
                $color = 'blue' if !$alarm;
 
                # Keep track of our primary value
@@ -2505,8 +2505,8 @@ sub render_msg {
                      $rrd{$name}{pri} = $oid if $rrd{$name}{pri} eq 'pri';
 
                      # This condition looks incorrect. We should not remove rrds if alerting
-                     # is disabled for this leaf. If the user doesnt want a graph, they probably
-                     # dont want this leaf in the table, they should set 'ignore' instead of 'noalarm'
+                     # is disabled for this leaf. If the user doesn't want a graph, they probably
+                     # don't want this leaf in the table, they should set 'ignore' instead of 'noalarm'
                      #if ($rrd{$name}{all} or $alarm) {
                      # add to list, but check we're not pushing multiple times
                      push @{$rrd{$name}{leaves}}, $leaf unless grep {$_ eq $leaf} @{$rrd{$name}{leaves}};
