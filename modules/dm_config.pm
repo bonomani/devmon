@@ -1345,18 +1345,19 @@ sub read_hosts_cfg {
 
                # Read custom thresholds
                if($options =~ s/(?:,|^)thresh\((\S+?)\)//) {
-                  for my $thresh (split /,/, $1) {
-                     my @args = split /;/, $thresh;
+                  for my $thresholds (split /,/, $1) {
+                     my @args = split /;/, $thresholds;
                      do_log("Invalid threshold clause for $host",0) and next
                      if scalar @args < 3;
                      my $test = shift @args;
                      my $oid  = shift @args;
                      for my $valpair (@args) {
-                        my ($sc, $val) = split /:/, $valpair, 2;
-                        my $type = $thr_sc{$sc}; # Process shortcut text
+                        my ($sc, $thresh_list, $thresh_msg) = split /:/, $valpair, 3;
+                        my $color = $thr_sc{$sc}; # Process shortcut text
                         do_log("Unknown exception shortcut '$sc' for $host") and next
-                        if !defined $type;
-                        $hosts_cfg{$host}{thresh}{$test}{$oid}{$type} = $val;
+                        if !defined $color;
+                        $hosts_cfg{$host}{thresh}{$test}{$oid}{$color}{$thresh_list} = undef;
+                        $hosts_cfg{$host}{thresh}{$test}{$oid}{$color}{$thresh_list} = $thresh_msg if defined $thresh_msg;
                      }
                   }
                }
@@ -1596,6 +1597,7 @@ sub read_hosts_cfg {
          $g{fail} = {};
 
          # Throw data to our query forks
+         do_log("SEND DATA TO SNMP",0) if $g{debug};
          dm_snmp::snmp_query(\%snmp_input);
 
          # Now go through our resulting snmp-data
@@ -1818,20 +1820,23 @@ sub read_hosts_cfg {
          $cid .= "::$port" if defined $port;
 
          # Custom thresholds
-         my $threshes = '';
+         my $thresholds = '';
          for my $test (keys %{$new_hosts{$host}{thresh}}) {
             for my $oid (keys %{$new_hosts{$host}{thresh}{$test}}) {
-               $threshes .= "$test;$oid";
+               $thresholds .= "$test;$oid";
                for my $color (keys %{$new_hosts{$host}{thresh}{$test}{$oid}}) {
-                  my $val = $new_hosts{$host}{thresh}{$test}{$oid}{$color};
-                  my $sc  = $thr_sc{$color};
-                  $threshes .= ";$sc:$val";
+                  $thresholds .= ";" . $thr_sc{$color};
+                  for my $threshes (keys %{$new_hosts{$host}{thresh}{$test}{$oid}{$color}}) {
+                     $thresholds .= ":" . $threshes;
+                     my $threshes_msg = $new_hosts{$host}{thresh}{$test}{$oid}{$color}{$threshes};
+                     $thresholds .= ":" . $threshes_msg if defined $threshes_msg;
+                  }
                }
-               $threshes .= ',';
+               $thresholds .= ',';
             }
-            $threshes .= ',' if ($threshes !~ /,$/);
+            $thresholds .= ',' if ($thresholds !~ /,$/);
          }
-         $threshes =~ s/,$//;
+         $thresholds =~ s/,$//;
 
          # Custom exceptions
          my $excepts = '';
@@ -1848,8 +1853,8 @@ sub read_hosts_cfg {
             $excepts .= ',' if ($excepts !~ /,$/);
          }
          $excepts =~ s/,$//;
-         do_log ("$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\n");
-         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$threshes\e$excepts\n";
+         do_log ("$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$thresholds\e$excepts\n");
+         print HOSTFILE "$host\e$ip\e$vendor\e$model\e$tests\e$cid\e$thresholds\e$excepts\n";
       }
 
       close HOSTFILE;
@@ -1923,7 +1928,7 @@ sub read_hosts {
       my $linenumber = 0;
       FILELINE: for my $line (<DBFILE>) {
          chomp $line;
-         my ($name,$ip,$vendor,$model,$tests,$cid,$threshes,$excepts) = split /\e/, $line;
+         my ($name,$ip,$vendor,$model,$tests,$cid,$thresholds,$excepts) = split /\e/, $line;
          ++$linenumber;
 
          if ( !defined $cid ) {
@@ -1945,15 +1950,16 @@ sub read_hosts {
          $hosts{$name}{cid}    = $cid;
          $hosts{$name}{port}   = $port;
 
-         if(defined $threshes and $threshes ne '') {
-            for my $thresh (split ',', $threshes) {
-               my @args = split /;/, $thresh, 4;
+         if(defined $thresholds and $thresholds ne '') {
+            for my $threshes (split ',', $thresholds) {
+               my @args = split /;/, $threshes, 4;
                my $test = shift @args;
                my $oid  = shift @args;
                for my $valpair (@args) {
-                  my ($sc, $val) = split /:/, $valpair, 2;
+                  my ($sc, $thresh_list, $thresh_msg) = split /:/, $valpair, 3;
                   my $color = $thr_sc{$sc};
-                  $hosts{$name}{thresh}{$test}{$oid}{$color} = $val;
+                  $hosts{$name}{thresh}{$test}{$oid}{$color}{$thresh_list} = undef;
+                  $hosts{$name}{thresh}{$test}{$oid}{$color}{$thresh_list} = $thresh_msg if defined $thresh_msg;
                }
             }
          }

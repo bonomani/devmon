@@ -23,6 +23,7 @@ use strict;
 use dm_config;
 use Math::BigInt::Calc;
 use POSIX qw/ strftime / ;
+use Scalar::Util qw(looks_like_number);
 use Data::Dumper;
 # my $dump = Dumper(\$oids);
 
@@ -147,10 +148,10 @@ sub oid_hash {
       # in the oids hash ref
       # First we do threshold data
 
-      if(defined $tmpl->{oids}{$oid}{thresh}) {
-         $oids->{$oid}{thresh} = $tmpl->{oids}{$oid}{thresh};
-      } elsif ( defined $oids->{$oid}{thresh} ) {
-         delete $oids->{$oid}{thresh} ;	# Remove old definition
+      if(defined $tmpl->{oids}{$oid}{threshold}) {
+         $oids->{$oid}{threshold} = $tmpl->{oids}{$oid}{threshold};
+      } elsif ( defined $oids->{$oid}{threshold} ) {
+         delete $oids->{$oid}{threshold} ;# Remove old definition
       }
 
       # Then exceptions
@@ -178,7 +179,7 @@ sub oid_hash {
       if (!defined $num or !defined $snmp->{$num}
             or !defined $snmp->{$num}{val} )
       {
-         do_log("No SNMP data found for $oid on $device", 0) if ($g{xymon_color}{$device} eq 'green');
+         do_log("No SNMP data found for $oid on $device", 0);# if ($g{xymon_color}{$device} eq 'green');
          next
       }
 
@@ -336,8 +337,9 @@ sub trans_delta {
          } else {
             $oid_h->{val}{$leaf}   = 'wait';
             $oid_h->{time}{$leaf}  = time;
-            $oid_h->{color}{$leaf} = 'green';
+            $oid_h->{color}{$leaf} = 'clear';
             $oid_h->{error}{$leaf} = 1;
+            $oid_h->{msg}{$leaf}   = '';
          }
 
          # Store history in temp hash
@@ -407,8 +409,9 @@ sub trans_delta {
       } else {
          $oid_h->{val}   = 'wait';
          $oid_h->{time}  = time;
-         $oid_h->{color} = 'green';
+         $oid_h->{color} = 'clear';
          $oid_h->{error} = 1;
+         $oid_h->{msg} = '';
       }
 
       # Set temporary history data
@@ -470,18 +473,16 @@ sub trans_math {
          my $result = eval($expr);
          $oid_h->{time}{$leaf} = time;
 
-         #if($@ =~ /^Illegal division by zero/) { $result = 0 }
-         #elsif($@) {
          if($@) {
             chomp $@ ;
             if($@ =~ /^Illegal division by zero/) {
                $oid_h->{val}{$leaf}   = 'NaN';
+               $oid_h->{color}{$leaf} = 'clear';
             } else {
+               do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
                $oid_h->{val}{$leaf}   = $@;
+               $oid_h->{color}{$leaf} = 'yellow';
             }
-            do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
-            $oid_h->{color}{$leaf} = 'clear';
-            $oid_h->{error}{$leaf} = 1;
             next;
          }
 
@@ -499,13 +500,16 @@ sub trans_math {
       my $result = eval $expr;
       $oid_h->{time} = time;
 
-      #if($@ =~ /^Illegal division by zero/) { $result = 0 }
-      #elsif($@) {
       if($@) {
-         do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
-         $oid_h->{val}   = 'NaN';
-         $oid_h->{color} = 'Clear';
-         $oid_h->{error} = 0;
+         chomp $@ ;
+         if($@ =~ /^Illegal division by zero/) {
+            $oid_h->{val}   = 'NaN';
+            $oid_h->{color} = 'clear';
+         } else {
+            do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
+            $oid_h->{val}   = $@;
+            $oid_h->{color} = 'yellow';
+         }
       }
 
       $result = sprintf $print_mask, $result;
@@ -548,6 +552,9 @@ sub trans_statistic {
    #
    $oid_h->{repeat}= 0 ;		# Make a leaf-type oid
    $oid_h->{val}   = undef ;
+   $oid_h->{color} = undef ;
+   $oid_h->{msg}   = undef ;
+   $oid_h->{error} = undef ;
 
    # Check all the leaves of a repeater-type oid for an error condition. If
    # one is found, propagate the error condition to the result oid.
@@ -556,24 +563,21 @@ sub trans_statistic {
       for $leaf ( keys %{$dep_oid_h->{val}} ) {
          $val= $dep_oid_h->{val}{$leaf} ;
          if ( ! defined $val ) {
-            $oid_h->{val}  = 'parent data missing' ;
+            $oid_h->{val}  = 'parent value n/a' ;
             $oid_h->{color}= 'yellow' ;
-            $oid_h->{error}= 1 ;
             last ;
          } elsif ( $val eq 'wait' ) {
             $oid_h->{val}  = 'wait' ;
-            $oid_h->{color}= 'green' ;
-            $oid_h->{error}= 1 ;
+            $oid_h->{color}= 'clear' ;
+            $oid_h->{msg}  = '' ;
             last ;
          } elsif ( $dep_oid_h->{error}{$leaf} ) {
             $oid_h->{val}  = 'inherited' ;
             $oid_h->{color}= 'clear' ;
-            $oid_h->{error}= 1 ;
             last ;
          } elsif ( $statistic ne 'cnt' and $val !~ m/^[-+]?\d+(?:\.\d+)?$/ ) {
             $oid_h->{val}  = 'Regex mismatch' ;
             $oid_h->{color}= 'yellow' ;
-            $oid_h->{error}= 1 ;
             last ;
          }
       }
@@ -589,44 +593,44 @@ sub trans_statistic {
       $oid_h->{error}= 1 ;
    }  # of if
 
-   # Abort if we already have an error code
-   return 0 if defined $oid_h->{error} ;
+   # bypass if we already have an error code
+   if (!defined $oid_h->{error}) { 
 
-   # The parent oid is a repeater-type oid. Determine the requested statistic
-   # from this list.
-   #
-   if ( $dep_oid_h->{repeat} ) {
-      @leaf = keys %{$dep_oid_h->{val}} ;
-      $count= scalar @leaf ;
-      if ( $statistic eq 'cnt' ) {
-         $result = $count ;
-      } elsif ( $count == 0 ) {
-         $result = undef ;
+      # The parent oid is a repeater-type oid. Determine the requested statistic
+      # from this list.
+      #
+      if ( $dep_oid_h->{repeat} ) {
+         @leaf = keys %{$dep_oid_h->{val}} ;
+         $count= scalar @leaf ;
+         if ( $statistic eq 'cnt' ) {
+            $result = $count ;
+         } elsif ( $count == 0 ) {
+            $result = undef ;
+         } else {
+            # Extract the first value of the list. This value is a nice starting
+            # value to determine the minimum and the maximum.
+            #
+            $leaf  = shift @leaf ;
+            $result= $dep_oid_h->{val}{$leaf} ;
+            for $leaf ( @leaf ) {
+               $val= $dep_oid_h->{val}{$leaf} ;
+               &{ $comp{$statistic} } ;	# Perform statistical computation
+            }  # of for
+            $result= $result/$count	if $statistic eq 'avg' ;
+         }  # of else
+  
+         $oid_h->{val} = $result ;
+         $oid_h->{time}= time ;
+
+         # The parent oid is a non-repeater-type oid. The computation of the
+         # statistic is trivial in this case.
       } else {
-         # Extract the first value of the list. This value is a nice starting
-         # value to determine the minimum and the maximum.
-         #
-         $leaf  = shift @leaf ;
-         $result= $dep_oid_h->{val}{$leaf} ;
-         for $leaf ( @leaf ) {
-            $val= $dep_oid_h->{val}{$leaf} ;
-            &{ $comp{$statistic} } ;	# Perform statistical computation
-         }  # of for
-         $result= $result/$count	if $statistic eq 'avg' ;
+         $oid_h->{val} = $dep_oid_h->{val} ;
+         $oid_h->{val} = 1 if $statistic eq 'cnt' ;
+         $oid_h->{time}= $dep_oid_h->{time} ;
+         $oid_h->{msg} = $dep_oid_h->{msg} ;
       }  # of else
-
-      $oid_h->{val} = $result ;
-      $oid_h->{time}= time ;
-
-      # The parent oid is a non-repeater-type oid. The computation of the
-      # statistic is trivial in this case.
-   } else {
-      $oid_h->{val} = $dep_oid_h->{val} ;
-      $oid_h->{val} = 1 if $statistic eq 'cnt' ;
-      $oid_h->{time}= $dep_oid_h->{time} ;
-      $oid_h->{msg} = $dep_oid_h->{msg} ;
-   }  # of else
-
+   }
    apply_thresh( $oids, $thr, $oid ) ;
 }  # of trans_statistic
 
@@ -1200,6 +1204,8 @@ sub trans_best {
          }
       }
    }
+   # Now apply our threshold to this data
+   apply_thresh($oids, $thr, $oid);
 }
 
 # Get the worst color of one or more oids ##################################
@@ -1210,40 +1216,91 @@ sub trans_worst {
    # Extract all our our parent oids from the expression, first
    my @dep_oids = $oid_h->{trans_data} =~ /\{(.+?)\}/g;
 
-   # Validate our dependencies
-   validate_deps($device, $oids, $oid, \@dep_oids) or return;
+   # Don't Validate our dependencies as this very, very near function
+
+   # Go through our parent oid array, if there are any repeaters
+   # set the first one as the primary OID and set the repeat type
+   for my $dep_oid (@dep_oids) {
+      if($oids->{$dep_oid}{repeat}) {
+         $oid_h->{pri_oid} = $dep_oid;
+         $oid_h->{repeat}  = $oids->{$dep_oid}{repeat};
+         last;
+      }
+   }
+
+   # Use a non-repeater type if we havent set it yet
+   $oid_h->{repeat} ||= 0;
+
+   # Go through each parent oid and mark the as dependant of this threshold
+   # transform. This is need to be able to calculate to worst threshold
+   #for my $dep_oid (@dep_oids) {
+   #    $oids->{$dep_oid}->{ttrans}{$oid} = ();
+   #}
 
    # Do repeater-type oids
    if($oid_h->{repeat}) {
 
       for my $leaf (keys %{$oids->{$oid_h->{pri_oid}}{val}}) {
 
-         # Skip if there was a dependency error for this leaf
-         next if $oid_h->{error}{$leaf};
-
          # Go through each parent oid for this leaf
-         my ($col, $val, $time, $msg);
          for my $dep_oid (@dep_oids) {
             my $dep_oid_h = \%{$oids->{$dep_oid}};
-            my ($dep_val, $dep_col, $dep_msg);
+
+            # Add to the parent oid this threshold transform oid as a dependency
+            # This is need to be able to calculate to whorst threshold
+            # so we had an empty hash
+            #$dep_oid_h->{ttrans}{$oid} = ();
+            #my $test = keys $dep_oid_h->{ttrans}{$oid};
+            # push @$dep_oid_h->{ttrans}, $oid;
+
+            # Skip if there was a dependency error for this parent oid leaf
+            # and if it is disable (blue)
+            next if ($dep_oid_h->{error}{$leaf} && $dep_oid_h->{color}{$leaf} eq 'blue');
 
             if($dep_oid_h->{repeat}) {
                if(!defined $oid_h->{color}{$leaf} or
-                  $colors{$dep_oid_h->{color}{$leaf}} >=
+                  $colors{$dep_oid_h->{color}{$leaf}} >
                   $colors{$oid_h->{color}{$leaf}}) {
-                  $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
-                  $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
-                  $oid_h->{time}{$leaf}  = $dep_oid_h->{time}{$leaf};
-                  $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg}{$leaf};
+                  $oid_h->{val}{$leaf}       = $dep_oid_h->{val}{$leaf};
+                  $oid_h->{color}{$leaf}     = $dep_oid_h->{color}{$leaf};
+                  $oid_h->{msg}{$leaf}       = $dep_oid_h->{msg}{$leaf};
+                  $oid_h->{error}{$leaf}     = $dep_oid_h->{error}{$leaf};;
+                  $oid_h->{time}{$leaf}      = time;
+               } elsif($dep_oid_h->{color}{$leaf} eq
+                  $oid_h->{color}{$leaf}) {
+                  $oid_h->{val}{$leaf}     .= $dep_oid_h->{val}{$leaf};
+                  if (defined $dep_oid_h->{msg}{$leaf}) {
+                     if (defined $oid_h->{msg}{$leaf}) {
+                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
+                     } else {
+                        $oid_h->{msg}{$leaf}  = $dep_oid_h->{msg}{$leaf};
+                     }
+                  }
+                  $oid_h->{error}{$leaf}    = $dep_oid_h->{error}{$leaf} || $oid_h->{error}{$leaf};
+                  $oid_h->{time}{$leaf}     = time;
                }
             } else {
+
                if(!defined $oid_h->{color}{$leaf} or
-                  $colors{$dep_oid_h->{color}} >=
+                  $colors{$dep_oid_h->{color}} >
                   $colors{$oid_h->{color}{$leaf}}) {
-                  $oid_h->{val}{$leaf}   = $dep_oid_h->{val};
-                  $oid_h->{color}{$leaf} = $dep_oid_h->{color};
-                  $oid_h->{time}{$leaf}  = $dep_oid_h->{time};
-                  $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg};
+                  $oid_h->{val}{$leaf}      = $dep_oid_h->{val};
+                  $oid_h->{color}{$leaf}    = $dep_oid_h->{color};
+                  $oid_h->{msg}{$leaf}      = $dep_oid_h->{msg};
+                  $oid_h->{error}{$leaf}    = $dep_oid_h->{error};;
+                  $oid_h->{time}{$leaf}     = time;
+               } elsif($dep_oid_h->{color} eq
+                  $oid_h->{color}{$leaf}) {
+                  $oid_h->{val}{$leaf}     .= $dep_oid_h->{val};
+                  if (defined $dep_oid_h->{msg}) {
+                     if (defined $oid_h->{msg}{$leaf}) {
+                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
+                     } else {
+                        $oid_h->{msg}{$leaf}  = $dep_oid_h->{msg};
+                     }
+                  }
+                  $oid_h->{error}{$leaf}    = $dep_oid_h->{error} || $oid_h->{error}{$leaf};
+                  $oid_h->{time}{$leaf}     = time;
                }
             }
          }
@@ -1253,16 +1310,36 @@ sub trans_worst {
    } else {
       for my $dep_oid (@dep_oids) {
          my $dep_oid_h = \%{$oids->{$dep_oid}};
+
+         # Skip if there was a dependency error for this parent oid leaf
+         # and if it is disable (blue)
+         next if ($dep_oid_h->{error} && $dep_oid_h->{color} eq 'blue');
+
          if(!defined $oid_h->{color} or
-            $colors{$dep_oid_h->{color}} >=
+            $colors{$dep_oid_h->{color}} >
             $colors{$oid_h->{color}}) {
-            $oid_h->{val}   = $dep_oid_h->{val};
-            $oid_h->{color} = $dep_oid_h->{color};
-            $oid_h->{time}  = $dep_oid_h->{time};
-            $oid_h->{msg}   = $dep_oid_h->{msg};
+            $oid_h->{val}      = $dep_oid_h->{val};
+            $oid_h->{color}    = $dep_oid_h->{color};
+            $oid_h->{msg}      = $dep_oid_h->{msg};
+            $oid_h->{error}    = $dep_oid_h->{error};
+            $oid_h->{time}     = time;
+         } elsif($dep_oid_h->{color} eq
+            $oid_h->{color}) {
+            $oid_h->{val}      = $dep_oid_h->{val};
+            if (defined $dep_oid_h->{msg}) {
+               if (defined $oid_h->{msg}) {
+                  $oid_h->{msg}  = " & " . $dep_oid_h->{msg};
+               } else {
+                  $oid_h->{msg}  = $dep_oid_h->{msg};
+               }
+            }
+            $oid_h->{error}    = $dep_oid_h->{error} || $oid_h->{error};
+            $oid_h->{time}     = time;
          }
       }
    }
+   # Now apply our threshold to this data
+   apply_thresh($oids, $thr, $oid);
 }
 
 # Return an (x days,)? hh:mm:ss date timestamp ##############################
@@ -1829,10 +1906,11 @@ sub trans_chain {
       my $sub_oid = $src_h->{val};
       my $trg_val = $trg_h->{val}{$sub_oid};
       if(!defined $trg_val) {
-         $oid_h->{val}    = 'Target val missing';
+         $oid_h->{val}    = 'n/a';
+         $oid_h->{val}    = $trg_oid . ' ' . $oid_h->{val} if $g{debug}; 
          $oid_h->{time}   = time;
          $oid_h->{color}  = 'yellow';
-         $oid_h->{error}  = 1;
+         #$oid_h->{error}  = 1;
          return;
       }
 
@@ -1858,10 +1936,11 @@ sub trans_chain {
 
          my $trg_val = $trg_h->{val}{$sub_oid};
          if(!defined $trg_val) {
-            $oid_h->{val}{$leaf}    = 'Target val missing';
+            $oid_h->{val}{$leaf}    = "n/a";
+            $oid_h->{val}{$leaf}    = $trg_oid . ' ' . $oid_h->{val}{$leaf} if $g{debug};
             $oid_h->{time}{$leaf}   = time;
             $oid_h->{color}{$leaf}  = 'yellow';
-            $oid_h->{error}{$leaf}  = 1;
+            #$oid_h->{error}{$leaf}  = 1;
             next;
          }
 
@@ -2018,7 +2097,7 @@ sub trans_sort {
             # my $oid_idx = $src_h->{val}{$leaf};
 
             if(!defined $leaf) {
-               $oid_h->{val}{$leaf}    = 'Target val missing - index';
+               $oid_h->{val}{$leaf}    = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
                $oid_h->{time}{$leaf}   = time;
                $oid_h->{color}{$leaf}  = 'yellow';
                $oid_h->{error}{$leaf}  = 1;
@@ -2040,7 +2119,7 @@ sub trans_sort {
             # my $oid_idx = $src_h->{val}{$leaf};
 
             if(!defined $leaf) {
-               $oid_h->{val}{$leaf}    = 'Target val missing - index';
+               $oid_h->{val}{$leaf}    = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
                $oid_h->{time}{$leaf}   = time;
                $oid_h->{color}{$leaf}  = 'yellow';
                $oid_h->{error}{$leaf}  = 1;
@@ -2062,7 +2141,7 @@ sub trans_sort {
             # my $oid_idx = $src_h->{val}{$leaf};
 
             if(!defined $leaf) {
-               $oid_h->{val}{$leaf}    = 'Target val missing - index';
+               $oid_h->{val}{$leaf}    = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
                $oid_h->{time}{$leaf}   = time;
                $oid_h->{color}{$leaf}  = 'yellow';
                $oid_h->{error}{$leaf}  = 1;
@@ -2119,7 +2198,7 @@ sub trans_index {
          # my $oid_idx = $src_h->{val}{$leaf};
 
          if(!defined $leaf) {
-            $oid_h->{val}{$leaf}    = 'Target val missing - index';
+            $oid_h->{val}{$leaf}    = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
             $oid_h->{time}{$leaf}   = time;
             $oid_h->{color}{$leaf}  = 'yellow';
             $oid_h->{error}{$leaf}  = 1;
@@ -2192,7 +2271,7 @@ sub trans_match {
          # my $oid_idx = $src_h->{val}{$leaf};
 
          if(!defined $leaf) {
-            $oid_h->{val}{$idx}    = 'Target val missing - index';
+            $oid_h->{val}{$idx}    = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
             $oid_h->{time}{$idx}   = time;
             $oid_h->{color}{$idx}  = 'yellow';
             $oid_h->{error}{$idx}  = 1;
@@ -2524,7 +2603,12 @@ sub render_msg {
                # place holder with flag data, if not, just replace
                # it with the oid value.  Also modify the global color
                # Display a Xymon color string (i.e. "&red ")
-               if(defined $flag) {
+               if(defined $flag ) {
+                   
+                  my $oid_msg = $oid_h->{msg}{$leaf};
+                  $oid_msg = 'Undefined' if !defined $oid_msg;
+                  $oid_msg = parse_deps($oids, $oid_msg, $leaf);
+
                   if($flag eq 'color') {
 
                      # Honor the 'alarm' exceptions
@@ -2532,7 +2616,7 @@ sub render_msg {
 
                      # If this test has a worse color, use it for the global color
                      # but verify first that this test should compute the worst color
-                     if (!$no_global_wcolor{$oid}) {
+                     if (!$no_global_wcolor{$oid} and $oid_msg ne '') {
                         $worst_color = $color if !defined $worst_color
                         or $colors{$worst_color} < $colors{$color};
                      }
@@ -2540,19 +2624,18 @@ sub render_msg {
                   # Display threshold messages if we get the msg flag
                   } elsif ($flag eq 'msg') {
                      if ($no_global_wcolor{$oid}) {
-                       do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.msg".'}'." in 'message' template",0);
+                       do_log("RENDER WARNING: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.msg".'}'." in 'message' template",0);
 
                      # Get oid msg and replace any inline oid dependencies
                      } else {
-                        my $oid_msg = $oid_h->{msg}{$leaf};
-                        $oid_msg = 'Undefined' if !defined $oid_msg;
-                        $oid_msg = parse_deps($oids, $oid_msg, $leaf);
+                        #$oid_msg = 'Undefined' if !defined $oid_msg;
+                        #$oid_msg = parse_deps($oids, $oid_msg, $leaf);
                         $row_data =~ s/\{$root\}/$oid_msg/;
                      }
 
                   # This flag only causes errors (with the color) to be displayed
                   # Will also modify global color type lag if it is alarming
-                  } elsif ($flag eq 'errors') {
+                  } elsif ($flag eq 'errors' or $flag eq 'error') {
                      $row_data =~ s/\{$root\}//;
 
                      next if $color eq 'green' or $color eq 'blue';
@@ -2560,31 +2643,49 @@ sub render_msg {
                      # If this test has a worse color, use it for the global color
                      # but verify first that this test should compute the worst color
                      if ($no_global_wcolor{$oid}) {
-                        do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.errors".'}'." in 'message' template",0);
+                        do_log("RENDER WARNING: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.errors".'}'." in 'message' template",0);
 
                      # Get oid msg and replace any inline oid dependencies
                      } else {
-                        my $oid_msg = $oid_h->{msg}{$leaf};
-                        $oid_msg = 'Undefined' if !defined $oid_msg;
-                        $oid_msg = parse_deps($oids, $oid_msg, $leaf);
+                        #my $oid_msg = $oid_h->{msg}{$leaf};
+                        #$oid_msg = 'Undefined' if !defined $oid_msg;
+                        #$oid_msg = parse_deps($oids, $oid_msg, $leaf);
 
-                        $worst_color = $color if !defined $worst_color or
-                        $colors{$worst_color} < $colors{$color};
+                        # If the message is an empty string it meeas tha we dont want to raise an error
+                        if ($oid_msg ne '') { 
+
+                            $worst_color = $color if !defined $worst_color or
+                            $colors{$worst_color} < $colors{$color};
                          
-                        # Now add it to our msg
-                        $errors .= "&$color $oid_msg\n";
+                            # Now add it to our msg
+                            $errors .= "&$color $oid_msg\n";
+                        }
                      }
 
                   # Display color threshold value
-                  } elsif ($flag =~ /^thresh\:(\w+)$/i) {
-                     my $th_col = lc $1;
-                     my $thresh = (defined $dev->{thresh}{$test}{$oid}{$th_col}) ?
-                     $dev->{thresh}{$test}{$oid}{$th_col} :
-                     $oids->{$oid}{thresh}{$th_col}{val};
+                  } elsif ($flag =~ /^thresh$/i) {
+                     my $thresh = $oid_h->{thresh}{$leaf};
 
                      $thresh = 'Undefined' if !defined $thresh;
                      $row_data =~ s/\{$root\}/$thresh/;
 
+                   # Display color threshold template value
+                  } elsif ($flag =~ /^thresh\:(\w+)$/i or $flag =~ /^threshold\.(\w+)$/i) {
+                         my $threshold_color = lc $1; 
+                         #do_log ("RENDER WARNING: {thresh:color} is DEPRECATED, please use {threshold.color} syntax") if $flag =~ /^thresh\:(\w+)$/i;
+                         my $threshold='';
+                         for my $limit (keys %{$oid_h->{threshold}->{$threshold_color}}) {
+                             if ($threshold eq '') {
+                                $threshold = $limit;
+                             } else {
+                                $threshold .= 'or' . $limit;
+                             }
+                         }
+   
+                         $threshold = 'Undefined' if !defined $threshold;
+                         $row_data =~ s/\{$root\}/$threshold/;
+  
+   
                   # Unknown flag
                   } else {
                      do_msg("Unknown flag ($flag) for $oid on $device\n");
@@ -2694,8 +2795,8 @@ sub render_msg {
             # Get our oid vars
             my $val   = $oid_h->{val};
             my $color = $oid_h->{color};
-            $val      = 'Undefined' if !defined $val;
-            $color    = 'clear' if !defined $color;
+            #$val      = 'Undefined' if !defined $val;
+            #$color    = 'clear' if !defined $color;
 
             # See if we have a valid flag, if so, replace the
             # place holder with flag data, if not, just replace
@@ -2716,7 +2817,7 @@ sub render_msg {
 
                } elsif ($flag eq 'msg') {
                   if ($no_global_wcolor{$oid}) {
-                     do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.msg".'}'." in 'message' template",0);
+                     do_log("RENDER WARNING: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.msg".'}'." in 'message' template",0);
 
                   # Get oid msg and replace any inline oid dependencies
                   } else {
@@ -2737,7 +2838,7 @@ sub render_msg {
                   # If this test has a worse color, use it for the global color
                   # but verify first that this test should compute the worst color
                   if ($no_global_wcolor{$oid}) {
-                     do_log("Render warning: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.errors".'}'." in 'message' template",0);
+                     do_log("RENDER WARNING: $oid of $test on $device is overwritten by Worst/Best Transform: remove ".'{'."$oid.errors".'}'." in 'message' template",0);
 
                   # Get oid msg and replace any inline oid dependencies
                   } else {
@@ -2752,16 +2853,26 @@ sub render_msg {
                      $errors .= "&$color $oid_msg\n";
                   }
                   
-
                # Display color threshold value
-               } elsif ($flag =~ /^thresh:($color_list)$/i) {
-                  my $th_col = lc $1;
-                  my $thresh = (defined $dev->{thresh}{$test}{$oid}{$th_col}) ?
-                  $dev->{thresh}{$test}{$oid}{$th_col} :
-                  $oids->{$oid}{thresh}{$th_col}{val};
-
+               } elsif ($flag =~ /^thresh$/i) {
+                  my $thresh = $oid_h->{thresh};
                   $thresh = 'Undefined' if !defined $thresh;
-                  $line   =~ s/\{$root\}/$thresh/;
+                  $line =~ s/\{$root\}/$thresh/;
+
+               # Display color threshold template value
+               } elsif ($flag =~ /^thresh:($color_list)$/i or $flag =~ /^threshold\.(\w+)$/i) {
+                  my $threshold_color  = lc $1;
+                  #do_log ("RENDER WARNING: {thresh:color} is DEPRECATED, please use {threshold.color} syntax") if $flag =~ /^thresh\:(\w+)$/i;
+                  my $threshold ='';
+                  for my $limit (keys %{$oid_h->{threshold}->{$threshold_color}}) {
+                     if ($threshold eq '') {
+                        $threshold = $limit;
+                     } else {
+                        $threshold .= 'or' . $limit;
+                     }
+                   }
+                   $threshold = 'Undefined' if !defined $threshold;
+                   $line =~ s/\{$root\}/$threshold/;
 
                # Unknown flag
                } else {
@@ -2947,169 +3058,433 @@ sub apply_thresh {
    my ($oids, $thr, $oid) = @_;
 
    my $oid_val = $oids->{$oid}{val};
-   if($oid_val eq 'wait') {
-      $oids->{$oid}{msg} = 'wait';
-      $oids->{$oid}{color} = 'green';
-      return;
-   }
+
+   # Skip to next if there is an error as color is already defined
+   return if $oids->{$oid}{error};
 
    # Sneakily sort our color array by color severity
-   for my $color (@color_order) {
-      my $threshes;
+   my $thresh_confidence_level = 0; # 6 Exact Mact, 5 Interveal Match, 4 smart-match, 
+                                    #  3 Negative match, 2 Negative smart match, 1 Automatch 
+   $oids->{$oid}{color}     = 'green' if (!defined $oids->{$oid}{color}) ;
+   delete $oids->{$oid}{thresh} ;
+   delete $oids->{$oid}{msg}    ;
+   COLOR: for my $color (@color_order) {
 
       # Determine if we use custom or template thresholds
       if(defined $thr) {
          if(exists $thr->{$oid}) {
-            if(defined $thr->{$oid}{$color}) {
-               $threshes = $thr->{$oid}{$color};
+            #if(defined $thr->{$oid}{$color}) {
+            #  $threshes = $thr->{$oid}{$color};
+            TRH_LIST: for my $thresh_list (keys %{$thr->{$oid}{$color}}) {
+               my $thresh_msg =  $thr->{$oid}->{$color}->{$thresh_list};
+
+               # Split our comma-delimited thresholds up
+               for my $thresh (split /\s*,\s*/, $thresh_list) {
+
+                  # check if the value to test is a num
+                  if ($oid_val ne 'NaN' and looks_like_number($oid_val)) {
+
+                     # Look for a simple numeric threshold, without a comparison operator.
+                     # This is the most common threshold definition and handling it separately
+                     # results in a significant performance improvement.
+                     if ($thresh_confidence_level < 5 and looks_like_number($thresh)) {
+                        if ($oid_val >= $thresh) {
+                           $oids->{$oid}{color}     = $color;
+                           $oids->{$oid}{thresh}    = $thresh;
+                           $oids->{$oid}{msg}       = $thresh_msg;
+                           $thresh_confidence_level = 5;
+                           next TRH_LIST;
+                        }
+   
+                     # Look for a numeric threshold preceeded by a comparison operator.
+                     } elsif($thresh_confidence_level < 5 and $thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+                        my ($op, $limit) = ($1, $2);
+                        if (($op eq '>'  and $oid_val >  $limit)
+                         or ($op eq '>=' and $oid_val >= $limit)
+                         or ($op eq '<'  and $oid_val <  $limit)
+                         or ($op eq '<=' and $oid_val <= $limit)) {
+                           $oids->{$oid}{color}     = $color;
+                           $oids->{$oid}{thresh}    = $thresh;
+                           $oids->{$oid}{msg}       = $thresh_msg;
+                           $thresh_confidence_level = 5;
+                           next TRH_LIST;
+                        } elsif ($op eq '=' and $oid_val = $limit) {
+                           $oids->{$oid}{color}     = $color;
+                           $oids->{$oid}{thresh}    = $thresh;
+                           $oids->{$oid}{msg}       = $thresh_msg;
+                           #$thresh_confidence_level = 6;
+                           last COLOR ;
+                        } elsif ($thresh_confidence_level < 3 and $op eq '!' and $oid_val != $limit) {
+                           $oids->{$oid}{color}     = $color;
+                           $oids->{$oid}{thresh}    = $thresh;
+                           $oids->{$oid}{msg}       =  $thresh_msg;
+                           $thresh_confidence_level = 3;
+                           next TRH_LIST ;
+                        }
+                     }
+                  # Look for negated test, must be string based
+                  } elsif($thresh =~ /^\!\s*(.+)/) {
+                      if ($thresh_confidence_level < 3 and $oid_val ne $thresh) {
+                         $oids->{$oid}{color}     = $color;
+                         $oids->{$oid}{thresh}    = $thresh;
+                         $oids->{$oid}{msg}       = $thresh_msg;
+                         $thresh_confidence_level = 3;
+                         next TRH_LIST ;
+                      } elsif ($thresh_confidence_level < 2 and $oid_val =~ /$1/) {
+                         $oids->{$oid}{color}     = $color;
+                         $oids->{$oid}{thresh}    = $thresh;
+                         $oids->{$oid}{msg}       = $thresh_msg;
+                         $thresh_confidence_level = 2;
+                         next TRH_LIST ;
+                      }
+                  # Its not numeric or negated, it must be string based
+                  } else {
+                     # Do our automatching for blank thresholds
+                     if ($thresh_confidence_level < 1 and $thresh eq '_AUTOMATCH_') {
+                        $oids->{$oid}{color}     = $color;
+                        $oids->{$oid}{thresh}    = $thresh;
+                        $oids->{$oid}{msg}       = $thresh_msg;
+                        $thresh_confidence_level = 1;
+                        next TRH_LIST ;
+                     } elsif ($oid_val eq $thresh) {
+                        $oids->{$oid}{color}     = $color;
+                        $oids->{$oid}{thresh}    = $thresh;
+                        $oids->{$oid}{msg}       =  $thresh_msg;
+                        #$thresh_confidence_level = 6;
+                        next COLOR ;
+                     } elsif ( $thresh_confidence_level < 4 and $oid_val =~ /$thresh/) {
+                        $oids->{$oid}{color}     = $color;
+                        $oids->{$oid}{thresh}    = $thresh;
+                        $oids->{$oid}{msg}       =  $thresh_msg;
+                        $thresh_confidence_level = 4;
+                        next TRH_LIST ;
+                     }
+                  }
+               }
             }
          }
       }
-      if(!defined $threshes ) {
-         if(defined $oids->{$oid}->{thresh}->{$color}) {
-            $threshes = $oids->{$oid}->{thresh}->{$color}{val};
-         }
-      }
-      next if !defined $threshes;
+      TRH_LIST: for my $thresh_list (keys %{$oids->{$oid}->{threshold}->{$color}}) {
+         my $thresh_msg =  $oids->{$oid}->{threshold}->{$color}->{$thresh_list};
+               
+         # Split our comma-delimited thresholds up
+         for my $thresh (split /\s*,\s*/, $thresh_list) {
+               
+            # check if the value to test is a num
+            if ($oid_val ne 'Nan' and looks_like_number($oid_val)) {
+                       
+               # Look for a simple numeric threshold, without a comparison operator.
+               # This is the most common threshold definition and handling it separately
+               # results in a significant performance improvement.
+               if ($thresh_confidence_level < 5 and looks_like_number($thresh)) {
+                  if ($oid_val >= $thresh) {
+                     $oids->{$oid}{color}     = $color;
+                     $oids->{$oid}{thresh}    = $thresh;
+                     $oids->{$oid}{msg}       = $thresh_msg;
+                     $thresh_confidence_level = 5;
+                     next TRH_LIST; 
+                  }    
 
-      my $match = 0;
-      # Split our comma-delimited thresholds up
-      for my $thresh (split /\s*,\s*/, $threshes) {
-         $match = 1;
-
-         # check if the value to test is a num
-         if ($oid_val =~ /^[+-]?\d+(\.\d+)?$/) {
-
-            # Look for a simple numeric threshold, without a comparison operator.
-            # This is the most common threshold definition and handling it separately
-            if ( $thresh =~ /^([+-]?\d+(?:\.\d+)?)$/ ) {
-               last if $oid_val >= $1 ;
-            # Look for a numeric threshold preceeded by a comparison operator.
-            } elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
-               my ($op, $limit) = ($1, $2);
-               last if $op eq '<'  and $oid_val < $limit;
-               last if $op eq '>=' and $oid_val >= $limit;
-               last if $op eq '<=' and $oid_val <= $limit;
-               last if $op eq '='  and $oid_val == $limit;
-               last if $op eq '!'  and $oid_val != $limit;
-               last if $op eq '>'  and $oid_val > $limit;
-            }
-
-         # Look for negated test, must be string based
-         } elsif($thresh =~ /^\!(\s*)(.+)$/) {
-            my ($thresh) = ($2);
-            last unless $oid_val =~ /$thresh/;
-
-         # Okay, its not numeric or negated, it must be string based
-         } else {
-            # Do our automatching for blank thresholds
-            last if $thresh eq '_AUTOMATCH_';
-            last if $oid_val =~ /$thresh/;
-         }
-
-         $match = 0;
-      }
-
-      if($match) {
-         $oids->{$oid}{color} = $color;
-         $oids->{$oid}{msg}   = $oids->{$oid}{thresh}{$color}{msg};
-         return;
-      }
-   }
-
-   # Check to make sure to assign a color by default
-   $oids->{$oid}{color} = 'green';
+               # Look for a numeric threshold preceeded by a comparison operator.
+               } elsif($thresh_confidence_level < 5 and $thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+                  my ($op, $limit) = ($1, $2);
+                  if (($op eq '>'  and $oid_val >  $limit)
+                   or ($op eq '>=' and $oid_val >= $limit)
+                   or ($op eq '<'  and $oid_val <  $limit)
+                   or ($op eq '<=' and $oid_val <= $limit)) {
+                     $oids->{$oid}{color}     = $color;
+                     $oids->{$oid}{thresh}    = $thresh;
+                     $oids->{$oid}{msg}       = $thresh_msg;
+                     $thresh_confidence_level = 5;
+                     next TRH_LIST;
+                  } elsif ($op eq '=' and $oid_val = $limit) {
+                     $oids->{$oid}{color}     = $color;
+                     $oids->{$oid}{thresh}    = $thresh;
+                     $oids->{$oid}{msg}       =  $thresh_msg;
+                     #$thresh_confidence_level = 6;
+                     last COLOR ;
+                  } elsif ($thresh_confidence_level < 3 and $op eq '!' and $oid_val != $limit) {
+                     $oids->{$oid}{color}     = $color;
+                     $oids->{$oid}{thresh}    = $thresh;
+                     $oids->{$oid}{msg}       = $thresh_msg;
+                     $thresh_confidence_level = 3;
+                     next TRH_LIST ;
+                  }
+               }
+            # Look for negated test, must be string based
+            } elsif($thresh =~ /^\!\s*(.+)/) {
+                if ($thresh_confidence_level < 3 and $oid_val ne $thresh) {
+                   $oids->{$oid}{color}     = $color;
+                   $oids->{$oid}{thresh}    = $thresh;
+                   $oids->{$oid}{msg}       = $thresh_msg;
+                   $thresh_confidence_level = 3;
+                    next TRH_LIST ;                
+                } elsif ($thresh_confidence_level < 2 and $oid_val =~ /$1/) {
+                   $oids->{$oid}{color}     = $color;
+                   $oids->{$oid}{thresh}    = $thresh;
+                   $oids->{$oid}{msg}       = $thresh_msg;
+                   $thresh_confidence_level = 2;
+                   next TRH_LIST ;
+                }
+            # Its not numeric or negated, it must be string based
+            } else {
+               # Do our automatching for blank thresholds
+               if ($thresh_confidence_level < 1 and $thresh eq '_AUTOMATCH_') {
+                  $oids->{$oid}{color}     = $color;
+                  $oids->{$oid}{thresh}    = $thresh;
+                  $oids->{$oid}{msg}       = $thresh_msg;
+                  $thresh_confidence_level = 1;
+                  next TRH_LIST ;
+              } elsif ($oid_val eq $thresh) {
+                  $oids->{$oid}{color}     = $color;
+                  $oids->{$oid}{thresh}    = $thresh;
+                  $oids->{$oid}{msg}       = $thresh_msg;
+                  #$thresh_confidence_level = 6;
+                  next COLOR ;
+               } elsif ( $thresh_confidence_level < 4 and $oid_val =~ /$thresh/) {
+                  $oids->{$oid}{color}     = $color;
+                  $oids->{$oid}{thresh}    = $thresh;
+                  $oids->{$oid}{msg}       = $thresh_msg;
+                  $thresh_confidence_level = 4;
+                  next TRH_LIST ;
+               }
+            } 
+         } 
+      }         
+   }    
+   if ($oids->{$oid}{color} eq 'green') {
+      return;
+   } elsif ($oids->{$oid}{color} eq 'clear') {
+      $oids->{$oid}{error} = 1;
+      return;
+   } elsif ($oids->{$oid}{color} eq 'blue') {
+      return;
+   } elsif ($oids->{$oid}{color} eq 'yellow') {
+      $oids->{$oid}{error} = 1;
+      return;
+   } elsif ($oids->{$oid}{color} eq 'red') {
+      $oids->{$oid}{error} = 1;
+      return;
+  }
+   do_log("APPLY_THRESH: Invalid Color $oids->{$oid}{color}");
 }
 
 # Apply thresholds to a supplied repeater oid, save in the oids hash
 sub apply_thresh_rep {
+
    my ($oids, $thr, $oid) = @_;
 
-   # Sneakily sort our color array by color severity
+   # 
    APTHRLEAF: for my $leaf (keys %{$oids->{$oid}{val}}) {
 
       # Skip to next if there is an error as color is already defined
-      #next if $oids->{$oid}{error}{$leaf};
+      next if $oids->{$oid}{error}{$leaf};
 
       my $oid_val = $oids->{$oid}{val}{$leaf};
-      if($oid_val eq 'wait') {
-         $oids->{$oid}{msg}{$leaf} = 'wait';
-         $oids->{$oid}{color}{$leaf} = 'green';
-         next;
-      }
+      my $thresh_confidence_level = 0; # 6 Exact Mact, 5 Interveal Match, 4 smart-match,
+                                       #  3 Negative match, 2 Negative samart match, 1 Automatch
 
-      for my $color (@color_order) {
-         my $threshes;
+      $oids->{$oid}{color}{$leaf}  = 'green' if (!defined $oids->{$oid}{color}{$leaf}) ;
+      delete $oids->{$oid}{thresh}{$leaf} ;
+      delete $oids->{$oid}{msg}{$leaf} ;
+      COLOR: for my $color (@color_order) {
 
-         # Determine if we use custom or template thresholds
+         # we have a custom thresholds
          if(defined $thr) {
             if(exists $thr->{$oid}) {
-               if(defined $thr->{$oid}{$color}) {
-                  $threshes = $thr->{$oid}{$color};
+               TRH_LIST: for my $thresh_list (keys %{$thr->{$oid}->{$color}}) {
+                  my $thresh_msg =  $thr->{$oid}->{$color}{$thresh_list};
+
+                  # Split our comma-delimited thresholds up
+                  for my $thresh (split /\s*,\s*/, $thresh_list) {
+
+                     # check if the value to test is a num
+                     if ($oid_val ne 'NaN' and looks_like_number($oid_val)) {
+
+                        # Look for a simple numeric threshold, without a comparison operator.
+                        # This is the most common threshold definition and handling it separately
+                        # results in a significant performance improvement.
+                        if ($thresh_confidence_level < 5 and looks_like_number($thresh)) {
+                           if ($oid_val >= $thresh) {
+                              $oids->{$oid}{color}{$leaf}  = $color;
+                              $oids->{$oid}{thresh}{$leaf} = $thresh;
+                              $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                              $thresh_confidence_level = 5;
+                              next TRH_LIST;
+                           }
+
+                        # Look for a numeric threshold preceeded by a comparison operator.
+                        } elsif($thresh_confidence_level < 5 and $thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+                           my ($op, $limit) = ($1, $2);
+                           if (($op eq '>'  and $oid_val >  $limit)
+                            or ($op eq '>=' and $oid_val >= $limit)
+                            or ($op eq '<'  and $oid_val <  $limit)
+                            or ($op eq '<=' and $oid_val <= $limit)) {
+                              $oids->{$oid}{color}{$leaf}  = $color;
+                              $oids->{$oid}{thresh}{$leaf} = $thresh;
+                              $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                              $thresh_confidence_level     = 5;
+                              next TRH_LIST;
+                           } elsif ($op eq '=' and $oid_val = $limit) {
+                              $oids->{$oid}{color}{$leaf}  = $color;
+                              $oids->{$oid}{thresh}{$leaf} = $thresh;
+                              $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                              #$thresh_confidence_level     = 6;
+                              last COLOR ;
+                           } elsif ($thresh_confidence_level < 3 and $op eq '!' and $oid_val != $limit) {
+                              $oids->{$oid}{color}{$leaf}  = $color;
+                              $oids->{$oid}{thresh}{$leaf} = $thresh;
+                              $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                              $thresh_confidence_level     = 3;
+                              next TRH_LIST ;
+                           }
+                        }
+                     # Look for negated test, must be string based                               
+                     } elsif($thresh =~ /^\!\s*(.+)/) {                                          
+                         if ($thresh_confidence_level < 3 and $oid_val ne $thresh) {             
+                            $oids->{$oid}{color}{$leaf}  = $color;                                   
+                            $oids->{$oid}{thresh}{$leaf} = $thresh;                                  
+                            $oids->{$oid}{msg}{$leaf}    = $thresh_msg;                              
+                            $thresh_confidence_level     = 3;                                        
+                            next TRH_LIST ;                                                      
+                         } elsif ($thresh_confidence_level < 2 and $oid_val =~ /$1/) {           
+                            $oids->{$oid}{color}{$leaf}  = $color;                                   
+                            $oids->{$oid}{thresh}{$leaf} = $thresh;                                  
+                            $oids->{$oid}{msg}{$leaf}    = $thresh_msg;                              
+                            $thresh_confidence_level     = 2;                                        
+                            next TRH_LIST ;                                                      
+                         }                                                                       
+                     # Its not numeric or negated, it must be string based                       
+                     } else {                                                                    
+                        # Do our automatching for blank thresholds                               
+                        if ($thresh_confidence_level < 1 and $thresh eq '_AUTOMATCH_') {         
+                           $oids->{$oid}{color}{$leaf}  = $color;                                    
+                           $oids->{$oid}{thresh}{$leaf} = $thresh;                                   
+                           $oids->{$oid}{msg}{$leaf}    = $thresh_msg;                               
+                           $thresh_confidence_level     = 1;                                         
+                           next TRH_LIST ;                                                       
+                        } elsif ($oid_val eq $thresh) {                                          
+                           $oids->{$oid}{color}{$leaf}  = $color;                                    
+                           $oids->{$oid}{thresh}{$leaf} = $thresh;                                   
+                           $oids->{$oid}{msg}{$leaf}    =  $thresh_msg;                              
+                           #$thresh_confidence_level     = 6;                                        
+                           next COLOR ;                                                          
+                        } elsif ( $thresh_confidence_level < 4 and $oid_val =~ /$thresh/) {      
+                           $oids->{$oid}{color}{$leaf}  = $color;                                    
+                           $oids->{$oid}{thresh}{$leaf} = $thresh;                                   
+                           $oids->{$oid}{msg}{$leaf}    =  $thresh_msg;                              
+                           $thresh_confidence_level     = 4;                                         
+                           next TRH_LIST ;                                                       
+                        }                                                                        
+                     }                                                                           
+                  }                                                                              
+               }                                                                                 
+            }                                                                                    
+         }                                                                                       
+         # we check our template threshold
+         TRH_LIST: for my $thresh_list (keys %{$oids->{$oid}->{threshold}->{$color}}) {
+            my $thresh_msg =  $oids->{$oid}->{threshold}->{$color}{$thresh_list};
+
+            # Split our comma-delimited thresholds up
+            for my $thresh (split /\s*,\s*/, $thresh_list) {
+               # check if the value to test is a num
+               if ($oid_val ne 'NaN' and looks_like_number($oid_val)) {
+                  # Look for a simple numeric threshold, without a comparison operator.
+                  # This is the most common threshold definition and handling it separately
+                  # results in a significant performance improvement.
+                  if ($thresh_confidence_level < 5 and looks_like_number($thresh)) {
+                     if ($oid_val >= $thresh) {
+                        $oids->{$oid}->{color}{$leaf}  = $color;
+                        $oids->{$oid}->{thresh}{$leaf} = $thresh;
+                        $oids->{$oid}->{msg}{$leaf}    = $thresh_msg;
+                        $thresh_confidence_level     = 5;
+
+                        next TRH_LIST;
+                     }
+
+                  # Look for a numeric threshold preceeded by a comparison operator.
+                  } elsif($thresh_confidence_level < 5 and $thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
+                     my ($op, $limit) = ($1, $2);
+                     if (($op eq '>'  and $oid_val >  $limit)
+                      or ($op eq '>=' and $oid_val >= $limit)
+                      or ($op eq '<'  and $oid_val <  $limit)
+                      or ($op eq '<=' and $oid_val <= $limit)) {
+                        $oids->{$oid}{color}{$leaf}  = $color;
+                        $oids->{$oid}{thresh}{$leaf} = $thresh;
+                        $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                        $thresh_confidence_level     = 5;
+                        next TRH_LIST;
+                     } elsif ($op eq '=' and $oid_val = $limit) {
+                        $oids->{$oid}{color}{$leaf}  = $color;
+                        $oids->{$oid}{thresh}{$leaf} = $thresh;
+                        $oids->{$oid}{msg}{$leaf}    =  $thresh_msg;
+                        #$thresh_confidence_level     = 6;
+                        last COLOR ;
+                     } elsif ($thresh_confidence_level < 3 and $op eq '!' and $oid_val != $limit) {
+                        $oids->{$oid}{color}{$leaf}  = $color;
+                        $oids->{$oid}{thresh}{$leaf} = $thresh;
+                        $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                        $thresh_confidence_level     = 3;
+                        next TRH_LIST ;
+                     }
+                  }
+               # Look for negated test, must be string based
+               } elsif ($thresh =~ /^\!\s*(.+)/) {
+                   if ($thresh_confidence_level < 3 and $oid_val ne $thresh) {
+                      $oids->{$oid}{color}{$leaf}  = $color;
+                      $oids->{$oid}{thresh}{$leaf} = $thresh;
+                      $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                      $thresh_confidence_level     = 3;
+                      next TRH_LIST ;
+                   } elsif ($thresh_confidence_level < 2 and $oid_val =~ /$1/) {
+                      $oids->{$oid}{color}{$leaf}  = $color;
+                      $oids->{$oid}{thresh}{$leaf} = $thresh;
+                      $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                      $thresh_confidence_level     = 2;
+                      next TRH_LIST ;
+                   }
+               # Its not numeric or negated, it must be string based
+               } else {
+                  # Do our automatching for blank thresholds
+                  if ($thresh_confidence_level < 1 and $thresh eq '_AUTOMATCH_') {
+                     $oids->{$oid}{color}{$leaf}  = $color;
+                     $oids->{$oid}{thresh}{$leaf} = $thresh;
+                     $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                     $thresh_confidence_level     = 1;
+                     next TRH_LIST ;
+                 } elsif ($oid_val eq $thresh) {
+                     $oids->{$oid}{color}{$leaf}  = $color;
+                     $oids->{$oid}{thresh}{$leaf} = $thresh;
+                     $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                     #$thresh_confidence_level     = 6;
+                     next COLOR ;
+                  } elsif ( $thresh_confidence_level < 4 and $oid_val =~ /$thresh/) {
+                     $oids->{$oid}{color}{$leaf}  = $color;
+                     $oids->{$oid}{thresh}{$leaf} = $thresh;
+                     $oids->{$oid}{msg}{$leaf}    = $thresh_msg;
+                     $thresh_confidence_level     = 4;
+                     next TRH_LIST ;
+                  }
                }
             }
-         }
-         if(!defined $threshes) {
-            if(defined $oids->{$oid}->{thresh}->{$color}) {
-               $threshes = $oids->{$oid}->{thresh}->{$color}{val};
-            }
-         }
-
-         next if !defined $threshes;
-         my $match = 0;
-
-         # Split our comma-delimited thresholds up
-         for my $thresh (split /\s*,\s*/, $threshes) {
-            $match = 1;
-
-            # check if the value to test is a num
-            if ($oid_val =~ /^[+-]?\d+(\.\d+)?$/) {
-
-               # Look for a simple numeric threshold, without a comparison operator.
-               # This is the most common threshold definition and handling it separately
-               if ( $thresh =~ /^([+-]?\d+(?:\.\d+)?)$/ ) {
-                  last if $oid_val >= $1 ;
-               # Look for a numeric threshold preceeded by a comparison operator.
-               } elsif($thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/) {
-                  my ($op, $limit) = ($1, $2);
-                  last if $op eq '<'  and $oid_val < $limit;
-                  last if $op eq '>=' and $oid_val >= $limit;
-                  last if $op eq '<=' and $oid_val <= $limit;
-                  last if $op eq '='  and $oid_val == $limit;
-                  last if $op eq '!'  and $oid_val != $limit;
-                  last if $op eq '>'  and $oid_val > $limit;
-               }
-            # Look for negated test, must be string based
-            } elsif($thresh =~ /^\!(\s*)(.+)$/) {
-               my ($thresh) = ($2);
-               last unless $oid_val =~ /$thresh/;
-
-            # Okay, its not numeric or negated, it must be string based
-            } else {
-               # Do our automatching for blank thresholds
-               #last if $thresh eq '_AUTOMATCH_';
-               last if $oid_val =~ /$thresh/;
-               last if $thresh eq '_AUTOMATCH_';
-            }
-            $match = 0;
-         }
-
-         if($match) {
-            $oids->{$oid}{color}{$leaf} = $color;
-            #if ($color eq 'blue') {
-            #   $oids->{$oid}{error}{$leaf} = 0;
-            #}
-            $oids->{$oid}{msg}{$leaf} = $oids->{$oid}{thresh}{$color}{msg};
-            next APTHRLEAF;
          }
       }
-
-      # Check to make sure to assign a color by default
-      # but a color may be exist if there is an error so increase severity to clear
-      $oids->{$oid}{color}{$leaf} = 'green' if (!defined $oids->{$oid}{color}{$leaf});
+      if ($oids->{$oid}{color}{$leaf} eq 'green') {
+         next;
+      } elsif ($oids->{$oid}{color}{$leaf} eq 'clear') {
+         $oids->{$oid}{error}{$leaf} = 1;
+         next;
+      } elsif ($oids->{$oid}{color}{$leaf} eq 'blue') {
+         next;
+      } elsif ($oids->{$oid}{color}{$leaf} eq 'yellow') {
+         $oids->{$oid}{error}{$leaf} = 1;
+         next;
+      } elsif ($oids->{$oid}{color}{$leaf} eq 'red') {
+         $oids->{$oid}{error}{$leaf} = 1;
+         next;
+      }
+      do_log("APPLY_THRESH: Invalid Color $oids->{$oid}{color}{$leaf}");
    }
-
-   return;
 }
 
 # Convert # of seconds into an elapsed string
@@ -3183,7 +3558,7 @@ sub validate_deps {
                # We should never be here with an undef val as it
                # should be alread treated: severity increase to yellow
 
-               $oid_h->{val}{$leaf}   = 'parent data missing';
+               $oid_h->{val}{$leaf}   = 'parent value n/a';
                $oid_h->{time}{$leaf}  = time;
                $oid_h->{color}{$leaf} = 'yellow';
                $oid_h->{error}{$leaf} = 1;
@@ -3191,8 +3566,9 @@ sub validate_deps {
             } elsif($val eq 'wait') {
                $oid_h->{val}{$leaf}   = 'wait';
                $oid_h->{time}{$leaf}  = time;
-               $oid_h->{color}{$leaf} = 'green';
+               $oid_h->{color}{$leaf} = 'clear';
                $oid_h->{error}{$leaf} = 1;
+               $oid_h->{msg}{$leaf}   = '';
                next LEAF;
             } elsif($error) {
 
@@ -3216,9 +3592,9 @@ sub validate_deps {
                      $oid_h->{val}{$leaf}  .= "|". $val;
                   }
                   if (defined $msg) {
-                     if (defined $oid_h->{msg}{$leaf} ) {
+                     if (defined $oid_h->{msg}{$leaf} and $oid_h->{msg}{$leaf} ne '') {
                         $oid_h->{msg}{$leaf}  .= " & ". $msg;
-                     } else {
+                     } else  {
                         $oid_h->{msg}{$leaf}   =  $msg;
                      }
                   }
@@ -3262,7 +3638,7 @@ sub validate_deps {
          if(!defined $val) {
             # We should never be here with an undef val as it
             # should be alread treated: severity increase to yellow
-            $oid_h->{val}   = 'parent data missing';
+            $oid_h->{val}   = 'parent value n/a';
             $oid_h->{time}  = time;
             $oid_h->{color} = 'yellow';
             $oid_h->{error} = 1;
@@ -3270,8 +3646,9 @@ sub validate_deps {
          } elsif($val eq 'wait') {
             $oid_h->{val}   = 'wait';
             $oid_h->{time}  = time;
-            $oid_h->{color} = 'green';
+            $oid_h->{color} = 'clear';
             $oid_h->{error} = 1;
+            $oid_h->{msg}   = '';
          } elsif($oids->{$dep_oid}{error}) {
 
             # Find de worst color
@@ -3294,7 +3671,7 @@ sub validate_deps {
                   $oid_h->{val} .= "|". $oids->{$dep_oid}{val};
                }
                if (defined $oids->{$dep_oid}{msg}) {
-                  if (defined $oid_h->{msg}) {
+                  if (defined $oid_h->{msg} and $oid_h->{msg} ne '') {
                      $oid_h->{msg} .= " & ". $oids->{$dep_oid}{msg};
                   } else {
                      $oid_h->{msg}  = $oids->{$dep_oid}{msg};

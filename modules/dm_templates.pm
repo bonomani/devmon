@@ -112,7 +112,7 @@ sub read_template_db {
    );
 
    for my $oid_row (@results) {
-      my ($id,$oid,$color,$thresh,$msg) = @$oid_row;
+      my ($id,$oid,$color,$threshes,$msg) = @$oid_row;
 
       my $vendor = $test_index{$id}{vendor};
       my $model  = $test_index{$id}{model};
@@ -120,8 +120,8 @@ sub read_template_db {
 
       my $tmpl = \%{$g{templates}{$vendor}{$model}{tests}{$test}};
 
-      $tmpl->{oids}{$oid}{thresh}{$color}{val} = $thresh;
-      $tmpl->{oids}{$oid}{thresh}{$color}{msg} = $msg if defined $msg;
+      $tmpl->{oids}{$oid}{threshold}{$color}{$threshes} = undef;
+      $tmpl->{oids}{$oid}{threshold}{$color}{$threshes}{msg} = $msg if defined $msg;
    }
 
    # Read exceptions from the database
@@ -1150,7 +1150,7 @@ sub read_thresholds_file {
       do_log("Curly bracket error in $thresh_file at line $.", 0) and next if $curly_bracket =~ /{|}/;
 
       # Render variables
-      my ($oid, $color, $threshold, $msg) = split /\s*:\s*/, $line, 4;
+      my ($oid, $color, $threshes, $msg) = split /\s*:\s*/, $line, 4;
 
       # Make sure we got all our variables and they are non-blank and valid
       if (!defined $color) {
@@ -1166,22 +1166,17 @@ sub read_thresholds_file {
             next;
          }
       }
-      if (!defined $threshold) {
+      if (!defined $threshes or $threshes eq '') {
          # If a threshold is blank, it should automatch any value
-         $threshold = "_AUTOMATCH_";
-      } else {
-         if ($threshold eq '') {
-            # If a threshold is blank, it should automatch any value
-            $threshold = "_AUTOMATCH_";
-         }
+         $threshes = "_AUTOMATCH_";
       }
       if (!defined $msg) {
-         if (!defined $threshold) {
+         if (!defined $threshes) {
             # Trim right (left done by split)
             do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $color  =~ s/\s$//;
          } else {
             # Trim right (left done by split)
-            do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $threshold =~ s/\s$//;
+            do_log("Syntax warning: Trailing space(s) in $thresh_file at line $.", 0) if $threshes =~ s/\s$//;
          }
       } else {
          # Trim right (left done by split)
@@ -1192,7 +1187,7 @@ sub read_thresholds_file {
       do_log("Undefined oid '$oid' referenced in $thresh_file at line $.", 0)
          and next if !defined $tmpl->{oids}{$oid};
 
-      # Validate any oids in the message
+      # Validate any oids in the message/
       my $tmp = $msg;
       while(defined $tmp and $tmp =~ s/\{(.+?)}//) {
          my $oid  = $1;
@@ -1203,8 +1198,7 @@ sub read_thresholds_file {
       }
 
       # Add the threshold to the global hash
-      $tmpl->{oids}{$oid}{thresh}{$color}{val} = $threshold;
-      $tmpl->{oids}{$oid}{thresh}{$color}{msg} = $msg;
+      $tmpl->{oids}{$oid}{threshold}{$color}{$threshes} = defined $msg ? $msg : undef;
    }
    close FILE;
 
@@ -1522,14 +1516,14 @@ sub sync_templates {
                for my $color (keys %{$tmpl->{oids}{$oid}{thresh}}) {
 
                   # Prepare our data for insert
-                  my $val = $tmpl->{oids}{$oid}{thresh}{$color}{val};
-                  my $txt = $tmpl->{oids}{$oid}{thresh}{$color}{msg};
+                  for my $threshes (keys %{$tmpl->{oids}{$oid}{thresh}{$color}}) {
+                     my $msg = $tmpl->{oids}{$oid}{thresh}{$color}{$threshes}{msg};
+                     $msg = (defined $msg) ? "'$msg'" : 'NULL';
 
-                  $txt = (defined $txt) ? "'$txt'" : 'NULL';
-
-                  # Insert our thresholds into DB
-                  db_do("insert into template_thresholds values " .
-                     "($test_id,'$oid','$color','$val',$txt)");
+                     # Insert our thresholds into DB
+                     db_do("insert into template_thresholds values "
+                         . "($test_id,'$oid','$color','$threshes',$msg)");
+                  } 
                }
 
                # Insert our exceptions into the DB
