@@ -3,8 +3,5 @@ TABLE:rrd(DS:ds0:TempValue:GAUGE; DS:ds1:TempSensorThresholdValue2:GAUGE ;DS:ds2
 Id|Description|Temp|State|Thresh1|Thresh2|Thresh3
 {TempIndex}|{TempDescr}|{TempValue}|{TempStatus}|{ValueIsBelowThreshold1.color}{TempSensorThresholdRelation1}{TempSensorThresholdValue1}{ValueIsBelowThreshold1.errors}|{ValueIsBelowThreshold2.color}{TempSensorThresholdRelationValue2}{ValueIsBelowThreshold2.errors}|{ValueIsBelowThreshold3.color}{TempSensorThresholdRelationValue3}{ValueIsBelowThreshold3.errors}
 
-#{TempIndex}|{TempDescr}|{TempValue}|{TempStatus}|{ValueIsBelowThreshold1.color}{TempSensorThresholdRelation1}{TempSensorThresholdValue1}{ValueIsBelowThreshold1.errors}|{ValueIsBelowThreshold2.color}{TempSensorThresholdRelation2}{TempSensorThresholdValue2}{ValueIsBelowThreshold2.errors}|{ValueIsBelowThreshold3.color}{TempSensorThresholdRelation3}{TempSensorThresholdValue3}{ValueIsBelowThreshold3.errors}|{TempSensorThresholdIndex3.color}{TempSensorThresholdValue3.color}{TempSensorThresholdRelation3.color}
+#{TempIndex}|{TempDescr}|{TempValue}|{TempStatus}|{TempSensorThresholdValue2.color}{TempSensorThresholdValue2.errors}{TempSensorThresholdRelation2.color}{TempSensorThresholdRelation2.errors}{TempSensorThresholdRelationValue2.color}{TempSensorThresholdRelationValue2.errors}{ValueIsBelowThreshold2.color}{ValueIsBelowThreshold2.errors}
 
-#TABLE:
-#-1-|-2-|-3-|-4-
-#{entSensorThresholdValue}|{entSensorThresholdRelation} 
