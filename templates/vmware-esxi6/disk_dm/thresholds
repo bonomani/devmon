@@ -1,2 +1,2 @@
-DiskPerUse    : yellow        : 90   : Disk utilization is high
+DiskPerUse    : yellow        : 80   : Disk utilization is high
 DiskPerUse    : red           : 95   : Disk utilization is critical
