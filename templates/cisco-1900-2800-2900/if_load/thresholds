@@ -1,6 +1,6 @@
 ifInLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
 ifInLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-ifInLoad        : green         : NaN   :
+ifInLoad        : yellow        : NaN   : Configure your Interface Bandwidth
 ifOutLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
 ifOutLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-ifOutLoad       : green         : NaN
+ifOutLoad       : yellow        : NaN   : Configure your Interface Bandwidth
