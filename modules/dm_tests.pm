@@ -512,10 +512,16 @@ sub trans_math {
          if($@ =~ /^Illegal division by zero/) {
             $oid_h->{val}   = 'NaN';
             $oid_h->{color} = 'yellow';
+            delete $oid_h->{msg};
+            delete $oid_h->{error};
+            delete $oid_h->{thresh};
          } else {
             do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
             $oid_h->{val}   = $@;
             $oid_h->{color} = 'yellow';
+            delete $oid_h->{msg};
+            delete $oid_h->{error};
+            delete $oid_h->{thresh};
          }
       }
 
