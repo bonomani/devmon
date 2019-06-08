@@ -476,8 +476,9 @@ sub trans_math {
          if($@) {
             chomp $@ ;
             if($@ =~ /^Illegal division by zero/) {
-               $oid_h->{val}{$leaf}   = 'NaN';
-               $oid_h->{color}{$leaf} = 'clear';
+               $oid_h->{val}{$leaf}   = 'NaN';  
+               $oid_h->{color}{$leaf} = 'yellow'; #We recommend to overide in most cases with 'clear'
+               $oid_h->{msg}{$leaf} = '';         #We recommand to put a specific msg if you dont override with 'clear'
             } else {
                do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
                $oid_h->{val}{$leaf}   = $@;
@@ -504,7 +505,8 @@ sub trans_math {
          chomp $@ ;
          if($@ =~ /^Illegal division by zero/) {
             $oid_h->{val}   = 'NaN';
-            $oid_h->{color} = 'clear';
+            $oid_h->{color} = 'yellow';
+            $oid_h->{msg}   = '';
          } else {
             do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
             $oid_h->{val}   = $@;
@@ -3065,9 +3067,12 @@ sub apply_thresh {
    # Sneakily sort our color array by color severity
    my $thresh_confidence_level = 0; # 6 Exact Mact, 5 Interveal Match, 4 smart-match, 
                                     #  3 Negative match, 2 Negative smart match, 1 Automatch 
-   $oids->{$oid}{color}     = 'green' if (!defined $oids->{$oid}{color}) ;
-   delete $oids->{$oid}{thresh} ;
-   delete $oids->{$oid}{msg}    ;
+   if (!defined $oids->{$oid}{color}) {
+      $oids->{$oid}{color} = 'green';
+      delete $oids->{$oid}{thresh} ;
+      delete $oids->{$oid}{msg};
+      delete $oids->{$oid}{error};
+   }
    COLOR: for my $color (@color_order) {
 
       # Determine if we use custom or template thresholds
@@ -3284,9 +3289,12 @@ sub apply_thresh_rep {
       my $thresh_confidence_level = 0; # 6 Exact Mact, 5 Interveal Match, 4 smart-match,
                                        #  3 Negative match, 2 Negative samart match, 1 Automatch
 
-      $oids->{$oid}{color}{$leaf}  = 'green' if (!defined $oids->{$oid}{color}{$leaf}) ;
-      delete $oids->{$oid}{thresh}{$leaf} ;
-      delete $oids->{$oid}{msg}{$leaf} ;
+      if (!defined $oids->{$oid}{color}{$leaf}) {
+         $oids->{$oid}{color}{$leaf} = 'green';
+         delete $oids->{$oid}{thresh}{$leaf} ;
+         delete $oids->{$oid}{msg}{$leaf} ;
+         delete $oids->{$oid}{error}{$leaf} ;
+      }
       COLOR: for my $color (@color_order) {
 
          # we have a custom thresholds
