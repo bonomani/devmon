@@ -477,12 +477,18 @@ sub trans_math {
             chomp $@ ;
             if($@ =~ /^Illegal division by zero/) {
                $oid_h->{val}{$leaf}   = 'NaN';  
-               $oid_h->{color}{$leaf} = 'yellow'; #We recommend to overide in most cases with 'clear'
-               $oid_h->{msg}{$leaf} = '';         #We recommand to put a specific msg if you dont override with 'clear'
+               $oid_h->{color}{$leaf} = 'yellow'; 
+               delete $oid_h->{msg}{$leaf}; 
+               delete $oid_h->{error}{$leaf};
+               delete $oid_h->{thresh}{$leaf};
+               
             } else {
                do_log("Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)",1);
                $oid_h->{val}{$leaf}   = $@;
                $oid_h->{color}{$leaf} = 'yellow';
+               delete $oid_h->{msg}{$leaf};
+               delete $oid_h->{error}{$leaf};
+               delete $oid_h->{thresh}{$leaf};
             }
             next;
          }
@@ -506,7 +512,6 @@ sub trans_math {
          if($@ =~ /^Illegal division by zero/) {
             $oid_h->{val}   = 'NaN';
             $oid_h->{color} = 'yellow';
-            $oid_h->{msg}   = '';
          } else {
             do_log("Failed eval for TRANS_MATH on $oid: $expr ($@)",1);
             $oid_h->{val}   = $@;
