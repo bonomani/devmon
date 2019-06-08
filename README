@@ -1,5 +1,5 @@
 =====================================================================
-Devmon VERSION 0.19.05.30, fork at SF version 0.3.1-beta1 r256
+Devmon VERSION 0.19.06.08, fork at SF version 0.3.1-beta1 r256
 ======================================================================
 
 SEE END OF FILE for current STATUS and ROADMAP! 
@@ -11,7 +11,7 @@ THIS IS NOT AN OFFICIAL VERSION from the original developers:
 - Cisco templates are modifyed to fit my own needs
 
 This devmon version should MORE STABLE AS THE SOURCEFORGE ONE ! 
-The most stable is the latest branch version: Now it is 0.19.05.30
+The most stable is the latest branch version: Now it is 0.19.06.08
 
 Please FORK it if you can, so you/we will be able to add your
 contributions / template easily  !!
@@ -215,6 +215,10 @@ Major improvement
       (Transforms used in cisco-isr template are tested)
     - Original errors msg and val are propagated in normal mode
     - Original errors val are accumulated and propagate in debug mode
+
+- Multiple error messages and threshold for an oid color
+    - We can have now multiple time the same color for an oid in the thresholds file
+      with different messages
  
 - New transforms:
   WARNING: THE USE OF THIS TRANSFORM BREAKS COMPATIBILTY WITH 
@@ -273,6 +277,8 @@ BREAKING CHANGES
  - The result of a division by zero was replaced by 0, but this is not 0. This now replaced by NaN. To remain green you should add 
    to your threshold file the following:
    {oid} : green : NaN :
+   or if you like the clear color (like me)
+   {oid} : clear : NaN :
    There is a script to modify your template in devmon/extra/add_NaN_thresholds: all template with this version are already updated
    This will also breaks also the BEST transform results as they will be "clear" and not green and they will raise an alamr (Current WIP)
      Thanks to Stef Coene for its feedback
