@@ -1,1 +1,1 @@
-#ifPri : ignore : ^\S*Nu.+|^\S*Vl.+|^\S*Lo.+|^\S*St.+
+ifPri : ignore : ^\S*Nu.+|^\S*Vl.+|^\S*StackPort.+

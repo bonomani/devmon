@@ -16,7 +16,7 @@ ifOutColPct	: MATH		: ({ifOutCps} / {ifOutCPps}) x 100
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox     	: REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
 
-ifDuplexStatus	: SWITCH	: {dot3StatsDuplexStatus} 1=?,2=Half,3=Full
+ifDuplexStatus	: SWITCH	: {c2900PortDuplexStatus} 1=Full,2=Half
 
 ifIndex         : INDEX         : {ifDescr}
 ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
