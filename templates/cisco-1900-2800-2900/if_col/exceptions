@@ -1,1 +1,1 @@
-ifPri : ignore : ^\S*Null.+|^\S*Dialer.+|^\S*Embedded-Service-Engine.+
+ifPri : ignore : ^\S*Null.+|^\S*BRI.+|^\S*Dialer.+|^\S*Embedded-Service-Engine.+

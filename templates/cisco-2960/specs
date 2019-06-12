@@ -1,4 +1,4 @@
 vendor	: cisco
-model	: 2960
+model	: 2960-2960S
 snmpver	: 2
-sysdesc : C2960-
+sysdesc : C2960-|C2960S
