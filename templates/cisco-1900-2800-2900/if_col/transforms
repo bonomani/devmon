@@ -1,7 +1,7 @@
 # Collision = single collision + multiple collision (not late nor excessive)
 
 # Compute the sum of paquets 
-ifOutPkts     	: MATH          : {ifOutUcastPkts} + {ifOutMulticastPkts} + {ifOutBroadcastPkts}
+ifOutPkts     	: MATH          : {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
 
 # Do delta transform on all counters
 ifOutPps       	: DELTA         : {ifOutPkts}

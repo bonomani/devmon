@@ -1,7 +1,7 @@
 # Collision = single collision + multiple collision (not late nor excessive)
 
 # Compute the sum of paquets 
-ifOutPkts     	: MATH          : {ifOutUcastPkts} + {ifOutMulticastPkts} + {ifOutBroadcastPkts}
+ifOutPkts     	: MATH          : {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
 
 # Do delta transform on all counters
 ifOutPps       	: DELTA         : {ifOutPkts}
@@ -16,7 +16,7 @@ ifOutColPct	: MATH		: ({ifOutCps} / {ifOutCPps}) x 100
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox     	: REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
 
-ifDuplexStatus	: SWITCH	: {c2900PortDuplexStatus} 1=Full,2=Half
+ifDuplexStatus	: SWITCH	: {dot3StatsDuplexStatus} 1=?,2=Half,3=Full
 
 ifIndex         : INDEX         : {ifDescr}
 ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e

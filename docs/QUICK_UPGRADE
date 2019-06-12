@@ -10,7 +10,7 @@ devmon/modules/
 devmon/modules/extra (optionnal but recommended, related to point 4)
 
 
-2. Replace the file
+2. Replace and adapt the file, as it is BB name references have changed to XYMON
 devmon/devmon.cfg
 
 
