@@ -1,1 +1,1 @@
-#ifDescr: ignore: BR.+:.+|VoiceOverIpPeer.+|VoiceEncapPeer.+
+ifPri : ignore : ^\S*Dialer.+

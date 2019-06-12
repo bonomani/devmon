@@ -1,6 +1,6 @@
 # Get bit speed delta (so we dont have to provide custom delta limit)
-ifInPkts      : MATH    : {ifInUcastPkts} + {ifInMulticastPkts} + {ifInBroadcastPkts}
-ifOutPkts     : MATH    : {ifOutUcastPkts} + {ifOutMulticastPkts} + {ifOutBroadcastPkts}
+ifInPkts      : MATH    : {ifHCInUcastPkts} + {ifHCInMulticastPkts} + {ifHCInBroadcastPkts}
+ifOutPkts     : MATH    : {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
 
 # Do delta transform on all counters
 ifInPps        	: DELTA         : {ifInPkts}

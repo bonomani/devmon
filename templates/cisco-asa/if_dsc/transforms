@@ -1,17 +1,18 @@
 # Get bit speed delta (so we dont have to provide custom delta limit)
-ifInPkts      : MATH  	: {ifInUcastPkts} + {ifInMulticastPkts} + {ifInBroadcastPkts}
-ifOutPkts     : MATH  	: {ifOutUcastPkts} + {ifOutMulticastPkts} + {ifOutBroadcastPkts}
+ifInPkts      : MATH  	: {ifHCInUcastPkts} + {ifHCInMulticastPkts} + {ifHCInBroadcastPkts}
+ifOutPkts     : MATH  	: {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
 # Do delta transform on all counters
 ifInPps         : DELTA         : {ifInPkts}
 ifOutPps        : DELTA         : {ifOutPkts}
-ifInDps		: DELTA		: {ifInDiscards}
-ifOutDps	: DELTA		: {ifOutDiscards}
+ifInDscPps	: DELTA		: {ifInDiscards}
+ifOutDscPps	: DELTA		: {ifOutDiscards}
 # Perform percentage calculations
-ifInDscPct	: MATH		: ({ifInDps} / {ifInPps}) x 100
-ifOutDscPct	: MATH		: ({ifOutDps} / {ifOutPps}) x 100
-ifInDscStat     : BEST          : {ifInDscPct},{ifInDps}
-ifOutDscStat    : BEST          : {ifOutDscPct},{ifOutDps}
+ifInDscPct	: MATH		: ({ifInDscPps}  / {ifInPps})  x 100
+ifOutDscPct	: MATH		: ({ifOutDscPps} / {ifOutPps}) x 100
+ifInDscBest     : BEST          : {ifInDscPct}   , {ifInDscPps}
+ifOutDscBest    : BEST          : {ifOutDscPct}  , {ifOutDscPps}
+ifDscAlarm      : WORST         : {ifInDscBest}  , {ifOutDscBest}
 # Create an alias in a bracketed box, or nothing if alias is blank
-ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-ifIndex         : INDEX         : {ifName}
-ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifName}/e
+ifAliasBox      : REGSUB        : {ifAlias}        /(\S+.*)/ [$1]/
+ifIndex         : INDEX         : {ifDescr}
+ifPri           : REGSUB        : {ifIndex}        /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
