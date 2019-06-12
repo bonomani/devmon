@@ -1,0 +1,11 @@
+Alarm threshold:  yellow: {MemPerUse.thresh:yellow}%, red: {MemPerUse.thresh:red}%                          
+Alarming on (1)  
+
+<table border=1 cellpadding=5>                                                                                                        
+<tr><th>Mem idx</th><th>Used</th><th>Total</th><th>Percent</th></tr>                                                                                  
+<tr><td>1</td><td>{mem_used} [B]</td><td>{MemSize} [B]</td><td>{MemPerUse.color}{MemPerUse}%{MemPerUse.errors}</td></tr>  
+</table>     
+<!--DEVMON RRD: mem_dm 0 0                                                                                                            
+DS:ds0:GAUGE:600:0:U                                                                                                                  
+1 {MemPerUse}                                                                                                                  
+-->         

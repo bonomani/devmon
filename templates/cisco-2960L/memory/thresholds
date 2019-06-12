@@ -1,2 +1,0 @@
-mem_used_per        : yellow        : 75    : Memory load is high
-mem_used_per        : red           : 95    : Memory load is very high

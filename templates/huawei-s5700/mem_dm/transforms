@@ -1,0 +1,6 @@
+#MemSize     : MATH : {mem_used} + {mem_free} : 0
+#MemPerUse   : MATH : ({mem_used} x 100) / {MemSize} : 0
+#MemPerUse  
+#MemPerFree : MATH : ({mem_free} x 100) / {mem_total} : 0
+mem_used     : MATH : {MemPerUse} x {MemSize} / 100 : 0
+
