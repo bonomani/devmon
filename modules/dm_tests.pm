@@ -102,7 +102,9 @@ sub tests {
 
             for my $oid ( @{$tmpl->{sorted_oids}} ) {
                next if !$oids->{$oid}{transform};
-               transform($device, $oids, $oid, $thr);
+               unless ( defined $oids->{$oid}{'val'} ) {
+                  transform($device, $oids, $oid, $thr);
+	       }
             }
          }
 
