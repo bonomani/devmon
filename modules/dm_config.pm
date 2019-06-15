@@ -1606,19 +1606,18 @@ sub read_hosts_cfg {
                $new_hosts{$host}{cid}    = $cid;
                --$hosts_left;
 
-               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
-                  "$hosts_cfg{$host}{model}",2);
+               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc",2);
                next CUSTOMHOST;
             }
 
             # Try and match sysdesc
-            CUSTOMMATCH: for my $vendor (keys %{$g{templates}}) {
+            CUSTOMVENDOR: for my $vendor (keys %{$g{templates}}) {
                CUSTOMMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
 
                   # Skip if this host doesn't match the regex
                   my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                   if ($sysdesc !~ /$regex/) {
-                     do_log("$host did not match $vendor : $model : $regex", 0)
+                     do_log("$host did not match $vendor / $model : $regex", 0)
                      if $g{debug};
                      next CUSTOMMODEL;
                   }
@@ -1635,13 +1634,13 @@ sub read_hosts_cfg {
                      my $old_vendor = $old_hosts{$host}{vendor};
                      my $old_model  = $old_hosts{$host}{model};
                      if($vendor ne $old_vendor or $model ne $old_model) {
-                        do_log("$host changed from a $old_vendor $old_model " .
+                        do_log("$host changed from a $old_vendor / $old_model " .
                            "to a $vendor $model",1);
                      }
                   } else {
-                     do_log("Discovered $host as a $vendor $model",1);
+                     do_log("Discovered $host as a $vendor $model with sysdesc=$sysdesc",1);
                   }
-                  last CUSTOMMATCH;
+                  last CUSTOMVENDOR;
                }
             }
 
@@ -1756,7 +1755,7 @@ sub read_hosts_cfg {
                }
             }
 
-         # If it wasnt pre-existing, go ahead and insert it
+         # If it wasn't pre-existing, go ahead and insert it
          } else {
             db_do("delete from devices where name='$host'");
             db_do("insert into devices values ('$host','$ip','$vendor','$model','$tests','$cid',0)");
