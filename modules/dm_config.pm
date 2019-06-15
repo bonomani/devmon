@@ -1428,8 +1428,7 @@ sub read_hosts_cfg {
          $new_hosts{$host}{port}   = $old_hosts{$host}{port};
 
          --$hosts_left;
-         do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
-            "$hosts_cfg{$host}{model}",2);
+         do_log("Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model} with sysdesc=$sysdesc",2);
          next OLDHOST;
       }
 
@@ -1444,7 +1443,7 @@ sub read_hosts_cfg {
 
             # Skip if this host doesn't match the regex
             if ($sysdesc !~ /$regex/) {
-               do_log("$host did not match $vendor : $model : $regex", 4)
+               do_log("$host did not match $vendor / $model : $regex", 4)
                if $g{debug};
                next OLDMODEL;
             }
@@ -1457,7 +1456,7 @@ sub read_hosts_cfg {
             $new_hosts{$host}{model}  = $model;
 
             --$hosts_left;
-            do_log("Discovered $host as a $vendor $model",2);
+            do_log("Discovered $host as a $vendor $model with sysdesc=$sysdesc",2);
             last OLDVENDOR;
          }
       }
@@ -1515,8 +1514,7 @@ sub read_hosts_cfg {
                %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
                --$hosts_left;
 
-               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} " .
-                  "$hosts_cfg{$host}{model}",2);
+               do_log("Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}",2);
                last NEWHOST;
             }
 
@@ -1527,7 +1525,7 @@ sub read_hosts_cfg {
                   # Skip if this host doesn't match the regex
                   my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                   if ($sysdesc !~ /$regex/) {
-                     do_log("$host did not match $vendor : $model : $regex", 0) if $g{debug};
+                     do_log("$host did not match $vendor / $model : $regex", 4) if $g{debug};
                      next NEWMODEL;
                   }
 
@@ -1537,16 +1535,15 @@ sub read_hosts_cfg {
                   $new_hosts{$host}{model}  = $model;
                   --$hosts_left;
 
-                  # If they are an old host, they probably changes models...
+                  # If they are an old host, they probably changed models...
                   if(defined $old_hosts{$host}) {
                      my $old_vendor = $old_hosts{$host}{vendor};
                      my $old_model  = $old_hosts{$host}{model};
                      if($vendor ne $old_vendor or $model ne $old_model) {
-                        do_log("$host changed from a $old_vendor $old_model " .
-                           "to a $vendor $model",1);
+                        do_log("$host changed from a $old_vendor / $old_model to a $vendor / $model",2);
                      }
                   } else {
-                     do_log("Discovered $host as a $vendor $model",1);
+                     do_log("Discovered $host as a $vendor $model with sysdesc=$sysdesc",1);
                   }
                   last NEWVENDOR;
                }
