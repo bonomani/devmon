@@ -86,7 +86,7 @@ sub poll_devices {
    # Build our query hash
    QUERYHASH: for my $device (sort keys %{$g{dev_data}}) {
 
-      # Skip this device if we werent able to reach it during update_indexes
+      # Skip this device if we weren't able to reach it during update_indexes
       # next unless $indexes->{$device}{reachable};
 
       # Skip this device if we are running a Xymon server and the
@@ -110,7 +110,7 @@ sub poll_devices {
       $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}}
       if $tests eq 'all';
 
-      $snmp_input{$device}{dev_ip}   = $g{dev_data}{$device}{ip};
+      $snmp_input{$device}{ip}       = $g{dev_data}{$device}{ip};
       $snmp_input{$device}{cid}      = $g{dev_data}{$device}{cid};
       $snmp_input{$device}{port}     = $g{dev_data}{$device}{port};
       $snmp_input{$device}{dev}      = $device;
@@ -248,7 +248,7 @@ sub snmp_query {
                   my $fatal = $returned{error}{$error};
                   do_log("ERROR: $error", 2);
 
-                  # Incrememnt our fail counter if the query died fatally
+                  # Increment our fail counter if the query died fatally
                   ++$g{fail}{$dev} if $fatal;
                }
                delete $returned{error};
@@ -286,7 +286,7 @@ sub snmp_query {
                   # our poll time
                   ++$g{fail}{$dev};
 
-               # We havent exceeded our poll time, but make sure its still live
+               # We haven't exceeded our poll time, but make sure its still live
                } elsif (!kill 0, $pid) {
                   # Whoops, looks like our fork died somewhow
                   do_log("Fork $fork ($pid) died polling $dev",0);
@@ -389,7 +389,7 @@ sub snmp_query {
                      do_log("Fork $fork responded to ping request $returned{ping} with $returned{pong} at $g{forks}{$fork}{time}",4) if $g{debug};
                      delete $g{forks}{$fork}{pinging};
                   } else {
-                     do_log("Fork $fork didnt send an appropriate response, killing it",4) if $g{debug};
+                     do_log("Fork $fork didn't send an appropriate response, killing it",4) if $g{debug};
                      kill 15, $g{forks}{$fork}{pid} or do_log("Sending $fork TERM signal failed: $!");
                      close $g{forks}{$fork}{CS} or do_log("Closing socket to fork $fork failed: $!");
                      delete $g{forks}{$fork};
@@ -550,12 +550,12 @@ sub fork_sub {
       my $snmp_cid  = $data_in{cid};
       my $snmp_port = $data_in{port} || 161; # Default to 161 if not specified
       my $snmp_ver  = $data_in{ver};
-      my $dev_ip    = $data_in{dev_ip};
+      my $ip        = $data_in{ip};
       my $dev       = $data_in{dev};
       my $retries   = $data_in{retries};
       my $timeout   = $data_in{timeout};
 
-      my $host = (defined $dev_ip and $dev_ip ne '') ? $dev_ip : $dev;
+      my $host = (defined $ip and $ip ne '') ? $ip : $dev;
 
       # Establish SNMP session
       my $session;

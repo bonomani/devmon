@@ -312,7 +312,7 @@ sub initialize {
 
       # Now write our pid to the pidfile
       my $pid_handle = new IO::File $g{pidfile}, 'w'
-         or log_fatal("Cant write to pidfile $g{pidfile} ($!)",0);
+         or log_fatal("Can't write to pidfile $g{pidfile} ($!)",0);
       $pid_handle->print($g{mypid});
       $pid_handle->close;
    }
@@ -407,7 +407,6 @@ sub sync_servers {
    if($g{multinode} ne 'yes') {
       %{$g{dev_data}} = read_hosts();
       return;
-
    }
 
    # First things first, update heartbeat info
@@ -591,7 +590,7 @@ sub sync_servers {
             # Go through all the devices for this test count
             for my $device (@{$available_devices{$count}}) {
 
-               # Make sure we havent hit our limit
+               # Make sure we haven't hit our limit
                last if $my_num_tests > $avg_tests_node;
 
                # Lets try and take this test
@@ -670,7 +669,7 @@ sub sync_servers {
          my $result = db_do("update devices set owner=0 where " .
             "name='$device' and owner=$g{my_nodenum}");
 
-         # We really shouldnt fail this, but just in case
+         # We really shouldn't fail this, but just in case
          next if !$result;
          $my_num_tests -= $test_count{$device};
          do_log("Dropped $device ($my_num_tests/$avg_tests_node tests)", 0);
@@ -1056,7 +1055,7 @@ sub db_connect {
    # Don't need this if we are not in multinode mode
    return if $g{multinode} ne 'yes';
 
-   # Load the DBI module if we havent initiliazed yet
+   # Load the DBI module if we haven't initiliazed yet
    if(!$g{initiliazed}) {
       require DBI if !$g{initiliazed};
       DBI->import();
@@ -1184,8 +1183,7 @@ sub read_hosts_cfg {
 
    # Hashes containing textual shortcuts for Xymon exception & thresholds
    my %thr_sc = ( 'r' => 'red', 'y' => 'yellow', 'g' => 'green', 'c' => 'clear', 'p' => 'purple', 'b' => 'blue' );
-   my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm',
-      'na' => 'noalarm' );
+   my %exc_sc = ( 'i' => 'ignore', 'o' => 'only', 'ao' => 'alarm', 'na' => 'noalarm' );
 
    # Read in templates, cause we'll need them
    db_connect();
@@ -1284,9 +1282,8 @@ sub read_hosts_cfg {
                # If this IP is 0.0.0.0, try and get IP from DNS
                if($ip eq '0.0.0.0') {
                   my (undef, undef, undef, undef, @addrs) = gethostbyname $host;
-                  do_log("Unable to resolve DNS name for host '$host'",0)
-                     and next FILELINE if !@addrs;
-                  $ip = join '.', unpack('C4', $addrs[0]);
+                  do_log("Unable to resolve DNS name for host '$host'",0) and next FILELINE if !@addrs;
+                  $ip = join '.', unpack('C4', $addrs[0]); # Use first address
                }
 
                # Make sure we don't have duplicates
@@ -1366,8 +1363,7 @@ sub read_hosts_cfg {
                my $tests = $1 if $options =~ s/(?:,|^)tests\((\S+?)\)//;
                $tests = 'all' if !defined $tests;
 
-               do_log("Unknown devmon option ($options) on line " .
-                  "$. of $hostscfg",0) and next if $options ne '';
+               do_log("Unknown devmon option ($options) on line $. of $hostscfg",0) and next if $options ne '';
 
                $hosts_cfg{$host}{ip}    = $ip;
                $hosts_cfg{$host}{tests} = $tests;
@@ -1405,7 +1401,7 @@ sub read_hosts_cfg {
       next if !defined $g{templates}{$vendor}{$model};
 
       my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
-      $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
+      $snmp_input{$host}{ip}     = $hosts_cfg{$host}{ip};
       $snmp_input{$host}{cid}    = $old_hosts{$host}{cid};
       $snmp_input{$host}{port}   = $old_hosts{$host}{port};
       $snmp_input{$host}{dev}    = $host;
@@ -1438,7 +1434,7 @@ sub read_hosts_cfg {
       }
 
       # Okay, we have a sysdesc, lets see if it matches any of our templates
-      OLDMATCH: for my $vendor (keys %{$g{templates}}) {
+      OLDVENDOR: for my $vendor (keys %{$g{templates}}) {
          OLDMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
             my $regex = $g{templates}{$vendor}{$model}{sysdesc};
 
@@ -1462,7 +1458,7 @@ sub read_hosts_cfg {
 
             --$hosts_left;
             do_log("Discovered $host as a $vendor $model",2);
-            last OLDMATCH;
+            last OLDVENDOR;
          }
       }
    }
@@ -1491,7 +1487,7 @@ sub read_hosts_cfg {
             next if defined $new_hosts{$host};
 
             # Throw together our query data
-            $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
+            $snmp_input{$host}{ip}     = $hosts_cfg{$host}{ip};
             $snmp_input{$host}{cid}    = $hosts_cfg{$host}{cid};
             $snmp_input{$host}{port}   = $hosts_cfg{$host}{port};
             $snmp_input{$host}{dev}    = $host;
@@ -1525,7 +1521,7 @@ sub read_hosts_cfg {
             }
 
             # Try and match sysdesc
-            NEWMATCH: for my $vendor (keys %{$g{templates}}) {
+            NEWVENDOR: for my $vendor (keys %{$g{templates}}) {
                NEWMODEL: for my $model (keys %{$g{templates}{$vendor}}) {
 
                   # Skip if this host doesn't match the regex
@@ -1552,7 +1548,7 @@ sub read_hosts_cfg {
                   } else {
                      do_log("Discovered $host as a $vendor $model",1);
                   }
-                  last NEWMATCH;
+                  last NEWVENDOR;
                }
             }
 
@@ -1577,13 +1573,13 @@ sub read_hosts_cfg {
          %{$g{snmp_data}} = ();
          %snmp_input = ();
 
-         # And query the devices that havent yet responded to previous cids
+         # And query the devices that haven't yet responded to previous cids
          for my $host (sort keys %hosts_cfg) {
 
             # Don't query this host if we already have succesfully done so
             next if defined $new_hosts{$host};
 
-            $snmp_input{$host}{dev_ip} = $hosts_cfg{$host}{ip};
+            $snmp_input{$host}{ip}     = $hosts_cfg{$host}{ip};
             $snmp_input{$host}{port}   = $hosts_cfg{$host}{port};
             $snmp_input{$host}{cid}    = $cid;
             $snmp_input{$host}{dev}    = $host;
@@ -1669,7 +1665,7 @@ sub read_hosts_cfg {
       next if defined $new_hosts{$host};
 
       if(defined $old_hosts{$host}) {
-         # Couldnt query pre-existing host, maybe temporarily unresponsive?
+         # Couldn't query pre-existing host, maybe temporarily unresponsive?
          %{$new_hosts{$host}} = %{$old_hosts{$host}};
       } else {
          # Throw a log message complaining
