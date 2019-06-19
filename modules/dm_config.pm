@@ -1418,7 +1418,7 @@ sub read_hosts_cfg {
    OLDHOST: for my $host (keys %{$g{snmp_data}}) {
       my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
       $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-      do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{debug};
+      do_log("$host sysdesc = $sysdesc ",0) if $g{debug};
       next OLDHOST if $sysdesc eq 'UNDEFINED';
 
       # Catch vendor/models override with the model() option
@@ -1506,7 +1506,7 @@ sub read_hosts_cfg {
          NEWHOST: for my $host (keys %{$g{snmp_data}}) {
             my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
             $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-            do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{debug};
+            do_log("$host sysdesc = $sysdesc ",0) if $g{debug};
             next NEWHOST if $sysdesc eq 'UNDEFINED';
 
             # Catch vendor/models override with the model() option
@@ -1597,7 +1597,7 @@ sub read_hosts_cfg {
          CUSTOMHOST: for my $host (keys %{$g{snmp_data}}) {
             my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
             $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-            do_log("$host sysdesc = ::: $sysdesc :::",0) if $g{debug};
+            do_log("$host sysdesc = $sysdesc ",0) if $g{debug};
             next CUSTOMHOST if $sysdesc eq 'UNDEFINED';
 
             # Catch vendor/models override with the model() option

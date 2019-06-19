@@ -56,6 +56,14 @@ sub tests {
    for my $device (sort keys %{$g{dev_data}}) {
 
       my $oids = {};
+      # Check to see if this device was unreachable in xymon
+      # If so skip device
+      if (!defined $g{xymon_color}{$device} or $g{xymon_color}{$device} ne 'green') {
+      #   $g{xymon_color}{$device} = 'clear';
+         next;
+      #} elsif ( $g{xymon_color}{$device} ne 'green') {
+      #   next;
+      }
 
       # Get template-specific variables
       my $vendor = $g{dev_data}{$device}{vendor};
@@ -92,6 +100,7 @@ sub tests {
 
          # Check to see if this device was unreachable in xymon
          # If so, don't bother doing transforms or rendering the message
+         # A TEST IN THE BEGINNING SHOULD OF THIS SUB SHOULD REPLACE THIS TEST..TO BE REMOVED
          if(!defined $g{xymon_color}{$device} or
             $g{xymon_color}{$device} eq 'green') {
 
@@ -181,7 +190,9 @@ sub oid_hash {
       if (!defined $num or !defined $snmp->{$num}
             or !defined $snmp->{$num}{val} )
       {
-         do_log("No SNMP data found for $oid on $device", 0);# if ($g{xymon_color}{$device} eq 'green');
+         # log this problem if xymon_color (normally "conn" ping) is green 
+         #do_log("No SNMP data found for $oid on $device", 0) if ($g{xymon_color}{$device} eq 'green');
+         do_log("No SNMP data found for $oid on $device", 0);
          next
       }
 
@@ -2693,7 +2704,7 @@ sub render_msg {
                              if ($threshold eq '') {
                                 $threshold = $limit;
                              } else {
-                                $threshold .= 'or' . $limit;
+                                $threshold .= ' or ' . $limit;
                              }
                          }
    
@@ -2883,7 +2894,7 @@ sub render_msg {
                      if ($threshold eq '') {
                         $threshold = $limit;
                      } else {
-                        $threshold .= 'or' . $limit;
+                        $threshold .= ' or ' . $limit;
                      }
                    }
                    $threshold = 'Undefined' if !defined $threshold;

@@ -71,19 +71,25 @@ sub poll_devices {
       Proto    => 'tcp',
       Timeout  => 10,
    );
-
    if(defined $sock) {
-      print $sock "xymondboard test=^conn\$ fields=hostname,color,line1";
+      #print $sock "xymondboard test=^conn\$ fields=hostname,color,line1";
+      # Ask xymon for all test on all devices
+      print $sock "xymondboard fields=hostname,color,line1";
       shutdown($sock, 1);
       while(<$sock>) {
          my ($device,$color,$line1) = split /\|/;
-         my ($l1col) = ($line1 =~ /^(\w+)/);
-         do_log("DEBUG SNMP: $device has Xymon status $color ($l1col)",2) if $g{debug};
-         $g{xymon_color}{$device} = $color ne "blue" && $color || $l1col;
+         chomp $line1 and do_log("DEBUG SNMP: $device has Xymon status $color and msg $line1",2) if $g{debug};
+         if ($line1 =~ /not ok/i and !defined $g{xymon_color}{device}) {
+            $g{xymon_color}{$device} = $color; 
+            next;
+         } elsif ($line1 =~ /ok/i) {
+            $g{xymon_color}{$device} = $color;
+         }   
       }
    }
 
    # Build our query hash
+   $g{numsnmpdevs} = $g{numdevs};
    QUERYHASH: for my $device (sort keys %{$g{dev_data}}) {
 
       # Skip this device if we weren't able to reach it during update_indexes
@@ -91,9 +97,13 @@ sub poll_devices {
 
       # Skip this device if we are running a Xymon server and the
       # server thinks that it isn't reachable
-      if(defined $g{xymon_color}{$device} and
-         $g{xymon_color}{$device} ne 'green') {
-         do_log("$device has a non-green Xymon status, skipping SNMP.", 2);
+      if(!defined $g{xymon_color}{$device}) {
+         do_log("$device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...");
+         --$g{numsnmpdevs};
+         next QUERYHASH;
+      } elsif  ($g{xymon_color}{$device} ne 'green') {
+         do_log("$device has a non-green Xymon status, skipping SNMP.");
+         --$g{numsnmpdevs}; 
          next QUERYHASH;
       }
 
@@ -102,13 +112,13 @@ sub poll_devices {
       my $tests  = $g{dev_data}{$device}{tests};
 
       # Make sure we have our device_type info
-      do_log("No vendor/model '$vendor/$model' templates for host " .
-         "$device, skipping.", 0)
+      do_log("No vendor/model '$vendor/$model' templates for host $device, skipping.", 0)
          and next QUERYHASH if !defined $g{templates}{$vendor}{$model};
 
       # If our tests = 'all', create a string with all the tests in it
-      $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}}
-      if $tests eq 'all';
+      if ( $tests eq 'all' ) {
+         $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}} ;
+      }
 
       $snmp_input{$device}{ip}       = $g{dev_data}{$device}{ip};
       $snmp_input{$device}{cid}      = $g{dev_data}{$device}{cid};
@@ -184,8 +194,15 @@ sub snmp_query {
 
    # Check the status of any currently running forks
    &check_forks();
+   
+   # If we are in the readbbhost phase the numsnmpdev is not discoverd 
+   # the number of snmp device is normally the number of device that have at 
+   # least one successfull Xymon test. As we skip this discovering phase
+   # we define it as the number of devices if it is not defined!
+   $g{numsnmpdevs} = $g{numdevs} if (!defined $g{numsnmpdevs});
+
    # Start forks if needed
-   fork_queries() if ((keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs}) or (keys %{$g{forks}} == 0 and $g{numdevs} < 2 )) ;
+   fork_queries() if ((keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numsnmpdevs}) or (keys %{$g{forks}} == 0 and $g{numsnmpdevs} < 2 )) ;
 
    # Now split up our data amongst our forks
    my @devices = keys %{$snmp_input};
@@ -431,10 +448,10 @@ sub snmp_query {
 # Start our forked query processes, if needed
 sub fork_queries {
    # Close our DB handle to avoid forked sneakiness
-   
    $g{dbh}->disconnect() if defined $g{dbh} and $g{dbh} ne '';
+
    # We should only enter this loop if we are below numforks
-   while((keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numdevs}) or (keys %{$g{forks}} == 0 and  $g{numdevs} < 2))  {
+   while((keys %{$g{forks}} < $g{numforks} && keys %{$g{forks}} < $g{numsnmpdevs}) or (keys %{$g{forks}} == 0 and  $g{numsnmpdevs} < 2))  {
       my $num = 1;
       my $pid;
 
@@ -713,6 +730,167 @@ sub fork_sub {
 
       # Now are done gathering data, close the session and return our hash
       $session->close();
+      send_data($sock, \%data_out);
+   }
+}
+
+# Subroutine2 that the forked query processes "live" in
+sub fork_sub2 {
+   eval {
+       require SNMP;
+   };
+   if ($@) {
+    die "Error: SNMP is not installed: $@";
+   }
+
+   my ($fork_num) = @_;
+   my $sock = $g{forks}{$fork_num}{PS};
+
+   DEVICE: while(1) { # We should never leave this loop
+      # Our outbound data hash
+      my %data_out = ();
+
+      # Heres a blocking call
+      my $serialized = '';
+      my $string_in;
+      do {
+         $string_in = undef;
+
+         # Wrap our getline in alarm code to make sure our parent doesn't die
+         # messily and leave us hanging around
+         eval {
+            local $SIG{ALRM} = sub { die "Timeout" };
+            alarm $g{cycletime} * 2;
+            $string_in = $sock->getline();
+            alarm 0;
+         };
+
+         # Our getline timed out, which means we haven't gotten any data
+         # in a while.  Make sure our parent is still there
+         if($@) {
+            do_log("Fork $fork_num timed out waiting for data from parent: $@",3);
+            if (!kill 0, $g{mypid}) {
+               do_log("Parent is no longer running, fork $fork_num exiting");
+               exit 1;
+            }
+            my $sleeptime = $g{cycletime} / 2;
+            do_log("Parent ($g{mypid}) seems to be running, fork $fork_num sleeping for $sleeptime",3);
+            sleep $sleeptime;
+         }
+
+         $serialized .= $string_in if defined $string_in;
+
+      } until $serialized =~ s/\nEOF\n$//s;
+      do_log("DEBUG SNMP($fork_num): Got EOF in message, attempting to thaw",4) if $g{debug};
+
+      # Now decode our serialized data scalar
+      my %data_in;
+      eval {
+         %data_in = %{thaw($serialized)};
+      };
+      if ($@) {
+         do_log("DEBUG SNMP($fork_num): thaw failed attempting to thaw $serialized: $@",4) if $g{debug};
+         do_log("DEBUG SNMP($fork_num): Replying to corrupt message with a pong",4) if $g{debug};
+         $data_out{ping} = '0';
+         $data_out{pong} = time;
+         send_data($sock,\%data_out);
+         next DEVICE;
+      }
+
+      if (defined $data_in{ping}) {
+         do_log("DEBUG SNMP($fork_num): Received ping from master $data_in{ping},replying",4) if $g{debug};
+         $data_out{ping} = $data_in{ping};
+         $data_out{pong} = time;
+         send_data($sock,\%data_out);
+         next DEVICE;
+      }
+
+      # Do some basic checking
+      if(!defined $data_in{nonreps} and !defined $data_in{reps}) {
+         my $error_str =
+         "No oids to query for $data_in{dev}, skipping";
+         $data_out{error}{$error_str} = 1;
+         send_data($sock, \%data_out);
+         next DEVICE;
+      } elsif(!defined $data_in{ver}) {
+         my $error_str =
+         "No snmp version found for $data_in{dev}";
+         $data_out{error}{$error_str} = 1;
+         send_data($sock, \%data_out);
+         next DEVICE;
+      }
+
+      #print "%data_in:\n" ;print Data::Dumper->Dumper(\%data_in) ;
+      #
+      # Get SNMP variables
+      my %snmpvars ;
+      $snmpvars{RemotePort} = $data_in{port} || 161; # Default to 161 if not specified
+      $snmpvars{DestHost}   = (defined $data_in{ip} and $data_in{ip} ne '') ? $data_in{ip} : $data_in{dev} ;
+      $snmpvars{Timeout}    = $data_in{timeout} * 1000000 ;
+      $snmpvars{Retries}    = $data_in{retries} ;
+
+      $snmpvars{UseNumeric} = 1 ;
+
+      # Establish SNMP session
+      my $session;
+
+      if($data_in{ver} eq '1') {
+         $snmpvars{Version} = 1 ;
+         $snmpvars{Community}  = $data_in{cid} if defined $data_in{cid} ;
+
+      } elsif($data_in{ver} =~ /^2c?$/) {
+         $snmpvars{Version} = 2 ;
+         $snmpvars{Community}  = $data_in{cid} if defined $data_in{cid} ;
+
+      } elsif($data_in{ver} eq '3') {
+         $snmpvars{Version} = 3 ;
+         # We store the security name for v3 als in cid so we keep the same data format
+         $snmpvars{SecName}    = $data_in{cid} if defined $data_in{cid} ;
+
+      # Whoa, we don't support this version of SNMP
+      } else {
+         my $error_str =
+         "Unsupported SNMP version for $data_in{dev} ($data_in{ver})";
+         $data_out{error}{$error_str} = 1;
+         send_data($sock, \%data_out);
+         next DEVICE;
+      }
+
+      #print "%snmpvars:\n" ;print Data::Dumper->Dumper(\%snmpvars) ;
+      $session = new SNMP::Session(%snmpvars) ;
+
+      foreach my $oid (sort keys %{$data_in{nonreps}}) {
+         next if defined $data_out{error} ;
+
+         my $vb = new SNMP::Varbind([".$oid"]);
+         my $val = $session->get($vb);
+         if ( $val ) {
+            $data_out{$oid}{val}  = $val;
+            $data_out{$oid}{time} = time;
+         } else {
+            $data_out{error}{$session->{ErrorStr}} = 1;
+            last ;
+         }
+      }
+
+      foreach my $oid (sort keys %{$data_in{reps}}) {
+         next if defined $data_out{error} ;
+
+         my $vb = new SNMP::Varbind([".$oid"]);
+         my $val ;
+         # for (INITIALIZE; TEST; STEP) {
+         for ( $val = $session->getnext($vb);
+               $vb->tag eq ".$oid" and not $session->{ErrorNum} ;
+               $val = $session->getnext($vb)
+            ) {
+            $data_out{$oid}{val}{$vb->iid} = $val;
+            $data_out{$oid}{time}{$vb->iid} = time;
+            $data_out{maxrep}{$oid} ++ ;
+         }
+      }
+
+      #print "%data_out:\n" ;print Data::Dumper->Dumper(\%data_out) ;
+      #
       send_data($sock, \%data_out);
    }
 }
