@@ -91,6 +91,7 @@ sub initialize {
 
       # Statistical vars
       'numdevs'       => 0,
+      'numsnmpdevs'   => 0,
       'numtests'      => 0,
       'avgtestsnode'  => 0,
       'snmppolltime'  => 0,
@@ -103,6 +104,7 @@ sub initialize {
       'snmptimeout'   => 0,
       'snmptries'     => 0,
       'snmpcids'      => '',
+      'snmplib'       => '',
 
       # Now our global data subhashes
       'templates'     => {},
