@@ -1,6 +1,8 @@
-ifInLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
-ifInLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-ifInLoad        : green         : NaN   :
+ifInLoad        : yellow	: 75	: {ifDescr}{ifAliasBox} load is high
+ifInLoad        : red		: 95	: {ifDescr}{ifAliasBox} load is very high
+ifInLoad        : yellow        : NaN   : Configure your Interface Bandwidth if possible or change :thresh(if_load;ifInLoad;c:NaN:)
+ifInLoad        : clear         : wait  : wait
 ifOutLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
 ifOutLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-ifOutLoad       : green         : NaN
+ifOutLoad       : yellow        : NaN   : Configure your Interface Bandwidth if possible or change :thresh(if_load;ifOutLoad;c:NaN:)
+ifOutLoad       : clear         : wait  : wait

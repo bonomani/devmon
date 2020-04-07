@@ -1,7 +1,19 @@
-hwEntityCpuUsage        : yellow        : >{hwEntityCpuUsageThreshold}          : CPU utilization is very high: {hwEntityCpuUsage}%
+#hwEntityCpuUsage        : yellow        : >{hwEntityCpuUsageThreshold}         : CPU utilization is very high: {hwEntityCpuUsage}%
+hwECUTreached                   : yellow        : <1                            : CPU utilization is very high: {hwEntityCpuUsage}%
 
-UpTime                  : red		: <600                                  : Device rebooted recently. System uptime: {UpTimeTxt}
-UpTime                  : yellow	: <5000                                 : Device rebooted recently. System uptime: {UpTimeTxt}
-UpTime                  : green		:	                                :
+UpTime                          : red		: <600                          : , device rebooted recently!
+UpTime                          : yellow	: <5000                         : , device rebooted recently!
+UpTime                          : green		:	                        :
 
-hwSysRebootReason       : yellow        : 2,3,4,5                             : Device reload reason : {hwSysRebootReason}
+#hwSysRebootReason              : yellow        : 2,3,5                         : Device reload reason : {hwSysRebootReason}
+hwSysRebootReasonTxt            : red           :                               : -> Abnormal !
+hwSysRebootReasonTxt            : green         : manual                        : -> Normal ! Volontary action.
+
+sysBootReasonDelayTimerEnable   : red           : >0                            : <b>Auto-disable delay has not expired yet</b>, remaining: {sysBootReasonDelayTimerTxt} / timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimerEnable   : blue          : <=0                           : <b>Auto-disable delay has expired -> this alarm is now deactivated!</b>, timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimerEnable   : green         : disable                       : <b>Auto-disable delay is off and not needed</b>, timeout: {sysBootReasonDelayTxt}
+
+sysBootReason                   : red           : red                           : <b>Not OK !</b>
+sysBootReason                   : yellow        : yellow                        : <b>Not OK !</b>
+sysBootReason                   : green         : green                         : <b>OK !</b>
+sysBootReason                   : blue          : blue                          : <b>Not OK, deactivated </b>after timeout ! Look below for details.

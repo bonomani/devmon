@@ -1,11 +1,23 @@
-cpmCPUTotal5minRev	: red		: >70	       : CPU utilization is very high: {cpmCPUTotal5minRev}%
-cpmCPUTotal5minRev	: yellow	: >30	       : CPU utilization is high: {cpmCPUTotal5minRev}%
-cpmCPUTotal5minRev	: green		:	       :
+cpmCPUTotal5minRev      	: red		: >70                           : CPU utilization is very high: {cpmCPUTotal5minRev}%
+cpmCPUTotal5minRev       	: yellow	: >30	                        : CPU utilization is high: {cpmCPUTotal5minRev}%
+cpmCPUTotal5minRev      	: green		:	                        :
 
-UpTime                  : red		: <600         : Device rebooted recently. System uptime: {UpTimeTxt}
-UpTime                  : yellow	: <5000        : Device rebooted recently. System uptime: {UpTimeTxt}
-UpTime                  : green		:	       :
+UpTime                          : red           : <600                          :, device rebooted recently!
+UpTime                          : yellow        : <5000                         :, device rebooted recently!
+UpTime                          : green         :                               :
 
-#sysReloadReason         : yellow        : .*Critical.* : Device reload reason : {sysReloadReason}
-sysReloadReason         : yellow        : .*Critical.* :
-#sysReloadReason         : green         : .*           :
+sysReloadReason                 : red           :                               : -> Abnormal !
+sysReloadReason                 : yellow        : power-on                      : -> Is this volontary?
+sysReloadReason                 : green         : Reload Command, reload, manual: -> Normal ! Volontary action.
+
+sysBootReasonDelayTimer         : red           : >0                            : <b>delay not expired</b>, remaining: {sysBootReasonDelayTimerTxt} / timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimer         : blue          : <=0                           : <b>delay expired</b>, timeout: {sysBootReasonDelayTxt}
+
+sysBootReasonDelayTimerEnable   : red           : >0                            : <b>Auto-disable delay has not expired yet</b>, remaining: {sysBootReasonDelayTimerTxt} / timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimerEnable   : blue          : <=0                           : <b>Auto-disable delay has expired -> this alarm is now deactivated!</b>, timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimerEnable   : green         : disable                       : <b>Auto-disable delay is off and not needed</b>, timeout: {sysBootReasonDelayTxt}
+
+sysBootReason                   : red           : red                           : <b>Not OK !</b>
+sysBootReason                   : yellow        : yellow                        : <b>Not OK !</b>
+sysBootReason                   : green         : green                         : <b>OK !</b>
+sysBootReason                   : blue          : blue                          : <b>Not OK, deactivated </b>after timeout ! Look below for details.

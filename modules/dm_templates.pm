@@ -870,36 +870,40 @@ sub read_transforms_file {
    }
 
    # Now go through our translations and make sure all the dependent oids exist
+   # and add the translations to the global hash
    for my $oid (keys %trans) {
       my $data = $trans{$oid}{data};
+      # If trans_data do not have any oids, it can be validated (put in template) 
+      # (mainly for SET or MATH transform)
+      if ($data !~ /\{.+?\}/) {
+           $tmpl->{oids}{$oid}{trans_type}  = $trans{$oid}{type};
+           $tmpl->{oids}{$oid}{trans_data}  = $trans{$oid}{data};
+      }
       while($data =~ s/\{(.+?)\}//) {
-         my $dep_oid = $1;
-
+         (my $dep_oid, my $dep_oid_sub) = split /\./,$1; # add sub oid value (like var.color) as possible oid dependency
          # Validate oid
-         do_log("Undefined oid '$dep_oid' referenced in $trans_file", 0)
-            and delete $trans{$oid} and next
-         if !defined $tmpl->{oids}{$dep_oid} and !defined $trans{$dep_oid};
-
-         # Create influences (contrary of dependecies) hash for the topological sort 
-         $infls->{$dep_oid}{$oid} = {};
-          
-         # Create a direct dependency hash for each oid 
-         $deps->{$oid}{$dep_oid} = {};
+         if (!defined $tmpl->{oids}{$dep_oid} and !defined $trans{$dep_oid}) {
+            delete $trans{$oid};
+            do_log("Undefined oid '$dep_oid' referenced in $trans_file", 0);
+            next;
+         } else {
+            $tmpl->{oids}{$oid}{trans_type}  = $trans{$oid}{type};
+            $tmpl->{oids}{$oid}{trans_data}  = $trans{$oid}{data};
          
-         #  Create influences (contrary of dependecies) hash for global worst thresh calc
-         $infls_thresh->{$dep_oid}{$oid} = {} if $trans{$oid}{type} =~ /^best$|worst/i ;
+            # Create a direct dependency hash for each oid
+            $tmpl->{oids}{$oid}{deps}{$dep_oid} = {};
+
+            # Create influences (contrary of dependecies) hash for the topological sort 
+            # and add them to the global hash
+            $tmpl->{oids}{$dep_oid}{infls}{$oid} = {};
+          
+            # Create influences (contrary of dependecies) hash for global worst thresh calc
+            if ($trans{$oid}{type} =~ /^best$|worst/i) {
+               $tmpl->{oids}{$dep_oid}{infls_thresh}{$oid} = {};
+            }
+         }
       }
    }
-
-   # Now add the translations to the global hash
-   for my $oid (keys %trans) {
-      $tmpl->{oids}{$oid}{trans_type}   = $trans{$oid}{type};
-      $tmpl->{oids}{$oid}{trans_data}   = $trans{$oid}{data};
-      $tmpl->{oids}{$oid}{deps}         = $deps->{$oid};
-      $tmpl->{oids}{$oid}{infls}        = $infls->{$oid};
-      $tmpl->{oids}{$oid}{infls_thresh} = $infls_thresh->{$oid};
-   }
-
    return 1;
 }
 sub calc_template_test_deps {
@@ -917,7 +921,6 @@ sub calc_template_test_deps {
       $infls->{$oid}        = $tmpl->{oids}{$oid}{infls}; 
       $infls_thresh->{$oid} = $tmpl->{oids}{$oid}{infls_thresh} ;
       $trans_data{$oid}     = $tmpl->{oids}{$oid}{trans_data} if (exists $tmpl->{oids}{$oid}{trans_data}) ;
-      
 
       #$oids_all{$oid}      = {};                  #Why not all oids from all test?
       
@@ -998,7 +1001,7 @@ sub sort_oids($) {
 
    # Complete the list of OIDs to include those OIDs which do not depend
    # on another OID, like the SET transform. They have to be added for the
-   # this algo to work : Commented as seem not needed !
+   # this algo to work : Commented as it seems not needed (but to be tested) !
 
    #foreach $oid ( keys %trans_data ) {
    #   next                      if $trans_data{$oid} =~ m/\{.+?\}/ ;
@@ -1151,7 +1154,6 @@ sub read_thresholds_file {
 
       # Render variables
       my ($oid, $color, $threshes, $msg) = split /\s*:\s*/, $line, 4;
-
       # Make sure we got all our variables and they are non-blank and valid
       if (!defined $color) {
          do_log("Syntax error:  Missing colon separator near color value in $thresh_file at line $.", 0);
