@@ -1,12 +1,14 @@
-{UpTime.color}Up for: {UpTimeTxt}
-{hwSysRebootReason.color}Last reboot due to: {hwSysRebootReasonTxt}
+<b>{UpTime.color}Uptime        : {UpTimeTxt}</b>{UpTime.msg}
+<b>{sysBootReason.color}Reboot reason :</b> {sysBootReason.msg}
+   <b>{hwSysRebootReasonTxt.color}Message    : {hwSysRebootReasonTxt}</b> {hwSysRebootReasonTxt.msg}
+   <font size=4>&#9201;&#65039;</font> <b>Timer      :</b> {sysBootReasonDelayTimerEnable.msg}
 
 {sysDescr}
 
 Alarming on (1)
 <table border=1 cellpadding=5>
 <tr><th>CPU</th><th>Threshold</th><th>Load</th></tr>
-<tr><td>1</td><td>{hwEntityCpuUsageThreshold}</td><td>{hwEntityCpuUsage.color}{hwEntityCpuUsage}%{hwEntityCpuUsage.errors}</td></tr>
+<tr><td>1</td><td>{hwEntityCpuUsageThreshold}</td><td>{hwECUTreached.color}{hwEntityCpuUsage}%{hwECUTreached.errors}</td></tr>
 </table>
 <!--DEVMON RRD: cpu_dm 0 0
 DS:ds0:GAUGE:600:0:U

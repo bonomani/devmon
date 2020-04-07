@@ -3,7 +3,9 @@
 
 ifInErrTraf	: yellow	: 5	: {ifDescr}{ifAliasBox} - High input error rate ({ifInErrTraf}%)
 ifInErrTraf	: red		: 10	: {ifDescr}{ifAliasBox} - Very high input error rate ({ifInErrTraf}%)
-ifInErrTraf     : green         : NaN    :
+ifInErrTraf     : clear         : NaN   :
+ifInErrTraf     : clear         : wait  : wait
 ifOutErrTraf	: yellow	: 5	: {ifDescr}{ifAliasBox} - High output error rate ({ifOutErrTraf}%)
 ifOutErrTraf	: red		: 10	: {ifDescr}{ifAliasBox} - Very high output error rate ({ifOutErrTraf}%)
-ifOutErrTraf    : green         : NaN
+ifOutErrTraf    : clear         : NaN   :
+ifOutErrTraf    : clear         : wait  : wait

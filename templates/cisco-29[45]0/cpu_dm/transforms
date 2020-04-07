@@ -1,4 +1,14 @@
-UpTime           : MATH          : {snmpEngineTime} + ((( {sysUpTime} - ({snmpEngineTime} x 100) + 4294967295 ) % 4294967295 ) / 100 )
-UpTimeTxt        : ELAPSED       : {UpTime}
-CPUIndex         : SORT          : {cpmCPUTotal5minRev}
+# UpTimeClone do not have threshold applyed: it will not propagate errors msg to other oids
+#UpTimeDiff                   : MATH            : {sysUpTime} - ({snmpEngineTime} x 100)
+UpTimeClone                  : MATH            : {snmpEngineTime} + ((( {sysUpTime} + 50 - ({snmpEngineTime} x 100) + 4294967295 ) % 4294967295 ) / 100 )
+UpTime                       : MATH            : {UpTimeClone}
+UpTimeTxt                    : ELAPSED         : {UpTime}
+CPUIndex                     : SORT            : {cpmCPUTotal5minRev}
 
+# Boot Alarm automatically disable after 1 week or 604800 s
+sysBootReasonDelay           : MATH            : 604800
+sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
+sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {UpTimeClone}
+sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
+sysBootReasonDelayTimerEnable: TSWITCH         : {sysReloadReason.color} 'green'=disable,default={sysBootReasonDelayTimer}
+sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable.color} , {sysReloadReason.color}

@@ -7,7 +7,7 @@ ifOutDscPct     : yellow        : 1     : {ifDescr}{ifAliasBox} - Low output rat
 ifOutDscPct     : red           : 5     : {ifDescr}{ifAliasBox} - High output ratio of discard rate to total traffic rate: {ifOutDscPct}%
 ifOutDscPct     : green         : NaN
 
-ifInDps         : yellow        : 2     : {ifDescr}{ifAliasBox} - Low input discard rate: {ifInDps}p/s
-ifInDps         : red           : 10    : {ifDescr}{ifAliasBox} - High input discard rate: {ifInDps}p/s
-ifOutDps        : yellow        : 2     : {ifDescr}{ifAliasBox} - Low output discard rate: {ifOutDps}p/s
-ifOutDps        : red           : 10    : {ifDescr}{ifAliasBox} - High output discard rate: {ifOutDps}p/s
+ifInDscPps      : yellow        : 2     : {ifDescr}{ifAliasBox} - Low input discard rate  : {ifInDscPps}p/s
+ifInDscPps      : red           : 10    : {ifDescr}{ifAliasBox} - High input discard rate : {ifInDscPps}p/s
+ifOutDscPps     : yellow        : 2     : {ifDescr}{ifAliasBox} - Low output discard rate : {ifOutDscPps}p/s
+ifOutDscPps     : red           : 10    : {ifDescr}{ifAliasBox} - High output discard rate: {ifOutDscPps}p/s

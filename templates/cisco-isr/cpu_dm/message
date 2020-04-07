@@ -1,5 +1,7 @@
-{UpTime.color}Up for: {UpTimeTxt}
-{sysReloadReason.color}Last reboot due to: {sysReloadReason}
+<b>{UpTime.color}Uptime        : {UpTimeTxt}</b>{UpTime.msg}
+<b>{sysBootReason.color}Reboot reason :</b> {sysBootReason.msg}
+   <b>{sysReloadReason.color}Message    : {sysReloadReason}</b> {sysReloadReason.msg}
+   <font size=4>&#9201;&#65039;</font> <b>Timer      :</b> {sysBootReasonDelayTimerEnable.msg}
 
 {sysDescr}
 

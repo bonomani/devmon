@@ -1,1 +1,1 @@
-#ifName : ignore : Stack.+|Nu.+
+#ifPri : ignore : ^\S*InLoopBack.+|^\S*NULL.+|^\S*Console.+
