@@ -1,4 +1,4 @@
 UpTime           : MATH          : {snmpEngineTime} + ((( {sysUpTime} - ({snmpEngineTime} x 100) + 4294967295 ) % 4294967295 ) / 100 )
 UpTimeTxt        : ELAPSED       : {UpTime}
-CPUIndex         : SORT          : {cpmCPUTotal5minRev}
+CPUIndex         : INDEX         : {cpmCPUTotal5minRev}
 

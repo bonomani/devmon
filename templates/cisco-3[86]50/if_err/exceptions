@@ -1,1 +1,3 @@
 #ifDescr: ignore: BR.+:.+|VoiceOverIpPeer.+|VoiceEncapPeer.+
+ifInErrTraf: ignore: parent.+
+ifOutErrTraf: ignore: parent.+

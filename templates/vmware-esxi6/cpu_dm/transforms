@@ -1,4 +1,8 @@
 UpTime           : MATH          : {hrSystemUptime} / 100
 UpTimeTxt        : ELAPSED       : {UpTime}
 CPUIndex         : INDEX         : {hrProcessorLoad}
-
+CPUIndexCount    : STATISTIC     : {CPUIndex} CNT
+LoadAverage      : STATISTIC     : {hrProcessorLoad} AVG
+LoadAverageInt   : MATH          : {LoadAverage}             : 0
+# Average CPU load is read from next rrd-file behind the last core
+LoadAverageIndex : MATH          : {CPUIndexCount} + 1       : 0
