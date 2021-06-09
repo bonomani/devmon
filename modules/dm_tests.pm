@@ -71,8 +71,19 @@ sub tests {
       my $tests  = $g{dev_data}{$device}{tests};
 
       # If our tests = 'all', create a string with all the tests in it
-      $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}}
-      if $tests eq 'all';
+      #$tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}}
+      #if $tests eq 'all';
+      if ( $tests eq 'all' ) {
+         $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}} ;
+      }
+      # If we have a !, remove tests from all tests
+      elsif (substr($tests, 0, 1) eq '!')  {
+         my %valid_tests =  %{$g{templates}{$vendor}{$model}{tests}};
+         foreach my $notest ( split /,/, substr($tests, 1) ) {
+            delete($valid_tests{$notest}) ;
+         }
+         $tests = join ',', keys %valid_tests ;
+      }
 
       # Copious, uncessary error checking, but whatever
       do_log("No vendor found for $device!", 0) and next if !defined $vendor;

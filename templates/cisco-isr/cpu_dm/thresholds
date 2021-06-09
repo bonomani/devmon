@@ -11,15 +11,15 @@ UpTimeModState                  : green         : =1                            
 UpTimeModStateNoAlarm           : yellow        :                               : 
 UpTimeModStateNoAlarm           : green         :                               :
 
-sysBootReason                   : yellow        : PowerOn                       : <b>Not OK</b>
+sysBootReason                   : yellow        : PowerOn,power-on              : <b>Not OK</b>
 sysBootReason                   : yellow        :                               : <b>Critical</b>, but lower alarm level to warning
 sysBootReason                   : green         :                               : <b>OK</b>
 sysBootReason                   : blue          :                               : <b>Disabled</b> by timer
 
 sysReloadReason                 : red           :                               : <b>{sysReloadReason}</b> is <b>critical</b> and must be investigated
 #sysReloadReason                 : yellow        : PowerOn                       : <b>{sysReloadReason}</b> is <b>ambiguous</b>: a deliberate reboot or power outage ?
-sysReloadReason                 : yellow        : PowerOn                       : <b>{sysReloadReason}</b> is <b>not OK</b> and generally means a power outage
-sysReloadReason                 : green         : Reload Command                : <b>{sysReloadReason}</b> is <b>OK</b> as it is a deliberate action
+sysReloadReason                 : yellow        : PowerOn, power-on             : <b>{sysReloadReason}</b> is <b>not OK</b> and generally means a power outage
+sysReloadReason                 : green         : Reload Command, reload        : <b>{sysReloadReason}</b> is <b>OK</b> as it is a deliberate action
 
 sysBootReasonDelayTimerEnable   : red           : >0                            : <b>Not expired</b> yet, remaining: {sysBootReasonDelayTimerTxt} / timeout: {sysBootReasonDelayTxt}
 sysBootReasonDelayTimerEnable   : blue          : <=0                           : <b>Expired</b>, timeout: {sysBootReasonDelayTxt}

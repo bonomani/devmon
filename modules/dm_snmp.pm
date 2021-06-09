@@ -118,7 +118,16 @@ sub poll_devices {
       # If our tests = 'all', create a string with all the tests in it
       if ( $tests eq 'all' ) {
          $tests = join ',', keys %{$g{templates}{$vendor}{$model}{tests}} ;
+      } 
+      # If we have a !, remove testis from all tests
+      elsif (substr($tests, 0, 1) eq '!')  {
+         my %valid_tests =  %{$g{templates}{$vendor}{$model}{tests}}; 
+         foreach my $notest ( split /,/, substr($tests, 1) ) {
+            delete($valid_tests{$notest}) ; 
+         } 
+         $tests = join ',', keys %valid_tests ;
       }
+      
 
       $snmp_input{$device}{ip}       = $g{dev_data}{$device}{ip};
       $snmp_input{$device}{cid}      = $g{dev_data}{$device}{cid};

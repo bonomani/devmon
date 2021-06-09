@@ -1456,6 +1456,7 @@ sub read_hosts_cfg {
             $new_hosts{$host}{port}   = $old_hosts{$host}{port};
             $new_hosts{$host}{vendor} = $vendor;
             $new_hosts{$host}{model}  = $model;
+            $new_hosts{$host}{ver}    = $old_hosts{$host}{ver};
 
             --$hosts_left;
             do_log("Discovered $host as a $vendor $model with sysdesc=$sysdesc",2);
@@ -1535,6 +1536,7 @@ sub read_hosts_cfg {
                   %{$new_hosts{$host}}        = %{$hosts_cfg{$host}};
                   $new_hosts{$host}{vendor} = $vendor;
                   $new_hosts{$host}{model}  = $model;
+                  $new_hosts{$host}{ver}    = $snmpver;
                   --$hosts_left;
 
                   # If they are an old host, they probably changed models...
@@ -1629,6 +1631,7 @@ sub read_hosts_cfg {
                   $new_hosts{$host}{cid}    = $cid;
                   $new_hosts{$host}{vendor} = $vendor;
                   $new_hosts{$host}{model}  = $model;
+                  $new_hosts{$host}{ver}    = $snmpver;
                   --$hosts_left;
 
                   # If they are an old host, they probably changed models...
@@ -2065,16 +2068,16 @@ sub usage {
    "   -f[oregrond]   Run in foreground. Prevents running in daemon mode\n" .
    "   -h[ostonly]    Poll only hosts matching the pattern that follows\n" .
    "   -p[rint]       Don't send message to display server but print it on stdout\n" .
-   "   -v[erbose]     Verbose mode. The more v's, the more vebose logging\n" .
+   "   -v[erbose]     Verbose mode. The more -v's, the more vebose logging max 5: -v -v -v -v -v \n" .
    "   -de[bug]       Print debug output (this can be quite extensive)\n" .
    "\n" .
    "  Mutually exclusive arguments:\n" .
-   "   -re[adhostscfg]   Read in data from the Xymon hosts.cfg file\n" .
+   "   -rea[dhostscfg]   Read in data from the Xymon hosts.cfg file\n" .
    "   -syncc[onfig]    Update multinode DB with the global config options\n" .
    "                    configured on this local node\n" .
    "   -synct[emplates] Update multinode device templates with the template\n" .
    "                    data on this local node\n" .
-   "   -re[setowners]   Reset multinode device ownership data.  This will\n" .
+   "   -res[etowners]   Reset multinode device ownership data.  This will\n" .
    "                    cause all nodes to recalculate ownership data\n" .
    "\n";
 }
