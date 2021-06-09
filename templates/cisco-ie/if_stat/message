@@ -5,7 +5,7 @@ Alarming on: Manually: In the xymon hosts.cfg file add option to DEVMON test
 Alarming on:  DEVMON:thresh(if_stat;ifStatAlarmingOn;r:INT1|INT2) 
 Alarming on:  Example INT1 = GigabitEthernet0/0/0 The field is a pseudo regexp ... 
 Alarming on: To desactivate an automatically running tests: 
-Alarming on:  DEVMON:thresh(if_stat;ifPri;na:.*INT1|.*INT2) 
+Alarming on:  DEVMON:except(if_stat;ifPri;na:.*INT1$|.*INT2$) 
 
 TABLE: noalarmsmsg
 Ifc name|Admin / Oper

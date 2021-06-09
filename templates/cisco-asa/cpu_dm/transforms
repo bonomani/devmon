@@ -1,4 +1,26 @@
-UpTime           : MATH          : {snmpEngineTime} + ((( {sysUpTime} - ({snmpEngineTime} x 100) + 4294967295 ) % 4294967295 ) / 100 )
-UpTimeTxt        : ELAPSED       : {UpTime}
-CPUIndex         : SORT          : {cpmCPUTotal5minRev}
+# maxUpTime do not have threshold applyed: it will not propagate errors msg to other oids
+sysUpTime100                 : MATH            : {sysUpTime}  / 100 : 0
+UpTimeMod                    : MATH            : {sysUpTime100} - ({snmpEngineTime} % 42949672.96 ) : 0
+UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-5 - 0=2, default=0
 
+# Create a clone (no threshold apply on clone)
+UpTimeModState               : MATH            : {UpTimeModStateClone}
+snmpEngineTimeAdjusted       : MATH            : {snmpEngineTime} + (({UpTimeModStateClone} % 2) x {UpTimeMod})
+UpTimeDiff                   : MATH            : {snmpEngineTimeAdjusted} - {sysUpTime100}
+maxUpTime                    : SWITCH          : {UpTimeDiff} >=0={snmpEngineTimeAdjusted}, default={sysUpTime100}
+
+# Create a duplicate Uptime (maxUpTime and Uptime) to have UptimeClone not affected by threshold tests (so keep maxUpTime green)
+UpTime                       : MATH            : {maxUpTime}
+UpTimeTxt                    : ELAPSED         : {UpTime}
+CPUIndex                     : SORT            : {cpmCPUTotal5minRev}
+
+# Boot Alarm automatically disable after 1 week or 604800s
+#sysBootReasonDelay           : MATH            : 604800
+#sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
+#sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {maxUpTime}
+#sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
+#sysBootReasonDelayTimerEnable: TSWITCH         : {sysReloadReason} 'Reload_Commmand'=disable,default={sysBootReasonDelayTimer}
+#sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {sysReloadReason}
+
+# Create a duplicate oid to be able to override the message alarm
+UpTimeModStateNoAlarm        : BEST            : {UpTimeModState}

@@ -325,7 +325,7 @@ sub post_template_load {
                   @{$trans_data->{case_nums}} = sort {$a <=> $b} keys %$cases;
 
                   # Make sure we have a default value
-                  $trans_data->{default} = $default || 'Unknown';
+                  $trans_data->{default} = $default // 'Unknown';
                }
             }
          }
@@ -757,12 +757,13 @@ sub read_transforms_file {
                } elsif($if =~ /^>\s*\d+(\.\d+)?$/)  {
                   $type = 'gt';
                } elsif($if =~ /^>=\s*\d+(\.\d+)?$/) {
+               #} elsif($if =~ /^>=\s*(\d+(\.\d+)?|{\S+})$/) {
                   $type = 'gte';
                } elsif($if =~ /^<\s*\d+(\.\d+)?$/)  {
                   $type = 'lt';
                } elsif($if =~ /^<=\s*\d+(\.\d+)?$/) {
                   $type = 'lte';
-               } elsif($if =~ /^\d+(\.\d+)?\s*-\s*\d+(\.\d+)?$/) {
+               } elsif($if =~ /^[+-]?\d+(\.\d+)?\s*-\s*\d+(\.\d+)?$/) {
                   $type = 'rng';
                } elsif($if =~ /^'(.+)'$/) {
                   $type = 'str';
@@ -908,7 +909,7 @@ sub read_transforms_file {
 }
 sub calc_template_test_deps {
    my $tmpl           = $_[0]; 
-   my @oids           = keys $tmpl->{oids};
+   my @oids           = keys %{$tmpl->{oids}}; #Deprecated feature with perl 2.28 (RHEL 8)
    my $deps           = {} ;
    my $infls          = {} ;
    my %trans_data          ;   #for sort from W. Nelis
@@ -977,9 +978,6 @@ sub calc_template_test_deps {
       $tmpl->{oids}->{$oid}{sorted_oids_thresh_infls} = $all_infls_thresh{$oid};
       }
    }
-
-
-
    return;
 }
 
@@ -1031,7 +1029,7 @@ sub sort_oids($) {
    #
    $mods= 1 ;                          # End-of-loop indicator
    while ( $mods > 0 ) {
-      $mods= 0 ;                               # Preset mod-count of this pass
+      $mods= 0 ;                       # Preset mod-count of this pass
       foreach $oid ( keys %Cnt ) {
          next                   unless $Cnt{$oid} == 0 ;
          if ( exists $$infls{$oid} ) {
@@ -1068,7 +1066,7 @@ sub sort_oids2 {
    my $node;
 
    # Precompute number of deps
-   foreach $node (keys $deps) {
+   foreach $node (keys %{$deps}) {  #Deprecated feature with perl 2.28 (RHEL 8)
       $nb_deps{$node} = keys %{$deps->{$node}}; 
       $nb_infls{$node}  = keys %{$infls->{$node}};
    }
