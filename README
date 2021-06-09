@@ -13,7 +13,7 @@ SEE END OF FILE for detailled  STATUS and ROADMAP!
 9 jun 2021, Bruno Manzoni
 ======================================================================
 
-0.21.06.0999999999 Changes
+0.21.06.09 Changes
 New features
 - CPU revamp (Cisco, Huawei), mainly the "uptime" part
   - Reboot cause analysis with a auto disable timer 
