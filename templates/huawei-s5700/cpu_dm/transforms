@@ -1,14 +1,27 @@
-hwSysRebootReasonTxt         : SWITCH         : {hwSysRebootReason} 1=manual,2=powerOff,3=unknown,4=schedule,5=software
-UpTimeClone                  : MATH           : {snmpEngineTime} + ((( {sysUpTime} + 50 - ({snmpEngineTime} x 100) + 4294967295 ) % 4294967295 ) / 100 )
-UpTime                       : MATH           : {UpTimeClone}
-UpTimeTxt                    : ELAPSED        : {UpTime}
-hwECUTreached                : MATH           : {hwEntityCpuUsageThreshold} - {hwEntityCpuUsage}
+# maxUpTime do not have threshold applyed: it will not propagate errors msg to other oids
+sysUpTime100                 : MATH            : {sysUpTime}  / 100 : 0
+UpTimeMod                    : MATH            : {sysUpTime100} - ({snmpEngineTime} % 42949672.96 ) : 0
+UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-5 - 0=2, default=0
 
-# Boot Alarm automatically disable after 1 week or 604800 s
+# Create a clone (no threshold apply on clone)
+UpTimeModState               : MATH            : {UpTimeModStateClone}
+snmpEngineTimeAdjusted       : MATH            : {snmpEngineTime} + (({UpTimeModStateClone} % 2) x {UpTimeMod})
+UpTimeDiff                   : MATH            : {snmpEngineTimeAdjusted} - {sysUpTime100}
+maxUpTime                    : SWITCH          : {UpTimeDiff} >=0={snmpEngineTimeAdjusted}, default={sysUpTime100}
+
+# Create a duplicate Uptime (maxUpTime and Uptime) to have UptimeClone not affected by threshold tests (so keep maxUpTime green)
+UpTime                       : MATH            : {maxUpTime}
+UpTimeTxt                    : ELAPSED         : {UpTime}
+hwSysRebootReasonTxt         : SWITCH          : {hwSysRebootReason} 1=manual,2=powerOff,3=unknown,4=schedule,5=software
+hwECUTreached                : MATH            : {hwEntityCpuUsageThreshold} - {hwEntityCpuUsage}
+
+# Boot Alarm automatically disable after 1 week or 604800s
 sysBootReasonDelay           : MATH            : 604800
 sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
-sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {UpTimeClone}
+sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {maxUpTime}
 sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
-sysBootReasonDelayTimerEnable: TSWITCH         : {hwSysRebootReasonTxt.color} 'green'=disable,default={sysBootReasonDelayTimer}
-sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable.color} , {hwSysRebootReasonTxt.color}
+sysBootReasonDelayTimerEnable: TSWITCH         : {hwSysRebootReasonTxt} 'manual'=disable,default={sysBootReasonDelayTimer}
+sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {hwSysRebootReasonTxt}
 
+# Create a duplicate oid to be able to override the message alarm
+UpTimeModStateNoAlarm        : BEST            : {UpTimeModState}

@@ -1,8 +1,17 @@
-{UpTime.color}Up for: {UpTimeTxt}
-#{sysReloadReason.color}Last reboot due to: {sysReloadReason}
-
+<table border="0" cellspacing="0" cellpadding="0">
+<tbody  style="vertical-align:baseline;" > 
+  <tr>
+    <td>{UpTime.color}<b>Uptime</b></td>
+    <td>: {UpTime.msg}</td>
+  </tr>
+  <tr>
+    <td>  {UpTimeModStateNoAlarm.color}<b>Accuracy</b></td>
+    <td>: {UpTimeModState.msg}</td>
+  </tr>
+</tbody>
+</table>
 {sysDescr}
 
-TABLE:rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
+TABLE:sort=CPUIndex,rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
 CPU|Load
 {CPUIndex}|{cpmCPUTotal5minRev.color}{cpmCPUTotal5minRev}%{cpmCPUTotal5minRev.errors}

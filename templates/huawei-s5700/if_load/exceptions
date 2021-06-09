@@ -1,1 +1,1 @@
-#ifPri : ignore : ^\S*InLoopBack.+|^\S*NULL.+|^\S*Console.+
+#ifPri : ignore : ^\S*InLoopBack.+|^\S*NULL.+|^\S*Console.+|^\S*LoopBack.+|^\S*Vlanif.+

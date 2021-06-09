@@ -1,36 +1,36 @@
 =====================================================================
-Devmon VERSION 0.19.06.08, fork at SF version 0.3.1-beta1 r256
+Devmon VERSION 0.21.06.06, fork at SF version 0.3.1-beta1 r256
 ======================================================================
 
-SEE END OF FILE for current STATUS and ROADMAP! 
 THIS IS NOT AN OFFICIAL VERSION from the original developers:
-- Look at SourceForge version for it 
-- Previous modifications (2018) of this version were reported to be less
-  stable than the SF one, but only template were modify at that time .....
-- Use it at your one risk !
-- Cisco templates are modifyed to fit my own needs
+- Look at SourceForge version for it !
+- Previous modified devmon version in this repo were reported
+  (in 2017) to be less stable than the SF one...
+- Use it at your own risks !
 
-This devmon version should MORE STABLE AS THE SOURCEFORGE ONE ! 
-The most stable is the latest branch version: Now it is 0.19.06.08
+SEE END OF FILE for detailled  STATUS and ROADMAP!
 
-Please FORK it if you can, so you/we will be able to add your
-contributions / template easily  !!
-
-2019.05 Bruno Manzoni
-
+9 jun 2021, Bruno Manzoni
 ======================================================================
 
-UPDATE included from Stef Coene                                                                     
-                                                                                           
-I changed this version of devmon and did the following:                                    
-- remove all refererences bb/hobbit/BigBrother                                             
-- use Getopt::Long for command line parsing                                                
-- use Sys::Hostname to get the hostname                                                    
+0.21.06.0999999999 Changes
+New features
+- CPU revamp (Cisco, Huawei), mainly the "uptime" part
+  - Reboot cause analysis with a auto disable timer 
+  - Better Uptime value, calculation with (snmp and system oid)
+- Threshold automatch acccept multiple value
+   - We can have not multiple empty (automatch) threshold for an oid
+   - Empty threshold of the current color is prefered  
+Bug resolved
+- MATH transform with constant (without other deps oids)
+- TSWITCH calc
+- Perl 5.28 compatibility
+- Threshold calculation 
+- Custom threshold in hosts.cfg should overide other
+- BEST threshold can override herited error
+And some more !!!
                                                                                            
 ======================================================================                                                                                           
-======================================================================
-                         Original ReadMe
-=====================================================================
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -38,51 +38,11 @@ I changed this version of devmon and did the following:
   (at your option) any later version.  Please see the file named
   'COPYING' that was included with the distrubition for more details.
 
- Thanks!
----------------------------------------
-  First off, let me thank, in no particular order, the people
-  that have helped make Devmon what it is today:
-
-    Henrik Stoerner
-    Steve Aiello
-    Dan Vande More
-    Craig Boyce
-
-
- What is Devmon?
+ What is Devmon ?
 ---------------------------------------
 
-  Devmon is a Perl script that can monitor a large number of
-  remote devices and report problems back to a display server
-  running either the BigBrother or Hobbit monitoring software.
-
-
- How does Devmon work?
----------------------------------------
-
-  Devmon uses SNMP (Simple Network Management Protocol) to
-  obtain the necessary information from remote hosts.  Right
-  now, Devmon only supports SNMP versions 1 and 2c (v3 support
-  might be added at a later date).
-
-  Devmon determines which hosts to query based on information
-  from the display server's hosts.cfg file, which allows you
-  to manage all of your monitoring facilities from a single file.
-
-  Devmon can either run in a single-node configuration, a
-  single machine does all of the work and reports back to the
-  test server (Devmon can even be run ON the test server, for
-  small networks), or Devmon can be run in a multi-node cluster.
-
-  A multi-node Devmon installation is considerably more 
-  powerful than a single-node one, as it allows you to query
-  more hosts on a more timely basis, and it gives you automatic
-  load balancing, node failure failover and scalability.  The
-  downside, though, is that it is more complicated than a single
-  node server, as it requires you to maintain a MySQL server,
-  which is what the multi-node cluster uses as a backend for
-  data storage.
-
+  Devmon is a Perl software that uses SNMP to monitor, graph and alert 
+  on host information
 
  What are Devmon's prerequisites?
 ---------------------------------------
@@ -102,7 +62,6 @@ I changed this version of devmon and did the following:
   remote host and display the results.  For more information on 
   Devmon's template system, please consult the TEMPLATES file
   located in the docs directory.
-  
 
  How do I install Devmon?
 ---------------------------------------
@@ -116,7 +75,6 @@ I changed this version of devmon and did the following:
   on each node in the cluster, as well as set up a MySQL database
   to facilitate communication between nodes.
 
-
  What are Devmon templates?
 --------------------------------------
 
@@ -125,105 +83,40 @@ I changed this version of devmon and did the following:
   each test to be conducted on a particular device type.
   For instance, a 'cpu' test on a Cisco 2950 switch is its own 
   template, while a 'if_load' test on the same switch is an
-  entirely different template.  For more on template creation
-  and modification, please see the docs/TEMPLATES file.
+  entirely different template. A must read: the docs/TEMPLATES file!
+  
+===========================================================================================================================================
 
+Thanks for all the work done and also all patch/ideas submitted !
+Special thanks to this fork version contributors
+- W. Nelis
+- Stef Coene
+- Coec (Github name)
 
- What kind of devices can Devmon monitor?
---------------------------------------
+And all previous devmon admins and devs: 
+- Henrik Stoerner
+- Steve Aiello
+- Dan Vande More
+- Craig Boyce
+- Buchan Milne
 
-  Basically, any device that supports SNMP v1 or v2c can be
-  monitored by Devmon.  Provided that you can determine which
-  SNMP OIDs (Object IDentifiers) you want to monitor on that
-  device, you can create your own Devmon template (provided
-  that a template of the same type doesnt already exist)
-  and Devmon will take care of the rest!
+This is a work in progress, changes can occur without notice ....
 
-
- What type of hardware/software does Devmon require?
---------------------------------------
-
-  To date, Devmon has been tested and is known to work
-  on Linux and FreeBSD.  Devmon might also run on other
-  operating systems with little or no modification, if 
-  you succeed at adapting Devmon to a new OS, please drop
-  the author a line and let him know of your success.
-
-  As for hardware, the requirements are entirely up
-  to how fast you want your collector to be able to run.
-  Obviously the machine needs to run an OS that can
-  run the Perl binary;  but theoretically you could run
-  Devmon on a 386 with 8MB of memory.
-
-
-$Id: README 190 2011-01-14 13:32:06Z buchanmilne $
+FEEDBACK ALWAYS APPRECIATED: use the github ISSUES to communicate even it is not a bug !
 
 ===========================================================================================================================================
 
-VERSION 0.3.1b1.256.1
-
-This is a work in progress, changes can occur without notice but is should be the most stable release....
-
-Thanks for all the work done and also all patch/ideas submitted !
-Special thanks to W. Nelis and the devmon admins and devs !
-Please feel free to fork again and ask for support !
-
-ALL PATCH FROM SOURCEFORGE ARE INTERGRATED IN THIS RELEASE
-This fork is an friendly one (Yes, I think it is possible ! ), mainly to push devmon to move again as I think it is great product with
-a huge potential. Xymon is also a amazing product ! I used it for years. A cooperation with original devs is desired and asked. To help the 
-reinjection of this code or parts of it to the original one, no major  code restructuration was done: you can still easely compare both codes,
-but this will limit the possible improvements. I am waiting for your feedback on how to continue. 
-
-FEEDBACK ALWAYS APPRECIATED
- I know we are in a stressing world and sometime when we expressed ourself to improve things, the message is not understood: This is not my case: I will
- always thanks you for your remarks even the message is not clear ! 
- So do not hesitate and use the github ISSUES to communicate even it is not a bug !
-
-REMARK ON THE OID TERM 
-As it "key" concept and as it is also extended in some way I created a section in the /devmon/docs/TEMPLATE to explain it more clearly: a must read..
-
-Major improvement
-- Improved User-Friendliness
-  - Mainly on configuration and template creation
+Major changes after fork
+. All patches from Sourceforge are integrated in this realease (some with adaptation)
+- Improved User-Friendliness 
   - Add the 'Blue' color for test that are 'Disabled' and for fun !
   - Error reporting
-    - Improved syntax of template error detection
-    - Error propagation (see below)
-  - Allow white space(s) at the end of a line, but warn
-  - and soome bugs that affect friendliness
-    - Continuation char on multiline (a feature of 'transform only)
-      this allow to have a clean 'transform' 
-    - Wrong syntax error line number log reported
-    - AUTOMATCH parsing (empty threshold that match any value like
-      catching error message)  
-  - Multiple tables support in a test with 1 table (anyone) graphed    
-    (not only the last one as before)
-    - Table sort option:  "TABLE:sort=oid" where the 'oid values' are num (usually int)
-      - Display a table based on sorted oid values 
-      - Works in conjonction with the 'SORT' transform (see below: 
-        new transforms) 
-  - Runtime graph for devmon Xymon test 'dm' (thanks to W. Nelis)
-    to check the performance through the time
 
-- Presorting algorythm (double sort/topological sort) to have the transforms 
-  sorted by dependecies so they can be calculated when they are ready:
-  Huge thanks to W. Nelis
+- Error propagation as "core" concept  
 
-- Error propagation feature
-  - Errors should have been were already propagated 
-    - Sometime the error was lost: Now works with major transform
-      (Transforms used in cisco-isr template are tested)
-    - Original errors msg and val are propagated in normal mode
-    - Original errors val are accumulated and propagate in debug mode
-
-- Multiple error messages and threshold for an oid color
-    - We can have now multiple time the same color for an oid in the thresholds file
-      with different messages
+- Multiple error messages and threshold for each oid color !
  
 - New transforms:
-  WARNING: THE USE OF THIS TRANSFORM BREAKS COMPATIBILTY WITH 
-           ORIGINAL CODEi (of course!), SO USE WITH MODERATION !
-
   - COLTRE     : To collect data when there are "parent" oid values   
   - SORT       : To sort in an increasing order (num or txt, default = txt)
                  oid values. The result (the new oid values) are 
@@ -233,14 +126,8 @@ Major improvement
                  (n is the number of element in the branch oid) 
                  It can be used to 'reindex' an oid if use in conjonction with
                  the CHAIN transform. (similar to the INDEX transform)
-  - EVAL       : should be avoided, but it's simply the perl5 eval fct 
-                (not used currently in template
   - SET        : See the docs/TEMPLATE for explanation (Thanks to W. Nelis)
   - STATISTIC  : See the docs/TEMPLATE for explanation (Thanks to W. Nelis)
-
-- Transform modifications
-  - REGSUB    : Add the capabilities "eg" to the regexp of Regsub 
-  - See patch statuts for other modifs (below)
 
 Template Update and Maintained:
 - Cisco
@@ -249,42 +136,6 @@ Template Update and Maintained:
 - Wmware
   - esxi6
 - Huawei
-- For all template:
-  - Interfaces graphs are ordered correctly
-  - Layer 2 interfaces state can be monitored easily
-  - Correct all wrong calculations of traffic
-  - Alarming on relative and absolute thresholds for traffic
-  - Fan, Power and Module(serial) are monitored
-  - Exception file is updated (error propagation feature help a lot in this task) 
-
-             
-Major bugs resolved
-- Threshold bug (autovivification bug)
-
-Minor bugs resolved
-- If a test has multiple table, only last can be graphed
-- Ability to graph, even not all values are defined
-- Trim files for a better experience
-- Do not start more process that devices
-- Optimized regexp for speed
-- Continuation char working on multi-lines
-- Deleted threshold remain undeleted
-
-Version details
-0.3.1 Beta r256.1 is the first version with keeping most format from the source in sourceforge to easely reinject this code or part of 
-it to the original one
-BREAKING CHANGES
- - The result of a division by zero was replaced by 0, but this is not 0. This now replaced by NaN. To remain green you should add 
-   to your threshold file the following:
-   {oid} : green : NaN :
-   or if you like the clear color (like me)
-   {oid} : clear : NaN :
-   There is a script to modify your template in devmon/extra/add_NaN_thresholds: all template with this version are already updated
-   This will also breaks also the BEST transform results as they will be "clear" and not green and they will raise an alamr (Current WIP)
-     Thanks to Stef Coene for its feedback
- - Devmon now send runtime data to Xymon to be graphed: look at the quick installation guide in the folder /devmon/extra
-0.3.1 Beta r256.2 Major code cleaning (thank to Stef Coene)
-0.3.2 Beta r256.3 After code cleaning - Current Master branch
 
 ===========================================================================================================================================
 
@@ -345,35 +196,30 @@ BUG
 TODO                         
 Priority 1: Sourceforge open and bugs
        Memory leaks
-         On linux 
+         On linux (WIP) 
          On BSD (major)
          One was in xymon-rrd, but should be fixed now? (version?) 
+         Results: Minimized by fixing all errors: run devmon in foreground and show logs
+       SNMPv3: After triing to use the work from StefCoene, it seem more complicated that what I tought...
+       Document Transform Coltre, Sort
+
+
+Ideas
+       Warn if autovivification (creates the hash if it do not exists, but it should not) and check if it does already make problem 
+       Make Table compatible with LEAF 
+       Share templates for similar devices: Lot of work!!!
        Support for negative numbers in (T)SWITCH: Parse mathematical expression simply....: Need more work
        Format display (SUBSTR negative, Align columns of a TABLE to the right side,  Formatting of result of MATH transform): Problems Alignement and Padding
        Exceptions based on other oid values: now only PriOi: make it work for alternate oid
        Template exceptions sorted misleadingly: need documentation clarification
        Use OID value in threshold comparison: Nice to have (workaround is to do that is transform)
-       Share templates for similar devices: Lot of work!!!
-
-Priority 2: Fix current changes        
-       Fix Huawei template: Power, Temperature                    
-       Document Transform Coltre, Sort, Eval                    
-
-Priority 3: Other
-       Warn if autovivification (creates the hash if it do not exists, but it should not) and check if it does already make problem 
-       Make Table compatible with LEAF 
-       SNMPv3: After trinig to use the work from StefCoene, it seem more complicated that what I tought...       
-       
 
 FEATURE REQUEST
-
        Better discovery (SF bug 10)
        Multiple graph in a test
        Add better timer calculation (HiRes)
 
 HELP NEEDED
-      
        Template not listed above cannot be test: please help to updated: take a look at template liste above that are maintained! 
        Template exceptions sorted misleadingly: need documentation clarification: I dont used it: I need concrate case!)
 
-Date 17.05.2019

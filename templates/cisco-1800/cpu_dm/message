@@ -1,6 +1,27 @@
-{UpTime.color}Up for: {UpTimeTxt}
-{sysReloadReason.color}Last reboot due to: {sysReloadReason}
-
+<table border="0" cellspacing="0" cellpadding="0">
+<tbody  style="vertical-align:baseline;" > 
+  <tr>
+    <td>{UpTime.color}<b>Uptime</b></td>
+    <td>: {UpTime.msg}</td>
+  </tr>
+  <tr>
+    <td>  {UpTimeModStateNoAlarm.color}<b>Accuracy</b></td>
+    <td>: {UpTimeModState.msg}</td>
+  </tr>
+  <tr>
+    <td>{sysBootReason.color}<b>Reboot reason</b></td>
+    <td>: {sysBootReason.msg}</td>
+  </tr>
+  <tr>
+    <td>  {sysReloadReason.color}<b>Message</b></td>
+    <td>: {sysReloadReason.msg}</td>
+  </tr>
+  <tr>
+    <td>  <span style="vertical-align:bottom; line-height: 1.5;">&#9201;&#65039;</span> <b>Timer</b></td>
+    <td>: {sysBootReasonDelayTimerEnable.msg}</td>
+  </tr>
+</tbody>
+</table>
 {sysDescr}
 
 TABLE:rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )

@@ -1,11 +1,26 @@
-cpmCPUTotal5minRev	: red		: >70	       : CPU utilization is very high: {cpmCPUTotal5minRev}%
-cpmCPUTotal5minRev	: yellow	: >30	       : CPU utilization is high: {cpmCPUTotal5minRev}%
-cpmCPUTotal5minRev	: green		:	       :
+cpmCPUTotal5minRev              : red           : >70                           : CPU utilization is very high: {cpmCPUTotal5minRev}%
+cpmCPUTotal5minRev              : yellow        : >30                           : CPU utilization is high: {cpmCPUTotal5minRev}%
+cpmCPUTotal5minRev              : green         :                               :
 
-UpTime                  : red		: <600         : Device rebooted recently. System uptime: {UpTimeTxt}
-UpTime                  : yellow	: <5000        : Device rebooted recently. System uptime: {UpTimeTxt}
-UpTime                  : green		:	       :
+UpTime                          : red           : <600                          : <b>{UpTimeTxt}, device rebooted recently</b>
+UpTime                          : yellow        : <5000                         : <b>{UpTimeTxt}, device rebooted recently</b>
+UpTime                          : green         :                               : <b>{UpTimeTxt}</b>
 
-#sysReloadReason         : yellow        : .*Critical.* : Device reload reason : {sysReloadReason}
-sysReloadReason         : yellow        : .*Critical.* :
-#sysReloadReason         : green         : .*           :
+UpTimeModState                  : yellow        : =0                            : <b>Not OK</b>, diff(snmp;system)={UpTimeMod}[sec] is not in range [-5..300] [sec]
+UpTimeModState                  : green         : =1                            : <b>OK</b>, diff(snmp;system)={UpTimeMod}[sec] is in range [-5..300] [sec]
+UpTimeModStateNoAlarm           : yellow        :                               : 
+UpTimeModStateNoAlarm           : green         :                               :
+
+sysBootReason                   : yellow        : power-on                      : <b>Ambiguous</b>
+sysBootReason                   : yellow        :                               : <b>Critical</b>, but lower alarm level to warning
+sysBootReason                   : green         :                               : <b>OK</b>
+sysBootReason                   : blue          :                               : <b>Disabled</b> by timer
+
+sysReloadReason                 : red           :                               : <b>{sysReloadReason}</b> is <b>critical</b> and must be investigated
+sysReloadReason                 : yellow        : power-on                       : <b>{sysReloadReason}</b> is <b>ambiguous</b>: a deliberate reboot or power outage ?
+#sysReloadReason                 : yellow        : power-on                       : <b>{sysReloadReason}</b> is <b>not OK</b> and generally means a power outage
+sysReloadReason                 : green         : Reload Command                : <b>{sysReloadReason}</b> is <b>OK</b> as it is a deliberate action
+
+sysBootReasonDelayTimerEnable   : red           : >0                            : <b>Not expired</b> yet, remaining: {sysBootReasonDelayTimerTxt} / timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimerEnable   : blue          : <=0                           : <b>Expired</b>, timeout: {sysBootReasonDelayTxt}
+sysBootReasonDelayTimerEnable   : green         : disable                       : <b>Disabled</b> as not needed, timeout: {sysBootReasonDelayTxt}
