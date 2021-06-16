@@ -1,0 +1,14 @@
+realMemoryRow           : MATCH : {hrStorageType} /1.3.6.1.2.1.25.2.1.2/
+MemBlocks               : CHAIN : {realMemoryRow} {hrStorageSize}
+MemBlockSize            : CHAIN : {realMemoryRow} {hrStorageAllocationUnits}
+MemBlocksUsed           : CHAIN : {realMemoryRow} {hrStorageUsed}
+hrStorageIndex  	: INDEX : {realMemoryRow}
+
+
+MemSize                 : MATH  : {MemBlocks} * {MemBlockSize} / 1024 : 0
+MemSizeUsed             : MATH  : {MemBlocksUsed} * {MemBlockSize} / 1024 : 0
+MemAvail                : MATH  : {MemSize} - {MemSizeUsed} : 0
+MemPerUse               : MATH  : ({MemSizeUsed} x 100) / {MemSize} : 0
+
+
+
