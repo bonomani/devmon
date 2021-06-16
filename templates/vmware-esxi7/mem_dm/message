@@ -1,3 +1,0 @@
-TABLE:rrd(DS:ds0:MemPerUse:GAUGE; )
-Mem idx|Used|Total|Percentage
-{hrStorageIndex}|{MemSizeUsed}kB|{MemSize}kB|{MemPerUse.color}{MemPerUse}%{MemPerUse.errors} 

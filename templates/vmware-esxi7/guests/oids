@@ -1,5 +1,0 @@
-vmwVmDisplayName	: .1.3.6.1.4.1.6876.2.1.1.2		: branch
-vmwVmMemSize		: .1.3.6.1.4.1.6876.2.1.1.5		: branch
-vmwVmState		: .1.3.6.1.4.1.6876.2.1.1.6		: branch
-#vmwVmVMID		: .1.3.6.1.4.1.6876.2.1.1.7		: branch
-vmwVmGuestState		: .1.3.6.1.4.1.6876.2.1.1.8		: branch
