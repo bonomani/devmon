@@ -1,0 +1,4 @@
+vendor	: vmware
+model	: esxi7
+snmpver	: 2
+sysdesc : VMware ESXi 7
