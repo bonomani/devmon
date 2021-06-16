@@ -1,5 +1,0 @@
-Guests :
-
-TABLE:
-ID | Name | RAM Provisioned | Guest Tools | VM State
-{priOID} | {vmwVmDisplayName} | {vmwVmMemSize} | {vmwVmGuestState} | {vmwVmState.color}{vmwVmState}

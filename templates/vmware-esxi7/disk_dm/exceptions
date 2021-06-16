@@ -1,2 +1,0 @@
-DiskName : alarm  : .*
-DiskName : ignore : Real.Memory.*|Swap Space
