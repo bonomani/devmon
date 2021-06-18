@@ -1,0 +1,3 @@
+ibNodeServiceStatusText : green : working
+ibNodeServiceStatusText : yellow : warning|unknown
+ibNodeServiceStatusText : red : failed|inactive

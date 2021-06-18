@@ -1,0 +1,13 @@
+System description of active Node:
+{sysDescr}
+
+NIOS Version:
+{niosVersion}
+
+CPU Load:
+{CPUTotal5Min}
+
+
+<!--
+<br>CPU 5 Load: {CPUTotal5Min}
+-->

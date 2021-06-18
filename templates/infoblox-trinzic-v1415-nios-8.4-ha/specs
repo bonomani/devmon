@@ -1,0 +1,4 @@
+vendor	: Infoblox
+model	: Trinzic V1415 Appliance HA
+snmpver	: 2c
+sysdesc : .*IB Trinzic V1415 NIOS 8.4 HA.+

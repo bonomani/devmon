@@ -1,0 +1,3 @@
+# OID Description: IbSnicNames (INTEGER) {lan1 (1),lan2 (2),ha (3)}
+ibSnicName1Text : SWITCH : {ibSnicName1} 1=lan1,2=lan2,3=ha
+ibSnicName5Text : SWITCH : {ibSnicName5} 1=lan1,2=lan2,3=ha

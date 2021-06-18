@@ -1,0 +1,3 @@
+TABLE:
+Service|Status
+{ibServiceDesc}|{ibServiceStatusText.color}
