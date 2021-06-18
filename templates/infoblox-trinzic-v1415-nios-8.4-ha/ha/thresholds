@@ -1,0 +1,20 @@
+# Status values are provided with strings. There was no hint in the documentation about the different values that may occur. So the values for yellow and red are predicted from the IB-TRAP-MIB file (can be downloaded using the NIOS GUI):
+# IbState ::= TEXTUAL-CONVENTION
+# STATUS        current
+# DESCRIPTION   "It defines the state for infoblox One products."
+# SYNTAX        INTEGER {
+# ...
+# ha-active     (1), -- high availability ACTIVE
+# ha-passive    (2), -- high availability PASSIVE
+# ha-initial    (3), -- high availability INITIAL
+# ...
+# ha-replication-online (13), -- ha replication is online
+# ha-replication-offline (14), -- ha replication is offline
+#
+# # The textual representation from the OIDs starts with capital letters, so better check uppercase and lowercase (for all eventualities, who knows...):
+
+ibHAStatus : green : (A|a)ctive
+ibHAStatus : yellow : (I|i)nitial
+ibHAStatus : red : (P|p)assive
+ibGridReplicationState : green : (O|o)nline
+ibGridReplicationState : red : (O|o)ffline

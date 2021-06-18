@@ -1,0 +1,12 @@
+One-Second-Loads:
+
+TABLE:
+NIC|RxBits|RxPackets|TxBits|TcPackets|DropBits|DropPackets
+{ibSnicName1Text}|{ibSnicRxBits1}|{ibSnicRxPackets1}|{ibSnicTxBits1}|{ibSnicTxPackets1}|{ibSnicDropBits1}|{ibSnicDropPackets1}
+
+
+Five-Second-Loads:
+
+TABLE:
+NIC|RxBits|RxPackets|TxBits|TcPackets|DropBits|DropPackets
+{ibSnicName5Text}|{ibSnicRxBits5}|{ibSnicRxPackets5}|{ibSnicTxBits5}|{ibSnicTxPackets5}|{ibSnicDropBits5}|{ibSnicDropPackets5}

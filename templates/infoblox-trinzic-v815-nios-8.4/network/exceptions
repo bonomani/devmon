@@ -1,0 +1,3 @@
+# Ignore HA-Interface in Standalone-Mode:
+ibSnicName1Text : ignore : ha
+ibSnicName5Text : ignore : ha

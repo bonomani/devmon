@@ -1,0 +1,5 @@
+# 1=working,2=warning,3=failed,4=inactive,5=unknown
+
+ibServiceStatusText : green : working
+ibServiceStatusText : yellow : warning|unknown
+ibServiceStatusText : red : inactive|failed

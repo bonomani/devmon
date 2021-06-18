@@ -1,0 +1,5 @@
+# running services
+ibServiceDesc : alarm : DHCP.+|DNS.+|NTP.+
+
+# disabled services:
+ibServiceDesc : ignore : .*TFTP Service.*|.*HTTP File Dist.*|.*FTP Service.*|CPU: .* Memory: .*, Hard Disk:.*

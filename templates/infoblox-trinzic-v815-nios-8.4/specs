@@ -1,0 +1,4 @@
+vendor	: Infoblox
+model	: Trinzic V815 Appliance
+snmpver	: 2c
+sysdesc : .*IB Trinzic V815 NIOS 8.4 Standalone.*
