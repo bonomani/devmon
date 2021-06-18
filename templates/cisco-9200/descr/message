@@ -1,0 +1,4 @@
+<b>VLANs on Cisco-3850-Switch:</b>
+TABLE:
+If name|VLAN
+{ifName}|{vmVlan}

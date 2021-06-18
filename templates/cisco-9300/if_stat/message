@@ -1,0 +1,3 @@
+TABLE:
+Name|Speed|Status
+{ifAliasBox} {ifName}|{ifSpeedDisplay}|{ifStat.color}{ifStat}{ifStat.errors}

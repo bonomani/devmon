@@ -1,0 +1,3 @@
+ciscoEnvMonTemperatureThresholdLow	: MATH		: {ciscoEnvMonTemperatureThresholdHigh} - 10 : 0
+ciscoEnvMonTemperatureStatusIndex	: REGSUB 	: {ciscoEnvMonTemperatureStatusDescr} /\D+(\d+)\D+(\d+)\D+/$1.$2/
+ciscoEnvMonTemperatureState             : SWITCH        : {ciscoEnvMonTemperatureStateRaw} 1=normal,2=warning,3=critical,4=shutdown,5=non present,6=not functioning
