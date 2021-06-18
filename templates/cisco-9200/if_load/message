@@ -1,0 +1,7 @@
+
+<b>Interface error rates:</b>
+Input load:  yellow={ifInLoad.thresh:yellow}%, red={ifInLoad.thresh:red}%
+Output load: yellow={ifOutLoad.thresh:yellow}%, red={ifOutLoad.thresh:red}%
+TABLE:rrd(DS:ds0:ifInOctets:COUNTER; DS:ds1:ifOutOctets:COUNTER)
+Ifc name|Ifc Speed|Rate in (load %)|Rate out (load %)
+{ifName} {ifAliasBox}|{ifSpeedDisplay}|{ifInLoad.color}{ifInSpeed} ({ifInLoad}%)|{ifOutLoad.color}{ifOutSpeed} ({ifOutLoad}%)
