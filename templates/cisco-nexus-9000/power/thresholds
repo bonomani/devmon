@@ -1,0 +1,7 @@
+cefcFRUPowerAdminStatusTxt : red : on|inlineAuto|inlineOn
+cefcFRUPowerAdminStatusTxt : yellow : powerCycle
+cefcFRUPowerAdminStatusTxt : green : admin off 
+
+cefcFRUPowerOperStatusTxt : green : on|inlineAuto|inlineOn
+cefcFRUPowerOperStatusTxt : yellow : powerCycle|onButFanFail
+cefcFRUPowerOperStatusTxt : red : off.*|failed|onButInlinePowerFail

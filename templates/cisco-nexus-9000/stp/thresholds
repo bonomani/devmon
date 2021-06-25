@@ -1,0 +1,24 @@
+StpProtocolSpecification	:	green	:		:
+StpPriority	:	green	:		:
+StpTimeSinceTopologyChange	: yellow	: <18000	:
+StpTopChanges	:	green	:		:
+StpDesignatedRootText	:	green	:		:
+StpRootCost	:	green	:		:
+StpRootPort	:	green	:		:
+StpMaxAge	:	green	:		:
+StpHelloTime	:	green	:		:
+StpHoldTime	:	green	:		:
+StpForwardDelay	:	green	:		:
+StpBridgeMaxAge	:	green	:		:
+StpBridgeHelloTime	:	green	:		:
+StpBridgeForwardDelay	:	green	:		:
+#StpPort	:	green	:		:
+#StpPortPriority	:	green	:		:
+#StpPortState	:	green	:		:
+#StpPortEnable	:	green	:		:
+#StpPortPathCost	:	green	:		:
+#StpPortDesignatedRoot	:	green	:		:
+#StpPortDesignatedCost	:	green	:		:
+#StpPortDesignatedBridge	:	green	:		:
+#StpPortDesignatedPort	:	green	:		:
+#StpPortForwardTransitions	:	green	:		:

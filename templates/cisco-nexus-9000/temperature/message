@@ -1,0 +1,15 @@
+<!--
+temperature : {nameFront}
+temp2 : {tempCPU}
+-->
+<!-- ncv_end -->
+<!-- ncv_skipstart -->
+
+{nameFront.color} Sensor {nameFront}: {tempFront} &deg;C
+{nameBack.color} Sensor {nameBack}: {tempBack} &deg;C
+{nameCPU.color} Sensor {nameCPU}: {tempCPU} &deg;C
+{nameHeavenly.color} Sensor {nameHeavenly}: {tempHeavenly} &deg;C
+
+
+Graph: Temp1: {nameFront}, Temp2: {nameCPU}
+<!-- ncv_skipend -->

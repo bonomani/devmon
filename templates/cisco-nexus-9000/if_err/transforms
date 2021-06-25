@@ -1,0 +1,13 @@
+ifHCInPkts	: MATH	: {ifHCInUcastPkts} + {ifHCInMulticastPkts} + {ifHCInBroadcastPkts} 
+ifHCOutPkts	: MATH	: {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts} 
+ifInPps		: DELTA		: {ifHCInPkts}
+ifOutPps	: DELTA		: {ifHCOutPkts}
+# Do delta transform on all error counters
+ifInEps		: DELTA		: {ifInErrors}
+ifOutEps	: DELTA		: {ifOutErrors}
+# Perform error to traffic percentage calculations
+ifInErrPct	: MATH		: ({ifInEps} / {ifInPps}) x 100
+ifOutErrPct	: MATH		: ({ifOutEps} / {ifOutPps}) x 100
+# Create an alias in a bracketed box, or nothing if alias is blank
+ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
+
