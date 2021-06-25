@@ -1,0 +1,4 @@
+ifInLoad	: yellow	: 75	: {ifName}{ifAliasBox} load is high ({ifInLoad}%)
+ifInLoad	: red		: 95	: {ifName}{ifAliasBox} load is very high ({ifInLoad}%)
+ifOutLoad	: yellow	: 75	: {ifName}{ifAliasBox} load is high ({ifOutLoad}%)
+ifOutLoad	: red		: 95	: {ifName}{ifAliasBox} load is very high ({ifOutLoad}%)

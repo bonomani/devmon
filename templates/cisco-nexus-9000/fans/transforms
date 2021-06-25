@@ -1,0 +1,1 @@
+cefcFanTrayOperStatusTxt : SWITCH : {cefcFanTrayOperStatus} 1=unknown,2=up,3=down,4=warning

@@ -1,0 +1,3 @@
+TABLE:
+Name|Status|Status (Admin)
+{entPhysicalName}|{cefcFRUPowerOperStatusTxt} ({cefcFRUPowerOperStatus})|{cefcFRUPowerStatus.color}{cefcFRUPowerStatus}{cefcFRUPowerStatus.errors} ({cefcFRUPowerAdminStatusTxt})
