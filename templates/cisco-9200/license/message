@@ -1,0 +1,13 @@
+<table>
+	<tr><td>Instance ID:</td><td>{ciscoSlaInstanceId}</td></tr>
+	<tr><td>Device Identification:</td><td>{ciscoSlaSUDIInfo}</td></tr>
+	<tr><td>Smart License Agent Version:</td><td>{ciscoSlaVersion}</td></tr>
+	<tr><td>Smart Licensing Enabled:</td><td>{ciscoSlaEnabledText.color} {ciscoSlaEnabledText} </td></tr>
+</table>
+
+Debug: {ciscoSlaEnabled}
+
+TABLE:
+entitlement feature name|entitlement descr|entitlement tag name|Requests for entitlement|entitlement version|entitlement enforcement mode
+{ciscoSlaEntitlementFeatureName.color} {ciscoSlaEntitlementFeatureName}|{ciscoSlaEntitlementDescription}|{ciscoSlaEntitlementTag}|{ciscoSlaEntitlementRequestCount}|{ciscoSlaEntitlementVersion}|{ciscoSlaEntitlementEnforceMode}
+
