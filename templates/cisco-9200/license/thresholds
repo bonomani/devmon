@@ -3,11 +3,11 @@ ciscoSlaEnabledText : red : false : SLA Agent not running
 
 # take one of the combinations of licenses below, if you have a uniform license level for all your switches (e.g. all switches have essentials or advantage licenses):
 # network essentials and dna essentials should be available:
-#ciscoSlaEntitlementFeatureName : red : ^((?!network-essentials|dna-essentials).*)*$ : network essentials license not available
+#ciscoSlaEntitlementFeatureName : red : ^((?!network-essentials|dna-essentials).*)*$ : essentials licenses not available
 # network advantage and dna advantage should be available:
-#ciscoSlaEntitlementFeatureName : red : ^((?!network-advantage|dna-advantage).*)*$ : network essentials license not available
+#ciscoSlaEntitlementFeatureName : red : ^((?!network-advantage|dna-advantage).*)*$ : advantage licenses not available
 
 # Any licensing level is ok (e.g. you have both essential and advantage licenses on your switches across your campus):
 # Since the templates are uses for all switches you can not monitor a specific license level for a specific switch :-( But you'll see if no license is in usw.
-ciscoSlaEntitlementFeatureName : red : ^((?!network-essentials|dna-essentials|network-advantage|dna-advantage).*)*$ : network essentials license not available
+ciscoSlaEntitlementFeatureName : red : ^((?!network-essentials|dna-essentials|network-advantage|dna-advantage).*)*$ : licenses not available
 
