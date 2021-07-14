@@ -1,27 +1,27 @@
-=====================================================================
+======================================================================
 Devmon VERSION 0.21.07.14
 ======================================================================
 
-  This is a cosmetic release: no new featue nor bug resolved
+  This is a cosmetic release: no new feature nor bug resolved
   
-  This is a revamp of the organisation of the documentation and files
+  This is mainly a revamp of the organisation of the documentation 
 
   - Update README and CHANGELOG
   - New WIKI: https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
-    (as github wikies are not indexed by google) 
-  - Roadmap: some on github issue (main), some of the end at this file 
+    (as github wikis are not indexed by google) 
 
   What are we working on
-  - SNMPv3: Implemented on our dev plateform: its very fast!
+  - SNMPv3: Implemented on our dev plateform: very soon... 
   - Compatibility with IPv6
   - Compatibility with and all forms of clustering
-  - Own discovery/ping test (WIP): conn_dm !
-  - And the rorganisation of the doc
+  - Own discovery/ping test (WIP): v1 milestone !? 
   - Organisation of the code and best practice
   - Why: 
     - Improve stability
     - Improve perf
     - Modern standard
+  
+  Roadmap: some on github issue (main), some of the end at this file
   
   DISCLAMER: THIS IS FORK VERSION of the original developers:
   - Look at SourceForge version for it !
@@ -86,8 +86,8 @@ Devmon VERSION 0.21.07.14
   entirely different template. A must read: the docs/TEMPLATES file!
   
 
-==========================================================================================================================================                         
-TODO                         
+======================================================================================                         
+TODO (will be moved)                         
 Priority 1: Sourceforge open and bugs
        Memory leaks
          On linux (WIP) 
