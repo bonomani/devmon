@@ -1,7 +1,0 @@
-{UpTime.color}Up for: {UpTimeTxt} (wrap to 0 after 497 days)
-
-{sysDescr}
-
-TABLE:rrd(DS:ds0:hrProcessorLoad:GAUGE; )
-CPU|Load
-{CPUIndex}|{hrProcessorLoad.color}{hrProcessorLoad}%{hrProcessorLoad.errors}
