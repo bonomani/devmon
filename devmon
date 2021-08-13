@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 our $VERSION = '0.3.1-beta1';
+
 #    Devmon: An SNMP data collecteor & page generator for the BigBrother &
 #    Hobbit network monitoring systems
 #    Copyright (C) 2005-2006  Eric Schwimmer
@@ -30,23 +31,24 @@ use dm_msg;
 initialize($VERSION);
 
 # Enter main loop
-do_log("Entering poll loop", 0);
+do_log( "INFOR MAIN: Entering poll loop", 0 );
 while (1) {
-   # Read in template data
-   read_templates();
 
-   # Load/reload test data & do failover recover
-   sync_servers();
+    # Read in template data
+    read_templates();
 
-   # Now collect SNMP data
-   poll_devices();
+    # Load/reload test data & do failover recover
+    sync_servers();
 
-   # Now do tests
-   tests(); 
+    # Now collect SNMP data
+    poll_devices();
 
-   # Now send messages
-   send_msgs(); 
+    # Now do tests
+    tests();
 
-   # Do time tests and then sleep
-   time_test();
+    # Now send messages
+    send_msgs();
+
+    # Do time tests and then sleep
+    time_test();
 }

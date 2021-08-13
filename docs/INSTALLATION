@@ -14,6 +14,12 @@ For an overview of how Devmon works, please see the OVERVIEW file.
   1. Install the SNMP_Session Perl module (v1.08 or later), which
      you can download from: 
         http://www.switch.ch/misc/leinen/snmp/perl/
+     and install Net-SNMP (C lib) with 
+       - yum install net-snmp
+       - apt install snmp
+     SNMP_Session provides SNMPv1 an SNMPv2c
+     Net-SNMP provides SNMPv2c and SNMPv3 
+     We recommand to install both to have all SNMP version 
 
   2. Unpack the Devmon tarball into your preferred directory.  I
      typically use /var/xymon/server/ext/devmon, but it is totally 

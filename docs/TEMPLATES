@@ -102,9 +102,8 @@
   both variables.  If there is, Devmon will complain about trying to 
   redefine a template and reject the second template.
 
-    The 'snmpver' variable defines what version of snmp should be 
-  used to query this device.  Acceptable values are 1, 2, and 2c 
-  (which is the same as '2').
+    The 'snmpver' variable is DEPRECATED and can be safely removed 
+  form all templates as it is not used anymore
 
     The 'sysdesc' variable is used by the type auto-detection that 
   Devmon does when it initially reads the host from the bb-hosts

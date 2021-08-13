@@ -13,8 +13,8 @@
     <td>: {sysBootReason.msg}</td>
   </tr>
   <tr>
-    <td>  {hwSysRebootReasonTxt.color}<b>Message</b></td>
-    <td>: {hwSysRebootReasonTxt.msg}</td>
+    <td>  {hwSysRebootReasonTxtClone.color}<b>Message</b></td>
+    <td>: {hwSysRebootReasonTxtClone.msg}</td>
   </tr>
   <tr>
     <td>  <span style="vertical-align:bottom; line-height: 1.5;">&#9201;&#65039;</span> <b>Timer</b></td>

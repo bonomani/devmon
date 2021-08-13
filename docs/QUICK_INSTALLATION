@@ -6,7 +6,13 @@ This are installation instructions that complement the doc devmon/docs/INSTALL
 yum install net-snmp-devel
 yum install perl-SNMP_Session.noarch
 yum install net-snmp-utils
+yum install net-snmp
 
+0.b For debian based OS (Incomplet and not tested)
+....
+apt install libsnmp-session-perl
+apt install snmp
+....
 
 1. Get the devmon files and templates
 
