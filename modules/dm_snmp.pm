@@ -22,13 +22,11 @@ require Exporter;
 use strict;
 use diagnostics;
 
-#use BER;
 use Socket;
 use IO::Handle;
 use IO::Select;
 use IO::Socket::INET;
 
-#use SNMP_Session;
 use POSIX ":sys_wait_h";
 use Math::BigInt;
 use Storable qw(nfreeze thaw);
@@ -596,7 +594,6 @@ DEVICE: while (1) {    # We should never leave this loop
 
         # Get SNMP variables
         #my $snmp_cid = $data_in{cid};
-
         my $snmp_ver = $data_in{ver};
 
         # Establish SNMP session
@@ -609,14 +606,12 @@ DEVICE: while (1) {    # We should never leave this loop
             send_data( $sock, \%data_out );
             next DEVICE;
 
-            #        } elsif ( !defined $snmp_ver ) {
         } elsif ( !defined $data_in{ver} ) {
             my $error_str = "No snmp version found for $data_in{dev}";
             $data_out{error}{$error_str} = 1;
             send_data( $sock, \%data_out );
             next DEVICE;
 
-            #      } elsif ($snmp_ver eq '0' or $snmp_ver =~ /^0/) {
         } elsif ( ( ( $g{snmpeng} eq 'session' ) and ( $snmp_ver eq '2' or $snmp_ver eq '2c' ) ) or ( $snmp_ver eq '1' ) ) {
             use BER;
             use SNMP_Session;
@@ -775,7 +770,6 @@ DEVICE: while (1) {    # We should never leave this loop
             if ($@) {
                 do_log("WARNI SNMP($fork_num): SNMP is not installed: $@ yum install net-snmp or apt install snmp");
             } else {
-                use SNMP;
 
                 # Get SNMP variables
                 my %snmpvars;
