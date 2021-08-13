@@ -386,13 +386,16 @@ sub initialize {
     }
 
     # Check mutual exclusions (run-and-die options)
-    sync_global_config()           if $syncconfig;
-    dm_templates::sync_templates() if $synctemps;
-    reset_ownerships()             if $resetowner;
-    read_hosts_cfg()               if $readhosts;
+    sync_global_config()                if $syncconfig;
+    dm_templates::sync_templates()      if $synctemps;
+    reset_ownerships()                  if $resetowner;
+    check_config() and read_hosts_cfg() if $readhosts;
 
     # Open the log file
     open_log();
+
+    # Check global config
+    check_config();
 
     # Daemonize if need be
     daemonize();
@@ -471,6 +474,11 @@ sub initialize {
         }
     }
 
+    # We are now initialized
+    $g{initialized} = 1;
+}
+sub check_config {
+
     # Check consistency
     # 1. snmptimeout * snmptries <  maxpolltime
     # 2. maxpolltime < cycletime
@@ -522,9 +530,6 @@ sub initialize {
     } else {
         do_log("ERROR CONF: Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...");
     }
-
-    # We are now initialized
-    $g{initialized} = 1;
 }
 
 # Determine the amount of time we spent doing tests
