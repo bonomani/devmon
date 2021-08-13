@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: nexus9000
+snmpver	: 2
+sysdesc : Cisco NX-OS.*nxos.9.*Software \(nxos\), Version 9

@@ -1,0 +1,17 @@
+<table>
+	<tr>
+		<td>DNS Stats (overall)</td><td></td>
+	</tr>
+	<tr>
+		<td>hit ratio</td><td>{ibDnsHitRatio}%</td>
+	</tr>
+	<tr>
+		<td>query rate</td><td>{ibDnsQueryRate} / second</td>
+	</tr>
+</table>
+
+DNS zone stats (since DNS sevice started):
+
+TABLE: noalarmsmsg
+Zone|successful responses|referrals|query received for non-existent record|query received for non-existent domain|received using recursion|Failed queries
+{ibBindZoneName}|{ibBindZoneSuccess}|{ibBindZoneReferral}|{ibBindZoneNxRRset}|{ibBindZoneNxDomain}|{ibBindZoneRecursion}|{ibBindZoneFailure}

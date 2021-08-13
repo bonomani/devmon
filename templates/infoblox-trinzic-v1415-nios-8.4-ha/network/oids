@@ -1,0 +1,17 @@
+# One second load of Smart NICs:
+ibSnicName1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.1 : branch
+ibSnicRxBits1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.2 : branch
+ibSnicRxPackets1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.3 : branch
+ibSnicTxBits1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.4 : branch
+ibSnicTxPackets1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.5 : branch
+ibSnicDropBits1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.6 : branch
+ibSnicDropPackets1 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.1.1.6 : branch
+
+# Five second load of Smart NICs:
+ibSnicName5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.1 : branch
+ibSnicRxBits5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.2 : branch
+ibSnicRxPackets5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.3 : branch
+ibSnicTxBits5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.4 : branch
+ibSnicTxPackets5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.5 : branch
+ibSnicDropBits5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.6 : branch
+ibSnicDropPackets5 : .1.3.6.1.4.1.7779.3.1.1.2.1.8.4.2.1.6 : branch

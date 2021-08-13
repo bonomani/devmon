@@ -1,0 +1,24 @@
+{StpProtocolSpecification.color} StpProtocolSpecification:	{StpProtocolSpecification}
+{StpPriority.color} StpPriority:	{StpPriority}
+{StpTimeSinceTopologyChange.color} StpTimeSinceTopologyChange:	{StpTimeSinceTopologyChangeSecs}sec - {StpTimeSinceTopologyChangeDays}days
+{StpTopChanges.color} StpTopChanges:	{StpTopChanges}
+{StpDesignatedRootText.color} StpDesignatedRoot:	{StpDesignatedRootHex0} {StpDesignatedRootHex2} {StpDesignatedRootHex4} {StpDesignatedRootHex6} {StpDesignatedRootHex8} {StpDesignatedRootHex10} {StpDesignatedRootHex12} {StpDesignatedRootHex14}
+{StpRootCost.color} StpRootCost:	{StpRootCost}
+{StpRootPort.color} StpRootPort:	{StpRootPort}
+{StpMaxAge.color} StpMaxAge:	{StpMaxAge}
+{StpHelloTime.color} StpHelloTime:	{StpHelloTime}
+{StpHoldTime.color} StpHoldTime:	{StpHoldTime}
+{StpForwardDelay.color} StpForwardDelay:	{StpForwardDelay}
+{StpBridgeMaxAge.color} StpBridgeMaxAge:	{StpBridgeMaxAge}
+{StpBridgeHelloTime.color} StpBridgeHelloTime:	{StpBridgeHelloTime}
+{StpBridgeForwardDelay.color} StpBridgeForwardDelay:	{StpBridgeForwardDelay}
+#{StpPort.color}:	{StpPort}
+#{StpPortPriority.color}:	{StpPortPriority}
+#{StpPortState.color}:	{StpPortState}
+#{StpPortEnable.color}:	{StpPortEnable}
+#{StpPortPathCost.color}:	{StpPortPathCost}
+#{StpPortDesignatedRoot.color}:	{StpPortDesignatedRoot}
+#{StpPortDesignatedCost.color}:	{StpPortDesignatedCost}
+#{StpPortDesignatedBridge.color}:	{StpPortDesignatedBridge}
+#{StpPortDesignatedPort.color}:	{StpPortDesignatedPort}
+#{StpPortForwardTransitions.color}:	{StpPortForwardTransitions}

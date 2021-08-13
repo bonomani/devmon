@@ -1,0 +1,3 @@
+ifAliasBox : alarm  : .*uplink.*|.*Uplink.*
+#ifName : alarm  : .+
+ifName : ignore : Nu.+|Vl.+|VLAN.+

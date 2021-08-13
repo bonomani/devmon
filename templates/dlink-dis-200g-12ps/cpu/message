@@ -1,0 +1,5 @@
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+Firmware: {sysVersion}
+
+System description:
+{sysDescr}

@@ -1,0 +1,3 @@
+sysUpTimeSecs	: red		: <600  : Device rebooted recently. System uptime: {UpTimeTxt}
+sysUpTimeSecs	: yellow	: <5000 : Device rebooted recently. System uptime: {UpTimeTxt}
+sysUpTimeSecs	: green		:	: System uptime: {UpTimeTxt}

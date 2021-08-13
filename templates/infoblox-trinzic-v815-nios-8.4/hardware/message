@@ -1,0 +1,5 @@
+ACTIVE NODE:
+
+TABLE:
+Name|Status|Info
+{ibNodeServiceNameText}|{ibNodeServiceStatusText} {ibNodeServiceNameText.color}|{ibNodeServiceDesc}

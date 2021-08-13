@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 9200
+snmpver	: 2
+sysdesc : CAT9K_LITE_IOSXE

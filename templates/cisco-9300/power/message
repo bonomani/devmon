@@ -1,0 +1,3 @@
+TABLE:
+PSU Type|PSU state
+{PsuDescr}|{PsuStatus.color}{PsuStatus}

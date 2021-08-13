@@ -1,0 +1,34 @@
+DHCP Stats (total):
+
+<table class='stats-table'>
+	<tr>
+		<td>Statistic</td><td>Count</td>
+	</tr>
+	<tr>
+		<td>Discovers</td><td>{ibDhcpTotalNoOfDiscovers}</td>
+	</tr>
+	<tr>
+		<td>Requests</td><td>{ibDhcpTotalNoOfRequests}</td>
+	</tr>
+	<tr>
+		<td>Releases</td><td>{ibDhcpTotalNoOfReleases}</td>
+	</tr>
+	<tr>
+		<td>Offers</td><td>{ibDhcpTotalNoOfOffers}</td>
+	</tr>
+	<tr>
+		<td>Acks</td><td>{ibDhcpTotalNoOfAcks}</td>
+	</tr>
+	<tr>
+		<td>Nacks</td><td>{ibDhcpTotalNoOfNacks}</td>
+	</tr>
+	<tr>
+		<td>Declines</td><td>{ibDhcpTotalNoOfDeclines}</td>
+	</tr>
+	<tr>
+		<td>Informs</td><td>{ibDhcpTotalNoOfInforms}</td>
+	</tr>
+	<tr>
+		<td>Others</td><td>{ibDhcpTotalNoOfOthers}</td>
+	</tr>
+</table>

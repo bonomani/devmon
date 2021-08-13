@@ -1,0 +1,9 @@
+
+{sysUpTimeSecs.color}: Up for approx. {UpTimeTxt}
+{CPUTotal5Min.color}: CPU usage: {CPUTotal5Min}%
+
+System description:
+{sysDescr}
+<!--
+<br>CPU 5 min average: {CPUTotal5Min}
+-->

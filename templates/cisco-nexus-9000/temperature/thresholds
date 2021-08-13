@@ -1,0 +1,11 @@
+tempFront		:	yellow : 70	: {nameFront} &deg;C erh&oouml;te Temperatur (Schwellwert 70 &deg;C)
+tempFront		:	red : 80	: {nameFront} &deg;C stark erh&oouml;te Temperatur (Schwellwert 80 &deg;C)
+
+tempBack		:	yellow : 42	: {nameBack} &deg;C erh&oouml;te Temperatur (Schwellwert 42 &deg;C)
+tempBack		:	red : 70	: {nameBack} &deg;C stark erh&oouml;te Temperatur (Schwellwert 70 &deg;C)
+
+tempCPU		:	yellow : 80	: {nameCPU} &deg;C erh&oouml;te Temperatur (Schwellwert 80 &deg;C)
+tempCPU		:	red : 90	: {nameCPU} &deg;C stark erh&oouml;te Temperatur (Schwellwert 90 &deg;C)
+
+tempHeavenly		:	yellow : 90	: {nameHeavenly} &deg;C erh&oouml;te Temperatur (Schwellwert 90 &deg;C)
+tempHeavenly		:	red : 110	: {nameHeavenly} &deg;C stark erh&oouml;te Temperatur (Schwellwert 110 &deg;C)

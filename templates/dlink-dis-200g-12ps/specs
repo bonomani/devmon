@@ -1,0 +1,4 @@
+vendor	: dlink
+model	: dis-200g-12ps
+snmpver	: 2
+sysdesc : DIS-200G-12PS.+GigaBit Ethernet Switch
