@@ -1,35 +1,31 @@
 ======================================================================
-Devmon VERSION 0.21.07.14
+Devmon VERSION 0.21.08.13
 ======================================================================
 
-  This is a cosmetic release: no new feature nor bug resolved
-  
-  This is mainly a revamp of the organisation of the documentation 
+  This is the first SNMPv3 release !
+  - Backup your server before upgrade
+  - Install Net-SNMP (see DOC/INSTALLATION)
+  - Expect bugs!
+  - Enjoy new speed...
 
-  - Update README and CHANGELOG
-  - New WIKI: https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
-    (as github wikis are not indexed by google) 
+  Wiki
+    - https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
+    - Devmon developpers: "must read" best practice
 
-  What are we working on
-  - SNMPv3: Implemented on our dev plateform: very soon... 
+  What are we working on in order
+  - Github issues (are the current roadmap) 
+  - Organisation of the code and best practice (Modern standard)
+  - Documenatation
   - Compatibility with IPv6
   - Compatibility with and all forms of clustering
   - Own discovery/ping test (WIP): v1 milestone !? 
-  - Organisation of the code and best practice
-  - Why: 
     - Improve stability
     - Improve perf
-    - Modern standard
   
-  Roadmap: some on github issue (main), some of the end at this file
-  
-  DISCLAMER: THIS IS FORK VERSION of the original developers:
-  - Look at SourceForge version for it !
-  - Previous modified devmon version in this repo were reported
-    (in 2017) to be less stable than the SF one...
+  DISCLAMER:
    - Use it at your own risks !
 
-  14 jul 2021, Bruno Manzoni
+  13 august 2021, Bruno Manzoni
 ======================================================================
 
   This program is free software; you can redistribute it and/or modify

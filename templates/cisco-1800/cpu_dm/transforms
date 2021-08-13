@@ -19,7 +19,7 @@ sysBootReasonDelay           : MATH            : 604800
 sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
 sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {maxUpTime}
 sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
-sysBootReasonDelayTimerEnable: TSWITCH         : {sysReloadReason} 'Reload_Commmand'=disable,default={sysBootReasonDelayTimer}
+sysBootReasonDelayTimerEnable: SWITCH          : {sysReloadReason} 'Reload_Commmand'=disable,default={sysBootReasonDelayTimer}
 sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {sysReloadReason}
 
 # Create a duplicate oid to be able to override the message alarm

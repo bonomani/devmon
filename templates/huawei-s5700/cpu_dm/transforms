@@ -15,13 +15,16 @@ UpTimeTxt                    : ELAPSED         : {UpTime}
 hwSysRebootReasonTxt         : SWITCH          : {hwSysRebootReason} 1=manual,2=powerOff,3=unknown,4=schedule,5=software
 hwECUTreached                : MATH            : {hwEntityCpuUsageThreshold} - {hwEntityCpuUsage}
 
+# Create a clone (no threshold apply on clone)
+hwSysRebootReasonTxtClone    : REGSUB          : {hwSysRebootReasonTxt} /^(.*)$/$1/
+
 # Boot Alarm automatically disable after 1 week or 604800s
 sysBootReasonDelay           : MATH            : 604800
 sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
 sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {maxUpTime}
 sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
-sysBootReasonDelayTimerEnable: TSWITCH         : {hwSysRebootReasonTxt} 'manual'=disable,default={sysBootReasonDelayTimer}
-sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {hwSysRebootReasonTxt}
+sysBootReasonDelayTimerEnable: SWITCH          : {hwSysRebootReasonTxt} 'manual'=disable,default={sysBootReasonDelayTimer}
+sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {hwSysRebootReasonTxtClone}
 
 # Create a duplicate oid to be able to override the message alarm
 UpTimeModStateNoAlarm        : BEST            : {UpTimeModState}

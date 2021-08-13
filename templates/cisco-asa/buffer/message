@@ -30,7 +30,7 @@
 		<td>{buff_block_8192v} </td><td> {buff_block_8192}</td>
 	</tr>
 	<tr>
-		<td>{buff_block_16384v} </td><td>  {buff_block_16384}</td>
+		<td>{buff_block_16384v} </td><td> {buff_block_16384}</td>
 	</tr>
 	<tr>
 		<td>{buff_block_65536v} </td><td> {buff_block_65536}</td>

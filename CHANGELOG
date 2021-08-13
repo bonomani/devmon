@@ -1,5 +1,13 @@
 Devmon changelog.  Contributors of specific features/patches are listed
 in parenthesis next to the respective entry.
+Devmon v0.21.08.13
+Changes since v0.21.07.14
+  First SNMPv3 version (read install)
+  Update template for vmware7 (thanks to Roemer)
+  Update wiki (mainly for devmon dev)
+  Tidy code (start to have best practice)
+  Update logs
+  Fix bugs
 
 Devmon v0.21.07.14
 Changes since v0.21.06.09
@@ -19,7 +27,7 @@ Changes since v0.16.12.15
   Bug resolved
   - MATH transform with constant (without other deps oids)
   - TSWITCH calc
-  - Perl 5.28 compatibility (thanks Stef Coene)
+  - Perl 5.28 compatibility (thanks to Stef Coene)
   - Threshold calculation
   - Custom threshold in hosts.cfg should overide other
   - BEST threshold can override herited error

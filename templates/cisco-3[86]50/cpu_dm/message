@@ -13,8 +13,8 @@
     <td>: {sysBootReason.msg}</td>
   </tr>
   <tr>
-    <td>  {sysReloadReason.color}<b>Message</b></td>
-    <td>: {sysReloadReason.msg}</td>
+    <td>  {sysReloadReasonClone.color}<b>Message</b></td>
+    <td>: {sysReloadReasonClone.msg}</td>
   </tr>
   <tr>
     <td>  <span style="vertical-align:bottom; line-height: 1.5;">&#9201;&#65039;</span> <b>Timer</b></td>
