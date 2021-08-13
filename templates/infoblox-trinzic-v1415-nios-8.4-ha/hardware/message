@@ -1,0 +1,10 @@
+ACTIVE NODE:
+
+TABLE:
+Name|Status|Info
+{ibNodeServiceNameText}|{ibNodeServiceStatusText} {ibNodeServiceNameText.color}|{ibNodeServiceDesc}
+
+PASSIVE NODE:
+TABLE:
+Name|Status|Info
+{ibPassiveNodeServiceNameText}|{ibPassiveNodeServiceStatusText} {ibPassiveNodeServiceStatusText.color}|{ibPassiveNodeServiceDesc}

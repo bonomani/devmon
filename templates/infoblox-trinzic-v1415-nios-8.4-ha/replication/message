@@ -1,0 +1,3 @@
+TABLE:
+Node|Replication Status|Queue From Master|Last Replication From Master|Queue To Master|Last Replication To Master
+{ibNodeIPAddress}|{ibNodeReplicationStatus.color} {ibNodeReplicationStatus}|{ibNodeQueueFromMaster}|{ibNodeLastRepTimeFromMaster}|{ibNodeQueueToMaster}|{ibNodeLastRepTimeToMaster}

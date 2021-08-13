@@ -1,0 +1,3 @@
+TABLE:noalarmsmsg
+Model|Description|Hardware Rev|Software Rev|Serial Number
+<!--{entPhysicalClassTxt}-->{entPhysicalModelName}|{entPhysicalDescr}|{entPhysicalHardwareRev}|{entPhysicalSoftwareRev}|{entPhysicalSerialNum}

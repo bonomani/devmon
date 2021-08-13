@@ -1,0 +1,2 @@
+HA State: {ibHAStatus} {ibHAStatus.color}
+Replication State: {ibGridReplicationState} {ibGridReplicationState.color}

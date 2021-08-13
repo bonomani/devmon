@@ -1,0 +1,14 @@
+
+System description:
+{sysDescr}
+
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{sysUpTimeSecs.color}: Last reboot due to {sysReloadReason}
+
+TABLE:noalarmsmsg
+Status|CPU-Index|CPU usage
+{CPUTotal5Min.color}|{CPUTotalIndex}|{CPUTotal5Min}%
+
+<!--
+<br>CPU 5 min average: {CPUTotal5Min}
+-->

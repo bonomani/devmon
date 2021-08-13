@@ -1,0 +1,9 @@
+ibNodeServiceNameText : alarm : node-status|disk-usage|enet-lan|enet-lan2|enet-ha|enet-mgmt|memory|replication|db-object|fan1|fan2|fan3|fan4|fan5|fan6|power-supply1|power-supply2|ntp-sync|cpu1-temp|sys-temp|cpu-usage|reporting|swap-usage
+
+# Status unknown  / inactive:
+ibNodeServiceNameText : ignore : lcd|cpu2-temp|raid-.*|fan7|fan8|mgm-service|subgrid-conn|subgrid-conn|dns-cache-acceleration|discovery-.*|cloud-api|network-capacity|bgp|ospf.*|threat-.*|taxii|bfd
+
+ibPassiveNodeServiceNameText : alarm : node-status|disk-usage|enet-lan|enet-lan2|enet-ha|enet-mgmt|memory|replication|db-object|fan1|fan2|fan3|fan4|fan5|fan6|power-supply1|power-supply2|ntp-sync|cpu1-temp|sys-temp|cpu-usage|reporting|swap-usage
+
+# Status unknown / inactive:
+ibPassiveNodeServiceNameText : ignore : lcd|cpu2-temp|raid-.*|fan7|fan8|mgm-service|subgrid-conn|subgrid-conn|dns-cache-acceleration|discovery-.*|cloud-api|network-capacity|bgp|ospf.*|threat-.*|taxii|bfd

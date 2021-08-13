@@ -1,0 +1,4 @@
+vendor	: cisco
+model	: 9300
+snmpver	: 2
+sysdesc : CAT9K_IOSXE
