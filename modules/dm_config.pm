@@ -509,7 +509,6 @@ sub check_config {
                 do_log( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 0 );
                 $g{snmpeng} = 'snmp';
             } else {
-                $g{snmpeng} = 'session';
                 do_log("INFOR CONF: SNMP_Session is installed and provides SNMPv1");
             }
         }
