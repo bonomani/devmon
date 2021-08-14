@@ -1,4 +1,4 @@
 cefcFRUPowerAdminStatusTxt : SWITCH : {cefcFRUPowerAdminStatus} 1=on,2=admin off,3=inlineAuto,4=inlineOn,5=powerCycle
 cefcFRUPowerOperStatusTxt : SWITCH : {cefcFRUPowerOperStatus} 1=offEnvOther,2=on,3=offAdmin,4=offDenied,5=offEnvPower,6=offEnvTemp,7=offEnvFan,8=failed,9=onButFanFail,10=offCooling,11=offConnectorRating,12=onButInlinePowerFail
-cefcFRUPowerStatus : BEST : {cefcFRUPowerAdminStatusTxt} {cefcFRUPowerOperStatusTxt}
+cefcFRUPowerStatus : BEST : {cefcFRUPowerAdminStatusTxt} , {cefcFRUPowerOperStatusTxt}
 

@@ -1,4 +1,4 @@
-StpTimeSinceTopologyChangeSecs	: MATH	: {StpTimeSinceTopologyChange} / 100 
+StpTimeSinceTopologyChangeSecs	: MATH	: {StpTimeSinceTopologyChange} / 100
 StpTimeSinceTopologyChangeDays	: MATH	: {StpTimeSinceTopologyChange} / 8640000
 StpDesignatedRootText	: UNPACK	: {StpDesignatedRoot} H16
 StpDesignatedRootHex0	: SUBSTR	: {StpDesignatedRootText} 0 2
