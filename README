@@ -1,8 +1,6 @@
-======================================================================
-Devmon VERSION 0.21.08.13
-======================================================================
+=======================================
 
-  This is the first SNMPv3 release !
+  This is the first SNMPv3 release!
   - Backup your server before upgrade
   - Install Net-SNMP (see DOC/INSTALLATION)
   - Expect bugs!
@@ -10,116 +8,72 @@ Devmon VERSION 0.21.08.13
 
   Wiki
     - http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
-    - Devmon developpers: "must read" best practice
+    - Devmon developers: "must read" best practice
 
-  What are we working on in order
-  - Github issues (are the current roadmap) 
-  - Organisation of the code and best practice (Modern standard)
-  - Documenatation
+  What are we working on? (In order):
+  - GitHub issues (are the current roadmap)
+  - Organization of the code and best practice (Modern standard)
+  - Documentation
   - Compatibility with IPv6
   - Compatibility with and all forms of clustering
-  - Own discovery/ping test (WIP): v1 milestone !? 
+  - Own discovery/ping test (WIP): v1 milestone!?
     - Improve stability
     - Improve perf
-  
-  DISCLAMER:
-   - Use it at your own risks !
+
+  DISCLAIMER:
+   - Use it at your own risks!
 
   13 august 2021, Bruno Manzoni
-======================================================================
+=======================================
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.  Please see the file named
-  'COPYING' that was included with the distrubition for more details.
+  the Free Software Foundation; either version 2 of the License, or (at
+  your option) any later version. Please see the file named 'COPYING'
+  that was included with the distribution for more details.
 
  What is Devmon ?
 ---------------------------------------
 
-  Devmon is a Perl software that uses SNMP to monitor, graph and alert 
+  Devmon is a Perl software that uses SNMP to monitor, graph and alert
   on host information
 
  What are Devmon's prerequisites?
 ---------------------------------------
 
-  In order for Devmon to do anything useful, you will need
-  a machine capable of running the Perl interpreter, which
-  is used to execute the Devmon code.  
+  In order for Devmon to do anything useful, you will need a machine
+  capable of running the Perl interpreter, which is used to execute the
+  Devmon code.
 
-  In addition, you will need a machine (either the same machine 
-  running Devmon, or a different one) runing either the Hobbit/Xymon 
-  or BigBrother monitoring program, which displays the messages
-  that Devmon generates.  
+  In addition, you will need a machine (either the same machine running
+  Devmon, or a different one) running either the Hobbit/Xymon or
+  BigBrother monitoring program, which displays the messages that Devmon
+  generates.
 
-  Finally, you will need your to have your Hobbit/Xymon or BigBrother 
-  program set up to monitor at least  one host that Devmon has 
-  a template for.   Only then will Devmon be able to poll a 
-  remote host and display the results.  For more information on 
-  Devmon's template system, please consult the TEMPLATES file
-  located in the docs directory.
+  Finally, you will need your to have your Hobbit/Xymon or BigBrother
+  program set up to monitor at least one host that Devmon has a template
+  for. Only then will Devmon be able to poll a remote host and display
+  the results. For more information on Devmon's template system, please
+  consult the TEMPLATES file located in the docs directory.
 
  How do I install Devmon?
 ---------------------------------------
 
-  Detailed instructions are available in the docs/INSTALLATION
-  file.  A single-node installation merely requires you to untar
-  the Devmon tarball to a suitable location, modify the config
-  file appropriately, and start the Devmon daemon.  
+  Detailed instructions are available in the docs/INSTALLATION file. A
+  single-node installation merely requires you to untar the Devmon
+  tarball to a suitable location, modify the config file appropriately,
+  and start the Devmon daemon.
 
-  A multi-node installation requires you to do all of the above
-  on each node in the cluster, as well as set up a MySQL database
-  to facilitate communication between nodes.
+  A multi-node installation requires you to do all of the above on each
+  node in the cluster, as well as set up a MySQL database to facilitate
+  communication between nodes.
 
  What are Devmon templates?
 --------------------------------------
 
-  Devmon can monitor a virtually unlimited number of different 
-  device types, by allowing a user to define a template for
-  each test to be conducted on a particular device type.
-  For instance, a 'cpu' test on a Cisco 2950 switch is its own 
-  template, while a 'if_load' test on the same switch is an
-  entirely different template. A must read: the docs/TEMPLATES file!
-  
-
-======================================================================================                         
-TODO (will be moved)                         
-Priority 1: Sourceforge open and bugs
-       Memory leaks
-         On linux (WIP) 
-         On BSD (major)
-         One was in xymon-rrd, but should be fixed now? (version?) 
-         Results: Minimized by fixing all errors: run devmon in foreground and show logs
-       SNMPv3: After triing to use the work from StefCoene, it seem more complicated that what I tought...
-       Document Transform Coltre, Sort
-
-
-Ideas
-       Warn if autovivification (creates the hash if it do not exists, but it should not) and check if it does already make problem 
-       Make Table compatible with LEAF 
-       Share templates for similar devices: Lot of work!!!
-       Support for negative numbers in (T)SWITCH: Parse mathematical expression simply....: Need more work
-       Format display (SUBSTR negative, Align columns of a TABLE to the right side,  Formatting of result of MATH transform): Problems Alignement and Padding
-       Exceptions based on other oid values: now only PriOi: make it work for alternate oid
-       Template exceptions sorted misleadingly: need documentation clarification
-       Use OID value in threshold comparison: Nice to have (workaround is to do that is transform)
-
-FEATURE REQUEST
-       Better discovery (SF bug 10)
-       Multiple graph in a test
-       Add better timer calculation (HiRes)
-
-Document SORT Transform 
-        To sort in an increasing order (num or txt, default = txt)
-        oid values. The result (the new oid values) are
-        int indexes corresponding to the position of the source
-        oid values in the sort.
-        The results are a int between 1 and n
-        (n is the number of element in the branch oid)
-        It can be used to 'reindex' an oid if use in conjonction with
-                 the CHAIN transform. (similar to the INDEX transform)
-
-HELP NEEDED
-       Template not listed above cannot be test: please help to updated: take a look at template liste above that are maintained! 
-       Template exceptions sorted misleadingly: need documentation clarification: I dont used it: I need concrate case!)
-
+  Devmon can monitor a virtually unlimited number of different device
+  types, by allowing a user to define a template for each test to be
+  conducted on a particular device type. For instance, a 'cpu' test on a
+  Cisco 2950 switch is its own template, while a 'if_load' test on the
+  same switch is an entirely different template. A must read: the
+  docs/TEMPLATES file!
