@@ -2,27 +2,12 @@
 >   Devmon is an open-source SNMP monitor tool that can graph and alert
   several hundreds of devices per minutes 
 
-## Table of Contents
-* [General Info](#general-information)
-* [Technologies Used](#technologies-used)
-* [Features](#features)
-* [Screenshots](#screenshots)
-* [Setup](#setup)
-* [Usage](#usage)
-* [Project Status](#project-status)
-* [Room for Improvement](#room-for-improvement)
-* [Acknowledgements](#acknowledgements)
-* [Contact](#contact)
-<!-- * [License](#license) -->
-
 
 ## General Information
 - Devmon is a Perl daemon designed to enhance the SNMP monitoring capabilities of a server running Xymon monitoring software
 - Devmon takes the data that it obtains via SNMP and applies user-defined logic against it and compares the results to user-customizable thresholds. It uses the final data to determine if the remote device is in an abnormal or critical state, and reports accordingly to the Xymon display server. 
 - Devmon provides a solution that is very efficient, fault-tolerant, scalable and maintainable.
 - Devmon supports a flexible, user-customizable template system, which allows an end user with little or no programming knowledge to easily create test logic for any number of different types of devices.
-
-
 
 
 ## Technologies Used
@@ -42,11 +27,9 @@
   - For larger, enterprise networks, Devmon can run in a 'multi node (cluster)' configuration (WIP), with all nodes using a MySQL back-end server (which can also be a cluster, for maximum fault tolerance) for data storage, load balancing, and fault tolerance or simply in "single node" in its own dedicated server (recommended so far)
 
 
-
 ## Screenshots
 ![Example screenshot](/fr/devmon_current_status.png)
 <!-- If you have screenshots you'd like to share, include them here. -->
-
 
 ## Setup
 - In order for Devmon to do anything useful, you will need a machine capable of running the Perl interpreter, which is used to execute the Devmon code. Please consult the INSTALLATION file located in the docs directory.
