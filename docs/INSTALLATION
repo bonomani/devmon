@@ -30,7 +30,7 @@ For an overview of how Devmon works, please see the OVERVIEW file.
      Templates should be in devmon/templates
 
      AND follow the QUICK_INSTALLATION guide in this folder (docs)
-     AND come back letter to verify that you dont miss anything!
+     AND come back later to verify that you dont miss anything!
 
   3. Edit the devmon.cfg file.  For a single node installation, the
      options you want to pay particular attention to are: 
