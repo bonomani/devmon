@@ -1,9 +1,9 @@
 blank_issues_enabled: true
-Wiki:
+wiki:
     - name: ❓ Other
       url: https://help.nextcloud.com/
       about: Developing Devmon, Screenshots, ...
-Contact:
+contact:
     - name: ✉ Devmon team 
       url: https://github.com/bonomani/devmon/discussions
       about: contact us
