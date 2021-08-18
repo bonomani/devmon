@@ -1,4 +1,4 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
     - name: ❓ Wiki
       url: http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
