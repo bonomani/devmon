@@ -5,7 +5,7 @@ title: ''
 labels: 'bug'
 assignees: ''
 ---
-Thanks for reporting issues back to Devmon!
+<!--Thanks for reporting issues back to Devmon!
 
 Note: This is the **issue tracker of Devmon**, please do NOT use this to get answers to your questions or get help for fixing your installation. This is a place to report bugs to developers, after your server has been debugged. You can find help debugging your system on the documentationm, on the wiki or on the discussions 
 
@@ -21,12 +21,13 @@ Guidelines for submitting issues:
 * This repository https://github.com/bonomani/devmon/issues is *only* for issues within the Devmon Server code. 
   
 * SECURITY: Report any potential security bug to us via ...
+-->
 ### How to use GitHub
 
 * Please use the 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to show that you are affected by the same issue.
 * Please don't comment if you have no relevant information to add. It's just extra noise for everyone subscribed to this issue.
 * Subscribe to receive notifications on status change and new comments. 
-* 
+
 ### Describe the bug
 A clear and concise description of what the bug is.
 
