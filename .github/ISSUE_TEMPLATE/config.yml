@@ -1,6 +1,6 @@
 blank_issues_enabled: true
 contact_links:
-    - name: ❓ Other
+    - name: ❓ Wiki
       url: http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
       about: Developing Devmon, Screenshots, ...
     - name: ✉ Devmon team 
