@@ -1,7 +1,7 @@
 blank_issues_enabled: true
 contact_links:
     - name: ❓ Other
-      url: https://help.nextcloud.com/
+      url: http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
       about: Developing Devmon, Screenshots, ...
     - name: ✉ Devmon team 
       url: https://github.com/bonomani/devmon/discussions
