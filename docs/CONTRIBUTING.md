@@ -9,7 +9,7 @@
 ## Did you write a patch that fixes a bug?
 * Perfect, create a PR and you will be listed as a developper (if you want)!
 
-## **Did you fix whitespace, format code, or make a purely cosmetic patch?
+## Did you fix whitespace, format code, or make a purely cosmetic patch?
 * Nice, create a PR, I cannot listed you as a developper as you are not really one, but many many thanks!
 
 ## Do you intend to add a new feature or change an existing one?
