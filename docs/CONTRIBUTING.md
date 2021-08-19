@@ -1,6 +1,6 @@
 # How to contribute to Devmon
 
-## DID you find a bug?
+## Did you find a bug?
 * Fine, open an issue! and welcome in the Devmon community
 
 ## Do you want to contribute by creating templates? 
