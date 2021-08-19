@@ -1,6 +1,6 @@
 ---
-name: 👽 Custom issue template
-about: Use this template if other do not fit your needs!
+name: 👽 Other issue 
+about: Use this template if other issue template do not fit your needs!
 title: ''
 labels: ''
 assignees: ''
