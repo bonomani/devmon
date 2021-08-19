@@ -4,6 +4,7 @@
   several hundreds of devices per minutes
 
 ![devmon_current_status](devmon_current_status.png)
+[More screenshots] https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots
 
 ## What is new!
 - This is the first SNMPv3 release! (8.2021)
@@ -86,6 +87,7 @@
 ## Wiki
 - http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
 - Devmon developers: "must read" best practice
+- [Screenshots]: https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots
 
 
 ## Contact
