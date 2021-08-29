@@ -385,17 +385,22 @@ sub initialize {
         usage();
     }
 
-    # Check mutual exclusions (run-and-die options)
-    sync_global_config()                if $syncconfig;
-    dm_templates::sync_templates()      if $synctemps;
-    reset_ownerships()                  if $resetowner;
-    check_config() and read_hosts_cfg() if $readhosts;
 
     # Open the log file
     open_log();
 
-    # Check global config
-    check_config();
+    # Check mutual exclusions (run-and-die options)
+    sync_global_config()                if $syncconfig;
+    dm_templates::sync_templates()      if $synctemps;
+    reset_ownerships()                  if $resetowner;
+
+    # check snmp config before last run-and-die options
+    # as it will start a snmp discovery
+    check_snmp_config(); 
+    read_hosts_cfg() if $readhosts;
+
+    # Open the log file
+    #open_log();
 
     # Daemonize if need be
     daemonize();
@@ -457,6 +462,9 @@ sub initialize {
     # Read our global variables
     read_global_config();
 
+    # Check our global config
+    check_global_config(); 
+
     # Throw out a little info to the log
     do_log( "INFOR CONF: ---Initializing devmon...",                              0 );
     do_log( "INFOR CONF: Verbosity level: $g{verbose}",                           1 );
@@ -477,18 +485,13 @@ sub initialize {
     # We are now initialized
     $g{initialized} = 1;
 }
-sub check_config {
-
+sub check_snmp_config {
     # Check consistency
-    # 1. snmptimeout * snmptries <  maxpolltime
-    # 2. maxpolltime < cycletime
+    # snmptimeout * snmptries <  maxpolltime
     if ( $g{snmptimeout} * $g{snmptries} >= $g{maxpolltime} ) {
         do_log("ERROR CONF: Consistency check failed: snmptimeout($g{snmptimeout}) * snmptries($g{snmptries}) <  maxpolltime($g{maxpolltime}) ");
     }
-    if ( $g{maxpolltime} >= $g{cycletime} ) {
-        do_log("ERROR CONF: Consistency check failed: maxpolltime($g{maxpolltime}) < cycletime($g{cycletime}) ");
-    }
-
+    
     # Check SNMP Engine: auto, snmp(first), session(fallback)
     if ( $g{snmpeng} eq 'auto' ) {
         eval { require SNMP; };
@@ -529,8 +532,15 @@ sub check_config {
     } else {
         do_log("ERROR CONF: Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...");
     }
-}
+}    
 
+sub check_global_config {
+    # Check consistency
+    # maxpolltime < cycletime
+    if ( $g{maxpolltime} >= $g{cycletime} ) {
+        do_log("ERROR CONF: Consistency check failed: maxpolltime($g{maxpolltime}) < cycletime($g{cycletime}) ");
+    }
+}
 # Determine the amount of time we spent doing tests
 sub time_test {
     do_log( "DEBUG CONF: running time_test()", 0 ) if $g{debug};
