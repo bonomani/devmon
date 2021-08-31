@@ -385,18 +385,17 @@ sub initialize {
         usage();
     }
 
-
     # Open the log file
     open_log();
 
     # Check mutual exclusions (run-and-die options)
-    sync_global_config()                if $syncconfig;
-    dm_templates::sync_templates()      if $synctemps;
-    reset_ownerships()                  if $resetowner;
+    sync_global_config()           if $syncconfig;
+    dm_templates::sync_templates() if $synctemps;
+    reset_ownerships()             if $resetowner;
 
     # check snmp config before last run-and-die options
     # as it will start a snmp discovery
-    check_snmp_config(); 
+    check_snmp_config();
     read_hosts_cfg() if $readhosts;
 
     # Open the log file
@@ -463,7 +462,7 @@ sub initialize {
     read_global_config();
 
     # Check our global config
-    check_global_config(); 
+    check_global_config();
 
     # Throw out a little info to the log
     do_log( "INFOR CONF: ---Initializing devmon...",                              0 );
@@ -485,13 +484,15 @@ sub initialize {
     # We are now initialized
     $g{initialized} = 1;
 }
+
 sub check_snmp_config {
+
     # Check consistency
     # snmptimeout * snmptries <  maxpolltime
     if ( $g{snmptimeout} * $g{snmptries} >= $g{maxpolltime} ) {
         do_log("ERROR CONF: Consistency check failed: snmptimeout($g{snmptimeout}) * snmptries($g{snmptries}) <  maxpolltime($g{maxpolltime}) ");
     }
-    
+
     # Check SNMP Engine: auto, snmp(first), session(fallback)
     if ( $g{snmpeng} eq 'auto' ) {
         eval { require SNMP; };
@@ -532,15 +533,17 @@ sub check_snmp_config {
     } else {
         do_log("ERROR CONF: Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...");
     }
-}    
+}
 
 sub check_global_config {
+
     # Check consistency
     # maxpolltime < cycletime
     if ( $g{maxpolltime} >= $g{cycletime} ) {
         do_log("ERROR CONF: Consistency check failed: maxpolltime($g{maxpolltime}) < cycletime($g{cycletime}) ");
     }
 }
+
 # Determine the amount of time we spent doing tests
 sub time_test {
     do_log( "DEBUG CONF: running time_test()", 0 ) if $g{debug};
@@ -1450,19 +1453,27 @@ FILEREAD: do {
                         and next
                         if $host eq '.default.';
 
-                    # If this IP is 0.0.0.0, try and get IP from DNS
-                    if ( $ip eq '0.0.0.0' ) {
-                        my ( undef, undef, undef, undef, @addrs ) = gethostbyname $host;
-                        do_log( "Unable to resolve DNS name for host '$host'", 0 ) and next FILELINE if !@addrs;
-                        $hosts_cfg{$host}{ip_dns} = join '.', unpack( 'C4', $addrs[0] );    # Use first address
-
-                    }
-
                     # Make sure we don't have duplicates
                     if ( defined $hosts_cfg{$host} ) {
                         my $old = $hosts_cfg{$host}{ip};
                         do_log( "Refusing to redefine $host from '$old' to '$ip'", 0 );
                         next;
+                    }
+
+                    # If this IP is 0.0.0.0, try and get IP from DNS
+                    if ( $ip eq '0.0.0.0' ) {
+                        $hosts_cfg{$host}{resolution} = 'dns';
+                        my ( undef, undef, undef, undef, @addrs ) = gethostbyname $host;
+                        if (@addrs) {
+                            $ip = join '.', unpack( 'C4', $addrs[0] );    # Use first address
+                        } else {
+
+                            # we dont resoled the hostname but maybe we have already resolved it
+                            # adn we have an IP in our DB so we dont skip it for now
+                            do_log( "Unable to resolve DNS name for host '$host'", 0 );
+                        }
+                    } else {
+                        $hosts_cfg{$host}{resolution} = 'xymon_host';
                     }
 
                     # See if we have a custom cid
@@ -1619,18 +1630,29 @@ FILEREAD: do {
             }
         }
 
-        $snmp_input{$host}{dev}       = $host;
-        $snmp_input{$host}{ip}        = $hosts_cfg{$host}{ip};
-        $snmp_input{$host}{ip_dns}    = $snmp_input{$host}{ip_dns};                                       #?
-        $snmp_input{$host}{port}      = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
-        $snmp_input{$host}{ver}       = $ver;
-        $snmp_input{$host}{cid}       = $cid;
-        $snmp_input{$host}{secname}   = $secname;
-        $snmp_input{$host}{seclevel}  = $seclevel;
-        $snmp_input{$host}{authproto} = $authproto;
-        $snmp_input{$host}{authpass}  = $authpass;
-        $snmp_input{$host}{privproto} = $privproto;
-        $snmp_input{$host}{privpass}  = $privpass;
+        # We were unable to make a name resolution so far but maybe we have the
+        # teporaris DNS failus so we ca try to keep our old value. If it is not
+        # a valid value we can skip it
+        if ( $hosts_cfg{$host}{ip} eq '0.0.0.0' ) {
+            next if $old_hosts{$host}{ip} eq '0.0.0.0';
+            $snmp_input{$host}{ip} = $old_hosts{$host}{ip};
+        } else {
+            $snmp_input{$host}{ip} = $hosts_cfg{$host}{ip};
+        }
+
+        $snmp_input{$host}{dev} = $host;
+
+        #        $snmp_input{$host}{ip}         = $hosts_cfg{$host}{ip};
+        $snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
+        $snmp_input{$host}{port}       = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
+        $snmp_input{$host}{ver}        = $ver;
+        $snmp_input{$host}{cid}        = $cid;
+        $snmp_input{$host}{secname}    = $secname;
+        $snmp_input{$host}{seclevel}   = $seclevel;
+        $snmp_input{$host}{authproto}  = $authproto;
+        $snmp_input{$host}{authpass}   = $authpass;
+        $snmp_input{$host}{privproto}  = $privproto;
+        $snmp_input{$host}{privpass}   = $privpass;
 
         # Add our sysdesc oid
         $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
@@ -1713,8 +1735,9 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         last if $hosts_left < 1;
 
         # First query hosts with custom cids
-        if ($custom_cids) {
-            do_log( "INFOR CONF: Querying new hosts /w custom cids using snmp v$snmpver", 1 );
+        if ( $custom_cids and $snmpver < 3 ) {
+
+            #do_log( "INFOR CONF: Querying $hosts_left new hosts as $custom_cids custom cids exist using snmp v$snmpver", 1 );
 
             # Zero out our data in and data out hashes
             %{ $g{snmp_data} } = ();
@@ -1722,14 +1745,15 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
             for my $host ( sort keys %hosts_cfg ) {
 
-                # Skip if they don't have a custom cid
-                next if !defined $hosts_cfg{$host}{cid};
-
                 # Skip if they have already been succesfully queried
                 next if defined $new_hosts{$host};
 
+                # Skip if they don't have a custom cid
+                next if !defined $hosts_cfg{$host}{cid};
+                do_log( "INFOR CONF: Querying new host:$host with custom cid:'$hosts_cfg{$host}{cid}' using snmp v$snmpver", 2 );
+
                 # Skip if version > 2
-                next if $snmpver > 2;
+                #next if $snmpver > 2;
 
                 # Throw together our query data
                 %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
@@ -1820,7 +1844,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Don't bother if we don't have any hosts left to query
                 next if $hosts_left < 1;
 
-                do_log( "INFOR CONF: Querying new hosts using cid '$cid' and snmp v$snmpver", 1 );
+                do_log( "INFOR CONF: Querying $hosts_left new hosts using cid:'$cid' and snmp v$snmpver", 1 );
 
                 # Zero out our data in and data out hashes
                 %{ $g{snmp_data} } = ();
@@ -1836,6 +1860,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                     # Don't query this host if we already have succesfully done so
                     next if defined $new_hosts{$host};
+                    do_log( "INFOR CONF: Querying new host:$host with cid:'$cid' using snmp v$snmpver", 2 );
 
                     %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -1923,7 +1948,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                     }
                 }
             }
-        } elsif ( $g{snmpeng} eq 'snmp' ) {
+        } elsif ( $g{snmpeng} eq 'auto' or $g{snmpeng} eq 'snmp' ) {
 
             # Now query hosts with snmpv3
             #for my $secname ( split /,/, $g{secnames} ) {
@@ -1952,7 +1977,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                     # Don't bother if we don't have any hosts left to query
                                     next if $hosts_left < 1;
 
-                                    do_log( "INFOR CONF: Querying new hosts using secname '$secname', seclevel '$seclevel', authproto '$authproto', authpass '$authpass', privproto '$privproto', privpass '$privpass' and snmp v$snmpver", 1 );
+                                    do_log( "INFOR CONF: Querying $hosts_left new hosts using secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 1 );
 
                                     # Zero out our data in and data out hashes
                                     %{ $g{snmp_data} } = ();
@@ -1964,6 +1989,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                         # Don't query this host if we already have succesfully done so
                                         next if defined $new_hosts{$host};
+                                        do_log( "INFOR CONF: Querying new host:$host using secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 2 );
 
                                         %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -2219,22 +2245,24 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
             or log_fatal( "Unable to write to dbfile '$g{dbfile}' ($!)", 0 );
 
         for my $host ( sort keys %new_hosts ) {
-            my $ip        = $new_hosts{$host}{ip};
-            my $vendor    = $new_hosts{$host}{vendor};
-            my $model     = $new_hosts{$host}{model};
-            my $tests     = $new_hosts{$host}{tests};
-            my $ver       = exists $new_hosts{$host}{ver}       ? $new_hosts{$host}{ver}       : '';
-            my $cid       = exists $new_hosts{$host}{cid}       ? $new_hosts{$host}{cid}       : '';
-            my $secname   = exists $new_hosts{$host}{secname}   ? $new_hosts{$host}{secname}   : '';
-            my $seclevel  = exists $new_hosts{$host}{seclevel}  ? $new_hosts{$host}{seclevel}  : '';
-            my $authproto = exists $new_hosts{$host}{authproto} ? $new_hosts{$host}{authproto} : '';
-            my $authpass  = exists $new_hosts{$host}{authpass}  ? $new_hosts{$host}{authpass}  : '';
-            my $privproto = exists $new_hosts{$host}{privproto} ? $new_hosts{$host}{privproto} : '';
-            my $privpass  = exists $new_hosts{$host}{privpass}  ? $new_hosts{$host}{privpass}  : '';
+            my $ip         = $new_hosts{$host}{ip};
+            my $port       = exists $new_hosts{$host}{port} ? $new_hosts{$host}{port} : 161;
+            my $resolution = $new_hosts{$host}{resolution};
+            my $vendor     = $new_hosts{$host}{vendor};
+            my $model      = $new_hosts{$host}{model};
+            my $tests      = $new_hosts{$host}{tests};
+            my $ver        = exists $new_hosts{$host}{ver}       ? $new_hosts{$host}{ver}       : '';
+            my $cid        = exists $new_hosts{$host}{cid}       ? $new_hosts{$host}{cid}       : '';
+            my $secname    = exists $new_hosts{$host}{secname}   ? $new_hosts{$host}{secname}   : '';
+            my $seclevel   = exists $new_hosts{$host}{seclevel}  ? $new_hosts{$host}{seclevel}  : '';
+            my $authproto  = exists $new_hosts{$host}{authproto} ? $new_hosts{$host}{authproto} : '';
+            my $authpass   = exists $new_hosts{$host}{authpass}  ? $new_hosts{$host}{authpass}  : '';
+            my $privproto  = exists $new_hosts{$host}{privproto} ? $new_hosts{$host}{privproto} : '';
+            my $privpass   = exists $new_hosts{$host}{privpass}  ? $new_hosts{$host}{privpass}  : '';
 
             #default port from config?
-            my $port = 161;
-            $port = $new_hosts{$host}{port} if ( exists $new_hosts{$host}{port} );
+            #my $port = 161;
+            #$port = $new_hosts{$host}{port} if ( exists $new_hosts{$host}{port} );
 
             # Custom thresholds
             my $thresholds = '';
@@ -2270,8 +2298,8 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 $excepts .= ',' if ( $excepts !~ /,$/ );
             }
             $excepts =~ s/,$//;
-            do_log( "DEBUG CONF: $host $ip $port $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", 5 ) if $g{debug};
-            print HOSTFILE "$host\e$ip\e$port\e$vendor\e$model\e$ver\e$cid\e$secname\e$seclevel\e$authproto\e$authpass\e$privproto\e$privpass\e$tests\e$thresholds\e$excepts\n";
+            do_log( "DEBUG CONF: $host $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", 5 ) if $g{debug};
+            print HOSTFILE "$host\e$ip\e$port\e$resolution\e$vendor\e$model\e$ver\e$cid\e$secname\e$seclevel\e$authproto\e$authpass\e$privproto\e$privpass\e$tests\e$thresholds\e$excepts\n";
         }
 
         close HOSTFILE;
@@ -2346,8 +2374,8 @@ sub read_hosts {
         my $linenumber = 0;
     FILELINE: for my $line (<DBFILE>) {
             chomp $line;
-            my ( $name, $ip, $port, $vendor, $model, $ver, $cid, $secname, $seclevel, $authproto, $authpass, $privproto, $privpass, $tests, $thresholds, $excepts ) = split /\e/, $line;
-            do_log("DEBUG CONF READHOSTSDB: $name $ip $port $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts") if $g{debug};
+            my ( $name, $ip, $port, $resolution, $vendor, $model, $ver, $cid, $secname, $seclevel, $authproto, $authpass, $privproto, $privpass, $tests, $thresholds, $excepts ) = split /\e/, $line;
+            do_log("DEBUG CONF READHOSTSDB: $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts") if $g{debug};
 
             ++$linenumber;
 
@@ -2363,19 +2391,20 @@ sub read_hosts {
 
             #         my $port = $1 if $cid =~ s/::(\d+)$//;
 
-            $hosts{$name}{ip}        = $ip;
-            $hosts{$name}{port}      = $port;
-            $hosts{$name}{vendor}    = $vendor;
-            $hosts{$name}{model}     = $model;
-            $hosts{$name}{ver}       = $ver;
-            $hosts{$name}{cid}       = $cid;
-            $hosts{$name}{secname}   = $secname;
-            $hosts{$name}{seclevel}  = $seclevel;
-            $hosts{$name}{authproto} = $authproto;
-            $hosts{$name}{authpass}  = $authpass;
-            $hosts{$name}{privproto} = $privproto;
-            $hosts{$name}{privpass}  = $privpass;
-            $hosts{$name}{tests}     = $tests;
+            $hosts{$name}{ip}         = $ip;
+            $hosts{$name}{port}       = $port;
+            $hosts{$name}{resolution} = $resolution;
+            $hosts{$name}{vendor}     = $vendor;
+            $hosts{$name}{model}      = $model;
+            $hosts{$name}{ver}        = $ver;
+            $hosts{$name}{cid}        = $cid;
+            $hosts{$name}{secname}    = $secname;
+            $hosts{$name}{seclevel}   = $seclevel;
+            $hosts{$name}{authproto}  = $authproto;
+            $hosts{$name}{authpass}   = $authpass;
+            $hosts{$name}{privproto}  = $privproto;
+            $hosts{$name}{privpass}   = $privpass;
+            $hosts{$name}{tests}      = $tests;
 
             if ( defined $thresholds and $thresholds ne '' ) {
                 for my $threshes ( split ',', $thresholds ) {
