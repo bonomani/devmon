@@ -16,7 +16,7 @@
 
 ## What are we working on? (In order):
   - Current roadmap
-    - GitHub [discussion](https://github.com/bonomani/devmon/discussions)
+    - GitHub [discussions](https://github.com/bonomani/devmon/discussions)
     - GitHub [issues](https://github.com/bonomani/devmon/issues)
   - Organization of the code and best practice (Modern standard)
   - Documentation
