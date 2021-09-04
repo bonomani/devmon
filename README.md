@@ -1,6 +1,6 @@
 <!DOCTYPE markdown>
 # Devmon
->   Devmon is an open-source SNMP monitor tool that can graph and alert
+>   Devmon is an open-source SNMP monitoring tool that can graph and alert
   several hundreds of devices per minutes
 
 ![devmon_current_status](devmon_current_status.png)
