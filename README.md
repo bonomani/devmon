@@ -15,7 +15,9 @@
   - Enjoy new speed...
 
 ## What are we working on? (In order):
-  - GitHub issues (are the current roadmap)
+  - Current roadmap
+    - GitHub [discussion](https://github.com/bonomani/devmon/discussions)
+    - GitHub [issues](https://github.com/bonomani/devmon/issues)
   - Organization of the code and best practice (Modern standard)
   - Documentation
   - Compatibility with IPv6
@@ -45,7 +47,6 @@
 - MySQL (for multi-node configuration)
 
 ## Features
-
 - Multithread polling engine
   - Devmon is able to spawn a user-configurable number of child processes to
     offload the SNMP v1,v2c,v3 query workload to. This allows for the rapid
