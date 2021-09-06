@@ -1402,6 +1402,7 @@ FILEREAD: do {
 
         # Now interate through our file and suck out the juicy bits
     FILELINE: while ( my $line = <HOSTSCFG> ) {
+            next if $line =~ /^\s#/ ; 
             chomp $line;
 
             while ( $line =~ s/\\$// and !eof(HOSTSCFG) ) {
@@ -1468,8 +1469,10 @@ FILEREAD: do {
                             $ip = join '.', unpack( 'C4', $addrs[0] );    # Use first address
                         } else {
 
-                            # we dont resoled the hostname but maybe we have already resolved it
-                            # adn we have an IP in our DB so we dont skip it for now
+                            # we were not able resoled the hostname but maybe we have already
+                            # resolved it in a previous process. We dont skip at this level anymore
+                            # and we will look in hosts.db (old_host) if there is an ip for this 
+                            # hostname. But log it as there is a problem (may be a dns outage only)
                             do_log( "Unable to resolve DNS name for host '$host'", 0 );
                         }
                     } else {
