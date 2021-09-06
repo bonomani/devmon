@@ -1402,7 +1402,7 @@ FILEREAD: do {
 
         # Now interate through our file and suck out the juicy bits
     FILELINE: while ( my $line = <HOSTSCFG> ) {
-            next if $line =~ /^\s#/ ; 
+            next if $line =~ /^\s*#/ ; 
             chomp $line;
 
             while ( $line =~ s/\\$// and !eof(HOSTSCFG) ) {
