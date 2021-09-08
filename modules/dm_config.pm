@@ -1473,7 +1473,8 @@ FILEREAD: do {
                             # resolved it in a previous process. We dont skip at this level anymore
                             # and we will look in hosts.db (old_host) if there is an ip for this 
                             # hostname. But log it as there is a problem (may be a dns outage only)
-                            do_log( "Unable to resolve DNS name for host '$host'", 0 );
+                            $ip = undef;
+                            do_log( "INFOR CONF: Unable to resolve DNS name for host '$host'", 0 );
                         }
                     } else {
                         $hosts_cfg{$host}{resolution} = 'xymon_host';
@@ -1634,13 +1635,18 @@ FILEREAD: do {
         }
 
         # We were unable to make a name resolution so far but maybe we have the
-        # teporaris DNS failus so we ca try to keep our old value. If it is not
-        # a valid value we can skip it
-        if ( $hosts_cfg{$host}{ip} eq '0.0.0.0' ) {
-            next if $old_hosts{$host}{ip} eq '0.0.0.0';
-            $snmp_input{$host}{ip} = $old_hosts{$host}{ip};
-        } else {
-            $snmp_input{$host}{ip} = $hosts_cfg{$host}{ip};
+        # temporary name resolution failure. We ca try to keep a previously discovered 
+        # value. If it is not a valid value or if we do not have any skip the SNMP discovery
+        if ( not defined $hosts_cfg{$host}{ip} ) {
+            if (exists $old_hosts{$host}{ip}) {
+                if (defined $old_hosts{$host}{ip} and $old_hosts{$host}{ip} ne '0.0.0.0') {
+                     $snmp_input{$host}{ip} = $old_hosts{$host}{ip};
+                } else {
+                    next;
+                }
+            } else {
+                next;
+            }
         }
 
         $snmp_input{$host}{dev} = $host;
@@ -1740,7 +1746,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         # First query hosts with custom cids
         if ( $custom_cids and $snmpver < 3 ) {
 
-            #do_log( "INFOR CONF: Querying $hosts_left new hosts as $custom_cids custom cids exist using snmp v$snmpver", 1 );
+            do_log( "INFOR CONF: $hosts_left new host(s) and $custom_cids custom cid(s) trying using snmp v$snmpver", 1 );
 
             # Zero out our data in and data out hashes
             %{ $g{snmp_data} } = ();
@@ -1751,9 +1757,12 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Skip if they have already been succesfully queried
                 next if defined $new_hosts{$host};
 
+                # Skip if ip is not defined (name resolution) 
+                next if !defined $hosts_cfg{$host}{ip};
+
                 # Skip if they don't have a custom cid
                 next if !defined $hosts_cfg{$host}{cid};
-                do_log( "INFOR CONF: Querying new host:$host with custom cid:'$hosts_cfg{$host}{cid}' using snmp v$snmpver", 2 );
+                do_log( "INFOR CONF: Valid new host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", 2 );
 
                 # Skip if version > 2
                 #next if $snmpver > 2;
@@ -1764,7 +1773,8 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 $snmp_input{$host}{dev}  = $host;
                 $snmp_input{$host}{ver}  = $snmpver;
                 $snmp_input{$host}{cid}  = $hosts_cfg{$host}{cid};
-                $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip}   if defined $hosts_cfg{$host}{ip};
+#                $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip}   if defined $hosts_cfg{$host}{ip};
+                $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
                 $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
 
                 # Add our sysdesc oid
@@ -1847,7 +1857,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Don't bother if we don't have any hosts left to query
                 next if $hosts_left < 1;
 
-                do_log( "INFOR CONF: Querying $hosts_left new hosts using cid:'$cid' and snmp v$snmpver", 1 );
+                do_log( "INFOR CONF: $hosts_left new host(s) left, trying cid:'$cid' and snmp v$snmpver", 1 );
 
                 # Zero out our data in and data out hashes
                 %{ $g{snmp_data} } = ();
@@ -1863,7 +1873,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                     # Don't query this host if we already have succesfully done so
                     next if defined $new_hosts{$host};
-                    do_log( "INFOR CONF: Querying new host:$host with cid:'$cid' using snmp v$snmpver", 2 );
+
+                    # Skip if ip is not defined (name resolution)
+                    next if !defined $hosts_cfg{$host}{ip};
+                                 
+                    do_log( "INFOR CONF: Valid new host:$host with cid:'$cid' using snmp v$snmpver", 2 );
 
                     %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -1880,9 +1894,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Reset our failed hosts
                 $g{fail} = {};
 
-                # Throw data to our query forks
-                do_log( "DEBUG CONF: SEND DATA TO SNMP", 0 ) if $g{debug};
-                dm_snmp::snmp_query( \%snmp_input );
+                # If there is some valid hosts, query them   
+                if (keys %snmp_input) {
+                   do_log( "DEBUG CONF: Sending data to SNMP", 0 ) if $g{debug};
+                   dm_snmp::snmp_query( \%snmp_input );
+                 }
 
                 # Now go through our resulting snmp-data
             CUSTOMHOST: for my $host ( keys %{ $g{snmp_data} } ) {
@@ -1980,7 +1996,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                     # Don't bother if we don't have any hosts left to query
                                     next if $hosts_left < 1;
 
-                                    do_log( "INFOR CONF: Querying $hosts_left new hosts using secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 1 );
+                                    do_log( "INFOR CONF: $hosts_left new host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 1 );
 
                                     # Zero out our data in and data out hashes
                                     %{ $g{snmp_data} } = ();
@@ -1992,7 +2008,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                         # Don't query this host if we already have succesfully done so
                                         next if defined $new_hosts{$host};
-                                        do_log( "INFOR CONF: Querying new host:$host using secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 2 );
+
+                                        # Skip if ip is not defined (name resolution)
+                                        next if !defined $hosts_cfg{$host}{ip};
+                                        
+                                        do_log( "INFOR CONF: Valid new host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 2 );
 
                                         %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -2014,10 +2034,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                     # Reset our failed hosts
                                     $g{fail} = {};
-
-                                    # Throw data to our query forks
-                                    do_log( "DEBUG CONF: SEND DATA TO SNMP", 0 ) if $g{debug};
-                                    dm_snmp::snmp_query( \%snmp_input );
+                                    # If there is some valid hosts, query them
+                                    if (keys %snmp_input) {
+                                        do_log( "DEBUG CONF: Sending data to SNMP", 0 ) if $g{debug};
+                                        dm_snmp::snmp_query( \%snmp_input );
+                                    }
 
                                     # Now go through our resulting snmp-data
                                 CUSTOMHOST: for my $host ( keys %{ $g{snmp_data} } ) {
