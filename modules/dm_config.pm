@@ -1638,20 +1638,16 @@ FILEREAD: do {
         # temporary name resolution failure. We ca try to keep a previously discovered 
         # value. If it is not a valid value or if we do not have any skip the SNMP discovery
         if ( not defined $hosts_cfg{$host}{ip} ) {
-            if (exists $old_hosts{$host}{ip}) {
-                if (defined $old_hosts{$host}{ip} and $old_hosts{$host}{ip} ne '0.0.0.0') {
-                     $snmp_input{$host}{ip} = $old_hosts{$host}{ip};
-                } else {
-                    next;
-                }
+            if ((exists $old_hosts{$host}{ip}) and (defined $old_hosts{$host}{ip}) and ($old_hosts{$host}{ip} ne '0.0.0.0')) {
+                $snmp_input{$host}{ip} = $old_hosts{$host}{ip};
             } else {
-                next;
+                next; #skip this host has we dont have an ip
             }
+        } else {
+            $snmp_input{$host}{ip}         = $hosts_cfg{$host}{ip};
         }
 
         $snmp_input{$host}{dev} = $host;
-
-        #        $snmp_input{$host}{ip}         = $hosts_cfg{$host}{ip};
         $snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
         $snmp_input{$host}{port}       = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
         $snmp_input{$host}{ver}        = $ver;
