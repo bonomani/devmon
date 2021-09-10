@@ -4080,13 +4080,10 @@ sub validate_deps {
 
                 # Record the fact that we got at least 1 good data value
                 $all_error = 0;
-
-                # Throw one error message
-                do_log( "ERROR TEST: '$oid_h->{val}' while parsing '$dep_oid' on $device", 5 ) if $oid_h->{error};
             }
 
-            # Throw one error message per leaf, to prevent log bloat
-            do_log( "ERROR TEST: '$oid_h->{val}' while parsing on $device", 4 ) if $oid_h->{error};
+            # Throw one error message 
+            do_log( "ERROR TEST: '$oid_h->{val}' while parsing '$dep_oid' on $device", 4 ) if $oid_h->{error};
             return 0                                                            if $oid_h->{error};
         }
     }
