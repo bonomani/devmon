@@ -1,0 +1,4 @@
+vendor	: dell
+model	: drac5
+snmpver	: 2
+sysdesc : Dell
