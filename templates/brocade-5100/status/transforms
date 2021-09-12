@@ -1,0 +1,30 @@
+connUnitIdWWN   : UNPACK        : {connUnitId} H16
+connUnitIdTxt   : REGSUB        : {connUnitIdWWN} /(..)(..)(..)(..)(..)(..)(..)(..)/$1:$2:$3:$4:$5:$6:$7:$8/
+connUnitDomainIdNum   : UNPACK        : {connUnitDomainId} H6
+connUnitDomainIdTxt   : REGSUB        : {connUnitDomainIdNum} /^0+//
+connUnitTypeTxt : SWITCH        : {connUnitType} 1=unknown,2=other,3=hub,4=switch,5=gateway,6=converter,7=hba,8=proxy-agent,9=storage-device,10=host,11=storage-subsystem,12=module,13=swdriver,14=storage-access-device,15=wdm,16=ups,17=nas
+connUnitStateTxt        : SWITCH        : {connUnitState} 1=unknown,2=online,3=offline
+connUnitStatusTxt       : SWITCH        : {connUnitStatus} 1=unknown,2=unused,3=ok,4=warning,5=failed
+connUnitUpTimeSecs	: MATH	: {connUnitUpTime} / 100 : 0
+connUnitUpTimeTxt	: ELAPSED	: {connUnitUpTimeSecs}
+connUnitProxyMasterTxt  : SWITCH        : {connUnitProxyMaster} 1=unknown,2=no,3=yes
+connUnitPrincipalTxt    : SWITCH        : {connUnitPrincipal} 1=unknown,2=no,3=yes
+connUnitControlTxt      : SWITCH        : {connUnitControl} 1=unknown,2=invalid,3=resetColdStart,4=resetWarmStart,5=offline,6=online
+#connUnitEventFilterTxt  : SWITCH        : {connUnitEventFilter} 1=unknown,2=emergency,3=alert,4=critical,5=error,6=warning,7=notify,8=info,9=debug,10=mark
+connUnitSensorStatusTxt : SWITCH        : {connUnitSensorStatus} 1=unknown,2=other,3=ok,4=warning,5=failed
+connUnitSensorTypeTxt   : SWITCH        : {connUnitSensorType} 1=unknown,2=other,3=battery,4=fan,5=PSU,6=transmitter,7=ENC,8=board,9=receiver
+connUnitSensorCharacteristicTxt : SWITCH        : {connUnitSensorCharacteristic} 1=unknown,2=other,3=Temp,4=Pressure,5=EMF,6=Current,7=Airflow,8=Freq,9=Power,10=Door
+connUnitSensorValue : REGSUB        : {connUnitSensorMessage} /.* value is (\S+)\s*/$1/
+connUnitPortTypeTxt     : SWITCH        : {connUnitPortType} 1=unknown,2=other,3=not-present,4=hub-port,5=N-port,6=NL-port,7=FL-port,8=F-port,9=E-port,10=G-port,11=domain-ctl,12=hub-controller,13=SCSI,14=escon,15=LAN,16=WAN,17=AC,18=DC,19=ssa,20=wdm,21=ib,22=ipstore
+connUnitPortStateTxt    : SWITCH        : {connUnitPortState} 1=unknown,2=online,3=offline,4=bypassed,5=diagnostics
+connUnitPortStatusTxt   : SWITCH        : {connUnitPortStatus} 1=unknown,2=unused,3=ready,4=warning,5=failure,6=notparticipating,7=initializing,8=bypass,9=ols,10=other
+connUnitPortTransmitterTypeTxt  : SWITCH        : {connUnitPortTransmitterType} 1=??,2=other,3=unused,4=SW,5=LW,6=Copper,7=scsi,8=LWNoOFC,9=SWNoOFC,10=LWLED,11=ssa
+connUnitPortModuleTypeTxt       : SWITCH        : {connUnitPortModuleType} 1=unknown,2=other,3=GBIC,4=embedded,5=glm,6=gbicSerialId,7=gbicNoSerialId,8=None,9=SFP
+connUnitPortSpeedVal    : MATH   : {connUnitPortSpeed}/125000 : 0
+connUnitPortControlTxt  : SWITCH        : {connUnitPortControl} 1=unknown,2=invalid,3=reset,4=bypass,5=unbypass,6=offline,7=online,8=resetCounters
+connUnitPortHWStateTxt  : SWITCH        : {connUnitPortHWState} 1=unknown,2=failed,3=bypassed,4=active,5=loopback,6=txfault,7=noMedia,8=linkDown
+connUnitPortBestState  : BEST        : {connUnitPortHWState},{connUnitPortStateTxt},{connUnitPortStatusTxt}
+#connUnitEventSeverityTxt        : SWITCH        : {connUnitEventSeverity} 1=unknown,2=emergency,3=alert,4=critical,5=error,6=warning,7=notify,8=info,9=debug,10=mark
+#connUnitEventTypeTxt    : SWITCH        : {connUnitEventType} 1=unknown,2=other,3=status,4=configuration,5=topology
+#connUnitLinkUnitTypeYTxt        : SWITCH        : {connUnitLinkUnitTypeY} 1=unknown,2=other,3=hub,4=switch,5=gateway,6=converter,7=hba,8=proxy-agent,9=storage-device,10=host,11=storage-subsystem,12=module,13=swdriver,14=storage-access-device,15=wdm,16=ups,17=nas
+

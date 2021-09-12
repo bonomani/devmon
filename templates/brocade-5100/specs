@@ -1,0 +1,4 @@
+vendor	: brocade
+model	: 5100
+snmpver	: 2
+sysdesc : Brocade5100

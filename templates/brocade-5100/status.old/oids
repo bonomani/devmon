@@ -1,0 +1,8 @@
+swFirmwareVersion 	: .1.3.6.1.4.1.1588.2.1.1.1.1.6           : branch
+swOperStatus 		: .1.3.6.1.4.1.1588.2.1.1.1.1.7		  : branch
+swAdmStatus 		: .1.3.6.1.4.1.1588.2.1.1.1.1.8		  : branch
+swSensorInfo 		: .1.3.6.1.4.1.1588.2.1.1.1.1.22.1.5	: branch
+swSensorValue 		: .1.3.6.1.4.1.1588.2.1.1.1.1.22.1.4	: branch
+swSensorStatus 		: .1.3.6.1.4.1.1588.2.1.1.1.1.22.1.3	: branch
+swSensorType 		: .1.3.6.1.4.1.1588.2.1.1.1.1.22.1.2	: branch
+swSensorIndex 		: .1.3.6.1.4.1.1588.2.1.1.1.1.22.1.1	: branch
