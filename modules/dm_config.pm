@@ -29,7 +29,6 @@ require dm_tests;
 require dm_templates;
 use IO::File;
 use FindBin;
-
 use Getopt::Long;
 use Sys::Hostname;
 
@@ -339,7 +338,12 @@ sub initialize {
     $syncconfig = $synctemps = $resetowner = $readhosts = 0;
 
     GetOptions(
-        "verbose+"                 => \$g{verbose},
+        "help|?"                   => \&help,
+        "v+"                       => \$g{verbose},
+        "vv"                       => sub { $g{verbose} += 2 },
+        "vvv"                      => sub { $g{verbose} += 3 },
+        "vvvv"                     => sub { $g{verbose} += 4 },
+        "vvvvv"                    => sub { $g{verbose} += 5 },
         "configfile=s"             => \$g{configfile},
         "dbfile=s"                 => \$g{dbfile},
         "foreground"               => \$g{foreground},
@@ -347,6 +351,7 @@ sub initialize {
         "1"                        => \$oneshot,
         "hostonly=s"               => \$g{hostonly},
         "debug"                    => \$g{debug},
+        "trace"                    => \$g{trace},
         "syncconfig"               => \$syncconfig,
         "synctemplates"            => \$synctemps,
         "resetowners"              => \$resetowner,
@@ -361,6 +366,13 @@ sub initialize {
 
     # If we check only 1 host, do not daemonize
     if ( $g{hostonly} ) {
+        $g{daemonize} = 0;
+    }
+     
+    # Trace mode
+    if ( $g{trace} ) {
+        $g{verbose}   = 6;
+        $g{debug}     = 1;
         $g{daemonize} = 0;
     }
 
@@ -2537,7 +2549,48 @@ sub nd { $b <=> $a }
 
 # Print help
 sub usage {
-    die "Devmon v$g{version}, a device monitor for Xymon\n" . "\n" . "Usage: devmon [arguments]\n" . "\n" . "  Arguments:\n" . "   -c[onfigfile]  Specify config file location\n" . "   -db[file]      Specify database file location\n" . "   -f[oregrond]   Run in foreground. Prevents running in daemon mode\n" . "   -h[ostonly]    Poll only hosts matching the pattern that follows\n" . "   -p[rint]       Don't send message to display server but print it on stdout\n" . "   -v[erbose]     Verbose mode. The more -v's, the more vebose logging max 5: -v -v -v -v -v \n" . "   -de[bug]       Print debug output (this can be quite extensive)\n" . "\n" . "  Mutually exclusive arguments:\n" . "   -rea[dhostscfg]   Read in data from the Xymon hosts.cfg file\n" . "   -syncc[onfig]    Update multinode DB with the global config options\n" . "                    configured on this local node\n" . "   -synct[emplates] Update multinode device templates with the template\n" . "                    data on this local node\n" . "   -res[etowners]   Reset multinode device ownership data.  This will\n" . "                    cause all nodes to recalculate ownership data\n" . "\n";
+   use File::Basename;
+   if (@_) {
+      my ($msg) = @_;
+      chomp($msg);
+      say STDERR $msg;
+   }
+
+   my $prog = basename($0);
+   say STDERR "Try '$prog -?' for more information.";
+   exit(1);
+}
+
+sub help {
+   use File::Basename;
+   my $prog = basename($0);
+   print <<"EOF";
+Devmon v$g{version}, a device monitor for Xymon
+Usage:
+
+  $prog [options]
+  $prog -? -he[lp] 
+
+Options:
+ -c[onfigfile]    Specify config file location  
+ -db[file]        Specify database file location  
+ -f[oregrond]     Run in foreground. Prevents running in daemon mode  
+ -ho[stonly]      Poll only hosts matching the pattern that follows
+ -p[rint]         Don't send message to display server but print it on stdout  
+ -v -vv           Verbose mode. The more -v's, the more verbose logging max 6: -vvvvvv  
+ -de[bug]         Print debug output (this can be quite extensive)
+ -t[race]         Trace (same -f -de -vvvvvv) 
+
+Mutually exclusive options:  
+ -rea[dhostscfg]  Read in data from the Xymon hosts.cfg file  
+ -syncc[onfig]    Update multinode DB with the global config options
+                  configured on this local node  
+ -synct[emplates] Update multinode device templates with the template
+                  data on this local node  
+ -res[etowners]   Reset multinode device ownership data.  This will
+                  cause all nodes to recalculate ownership data
+EOF
+exit(1);
 }
 
 # Sub to call when we quit, be it normally or not
