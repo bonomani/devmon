@@ -43,13 +43,13 @@ sub send_msgs {
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
 
-    # Print messages to stdout if requested
-    if ( $g{print_msg} and defined $g{test_results} ) {
+    # Print messages to output if requested
+    if ( $g{output} and defined $g{test_results} ) {
         print join "\n", @{ $g{test_results} };
     }
 
     # Don't actually send messages if we are printing them
-    if ( $g{print_msg} ) {
+    if ( $g{output} ) {
         $g{msgxfrtime} = time - $g{msgxfrtime};
         print dm_stat_msg();
         return;
@@ -196,7 +196,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
     # Now send our dm status message!
-    if ( !$g{print_msg} ) {
+    if ( !$g{output} ) {
         my $dm_msg  = dm_stat_msg();
         my $msgsize = length $dm_msg;
         do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 3 ) if $g{debug};
