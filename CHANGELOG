@@ -37,9 +37,9 @@ Changes since v0.16.12.15
 Devmon v0.16.12.15 
   Changes since v0.3.1-beta1
   - Fork Soureforge
-  - New release versionning
+  - New release versioning
     - Stay under 1 (we consider there is a room of improvement befer release 1.
-    - Date versionning v0.16.12.15 = 2016-12-15
+    - Date versioning v0.16.12.15 = 2016-12-15
   - Modify "core" concept: Error propagation is the default 
   - Improved User-Friendliness
     - Error reporting
