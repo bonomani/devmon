@@ -1,0 +1,7 @@
+TABLE:
+Firmware Version | Operation Status | Admin Operation Status 
+{swFirmwareVersion} | {swOperStatus.color}{swOperStatusTXT}  | {swAdmStatus.color}{swAdmStatusTXT}
+
+TABLE:
+Sensor Info | Sensor Value | Sensor Status | Sensor Type
+{swSensorInfo} | {swSensorValue} | {swSensorStatus.color}{swSensorStatusTXT} | {swSensorTypeTXT}

@@ -1,0 +1,4 @@
+swOperStatusTXT	: SWITCH : {swOperStatus} 1 = Online, 2 = Offline, 3 = Testing, 4 = Faulty
+swAdmStatusTXT	: SWITCH : {swOperStatus} 1 = Online, 2 = Offline, 3 = Testing, 4 = Faulty, 5 = reboot, 6 = fastboot, 7 = switchReboot
+swSensorStatusTXT : SWITCH : {swSensorStatus} 1 = Unknown, 2 = Faulty, 3 = Below Min, 4 = Nominal, 5 = Above Max, 6 = Absent
+swSensorTypeTXT : SWITCH : {swSensorType} 1 = Temperature, 2 = Fan, 3 = Power Supply

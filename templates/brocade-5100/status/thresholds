@@ -1,0 +1,24 @@
+connUnitStateTxt        : green  : online     :
+connUnitStateTxt        : yellow : unknown    :
+connUnitStateTxt        : red    : offline    :
+connUnitStatusTxt       : green  : ok :
+connUnitStatusTxt       : yellow : unknown|unused|warning :
+connUnitStatusTxt       : red    : failed     :
+connUnitControlTxt      : green  : online     :
+connUnitControlTxt      : yellow : unknown|invalid|resetColdStart|resetWarmStart        :
+connUnitControlTxt      : red    : offline    :
+connUnitSensorStatusTxt : green  : ok|other :
+connUnitSensorStatusTxt : yellow : unknown|warning  :
+connUnitSensorStatusTxt : red    : failed     :
+connUnitPortStateTxt    : green  : online     :
+connUnitPortStateTxt    : yellow : offline|unknown|bypassed|diagnostics   :
+connUnitPortStateTxt    : red    : :
+connUnitPortStatusTxt   : green  : unused|ready|ols     :
+connUnitPortStatusTxt   : yellow : unknown|warning|notparticipating|initializing|other       :
+connUnitPortStatusTxt   : red    : failure|bypass    :
+connUnitPortControlTxt  : green  : onlinePort :
+connUnitPortControlTxt  : yellow : unknown|invalid|reset|bypass|unbypass|resetCounters      :
+connUnitPortControlTxt  : red    : offline        :
+connUnitPortHWStateTxt  : green  : active|unknown|noMedia     :
+connUnitPortHWStateTxt  : yellow : bypassed|loopback|txfault|linkDown      :
+connUnitPortHWStateTxt  : red    : failed     :

@@ -1,0 +1,3 @@
+swOperStatus	: red : >1 : {swOperStatusTXT}
+swAdmStatus	: red : >1 : {swAdmStatusTXT}
+swSensorStatus	: red : 1|2|3|5 : {swSensorStatusTXT}

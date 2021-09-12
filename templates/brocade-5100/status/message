@@ -1,0 +1,24 @@
+Switch Details
+TABLE:noalarmsmsg
+ID|Type|Name|SerNo|State|Status|Uptime
+{connUnitIdTxt}|{connUnitTypeTxt}|{connUnitName}|{connUnitSn}|{connUnitStateTxt.color}{connUnitStateTxt}|{connUnitStatusTxt.color}{connUnitStatusTxt}|{connUnitUpTimeTxt}
+
+Switch Info
+TABLE:noalarmsmsg
+Ports|DomID|PrxyMst|Princ
+{connUnitNumports}|{connUnitDomainIdTxt}|{connUnitProxyMasterTxt}|{connUnitPrincipalTxt}
+
+Revisions
+TABLE:noalarmsmsg
+Item|Rev
+{connUnitRevsDescription}|{connUnitRevsRevId}
+
+Sensors
+TABLE:noalarmsmsg
+ID|Name|Status|Location|Type|Value|Message
+{connUnitSensorIndex}|{connUnitSensorName}|{connUnitSensorStatusTxt.color}{connUnitSensorStatusTxt}|{connUnitSensorTypeTxt}|{connUnitSensorCharacteristicTxt}|{connUnitSensorValue}|{connUnitSensorMessage}
+
+Ports
+TABLE:noalarmsmsg
+ID|Phys|Type|State|Status|HWState|SFP Type|SerNo|Vendor|Speed|Ctl
+{connUnitPortBestState.color}{connUnitPortIndex}|{connUnitPortPhysicalNumber}|{connUnitPortTypeTxt}|{connUnitPortStateTxt}|{connUnitPortStatusTxt.color}{connUnitPortStatusTxt}|{connUnitPortHWStateTxt}|{connUnitPortTransmitterTypeTxt} {connUnitPortModuleTypeTxt}|{connUnitPortSn}|{connUnitPortVendor}|{connUnitPortSpeedVal} Gbps|{connUnitPortControlTxt}
