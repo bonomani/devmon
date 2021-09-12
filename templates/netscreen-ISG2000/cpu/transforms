@@ -1,0 +1,2 @@
+#PerCentMemFree : MATH : ( {ResMemLeft} * 100 ) / ( {ResMemLeft} + {ResMemFrag} + {ResMemAllocate} ) : 4
+#PerCentMemFrag : MATH : ( {ResMemFrag} * 100 ) / ( {ResMemLeft} + {ResMemFrag} + {ResMemAllocate} ) : 4

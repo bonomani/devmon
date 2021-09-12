@@ -1,0 +1,3 @@
+TABLE:
+Fan Type|Fan state
+{FanDescr}|{FanStatus.color}{FanStatus}

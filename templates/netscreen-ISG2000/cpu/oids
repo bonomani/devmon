@@ -1,0 +1,10 @@
+ResCpuAvg	: .1.3.6.1.4.1.3224.16.1.1.0	: leaf
+ResCpuLast1min	: .1.3.6.1.4.1.3224.16.1.2.0	: leaf
+ResCpuLast5min	: .1.3.6.1.4.1.3224.16.1.3.0	: leaf
+ResCpuLast15min	: .1.3.6.1.4.1.3224.16.1.4.0	: leaf
+ResMemAllocate	: .1.3.6.1.4.1.3224.16.2.1.0	: leaf
+ResMemLeft	: .1.3.6.1.4.1.3224.16.2.2.0	: leaf
+ResMemFrag	: .1.3.6.1.4.1.3224.16.2.3.0	: leaf
+ResSessAllocate	: .1.3.6.1.4.1.3224.16.3.2.0	: leaf
+ResSessMaximum	: .1.3.6.1.4.1.3224.16.3.3.0	: leaf
+ResSessFailed	: .1.3.6.1.4.1.3224.16.3.4.0	: leaf

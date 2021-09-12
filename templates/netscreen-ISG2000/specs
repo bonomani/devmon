@@ -1,0 +1,4 @@
+vendor	: NetScreen-ISG
+model	: 2000
+snmpver	: 2
+sysdesc : NetScreen-ISG

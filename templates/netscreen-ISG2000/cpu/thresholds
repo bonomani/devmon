@@ -1,0 +1,11 @@
+#PerCentMemFree	: red		: <10  
+#PerCentMemFree	: yellow	: <20  
+ResCpuAvg	: red		: >=50	: CPU Too High
+ResCpuAvg	: yellow	: >=30	: CPU little bit High
+ResCpuLast1min	: red		: >=50	: CPU Too High
+ResCpuLast1min	: yellow	: >=30	: CPU little bit High
+ResCpuLast5min  : red           : >=50  : CPU Too High
+ResCpuLast5min  : yellow        : >=30  : CPU little bit High
+ResCpuLast15min : red           : >=50  : CPU Too High
+ResCpuLast15min : yellow        : >=30  : CPU little bit High
+

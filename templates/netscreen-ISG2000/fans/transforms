@@ -1,0 +1,1 @@
+FanStatus : SWITCH : {FanState} 0=Fail,1=Good,2=Not installed
