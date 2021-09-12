@@ -1,0 +1,4 @@
+vendor	: apc
+model	: 8853
+snmpver	: 1
+sysdesc : MN:AP8853

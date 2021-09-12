@@ -1,0 +1,17 @@
+PDU status
+
+Name            ->  {sysName}
+Location        ->  {sysLocation}
+
+Vendor          ->  apc
+Model           ->  {sPDUIdentModelNumber}
+Firmware        ->  {sPDUIdentFirmwareRev}
+
+Status A        ->  {pduLoadState3.color}{pduLoadState3}
+Status B        ->  {pduLoadState2.color}{pduLoadState2}
+Status Power    ->  {pduLoadState1.color}{pduLoadState1}
+
+LoadA           :   {pduLoad3}
+LoadB           :   {pduLoad2}
+Power           :   {pduLoad1}
+

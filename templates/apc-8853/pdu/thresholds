@@ -1,0 +1,6 @@
+pduLoadState1	: red		: Overload		: Phase Overloaded
+pduLoadState1	: yellow	: Near Overload		: Phase Near Overload
+pduLoadState2	: red		: Overload		: Bank A Overloaded
+pduLoadState2	: yellow	: Near Overload		: Bank A Near Overload
+pduLoadState3	: red		: Overload		: Bank B Overloaded
+pduLoadState3	: yellow	: Near Overload		: Bank B Near Overload

@@ -1,0 +1,8 @@
+pduLoad1	: MATH : {rPDULoadStatusLoad1} / 10
+pduLoad2	: MATH : {rPDULoadStatusLoad2} / 10
+pduLoad3	: MATH : {rPDULoadStatusLoad3} / 10
+
+pduLoadState1	: SWITCH : {rPDULoadStatusLoadState1} 1=Normal load,2=Low,3=Near Overload,4=Overload
+pduLoadState2	: SWITCH : {rPDULoadStatusLoadState2} 1=Normal load,2=Low,3=Near Overload,4=Overload
+pduLoadState3	: SWITCH : {rPDULoadStatusLoadState3} 1=Normal load,2=Low,3=Near Overload,4=Overload
+
