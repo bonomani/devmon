@@ -216,6 +216,11 @@ MODEL: for my $dir (@dirs) {
             do_log( "ERROR TMPL: Unable to read test folder $dir/$test, skipping this test", 0 ) and next TEST
                 if !-r "$dir/$test";
 
+            # Honor 'probe' and 'match' command line: Filter unmatch template
+            if ( defined $g{match_test} and $test !~ /$g{match_test}/  ) {
+               next;
+            }
+
             # Barf if we are trying to define a pre-existing template
             if ( defined $g{templates}{$vendor}{$model}{tests}{$test} ) {
                 do_log( "ERROR TMPL: Attempting to redefine $vendor/$model/$test template " . "when reading data from $dir." );

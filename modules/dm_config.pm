@@ -47,14 +47,14 @@ sub initialize {
         'homedir'       => $FindBin::Bin,
         'configfile'    => "$FindBin::Bin/devmon.cfg",
         'dbfile'        => "$FindBin::Bin/hosts.db",
-        'daemonize'     => 1,
+#        'daemonize'     => 1,
+        'foreground'    => 0,
         'initialized'   => 0,
         'mypid'         => 0,
         'verbose'       => 0,
         'debug'         => 0,
         'oneshot'       => 0,
-        'print_msg'     => 0,
-        'hostonly'      => '',
+        'output'        => 0,
         'shutting_down' => 0,
         'active'        => '',
         'pidfile'       => '',
@@ -336,6 +336,7 @@ sub initialize {
     # Parse command line options
     my ( $syncconfig, $synctemps, $resetowner, $readhosts, $oneshot );
     $syncconfig = $synctemps = $resetowner = $readhosts = 0;
+    my (%match, $hostonly, $probe);
 
     GetOptions(
         "help|?"                   => \&help,
@@ -347,9 +348,11 @@ sub initialize {
         "configfile=s"             => \$g{configfile},
         "dbfile=s"                 => \$g{dbfile},
         "foreground"               => \$g{foreground},
-        "print_msg"                => \$g{print_msg},
+        "output"                   => \$g{output},
         "1"                        => \$oneshot,
-        "hostonly=s"               => \$g{hostonly},
+        "match=s%"                 => sub { push(@{$match{$_[1]}}, $_[2]) },
+        "hostonly=s"               => \$hostonly,
+	"probe=s"                  => \$probe,
         "debug"                    => \$g{debug},
         "trace"                    => \$g{trace},
         "syncconfig"               => \$syncconfig,
@@ -360,22 +363,43 @@ sub initialize {
 
     # Check / fix command line options
     # The original code used -f to set daemonize=0
-    if ( $g{foreground} ) {
-        $g{daemonize} = 0;
-    }
-
-    # If we check only 1 host, do not daemonize
-    if ( $g{hostonly} ) {
-        $g{daemonize} = 0;
-    }
+#    if ( $g{foreground} ) {
+#        $g{daemonize} = 0;
+#    }
      
     # Trace mode
     if ( $g{trace} ) {
         $g{verbose}   = 6;
         $g{debug}     = 1;
-        $g{daemonize} = 0;
+        $g{foreground} =1;
     }
 
+    #  probe mode
+    if ($probe) {
+        $g{foreground} =1;
+        ($g{match_iphost}, $g{match_test}) = split '=',$probe;
+    }
+    #  Match filter mode
+    elsif ( %match ) {
+        $g{foreground} =1;
+        foreach my $match_key ( keys %match) { 
+            if ( $match_key eq 'ip')  {
+                $g{match_ip} = join('|', map { "(?:$_)" } @{$match{ip}});
+            } elsif ( $match_key eq 'host')   {
+                $g{match_host} = join('|', map { "(?:$_)" } @{$match{host}});
+            } elsif ( $match_key eq 'test')   {
+                $g{match_test} = join('|', map { "(?:$_)" } @{$match{test}});
+            } else { 
+                do_log('Option match, unkown key "'.$match_key.'"');
+                usage();
+            }
+        }
+    } 
+    # If we check only 1 host, do not daemonize (deprecated by probe)
+    elsif ( $hostonly ) {
+        $g{foreground} =1;
+        $g{match_iphost} = $hostonly;
+    }
     # Undocumented option.
     if ($oneshot) {
         $g{verbose} = 2;
@@ -384,8 +408,9 @@ sub initialize {
     }
 
     # Don't daemonize if we are printing messages
-    if ( $g{print_msg} ) {
-        $g{daemonize} = 0;
+    if ( $g{output} ) {
+#        $g{daemonize} = 0;
+        $g{foreground} =1;
     }
 
     # Now read in our local config info from our file
@@ -420,7 +445,8 @@ sub initialize {
     $g{mypid} = $$;
 
     # PID file handling
-    if ( $g{daemonize} ) {
+#    if ( $g{daemonize} ) {
+    if ( !$g{foreground} ) { 
 
         # Check to see if a pid file exists
         if ( -e $g{pidfile} ) {
@@ -1173,7 +1199,8 @@ sub rewrite_config {
 sub open_log {
 
     # Don't open the log if we are not in daemon mode
-    return if $g{logfile} =~ /^\s*$/ or !$g{daemonize};
+#    return if $g{logfile} =~ /^\s*$/ or !$g{daemonize};
+    return if $g{logfile} =~ /^\s*$/ or $g{foreground};
 
     $g{log} = new IO::File $g{logfile}, 'a'
         or log_fatal( "ERROR: Unable to open logfile $g{logfile} ($!)", 0 );
@@ -2355,10 +2382,25 @@ sub read_hosts {
             my ( $name, $ip, $vendor, $model, $tests, $cid ) = @$host;
 
             # Filter if requested
-            if ( $g{hostonly} ne '' and $name !~ /$g{hostonly}/ ) {
+            #if ( $g{hostonly} ne '' and $name !~ /$g{hostonly}/ ) {
+            #    next;
+            #}
+            # Filter unmatch pattern
+            # Honor 'probe' command line
+            if ( defined $g{match_iphost} and not ( ( $name =~ /$g{match_iphost}/ ) or ( $ip =~ /$g{match_iphost}/ ) ) ) {
                 next;
             }
-
+                # Honor 'match' command line
+            if ( (defined $g{match_host}) and ($name !~ /$g{match_host}/ )) {
+               if ( (defined $g{match_ip}) and ($ip !~ /$g{match_ip}/ )) {
+                  next;
+               }
+               next;
+            } else {
+                if ( (defined $g{match_ip}) and ($ip !~ /$g{match_ip}/ )) {
+                  next;
+                }
+            }
             my $port = $1 if $cid =~ s/::(\d+)$//;
 
             $hosts{$name}{ip}     = $ip;
@@ -2416,9 +2458,21 @@ sub read_hosts {
             #   next;
             #}
 
-            # Filter if requested
-            if ( $g{hostonly} ne '' and $name !~ /$g{hostonly}/ ) {
+            # Filter unmatch pattern
+            # Honor 'probe' command line
+	    if ( defined $g{match_iphost} and not ( ( $name =~ /$g{match_iphost}/ ) or ( $ip =~ /$g{match_iphost}/ ) ) ) {
                 next;
+            }
+            # Honor 'match' command line 
+            if ( (defined $g{match_host}) and ($name !~ /$g{match_host}/ )) {
+               if ( (defined $g{match_ip}) and ($ip !~ /$g{match_ip}/ )) {
+                  next;
+               }
+               next; 
+            } else {
+               if ( (defined $g{match_ip}) and ($ip !~ /$g{match_ip}/ )) {
+                  next;
+               }
             }
 
             #         my $port = $1 if $cid =~ s/::(\d+)$//;
@@ -2483,7 +2537,8 @@ sub read_hosts {
 # Daemonize: go to daemon mode and fork into background
 # Much code shamelessly stolen from Proc::Daemon by Earl Hood
 sub daemonize {
-    return if !$g{daemonize};
+    #return if !$g{daemonize};
+    return if $g{foreground};
 
     # Now fork our child process off
     if ( my $pid = do_fork() ) {
@@ -2567,19 +2622,25 @@ sub help {
    print <<"EOF";
 Devmon v$g{version}, a device monitor for Xymon
 Usage:
-
   $prog [options]
   $prog -? -he[lp] 
+
+Template development:
+  $prog -p iphost=test
+  $prog -o -p iphost=test 
+  $prog -t -o -p iphost=test 
 
 Options:
  -c[onfigfile]    Specify config file location  
  -db[file]        Specify database file location  
- -f[oregrond]     Run in foreground. Prevents running in daemon mode  
- -ho[stonly]      Poll only hosts matching the pattern that follows
- -p[rint]         Don't send message to display server but print it on stdout  
- -v -vv           Verbose mode. The more -v's, the more verbose logging max 6: -vvvvvv  
  -de[bug]         Print debug output (this can be quite extensive)
- -t[race]         Trace (same -f -de -vvvvvv) 
+ -f[oreground]    Run in foreground (fg). Prevents running in daemon mode  
+ -ho[stonly]      Poll only hosts matching the pattern that follows (deprecated by "probe")
+ -p[robe]         Probe (regexp) a host for a test: -p host1=fan or -p 1.1.1.1=fan or -p host2 
+ -m[atch]         Match multiple (regexp) pattern: -m host=host1 -m host=host2 -m ip=1.1.1.1 -m test=fan
+ -o[utput]        Don't send message to display server but print it on (std)out (previously -print, which is replaced) 
+ -t[race]         Trace (same -f -de -vvvvvv)
+ -v -vv           Verbose mode. The more -v's, the more verbose logging max 6: -vvvvvv  
 
 Mutually exclusive options:  
  -rea[dhostscfg]  Read in data from the Xymon hosts.cfg file  
