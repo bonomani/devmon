@@ -1,0 +1,13 @@
+Cpu Avg = {ResCpuAvg.color}{ResCpuAvg}
+Cpu Last 1min = {ResCpuLast1min.color}{ResCpuLast1min}
+Cpu Last 5min = {ResCpuLast5min.color}{ResCpuLast5min}
+Cpu Last 15min = {ResCpuLast15min.color}{ResCpuLast15min}
+
+Mem Allocated = {ResMemAllocate}
+Mem Free = {ResMemLeft}
+Mem Frag = {ResMemFrag}
+
+Session Allocated = {ResSessAllocate}
+Session Maximum = {ResSessMaximum} 
+Session Failed = {ResSessFailed}
+

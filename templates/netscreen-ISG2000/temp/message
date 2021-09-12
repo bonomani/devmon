@@ -1,0 +1,3 @@
+TABLE:rrd(DS:ds0:TempState:GAUGE)
+Temp Description|Temp (C)
+{TempDescr}|{TempStatus.color}{TempStatus}

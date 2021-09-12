@@ -1,0 +1,1 @@
+PsuStatus : SWITCH : {PsuState} 0=Fail,1=Good

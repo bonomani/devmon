@@ -1,0 +1,2 @@
+TempStatus	: red		: >=55	: Temperature Too High
+TempStatus	: yellow	: >=45	: Temperature a little bit high
