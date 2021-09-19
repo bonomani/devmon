@@ -46,8 +46,10 @@ sub send_msgs {
     # Print messages to output if requested
     if ( $g{output} eq 'STDOUT' and defined $g{test_results} ) {
         print join "\n", @{ $g{test_results} };
+
         #TO BE ADDED: PRINT STAT ONLY IF REQUESTED
         $g{msgxfrtime} = time - $g{msgxfrtime};
+
         #print dm_stat_msg();
         return;
     }
@@ -193,7 +195,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
     # Now send our dm status message !
-    if ( $g{output}  eq 'xymon' ) {
+    if ( $g{output} eq 'xymon' ) {
         my $dm_msg  = dm_stat_msg();
         my $msgsize = length $dm_msg;
         do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 4 ) if $g{debug};

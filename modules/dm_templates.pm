@@ -217,13 +217,13 @@ MODEL: for my $dir (@dirs) {
                 if !-r "$dir/$test";
 
             # Honor 'probe' and 'match' command line: Filter unmatch template
-            if ( defined $g{match_test} and $test !~ /$g{match_test}/  ) {
-              next;
+            if ( defined $g{match_test} and $test !~ /$g{match_test}/ ) {
+                next;
             }
 
             # Barf if we are trying to define a pre-existing template
             if ( defined $g{templates}{$vendor}{$model}{tests}{$test} ) {
-                do_log( "ERROR TMPL: Attempting to redefine $vendor/$model/$test template " . "when reading data from $dir.",1 );
+                do_log( "ERROR TMPL: Attempting to redefine $vendor/$model/$test template " . "when reading data from $dir.", 1 );
                 next TEST;
             }
 
@@ -243,22 +243,22 @@ MODEL: for my $dir (@dirs) {
                 if !defined $tmpl->{msg};
 
             # Compute dependencies and delete test template if something went wrong
-            if (not calc_template_test_deps($tmpl)) {
-               delete $g{templates}{$vendor}{$model}{tests}{$test};
-               do_log("WARNI TMPL: Test '$vendor:$model:$test' skipped",2)
+            if ( not calc_template_test_deps($tmpl) ) {
+                delete $g{templates}{$vendor}{$model}{tests}{$test};
+                do_log( "WARNI TMPL: Test '$vendor:$model:$test' skipped", 2 );
             } elsif ( $g{debug} ) {
-               do_log("DEBUG TMPL: Test '$vendor:$model:$test' loaded",5)
-            } 
+                do_log( "DEBUG TMPL: Test '$vendor:$model:$test' loaded", 5 );
+            }
         }
 
-        # If we don't have any tests, warn 
-        if ( not scalar keys %{ $g{templates}{$vendor}{$model}{tests} } ) { 
+        # If we don't have any tests, warn
+        if ( not scalar keys %{ $g{templates}{$vendor}{$model}{tests} } ) {
 
-           # dont warn if it this because test are filtered by honoring 'probe' and 'match'
-           if  ( not defined $g{match_test} ) {
-              do_log("WARNI TMPL: Template '$vendor:$model' has not any valid test",2);
-           }
-        } 
+            # dont warn if it this because test are filtered by honoring 'probe' and 'match'
+            if ( not defined $g{match_test} ) {
+                do_log( "WARNI TMPL: Template '$vendor:$model' has not any valid test", 2 );
+            }
+        }
     }
     return;
 }
@@ -337,7 +337,7 @@ sub post_template_load {
                                 $cases->{$case_num}{then}   = $then;
 
                             } else {
-                                do_log( "ERROR TMPL: Could not parse $dep_oid : " . uc($trans_type) . " option '$val_pair'",1 );
+                                do_log( "ERROR TMPL: Could not parse $dep_oid : " . uc($trans_type) . " option '$val_pair'", 1 );
                                 next PTL_OID;
                             }
                         }
@@ -801,7 +801,7 @@ LINE: while ( my $line = shift @text ) {
                 #$func_type eq 'switch' and do {
                 #          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
                 if ( $func_type eq 'tswitch' ) {
-                    do_log("WARNI TMPL: 'TSWITCH' is deprecated and should be replaced by 'SWITCH' transform in $trans_file at line $l_num",2);
+                    do_log( "WARNI TMPL: 'TSWITCH' is deprecated and should be replaced by 'SWITCH' transform in $trans_file at line $l_num", 2 );
                     $func_type = 'switch';
                 }
                 $temp =~ s/^\{\S+\}\s*//;
@@ -995,10 +995,11 @@ sub calc_template_test_deps {
         $infls_thresh->{$oid} = $tmpl->{oids}{$oid}{infls_thresh};
         $trans_data{$oid}     = $tmpl->{oids}{$oid}{trans_data} if ( exists $tmpl->{oids}{$oid}{trans_data} );
     }
+
     # call the topological sort function to have ordered dependecies from W Nelis
     my $sorted_oids = sort_oids( \$infls, \%trans_data );
-    if (not @{ $sorted_oids }) {
-        do_log("WARNI TMPL: Empty oids list",2);
+    if ( not @{$sorted_oids} ) {
+        do_log( "WARNI TMPL: Empty oids list", 2 );
         return 0;
     }
 
@@ -1029,7 +1030,7 @@ sub calc_template_test_deps {
     # For each oids in a test find all oids that depend on it and have it in
     # in a sorted liste (this is used for the worst_color calc in render_msg
     my %all_infls_thresh;
-    for my $oid ( reverse( @{ $sorted_oids } ) ) {
+    for my $oid ( reverse( @{$sorted_oids} ) ) {
 
         for my $oid_infl ( keys %{ $infls_thresh->{$oid} } ) {
             if ( exists $all_infls_thresh{$oid_infl} ) {
@@ -1434,7 +1435,7 @@ sub read_message_file {
         # and skip to next line
         if ( $line =~ /^\s*(?:TABLE|NONHTMLTABLE):\s*(.*)/ ) {
             my $opts = $1;
-            do_log( "WARNI TMPL: NONHTMLTABLE tag used in $msg_file is deprecated, use " . "'nonhtml' TABLE option instead." ,2)
+            do_log( "WARNI TMPL: NONHTMLTABLE tag used in $msg_file is deprecated, use " . "'nonhtml' TABLE option instead.", 2 )
                 and $line =~ s/NONHTMLTABLE/TABLE/
                 if $1 eq 'NONHTMLTABLE';
             my %t_opts;
@@ -1464,42 +1465,42 @@ sub read_message_file {
                             } elsif ( lc $sub_opt eq 'max' ) {
                             } elsif ( lc $sub_opt =~ /^name:(\S+)$/ ) {
                             } elsif ( lc $sub_opt =~ /^pri:(\S+)$/ ) {
-                                do_log("ERROR TMPL: Undefined rrd oid '$1' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Undefined rrd oid '$1' at $msg_file line $.", 1 )
                                     and return 0
                                     if !defined $tmpl->{oids}{$1};
                             } elsif ( $sub_opt =~ /^DS:(\S+)$/ ) {
                                 my ( $ds, $oid, $type, $time, $min, $max ) = split /:/, $1;
-                                do_log("ERROR TMPL: Invalid rrd ds name '$ds' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Invalid rrd ds name '$ds' at $msg_file line $.", 1 )
                                     and return 0
                                     if defined $ds
                                     and $ds =~ /\W/;
-                                do_log("ERROR TMPL: No RRD oid defined at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: No RRD oid defined at $msg_file line $.", 1 )
                                     and return 0
                                     if !defined $oid;
-                                do_log("ERROR TMPL: Undefined rrd oid '$oid' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Undefined rrd oid '$oid' at $msg_file line $.", 1 )
                                     and return 0
                                     if !defined $tmpl->{oids}{$oid};
-                                do_log("ERROR TMPL: Bad rrd datatype '$type' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Bad rrd datatype '$type' at $msg_file line $.", 1 )
                                     and return 0
                                     if defined $type
                                     and $type ne ''
                                     and $type !~ /^(GAUGE|COUNTER|DERIVE|ABSOLUTE)$/;
-                                do_log("ERROR TMPL: Bad rrd maxtime '$time' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Bad rrd maxtime '$time' at $msg_file line $.", 1 )
                                     and return 0
                                     if defined $time
                                     and $time ne ''
                                     and ( $time !~ /^\d+/ or $time < 1 );
-                                do_log("ERROR TMPL: Bad rrd min value '$min' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Bad rrd min value '$min' at $msg_file line $.", 1 )
                                     and return 0
                                     if defined $min
                                     and $min ne ''
                                     and $min !~ /^[-+]?(\d+)$/;
-                                do_log("ERROR TMPL: Bad rrd max value '$max' at $msg_file line $.",1)
+                                do_log( "ERROR TMPL: Bad rrd max value '$max' at $msg_file line $.", 1 )
                                     and return 0
                                     if defined $max
                                     and $max ne ''
                                     and $max !~ /^([-+]?(\d+)|U$)/;
-                                do_log("ERROR TMPL: rrd max value > min value at $msg_file line $.",1) and return 0
+                                do_log( "ERROR TMPL: rrd max value > min value at $msg_file line $.", 1 ) and return 0
                                     if (    defined $min
                                         and $min ne ''
                                         and defined $max
@@ -1508,17 +1509,17 @@ sub read_message_file {
                                     or ( defined $max and $max ne '' and $max < 0 );
                                 $got_ds = 1;
                             } else {
-                                do_log("ERROR TMPL: Bad rrd option '$sub_opt' at $msg_file line $.",1);
+                                do_log( "ERROR TMPL: Bad rrd option '$sub_opt' at $msg_file line $.", 1 );
                                 return 0;
                             }
                         }
 
-                        do_log("ERROR TMPL: No dataset included for RRD at $msg_file line $.",1)
+                        do_log( "ERROR TMPL: No dataset included for RRD at $msg_file line $.", 1 )
                             and return 0
                             if !$got_ds;
                     }
                 } else {
-                    do_log("ERROR TMPL: Invalid option '$opt' for table at line $. in $msg_file",1);
+                    do_log( "ERROR TMPL: Invalid option '$opt' for table at line $. in $msg_file", 1 );
                     return 0;
                 }
             }
@@ -1658,6 +1659,6 @@ sub sync_templates {
     db_do("update nodes set read_temps='y'");
 
     # Now quit
-    do_log( "INFOR TMPL: Template synchronization complete",3 );
+    do_log( "INFOR TMPL: Template synchronization complete", 3 );
     exit 0;
 }

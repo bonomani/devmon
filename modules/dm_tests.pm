@@ -103,8 +103,8 @@ sub tests {
 
             #Filter if requested
             # Honor 'probe' and 'match' command line
-            if ( defined $g{match_test} and $test !~ /$g{match_test}/  ) {
-               next;
+            if ( defined $g{match_test} and $test !~ /$g{match_test}/ ) {
+                next;
             }
             do_log( "DEBUG TEST: Starting test for $test on device $device", 4 ) if $g{debug};
 
@@ -158,7 +158,8 @@ sub tests {
 
     # Finish timestamp
     $g{testtime} = time - $g{testtime};
-#    do_log( "INFOR TEST: Done with test logic", 3 );
+
+    #    do_log( "INFOR TEST: Done with test logic", 3 );
 }
 
 # Create a oid hash ref that will eventually contain all gathered
@@ -284,7 +285,7 @@ sub transform {
     # Make sure we inherit repeatability from previous types
     my $trans_sub = "trans_" . $trans_type;
     no strict 'refs';
-    do_log("DEBUG TEST: Doing $trans_type transform on $device/$oid",4)
+    do_log( "DEBUG TEST: Doing $trans_type transform on $device/$oid", 4 )
         if $g{debug};
     if ( defined &$trans_sub ) {
         eval {
@@ -326,7 +327,7 @@ sub trans_delta {
 
     # Check our parent oids for any errors
     if ( not validate_deps( $device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$' ) ) {
-        do_log("INFOR TEST: Delta transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
+        do_log( "INFOR TEST: Delta transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -502,7 +503,7 @@ sub trans_math {
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids, '^[-+]?\d+(\.\d+)?$' ) ) {
 
         #if ( not validate_deps($device, $oids, $oid, \@dep_oids ) ) {
-        do_log("INFOR TEST: Math transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
+        do_log( "INFOR TEST: Math transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -1967,7 +1968,7 @@ sub trans_regsub {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids ) ) {
-        do_log("INFOR TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
+        do_log( "INFOR TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -2355,7 +2356,7 @@ sub trans_index {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, [$src_oid] ) ) {
-        do_log("INFOR TEST: Index transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
+        do_log( "INFOR TEST: Index transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -2485,7 +2486,7 @@ sub render_msg {
     my $hostname     = $device;
     $hostname =~ s/\./,/g;
 
-    do_log("DEBUG TEST: Rendering $test message for $device",4) if $g{debug};
+    do_log( "DEBUG TEST: Rendering $test message for $device", 4 ) if $g{debug};
 
     # Build readable timestamp
     my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
@@ -2734,7 +2735,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     my $val   = $oid_h->{repeat} ? $oid_h->{val}{$leaf}   : $oid_h->{val};
                     my $color = $oid_h->{repeat} ? $oid_h->{color}{$leaf} : $oid_h->{color};
                     if ( !defined $val ) {
-                        do_log("WARNI TEST: Undefined value for $oid in test $test on $device, ignoring row for $pri_val",4) if $g{debug};
+                        do_log( "WARNI TEST: Undefined value for $oid in test $test on $device, ignoring row for $pri_val", 4 ) if $g{debug};
                         next T_LEAF;
                     }
 
@@ -2947,7 +2948,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
                     if ( $temp_data =~ /^(U:)+/ ) {
 
-                        do_log("WARNI TEST: Text values in data for rrd repeater, dropping rrd for $pri_val",4)
+                        do_log( "WARNI TEST: Text values in data for rrd repeater, dropping rrd for $pri_val", 4 )
                             if $g{debug};
                         next;
                     }
@@ -3134,7 +3135,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
     {
         my $start_clear = $g{numclears}{$device}{$test};
         if ( time - $start_clear < $g{cleartime} ) {
-            do_log( "DEBUG TEST: $device had some clear errors " . "during test $test",4 ) if $g{debug};
+            do_log( "DEBUG TEST: $device had some clear errors " . "during test $test", 4 ) if $g{debug};
             return;
         }
     }
@@ -4083,9 +4084,9 @@ sub validate_deps {
                 $all_error = 0;
             }
 
-            # Throw one error message 
+            # Throw one error message
             do_log( "ERROR TEST: '$oid_h->{val}' while parsing '$dep_oid' on $device", 4 ) if $oid_h->{error};
-            return 0                                                            if $oid_h->{error};
+            return 0                                                                       if $oid_h->{error};
         }
     }
     $all_error ? return 0 : return 1;
