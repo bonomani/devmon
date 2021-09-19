@@ -50,14 +50,14 @@ sub poll_devices {
     foreach ( keys %{ $g{forks} } ) {
         $g{forks}{$_}{polled} = 0;
     }
-    do_log( "INFOR SNMP: Starting snmp queries", 1 );
+    do_log( "INFOR SNMP: Starting snmp queries", 3 );
     $g{snmppolltime} = time;
     my %snmp_input = ();
     %{ $g{snmp_data} } = ();
 
     # Query our Xymon server for device reachability status
     # we don't want to waste time querying devices that are down
-    do_log( "INFOR SNMP: Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport}, 1 );
+    do_log( "INFOR SNMP: Getting device status from Xymon at " . $g{dispserv} . ":" . $g{dispport}, 3 );
     %{ $g{xymon_color} } = ();
     my $sock = IO::Socket::INET->new(
         PeerAddr => $g{dispserv},
@@ -67,18 +67,23 @@ sub poll_devices {
     );
     if ( defined $sock ) {
 
-        # Ask xymon for all test on all devices
-        print $sock "xymondboard fields=hostname,color,line1";
+        # Ask xymon for ssh, conn, http, telnet tests green on all devices
+        print $sock "xymondboard test=conn|ssh|http|telnet color=green fields=hostname";
         shutdown( $sock, 1 );
-        while (<$sock>) {
-            my ( $device, $color, $line1 ) = split /\|/;
-            chomp $line1 and do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 2 ) if $g{debug};
-            if ( $line1 =~ /not ok/i and !defined $g{xymon_color}{device} ) {
-                $g{xymon_color}{$device} = $color;
-                next;
-            } elsif ( $line1 =~ /ok/i ) {
-                $g{xymon_color}{$device} = $color;
-            }
+        while (my $device=<$sock>) {
+            chomp $device;
+            #my ( $device, $color, $line1 ) = split /\|/;
+            #chomp $line1; #and do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 4 ) if $g{debug};
+
+            #if ( $line1 =~ /not ok/i and !defined $g{xymon_color}{device} ) {
+            #    $g{xymon_color}{$device} = $color;
+            #    do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 5 ) if $g{debug};
+            #    next;
+            #} elsif ( $line1 =~ /ok/i ) {
+        $g{xymon_color}{$device} = 'green';
+            #    do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 4 ) if $g{debug};
+            #}
+        #do_log("$line");
         }
     }
 
@@ -92,11 +97,11 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
         # Skip this device if we are running a Xymon server and the
         # server thinks that it isn't reachable
         if ( !defined $g{xymon_color}{$device} ) {
-            do_log("INFOR SNMP: $device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...");
+            do_log("DEBUG SNMP: $device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...",4);
             --$g{numsnmpdevs};
             next QUERYHASH;
         } elsif ( $g{xymon_color}{$device} ne 'green' ) {
-            do_log("INFOR SNMP: $device has a non-green Xymon status, skipping SNMP.");
+            do_log("INFOR SNMP: $device has a non-green Xymon status, skipping SNMP.",4);
             --$g{numsnmpdevs};
             next QUERYHASH;
         }
@@ -105,7 +110,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
         my $tests  = $g{dev_data}{$device}{tests};
 
         # Make sure we have our device_type info
-        do_log( "INFOR SNMP: No vendor/model '$vendor/$model' templates for host $device, skipping.", 0 )
+        do_log( "INFOR SNMP: No vendor/model '$vendor/$model' templates for host $device, skipping.", 3 )
             and next QUERYHASH
             if !defined $g{templates}{$vendor}{$model};
 
@@ -129,7 +134,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
         %{ $snmp_input{$device} } = %{ $g{dev_data}{$device} };
         $snmp_input{$device}{dev} = $device;
 
-        do_log( "INFOR SNMP: Querying $device for tests $tests", 3 );
+        do_log( "INFOR SNMP: Querying snmp oids on $device for tests $tests", 3 );
 
         # Go through each of the tests and determine what their type is
     TESTTYPE: for my $test ( split /,/, $tests ) {
@@ -800,11 +805,11 @@ DEVICE: while (1) {    # We should never leave this loop
                 my @nonreps = ();
                 if ($session) {
                     if ( $g{debug} ) {
-                        do_log( "DEBUG SNMP($fork_num): SNMP session started: Device=$snmpvars{Device}, RemotePort=$snmpvars{RemotePort}, DestHost=$snmpvars{DestHost}, Version=$snmp_ver", 0 );
+                        do_log( "DEBUG SNMP($fork_num): SNMP session started: Device=$snmpvars{Device}, RemotePort=$snmpvars{RemotePort}, DestHost=$snmpvars{DestHost}, Version=$snmp_ver", 4 );
                         if ( $snmp_ver eq '3' ) {
-                            do_log( "DEBUG SNMP($fork_num): SecLevel=$snmpvars{SecLevel}, SecName=$snmpvars{SecName}, AuthProto=$snmpvars{AuthProto}, AuthPass=$snmpvars{AuthPass}, PrivProto=$snmpvars{PrivProto}, PrivPass=$snmpvars{PrivPass} ", 0 );
+                            do_log( "DEBUG SNMP($fork_num): SecLevel=$snmpvars{SecLevel}, SecName=$snmpvars{SecName}, AuthProto=$snmpvars{AuthProto}, AuthPass=$snmpvars{AuthPass}, PrivProto=$snmpvars{PrivProto}, PrivPass=$snmpvars{PrivPass} ", 5 );
                         } elsif ( $snmp_ver eq '2' ) {
-                            do_log( "DEBUG SNMP($fork_num): Cid=$snmpvars{Community}", 0 );
+                            do_log( "DEBUG SNMP($fork_num): Cid=$snmpvars{Community}", 5 );
                         }
                     }
 
@@ -992,8 +997,9 @@ DEVICE: while (1) {    # We should never leave this loop
                                     my $snmp_val  = $nrv->val;
                                     my $snmp_type = $nrv->type;
 
-                                    do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
+                                    #do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
                                     if ($is_devmon_repeater) {
+                                        do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
                                         my $leaf = substr( $snmp_oid, length($oid) + 1 );
 
                                         $data_out->{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
@@ -1006,7 +1012,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                             # Slow path
                                             # Test if answer match
                                             if ( $snmp_oid eq $oid ) {
-                                                do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 4 ) if $g{debug};
+                                                do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
                                                 if ( ( scalar @$vbarr ) == 1 ) {
                                                     if ( ${ $is_repeater->{$oid} } == 0 ) {
                                                     } else {
@@ -1100,7 +1106,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         }
                         return 1;
                     }
-                } elsif (0) {    # Old code from coec, we keep it as it is an implementation with getnext
+                } elsif (0) {    # previous code from S. Coene, we keep it as it is an implementation with getnext
 
                     foreach my $oid ( sort keys %{ $data_in{nonreps} } ) {
                         next if defined $data_out{error};

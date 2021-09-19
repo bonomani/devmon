@@ -36,7 +36,7 @@ my $color_list  = join '|', @color_order;
 
 # Read templates from DB or from disk, depending on our multinode type
 sub read_templates {
-    do_log( 'DEBUG TMPL: running read_templates()', 0 ) if $g{debug};
+    do_log( 'INFOR TMPL: Reading devices templates', 3 );
     if ( $g{multinode} eq 'yes' ) {
         read_template_db();
     } else {
@@ -205,7 +205,7 @@ MODEL: for my $dir (@dirs) {
         opendir MODELDIR, $dir or
 
             #  log_fatal("Unable to open template directory ($!)",0);
-            do_log( "ERROR TMPL: Unable to open template directory ($!), skipping this template", 0 )
+            do_log( "ERROR TMPL: Unable to open template directory ($!), skipping this template", 1 )
             and next MODEL;
 
     TEST: for my $test ( readdir MODELDIR ) {
@@ -213,17 +213,17 @@ MODEL: for my $dir (@dirs) {
             # Only if this is a test dir
             my $testdir = "$dir/$test";
             next if !-d $testdir or $test =~ /^\..*$/;    # . and .svn or .cvs
-            do_log( "ERROR TMPL: Unable to read test folder $dir/$test, skipping this test", 0 ) and next TEST
+            do_log( "ERROR TMPL: Unable to read test folder $dir/$test, skipping this test", 1 ) and next TEST
                 if !-r "$dir/$test";
 
             # Honor 'probe' and 'match' command line: Filter unmatch template
             if ( defined $g{match_test} and $test !~ /$g{match_test}/  ) {
-               next;
+              next;
             }
 
             # Barf if we are trying to define a pre-existing template
             if ( defined $g{templates}{$vendor}{$model}{tests}{$test} ) {
-                do_log( "ERROR TMPL: Attempting to redefine $vendor/$model/$test template " . "when reading data from $dir." );
+                do_log( "ERROR TMPL: Attempting to redefine $vendor/$model/$test template " . "when reading data from $dir.",1 );
                 next TEST;
             }
 
@@ -242,23 +242,30 @@ MODEL: for my $dir (@dirs) {
             delete $g{templates}{$vendor}{$model}{tests}{$test}
                 if !defined $tmpl->{msg};
 
-            # Compute dependencies
-            calc_template_test_deps($tmpl);
-
-            do_log("DEBUG TMPL: read $vendor:$model:$test template")
-                if $g{debug};
+            # Compute dependencies and delete test template if something went wrong
+            if (not calc_template_test_deps($tmpl)) {
+               delete $g{templates}{$vendor}{$model}{tests}{$test};
+               do_log("WARNI TMPL: Test '$vendor:$model:$test' skipped",2)
+            } elsif ( $g{debug} ) {
+               do_log("DEBUG TMPL: Test '$vendor:$model:$test' loaded",5)
+            } 
         }
 
-        # If we don't have any tests, delete the model info
-        delete $g{templates}{$vendor}{$model}
-            if ( scalar keys %{ $g{templates}{$vendor}{$model}{tests} } ) == 0;
+        # If we don't have any tests, warn 
+        if ( not scalar keys %{ $g{templates}{$vendor}{$model}{tests} } ) { 
+
+           # dont warn if it this because test are filtered by honoring 'probe' and 'match'
+           if  ( not defined $g{match_test} ) {
+              do_log("WARNI TMPL: Template '$vendor:$model' has not any valid test",2);
+           }
+        } 
     }
     return;
 }
 
 # Do various post-load stuff on templates
 sub post_template_load {
-    do_log( 'DEBUG TMPL: running post_template_load()', 0 ) if $g{debug};
+    do_log( 'DEBUG TMPL: running post_template_load()', 4 ) if $g{debug};
     for my $vendor ( keys %{ $g{templates} } ) {
         for my $model ( keys %{ $g{templates}{$vendor} } ) {
             for my $test ( keys %{ $g{templates}{$vendor}{$model}{tests} } ) {
@@ -330,7 +337,7 @@ sub post_template_load {
                                 $cases->{$case_num}{then}   = $then;
 
                             } else {
-                                do_log( "ERROR TMPL: Could not parse $dep_oid : " . uc($trans_type) . " option '$val_pair'" );
+                                do_log( "ERROR TMPL: Could not parse $dep_oid : " . uc($trans_type) . " option '$val_pair'",1 );
                                 next PTL_OID;
                             }
                         }
@@ -360,7 +367,7 @@ sub read_specs_file {
     #   and return 0 if !-e $specs_file;
 
     open FILE, "$specs_file"
-        or do_log( "ERROR TMPL: Failed to open $specs_file ($!), skipping this test.", 0 )
+        or do_log( "ERROR TMPL: Failed to open $specs_file ($!), skipping this test.", 1 )
         and return 0;
 
     # Define our applicable variables
@@ -380,14 +387,14 @@ sub read_specs_file {
 
         # Make sure we got all our variables and they are non-blank and valid
         if ( !defined $val ) {
-            do_log( "ERROR TMPL: Undefined value in $specs_file at line $.", 0 );
+            do_log( "ERROR TMPL: Undefined value in $specs_file at line $.", 1 );
             next;
         } else {
 
             # Trim right (left done by split)
-            do_log( "WARNI TMPL: Trailing space(s) in $specs_file at line $.", 0 ) if $val =~ s/\s$//;
+            do_log( "WARNI TMPL: Trailing space(s) in $specs_file at line $.", 2 ) if $val =~ s/\s$//;
             if ( $val eq '' ) {
-                do_log( "ERROR TMPL: Missing spec value in $specs_file at line $.", 0 );
+                do_log( "ERROR TMPL: Missing spec value in $specs_file at line $.", 1 );
                 next;
 
                 # Check our snmp version
@@ -410,7 +417,7 @@ sub read_specs_file {
     # Make sure we got all our necessary vars
     for my $var ( keys %vars ) {
         my $val = $vars{$var};
-        do_log( "ERROR TMPL: '$var' not defined in $specs_file, skipping this test.", 0 ) and return 0
+        do_log( "ERROR TMPL: '$var' not defined in $specs_file, skipping this test.", 1 ) and return 0
             if !defined $val or $val eq '';
     }
 
@@ -435,7 +442,7 @@ sub read_oids_file {
     #do_log ("Missing 'oids' file in $dir, skipping this test.", 0)
     #   and return 0 if !-e $oid_file;
     open FILE, "$oid_file"
-        or do_log( "ERROR TMPL: Failed to open $oid_file ($!), skipping this test.", 0 )
+        or do_log( "ERROR TMPL: Failed to open $oid_file ($!), skipping this test.", 1 )
         and return 0;
 
     # Go through file, read in oids
@@ -449,36 +456,36 @@ sub read_oids_file {
 
         # Make sure we got all our variables and they are non-blank and valid
         if ( !defined $number ) {
-            do_log( "ERROR TMPL: Missing colon separator near oid value in $oid_file at line $.", 0 );
+            do_log( "ERROR TMPL: Missing colon separator near oid value in $oid_file at line $.", 1 );
             next;
         } else {
             if ( $number eq '' ) {
-                do_log( "ERROR TMPL: Missing oid value in $oid_file at line $.", 0 );
+                do_log( "ERROR TMPL: Missing oid value in $oid_file at line $.", 1 );
                 next;
             }
 
             # TODO: We should valide also OID format
         }
         if ( !defined $repeat ) {
-            do_log( "ERROR TMPL: Missing colon separator near repeater type in $oid_file at line $.", 0 );
+            do_log( "ERROR TMPL: Missing colon separator near repeater type in $oid_file at line $.", 1 );
             next;
         } else {
 
             # Trim right (left done by split)
-            do_log( "ERROR TMPL: Trailing space(s) in $oid_file at line $.", 0 ) if $repeat =~ s/\s$//;
+            do_log( "ERROR TMPL: Trailing space(s) in $oid_file at line $.", 1 ) if $repeat =~ s/\s$//;
             if ( $repeat eq '' ) {
-                do_log( "ERROR TMPL: Missing repeater type in $oid_file at line $.", 0 );
+                do_log( "ERROR TMPL: Missing repeater type in $oid_file at line $.", 1 );
                 next;
 
                 # Make sure repeater variable is valid
             } elsif ( $repeat !~ /^leaf$|^branch$/ ) {
-                do_log( "ERROR TMPL: Invalid repeater type '$repeat' for $oid in $oid_file", 0 );
+                do_log( "ERROR TMPL: Invalid repeater type '$repeat' for $oid in $oid_file", 1 );
                 next;
             }
         }
 
         # Make sure this oid hasnt been defined before
-        do_log( "ERROR TMPL: $oid defined more than once in $oid_file", 0 ) and next
+        do_log( "ERROR TMPL: $oid defined more than once in $oid_file", 1 ) and next
             if defined $tmpl->{oids}{$oid};
 
         # Make repeater variable boolean
@@ -518,7 +525,7 @@ sub read_transforms_file {
     #do_log ("Missing 'transforms' file in $dir, skipping this test.", 0)
     #   and return 0 if !-e $trans_file;
     open FILE, "$trans_file"
-        or do_log( "ERROR TMPL: Failed to open $trans_file ($!), skipping this test.", 0 )
+        or do_log( "ERROR TMPL: Failed to open $trans_file ($!), skipping this test.", 1 )
         and return 0;
 
     # Go through file, read in oids
@@ -543,14 +550,14 @@ LINE: while ( my $line = shift @text ) {
                 $cont_line =~ s/^\s+//;
                 $line .= $cont_line;
             } else {
-                do_log( "ERROR TMPL: The continuation char \ is not follow by a line $trans_file at line $l_num", 0 );
+                do_log( "ERROR TMPL: The continuation char \ is not follow by a line $trans_file at line $l_num", 1 );
             }
         }
 
         # Validate curly bracket
         my $curly_bracket = $line;
         $curly_bracket =~ s/\{([^{}\s]+)\}//g;
-        do_log( "ERROR TMPL: Curly brackets are not balanced/conform or contain space char in $trans_file at line $l_num", 0 )
+        do_log( "ERROR TMPL: Curly brackets are not balanced/conform or contain space char in $trans_file at line $l_num", 1 )
             and next
             if $curly_bracket =~ /{|}/;
 
@@ -559,25 +566,25 @@ LINE: while ( my $line = shift @text ) {
 
         # Make sure we got all our variables and they are non-blank and valid
         if ( !defined $func_type ) {
-            do_log( "ERROR TMPL: Missing colon separator near function type in $trans_file at line $l_num", 0 );
+            do_log( "ERROR TMPL: Missing colon separator near function type in $trans_file at line $l_num", 1 );
             next;
         } else {
             if ( $func_type eq '' ) {
-                do_log( "ERROR TMPL: Missing function type in $trans_file at line $l_num", 0 );
+                do_log( "ERROR TMPL: Missing function type in $trans_file at line $l_num", 1 );
                 next;
             }
 
             # TODO: We should valide format
         }
         if ( !defined $func_data ) {
-            do_log( "ERROR TMPL: Missing colon separator near function data in $trans_file at line $l_num", 0 );
+            do_log( "ERROR TMPL: Missing colon separator near function data in $trans_file at line $l_num", 1 );
             next;
         } else {
 
             # Trim right (left done by split)
-            do_log( "WARNI TMPL: Trailing space(s) in $trans_file at line $l_num", 0 ) if $func_data =~ s/\s$//;
+            do_log( "WARNI TMPL: Trailing space(s) in $trans_file at line $l_num", 2 ) if $func_data =~ s/\s$//;
             if ( $func_data eq '' ) {
-                do_log( "ERROR TMPL: Missing function data in $trans_file at line $l_num", 0 );
+                do_log( "ERROR TMPL: Missing function data in $trans_file at line $l_num", 1 );
                 next;
             }
         }
@@ -585,7 +592,7 @@ LINE: while ( my $line = shift @text ) {
         # Make sure this oid hasnt been defined before
         # TODO: Would be nice to check that if it was defined
         # before, both oid are realy the same
-        do_log( "ERROR TMPL: Cant redefine $oid  in $trans_file", 0 ) and next
+        do_log( "ERROR TMPL: Cant redefine $oid  in $trans_file", 1 ) and next
             if defined $tmpl->{oids}{$oid};
 
         # Make sure function is a real one and that it is formatted correctly
@@ -600,7 +607,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/\{\S+\}|\s*,\s*//g;
-                do_log( "ERROR TMPL: BEST transform uses only comma-delimited oids at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: BEST transform uses only comma-delimited oids at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -610,7 +617,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*//g;
                 $temp =~ s/^\{\S+\}\s*\{\S+\}//;
-                do_log( "ERROR TMPL: CHAIN uses exactly two dependent oids at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: CHAIN uses exactly two dependent oids at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -621,7 +628,7 @@ LINE: while ( my $line = shift @text ) {
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
                 #          $temp =~ s/^\{\S+?\}\s*\{\S+?\}\s*(|:\s*\S+?|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}])//;
                 $temp =~ s/^\{\S+\}\s*\{\S+?\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)}])//;
-                do_log( "ERROR TMPL: COLTRE uses two dependent oids and optional arguments at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: COLTRE uses two dependent oids and optional arguments at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -632,7 +639,7 @@ LINE: while ( my $line = shift @text ) {
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i;
                 $temp =~ s/^\{\S+\}\s+(hex|oct)(?:\s*\d*)//i;
                 my ($type) = ($1);    #??
-                do_log( "ERROR TMPL: CONVERT transform uses only a single oid, a valid " . "conversion type & an option pad length at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: CONVERT transform uses only a single oid, a valid " . "conversion type & an option pad length at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -642,7 +649,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/^\{\S+\}//;
-                do_log( "ERROR TMPL: DATE transform uses only a single oid at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: DATE transform uses only a single oid at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -652,7 +659,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\}(\s*\d*)\s*//;
                 $temp =~ s/^\{\S+\}(?:$|\s+\d+$)//;
-                do_log( "ERROR TMPL: DELTA transform  only a single oid (plus an " . "optional limit) at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: DELTA transform  only a single oid (plus an " . "optional limit) at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -662,7 +669,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*//g;
                 $temp =~ s/^\{\S+\}//;
-                do_log( "ERROR TMPL: ELAPSED transform uses only a single oid at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: ELAPSED transform uses only a single oid at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -670,7 +677,7 @@ LINE: while ( my $line = shift @text ) {
 
             $func_type eq 'sort' and do {
                 $temp =~ s/^\{\S+\}//;
-                do_log( "ERROR TMPL: SORT transform uses only a single oid at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: SORT transform uses only a single oid at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -680,7 +687,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/^\{\S+\}//;
-                do_log( "ERROR TMPL: INDEX transform uses only a single oid at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: INDEX transform uses only a single oid at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -690,7 +697,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/\s*$//g;
                 $temp =~ s/^\{\S+\}\s+\/.+\///;
-                do_log( "ERROR TMPL: MATCH transform should be a perl regex match at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: MATCH transform should be a perl regex match at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -702,7 +709,7 @@ LINE: while ( my $line = shift @text ) {
                 #          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(\.\d*)?|\(|\)|abs\(//g;
                 $temp =~ s/\{\S+\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(?:\.\d+)?|\(|\)//g;
                 $temp =~ s/\s*//;
-                do_log( "ERROR TMPL: MATH transform uses only math/numeric symbols and an " . "optional precision number, $temp did not pass, at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: MATH transform uses only math/numeric symbols and an " . "optional precision number, $temp did not pass, at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp !~ /^\s*$/;
                 last CASE;
@@ -723,19 +730,19 @@ LINE: while ( my $line = shift @text ) {
                 $temp =~ s/^\{\S+\}\s+(\S+)(\s+.+)?//;
                 my $type       = $1;
                 my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
-                do_log( "ERROR TMPL: PACK transform uses only a single oid,an encode type, " . "and an optional seperator at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: PACK transform uses only a single oid,an encode type, " . "and an optional seperator at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
-                do_log( "ERROR TMPL: No encode type at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: No encode type at $trans_file, line $l_num", 1 )
                     and next LINE
                     if !defined $type;
                 while ( $type =~ s/\((.+?)\)(\d+|\*)?// ) {
                     my $bit = $1;
-                    do_log( "ERROR TMPL: Bad encode type ($bit) at $trans_file, line $l_num", 0 )
+                    do_log( "ERROR TMPL: Bad encode type ($bit) at $trans_file, line $l_num", 1 )
                         and next LINE
                         if $bit !~ /^([$validChars](\d+|\*)?)+$/i;
                 }
-                do_log( "ERROR TMPL: Bad encode type ($type) at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: Bad encode type ($type) at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $type ne ''
                     and $type !~ /^([$validChars](\d+|\*)?)+$/i;
@@ -746,7 +753,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//;
                 $temp =~ s/^\{\S+\}\s*\/.+\/.*\/[eg]*//;
-                do_log( "ERROR TMPL: REGSUB transform should be a perl regex substitution at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: REGSUB transform should be a perl regex substitution at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -755,7 +762,7 @@ LINE: while ( my $line = shift @text ) {
             $func_type eq 'set' and do {
                 $temp = '{}' if $temp =~ m/^\s*$/;
                 $temp =~ tr/{}//cd;    # Check for OID references
-                do_log( "ERROR TMPL: SET transform requires a non-empty list of constant values at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: SET transform requires a non-empty list of constant values at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -765,7 +772,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/^\{\S+}//;
-                do_log( "ERROR TMPL: SPEED transform uses only a single oid at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: SPEED transform uses only a single oid at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -773,7 +780,7 @@ LINE: while ( my $line = shift @text ) {
 
             $func_type eq 'statistic' and do {
                 $temp =~ s/^\{\S+\}\s+(?:avg|cnt|max|min|sum)//i;
-                do_log( "ERROR TMPL: STATISTIC transform uses only a single oid at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: STATISTIC transform uses only a single oid at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -783,7 +790,7 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(\d+)\s*(\d*)\s*//;
                 $temp =~ s/^\{\S+\}\s+\d+(?:$|\s+\d+)//;
-                do_log( "ERROR TMPL: SUBSTR transform uses only a single oid, a numeric offset " . "and an optional shift value at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: SUBSTR transform uses only a single oid, a numeric offset " . "and an optional shift value at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -794,7 +801,7 @@ LINE: while ( my $line = shift @text ) {
                 #$func_type eq 'switch' and do {
                 #          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
                 if ( $func_type eq 'tswitch' ) {
-                    do_log("WARNI TMPL: 'TSWITCH' is deprecated and should be replaced by 'SWITCH' transform in $trans_file at line $l_num");
+                    do_log("WARNI TMPL: 'TSWITCH' is deprecated and should be replaced by 'SWITCH' transform in $trans_file at line $l_num",2);
                     $func_type = 'switch';
                 }
                 $temp =~ s/^\{\S+\}\s*//;
@@ -805,7 +812,7 @@ LINE: while ( my $line = shift @text ) {
                     if ( !defined($if) ) {
                         ( $if, $then ) = ( $1, $2 ) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
                     }
-                    do_log( "ERROR TMPL: Bad SWITCH value pair ($val) at $trans_file, line $l_num", 0 )
+                    do_log( "ERROR TMPL: Bad SWITCH value pair ($val) at $trans_file, line $l_num", 1 )
                         and next
                         if !defined $if;
                     my $type;
@@ -830,13 +837,13 @@ LINE: while ( my $line = shift @text ) {
                     } elsif ( $if =~ /^default$/i ) {
                         $type = 'default';
                     } else {
-                        do_log( "ERROR TMPL: Bad SWITCH case type ($if) at $trans_file, line $l_num", 0 );
+                        do_log( "ERROR TMPL: Bad SWITCH case type ($if) at $trans_file, line $l_num", 1 );
                         next;
                     }
 
                     $temp2 .= $val;
                 }
-                do_log( "ERROR TMPL: SWITCH transform uses a comma delimited list of values " . "in 'case = value' format at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: SWITCH transform uses a comma delimited list of values " . "in 'case = value' format at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp2 ne '';
                 last CASE;
@@ -853,7 +860,7 @@ LINE: while ( my $line = shift @text ) {
                     if ( !defined($if) ) {
                         ( $if, $then ) = ( $1, $2 ) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
                     }
-                    do_log( "ERROR TMPL: Bad TSWITCH value pair ($val) at $trans_file, " . "line $l_num", 0 )
+                    do_log( "ERROR TMPL: Bad TSWITCH value pair ($val) at $trans_file, " . "line $l_num", 1 )
                         and next
                         if !defined $if;
                     my $type;
@@ -876,13 +883,13 @@ LINE: while ( my $line = shift @text ) {
                     } elsif ( $if =~ /^default$/i ) {
                         $type = 'default';
                     } else {
-                        do_log( "ERROR TMPL: Bad TSWITCH case type ($if) at $trans_file, line $l_num", 0 );
+                        do_log( "ERROR TMPL: Bad TSWITCH case type ($if) at $trans_file, line $l_num", 1 );
                         next;
                     }
 
                     $temp2 .= $val;
                 }
-                do_log( "ERROR TMPL: TSWITCH transform uses a comma delimited list of values " . "in 'case = value' format at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: TSWITCH transform uses a comma delimited list of values " . "in 'case = value' format at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp2 ne '';
                 last CASE;
@@ -894,19 +901,19 @@ LINE: while ( my $line = shift @text ) {
                 $temp =~ s/^\{\S+\}\s+(\S+)(?:\s+.+)?//;
                 my $type       = $1;
                 my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
-                do_log( "ERROR TMPL: UNPACK transform uses only a single oid,a decode type, " . "and an optional seperator at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: UNPACK transform uses only a single oid,a decode type, " . "and an optional seperator at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
-                do_log( "ERROR TMPL: No decode type at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: No decode type at $trans_file, line $l_num", 1 )
                     and next LINE
                     if !defined $type;
                 while ( $type =~ s/\((.+?)\)(\d+|\*)?// ) {
                     my $bit = $1;
-                    do_log( "ERROR TMPL: Bad decode type ($bit) at $trans_file, line $l_num", 0 )
+                    do_log( "ERROR TMPL: Bad decode type ($bit) at $trans_file, line $l_num", 1 )
                         and next LINE
                         if $bit !~ /^([$validChars](\d+|\*)?)+$/i;
                 }
-                do_log( "ERROR TMPL: Bad decode type ($type) at $trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: Bad decode type ($type) at $trans_file, line $l_num", 1 )
                     and next LINE
                     if $type ne ''
                     and $type !~ /^([$validChars](\d+|\*)?)+$/i;
@@ -917,13 +924,13 @@ LINE: while ( my $line = shift @text ) {
 
                 #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/\{\S+\}|\s*,\s*//g;
-                do_log( "ERROR TMPL: WORST transform uses only comma-delimited oids at " . "$trans_file, line $l_num", 0 )
+                do_log( "ERROR TMPL: WORST transform uses only comma-delimited oids at " . "$trans_file, line $l_num", 1 )
                     and next LINE
                     if $temp ne '';
                 last CASE;
             };
 
-            do_log( "ERROR TMPL: Unknown function '$func_type' at $trans_file, line $l_num", 0 );
+            do_log( "ERROR TMPL: Unknown function '$func_type' at $trans_file, line $l_num", 1 );
             next LINE;
         }
 
@@ -951,7 +958,7 @@ LINE: while ( my $line = shift @text ) {
                                                                   # Validate oid
             if ( !defined $tmpl->{oids}{$dep_oid} and !defined $trans{$dep_oid} ) {
                 delete $trans{$oid};
-                do_log( "ERROR TMPL: Undefined oid '$dep_oid' referenced in $trans_file", 0 );
+                do_log( "ERROR TMPL: Undefined oid '$dep_oid' referenced in $trans_file", 1 );
                 next;
             } else {
                 $tmpl->{oids}{$oid}{trans_type} = $trans{$oid}{type};
@@ -982,38 +989,25 @@ sub calc_template_test_deps {
     my %trans_data;                         #for sort from W. Nelis
     my $infls_thresh = {};
 
-    #my %oids_all ;
-    #my @oids_list      = () ;
-
     foreach my $oid (@oids) {
         $deps->{$oid}         = $tmpl->{oids}{$oid}{deps};
         $infls->{$oid}        = $tmpl->{oids}{$oid}{infls};
         $infls_thresh->{$oid} = $tmpl->{oids}{$oid}{infls_thresh};
         $trans_data{$oid}     = $tmpl->{oids}{$oid}{trans_data} if ( exists $tmpl->{oids}{$oid}{trans_data} );
-
-        #$oids_all{$oid}      = {};                  #Why not all oids from all test?
-
-        #@sorted_oids = sort_oids (\@oids, \$deps ); #Why not all oids from all test?
-        #$tmpl->{sorted_oids} = @sorted_oids;        #because this function should not
-        #be call not per test !
     }
-
-    #@oids_list          = keys %oids_all;
-
     # call the topological sort function to have ordered dependecies from W Nelis
     my $sorted_oids = sort_oids( \$infls, \%trans_data );
-    return 0 unless defined $sorted_oids;
-    my @sorted_oids = @{$sorted_oids};
+    if (not @{ $sorted_oids }) {
+        do_log("WARNI TMPL: Empty oids list",2);
+        return 0;
+    }
 
     # call the topological sort function to have ordered dependecies WIP
     # my @sorted_oids = sort_oids2 (\@oids, \$deps, \$infls);
 
-    # Check that we have a results for each tests (we should never be false)
-    do_log("ERROR TMPL: no sorted oids @sorted_oids?!") if !@sorted_oids;
-
     # Add the results as a ref (the supported scalar type) so we can have an
     # array into the template hash of hash
-    $tmpl->{sorted_oids} = \@sorted_oids;
+    $tmpl->{sorted_oids} = $sorted_oids;
 
     # For thresholds calculation
 
@@ -1035,7 +1029,7 @@ sub calc_template_test_deps {
     # For each oids in a test find all oids that depend on it and have it in
     # in a sorted liste (this is used for the worst_color calc in render_msg
     my %all_infls_thresh;
-    for my $oid ( reverse(@sorted_oids) ) {
+    for my $oid ( reverse( @{ $sorted_oids } ) ) {
 
         for my $oid_infl ( keys %{ $infls_thresh->{$oid} } ) {
             if ( exists $all_infls_thresh{$oid_infl} ) {
@@ -1046,7 +1040,7 @@ sub calc_template_test_deps {
             $tmpl->{oids}->{$oid}{sorted_oids_thresh_infls} = $all_infls_thresh{$oid};
         }
     }
-    return;
+    return 1;
 }
 
 # Function sort-oid sorts the OIDs used in the transformations in a order
@@ -1110,7 +1104,7 @@ sub sort_oids($) {
     }    # of while
 
     if ( keys %Cnt ) {
-        do_log( "ERROR TMPL: The following OIDs are in one or more circular depency chains: " . join( ', ', sort keys %Cnt ), 0 );
+        do_log( "ERROR TMPL: The following OIDs are in one or more circular depency chains: " . join( ', ', sort keys %Cnt ), 1 );
         return undef;    # Circular dependency chain found
     } else {
         return \@Sorted;    # No circular dependency chains found
@@ -1204,7 +1198,7 @@ sub read_thresholds_file {
     #do_log("Missing 'thresholds' file in $dir, skipping this test.", 0)
     #   and return 0 if !-e $thresh_file;
     open FILE, "$thresh_file"
-        or do_log( "ERROR TMPL: Failed to open $thresh_file ($!), skipping this test.", 0 )
+        or do_log( "ERROR TMPL: Failed to open $thresh_file ($!), skipping this test.", 1 )
         and return 0;
 
     # Go through file, read in oids
@@ -1217,23 +1211,23 @@ sub read_thresholds_file {
         # Validate curly bracket
         my $curly_bracket = $line;
         $curly_bracket =~ s/\{([^{}\s]+)\}//g;
-        do_log( "ERROR TMPL: Curly bracket error in $thresh_file at line $.", 0 ) and next if $curly_bracket =~ /{|}/;
+        do_log( "ERROR TMPL: Curly bracket error in $thresh_file at line $.", 1 ) and next if $curly_bracket =~ /{|}/;
 
         # Render variables
         my ( $oid, $color, $threshes, $msg ) = split /\s*:\s*/, $line, 4;
 
         # Make sure we got all our variables and they are non-blank and valid
         if ( !defined $color ) {
-            do_log( "ERROR TMPL:  Missing colon separator near color value in $thresh_file at line $.", 0 );
+            do_log( "ERROR TMPL:  Missing colon separator near color value in $thresh_file at line $.", 1 );
             next;
         } else {
             if ( $color eq '' ) {
-                do_log( "ERROR TMPL: Missing color value in $thresh_file at line $.", 0 );
+                do_log( "ERROR TMPL: Missing color value in $thresh_file at line $.", 1 );
                 next;
 
                 # Validate colors
             } elsif ( !defined $colors{$color} ) {
-                do_log( "ERROR TMPL: Invalid color value in $thresh_file at line $.", 0 );
+                do_log( "ERROR TMPL: Invalid color value in $thresh_file at line $.", 1 );
                 next;
             }
         }
@@ -1246,20 +1240,20 @@ sub read_thresholds_file {
             if ( !defined $threshes ) {
 
                 # Trim right (left done by split)
-                do_log( "WARNI TMPL: Trailing space(s) in $thresh_file at line $.", 0 ) if $color =~ s/\s$//;
+                do_log( "WARNI TMPL: Trailing space(s) in $thresh_file at line $.", 2 ) if $color =~ s/\s$//;
             } else {
 
                 # Trim right (left done by split)
-                do_log( "WARNI TMPL: Trailing space(s) in $thresh_file at line $.", 0 ) if $threshes =~ s/\s$//;
+                do_log( "WARNI TMPL: Trailing space(s) in $thresh_file at line $.", 2 ) if $threshes =~ s/\s$//;
             }
         } else {
 
             # Trim right (left done by split)
-            do_log( "WARNI TMPL: Trailing space(s) in $thresh_file at line $.", 0 ) if $msg =~ s/\s$//;
+            do_log( "WARNI TMPL: Trailing space(s) in $thresh_file at line $.", 2 ) if $msg =~ s/\s$//;
         }
 
         # Validate oid
-        do_log( "ERROR TMPL: Undefined oid '$oid' referenced in $thresh_file at line $.", 0 )
+        do_log( "ERROR TMPL: Undefined oid '$oid' referenced in $thresh_file at line $.", 1 )
             and next
             if !defined $tmpl->{oids}{$oid};
 
@@ -1268,7 +1262,7 @@ sub read_thresholds_file {
         while ( defined $tmp and $tmp =~ s/\{(.+?)}// ) {
             my $oid = $1;
             $oid =~ s/\..+$//;    # Remove flag, if any
-            do_log( "ERROR TMPL: Undefined oid '$1' referenced in " . "$thresh_file at line $.", 0 )
+            do_log( "ERROR TMPL: Undefined oid '$1' referenced in " . "$thresh_file at line $.", 1 )
                 if !defined $tmpl->{oids}{$oid};
         }
 
@@ -1299,7 +1293,7 @@ sub read_exceptions_file {
     #do_log ("Missing 'exceptions' file in $dir, skipping this test.", 0)
     #   and return 0 if !-e $except_file;
     open FILE, "$except_file"
-        or do_log( "ERROR TMPL: Failed to open $except_file ($!), skipping this test.", 0 )
+        or do_log( "ERROR TMPL: Failed to open $except_file ($!), skipping this test.", 1 )
         and return 0;
 
     # Go through file, read in oids
@@ -1313,7 +1307,7 @@ sub read_exceptions_file {
         # Validate curly bracket
         my $curly_bracket = $line;
         $curly_bracket =~ s/\{([^{}\s]+)\}//g;
-        do_log( "ERROR TMPL: Curly bracket error in $except_file at line $.", 0 ) and next if $curly_bracket =~ /{|}/;
+        do_log( "ERROR TMPL: Curly bracket error in $except_file at line $.", 1 ) and next if $curly_bracket =~ /{|}/;
 
         # Render variables
         my ( $oid, $type, $data ) = split /\s*:\s*/, $line, 3;
@@ -1323,38 +1317,38 @@ sub read_exceptions_file {
 
         # Make sure we got all our variables and they are non-blank
         if ( !defined $type ) {
-            do_log( "ERROR TMPL: Missing colon separator near exception type in $except_file at line $.", 0 );
+            do_log( "ERROR TMPL: Missing colon separator near exception type in $except_file at line $.", 1 );
             next;
         } else {
             if ( $type eq '' ) {
-                do_log( "ERROR TMPL: Missing oid value in $except_file at line $.", 0 );
+                do_log( "ERROR TMPL: Missing oid value in $except_file at line $.", 1 );
                 next;
 
                 # Validate exception type
             } elsif ( !defined $excepts{$type} ) {
-                do_log( "ERROR TMPL: Invalid exception type '$type' for $oid in $except_file", 0 );
+                do_log( "ERROR TMPL: Invalid exception type '$type' for $oid in $except_file", 1 );
                 next;
             }
         }
         if ( !defined $data ) {
-            do_log( "ERROR TMPL: Missing colon separator near exception data in $except_file at line $.", 0 );
+            do_log( "ERROR TMPL: Missing colon separator near exception data in $except_file at line $.", 1 );
             next;
         } else {
 
             # Trim right (left done by split)
-            do_log( "WARNI TMPL: Trailing space(s) in $except_file at line $.", 0 ) if $data =~ s/\s$//;
+            do_log( "WARNI TMPL: Trailing space(s) in $except_file at line $.", 2 ) if $data =~ s/\s$//;
             if ( $data eq '' ) {
-                do_log( "ERROR TMPL: Missing exception data $except_file at line $.", 0 );
+                do_log( "ERROR TMPL: Missing exception data $except_file at line $.", 1 );
                 next;
             }
         }
 
         # Make sure we don't have an except defined twice
-        do_log( "ERROR TMPL: Exception for $oid redefined in $except_file at " . "line $.", 0 ) and next
+        do_log( "ERROR TMPL: Exception for $oid redefined in $except_file at " . "line $.", 1 ) and next
             if defined $tmpl->{oids}{$oid}{except}{$type};
 
         # Validate oid
-        do_log( "ERROR TMPL: Undefined oid '$oid' in $except_file at line $.", 0 )
+        do_log( "ERROR TMPL: Undefined oid '$oid' in $except_file at line $.", 1 )
             and next
             if !defined $tmpl->{oids}{$oid};
 
@@ -1382,7 +1376,7 @@ sub read_message_file {
     #   and return 0 if !-e $msg_file;
 
     open FILE, "$msg_file"
-        or do_log( "ERROR TMPL: Failed to open $msg_file ($!), skipping this test.", 0 )
+        or do_log( "ERROR TMPL: Failed to open $msg_file ($!), skipping this test.", 1 )
         and return 0;
 
     # Go through file, read in oids
@@ -1402,7 +1396,7 @@ sub read_message_file {
             # Remove tags
             $oid =~ s/.($oid_tags)$//;
 
-            do_log( "ERROR TMPL: Undefined oid '$oid' at line $. of $msg_file, " . "skipping this test.", 0 )
+            do_log( "ERROR TMPL: Undefined oid '$oid' at line $. of $msg_file, " . "skipping this test.", 1 )
                 and return 0
                 if !defined $tmpl->{oids}{$oid};
         }
@@ -1417,7 +1411,7 @@ sub read_message_file {
             if ( $line !~ /\{.+\}/ ) { $header = 1; next }
 
             # Complain if we havent found any oids yet
-            do_log( "ERROR TMPL: Table definition at line $table_at of $msg_file has no " . "OIDs defined. Skipping this test.", 0 )
+            do_log( "ERROR TMPL: Table definition at line $table_at of $msg_file has no " . "OIDs defined. Skipping this test.", 1 )
                 and return 0
                 if $header
                 and $line !~ /\{.+\}/;
@@ -1426,7 +1420,7 @@ sub read_message_file {
             for my $col ( split /\s*\|\s*/, $line ) {
                 for my $oid ( $col =~ /\{(.+?)}/g ) {
                     $oid =~ s/\.($oid_tags)$//;
-                    do_log( "ERROR TMPL: Undefined oid '$oid' at line $. of " . "$msg_file, skipping this test.", 0 )
+                    do_log( "ERROR TMPL: Undefined oid '$oid' at line $. of " . "$msg_file, skipping this test.", 1 )
                         and return 0
                         if !defined $tmpl->{oids}{$oid};
                 }
@@ -1440,7 +1434,7 @@ sub read_message_file {
         # and skip to next line
         if ( $line =~ /^\s*(?:TABLE|NONHTMLTABLE):\s*(.*)/ ) {
             my $opts = $1;
-            do_log( "WARNI TMPL: NONHTMLTABLE tag used in $msg_file is deprecated, use " . "'nonhtml' TABLE option instead." )
+            do_log( "WARNI TMPL: NONHTMLTABLE tag used in $msg_file is deprecated, use " . "'nonhtml' TABLE option instead." ,2)
                 and $line =~ s/NONHTMLTABLE/TABLE/
                 if $1 eq 'NONHTMLTABLE';
             my %t_opts;
@@ -1470,42 +1464,42 @@ sub read_message_file {
                             } elsif ( lc $sub_opt eq 'max' ) {
                             } elsif ( lc $sub_opt =~ /^name:(\S+)$/ ) {
                             } elsif ( lc $sub_opt =~ /^pri:(\S+)$/ ) {
-                                do_log("ERROR TMPL: Undefined rrd oid '$1' at $msg_file line $.")
+                                do_log("ERROR TMPL: Undefined rrd oid '$1' at $msg_file line $.",1)
                                     and return 0
                                     if !defined $tmpl->{oids}{$1};
                             } elsif ( $sub_opt =~ /^DS:(\S+)$/ ) {
                                 my ( $ds, $oid, $type, $time, $min, $max ) = split /:/, $1;
-                                do_log("ERROR TMPL: Invalid rrd ds name '$ds' at $msg_file line $.")
+                                do_log("ERROR TMPL: Invalid rrd ds name '$ds' at $msg_file line $.",1)
                                     and return 0
                                     if defined $ds
                                     and $ds =~ /\W/;
-                                do_log("ERROR TMPL: No RRD oid defined at $msg_file line $.")
+                                do_log("ERROR TMPL: No RRD oid defined at $msg_file line $.",1)
                                     and return 0
                                     if !defined $oid;
-                                do_log("ERROR TMPL: Undefined rrd oid '$oid' at $msg_file line $.")
+                                do_log("ERROR TMPL: Undefined rrd oid '$oid' at $msg_file line $.",1)
                                     and return 0
                                     if !defined $tmpl->{oids}{$oid};
-                                do_log("ERROR TMPL: Bad rrd datatype '$type' at $msg_file line $.")
+                                do_log("ERROR TMPL: Bad rrd datatype '$type' at $msg_file line $.",1)
                                     and return 0
                                     if defined $type
                                     and $type ne ''
                                     and $type !~ /^(GAUGE|COUNTER|DERIVE|ABSOLUTE)$/;
-                                do_log("ERROR TMPL: Bad rrd maxtime '$time' at $msg_file line $.")
+                                do_log("ERROR TMPL: Bad rrd maxtime '$time' at $msg_file line $.",1)
                                     and return 0
                                     if defined $time
                                     and $time ne ''
                                     and ( $time !~ /^\d+/ or $time < 1 );
-                                do_log("ERROR TMPL: Bad rrd min value '$min' at $msg_file line $.")
+                                do_log("ERROR TMPL: Bad rrd min value '$min' at $msg_file line $.",1)
                                     and return 0
                                     if defined $min
                                     and $min ne ''
                                     and $min !~ /^[-+]?(\d+)$/;
-                                do_log("ERROR TMPL: Bad rrd max value '$max' at $msg_file line $.")
+                                do_log("ERROR TMPL: Bad rrd max value '$max' at $msg_file line $.",1)
                                     and return 0
                                     if defined $max
                                     and $max ne ''
                                     and $max !~ /^([-+]?(\d+)|U$)/;
-                                do_log("ERROR TMPL: rrd max value > min value at $msg_file line $.") and return 0
+                                do_log("ERROR TMPL: rrd max value > min value at $msg_file line $.",1) and return 0
                                     if (    defined $min
                                         and $min ne ''
                                         and defined $max
@@ -1514,17 +1508,17 @@ sub read_message_file {
                                     or ( defined $max and $max ne '' and $max < 0 );
                                 $got_ds = 1;
                             } else {
-                                do_log("ERROR TMPL: Bad rrd option '$sub_opt' at $msg_file line $.");
+                                do_log("ERROR TMPL: Bad rrd option '$sub_opt' at $msg_file line $.",1);
                                 return 0;
                             }
                         }
 
-                        do_log("ERROR TMPL: No dataset included for RRD at $msg_file line $.")
+                        do_log("ERROR TMPL: No dataset included for RRD at $msg_file line $.",1)
                             and return 0
                             if !$got_ds;
                     }
                 } else {
-                    do_log("ERROR TMPL: Invalid option '$opt' for table at line $. in $msg_file");
+                    do_log("ERROR TMPL: Invalid option '$opt' for table at line $. in $msg_file",1);
                     return 0;
                 }
             }
@@ -1664,6 +1658,6 @@ sub sync_templates {
     db_do("update nodes set read_temps='y'");
 
     # Now quit
-    do_log( "INFOR TMPL: Template synchronization complete", 0 );
+    do_log( "INFOR TMPL: Template synchronization complete",3 );
     exit 0;
 }
