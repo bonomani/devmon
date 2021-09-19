@@ -32,31 +32,28 @@ sub send_msgs {
     $g{msgxfrtime}  = time;
     $g{sentmsgsize} = 0;
 
-    do_log( 'DEBUG MESG: running send_msgs()', 1 ) if $g{debug};
+    do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
     my $nummsg = scalar @{ $g{test_results} };
-    do_log( "INFOR MESG: Sending $nummsg messages to display server", 1 );
+    do_log( "INFOR MESG: Sending $nummsg messages to '$g{output}'", 3 );
 
     # Determine the address we are connecting to
     my $host = $g{dispserv};
     my $addr = inet_aton($host)
-        or do_log( "ERROR MESG: Can't resolve display server $host ($!)", 0 )
+        or do_log( "ERROR MESG: Can't resolve display server $host ($!)", 1 )
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
 
     # Print messages to output if requested
-    if ( $g{output} and defined $g{test_results} ) {
+    if ( $g{output} eq 'STDOUT' and defined $g{test_results} ) {
         print join "\n", @{ $g{test_results} };
-    }
-
-    # Don't actually send messages if we are printing them
-    if ( $g{output} ) {
+        #TO BE ADDED: PRINT STAT ONLY IF REQUESTED
         $g{msgxfrtime} = time - $g{msgxfrtime};
-        print dm_stat_msg();
+        #print dm_stat_msg();
         return;
     }
 
     my $msg_sent = 0;
-    do_log( "DEBUG MESG: Looping through messages for this socket", 3 ) if $g{debug};
+    do_log( "DEBUG MESG: Looping through messages for this socket", 4 ) if $g{debug};
 
     # Run until we are out of messages to send
 SOCKLOOP: while ( @{ $g{test_results} } ) {
@@ -65,19 +62,19 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
         select undef, undef, undef, $g{msgsleep} / 1000;
 
         # Open our socket to the host
-        do_log( "DEBUG MESG: Opening socket to $host:$g{dispport}", 3 ) if $g{debug};
+        do_log( "DEBUG MESG: Opening socket to $host:$g{dispport}", 4 ) if $g{debug};
         eval {
             local $SIG{ALRM} = sub { die "Socket timed out\n" };
             alarm 10;
             socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp') )
-                or do_log( "ERROR MESG: Failed to create socket ($!)", 0 )
+                or do_log( "ERROR MESG: Failed to create socket ($!)", 1 )
                 and $g{msgxfrtime} = time - $g{msgxfrtime}
                 and return;
             alarm 0;
             local $SIG{ALRM} = sub { die "Connect timed out\n" };
             alarm 10;
             if ( !connect( SOCK, $p_addr ) ) {
-                do_log( "ERROR MESG: Can't connect to display server $host ($!)", 0 );
+                do_log( "ERROR MESG: Can't connect to display server $host ($!)", 1 );
                 $g{msgxfrtime} = time - $g{msgxfrtime};
                 close SOCK;
                 return;
@@ -85,7 +82,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             alarm 0;
         };
         if ($@) {
-            do_log( "ERROR MESG: Timed out connecting to display server: $!", 0 );
+            do_log( "ERROR MESG: Timed out connecting to display server: $!", 1 );
             return;
         }
 
@@ -97,13 +94,13 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             alarm 0;
         };
         if ($@) {
-            do_log( "ERROR MESG: Timed out printing to display server: $!", 0 );
+            do_log( "ERROR MESG: Timed out printing to display server: $!", 1 );
             close SOCK;
             return;
         }
 
         # Now print to this socket until we hit the max msg size
-        do_log( "DEBUG MESG: Looping through messages to build a combo", 3 ) if $g{debug};
+        do_log( "DEBUG MESG: Looping through messages to build a combo", 4 ) if $g{debug};
         my $msg_size = 0;
     MSGLOOP: while ( $msg_size < $g{msgsize}
             and @{ $g{test_results} } )
@@ -113,7 +110,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
             # Make sure this is a valid message
             if ( !defined $msg or $msg eq '' ) {
-                do_log( "ERROR MESG: trying to send a blank message!", 0 );
+                do_log( "ERROR MESG: trying to send a blank message!", 1 );
                 next MSGLOOP;
             }
 
@@ -129,14 +126,14 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                     eval {
                         local $SIG{ALRM} = sub { die "Printing message timed out\n" };
                         alarm 10;
-                        do_log( "DEBUG MESG: Printing single combo message ($msg_sent of $nummsg), size $msg_size", 3 )
+                        do_log( "DEBUG MESG: Printing single combo message ($msg_sent of $nummsg), size $msg_size", 4 )
                             if $g{debug};
                         print SOCK "$msg\n";
-                        do_log( "DEBUG MESG: Finished printing single combo message", 3 ) if $g{debug};
+                        do_log( "DEBUG MESG: Finished printing single combo message", 4 ) if $g{debug};
                         alarm 0;
                     };
                     if ($@) {
-                        do_log( "ERROR MESG: Timed out printing to display server: $@ - $!", 0 );
+                        do_log( "ERROR MESG: Timed out printing to display server: $@ - $!", 1 );
                         close SOCK;
                         return;
                     }
@@ -149,7 +146,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
                 # Either way, open a new socket
                 $g{sentmsgsize} += $msg_size;
-                do_log( "DEBUG MESG: Closing socket, $msg_size sent", 3 ) if $g{debug};
+                do_log( "DEBUG MESG: Closing socket, $msg_size sent", 4 ) if $g{debug};
                 close SOCK;
                 next SOCKLOOP;
 
@@ -161,14 +158,14 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                 unshift @{ $g{test_results} }, $msg;
                 $msg_sent--;
                 $g{sentmsgsize} += $msg_size;
-                do_log( "DEBUG MESG: Closing socket, $msg_size sent", 3 ) if $g{debug};
+                do_log( "DEBUG MESG: Closing socket, $msg_size sent", 4 ) if $g{debug};
                 close SOCK;
                 next SOCKLOOP;
 
                 # Looks good, print the msg
             } else {
                 my $thismsgsize = length $msg;
-                do_log( "DEBUG MESG: Printing message ($msg_sent of $nummsg), size $thismsgsize to existing combo", 3 )
+                do_log( "DEBUG MESG: Printing message ($msg_sent of $nummsg), size $thismsgsize to existing combo", 4 )
                     if $g{debug};
                 eval {
                     local $SIG{ALRM} = sub { die "Printing message timed out\n" };
@@ -177,37 +174,37 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                     alarm 0;
                 };
                 if ($@) {
-                    do_log( "ERROR MESG: Timed out printing to display server: $!", 0 );
+                    do_log( "ERROR MESG: Timed out printing to display server: $!", 1 );
                     close SOCK;
                     return;
                 }
                 $msg_size += length $msg;
-                do_log( "DEBUG MESG: Finished printing message to existing combo ($msg_size so far)", 3 )
+                do_log( "DEBUG MESG: Finished printing message to existing combo ($msg_size so far)", 4 )
                     if $g{debug};
             }
 
         }    # End MSGLOOP
 
         $g{sentmsgsize} += $msg_size;
-        do_log( "DEBUG MESG: Closing socket, $msg_size sent", 3 ) if $g{debug};
+        do_log( "DEBUG MESG: Closing socket, $msg_size sent", 4 ) if $g{debug};
         close SOCK;
     }    # END SOCKLOOP
 
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
-    # Now send our dm status message!
-    if ( !$g{output} ) {
+    # Now send our dm status message !
+    if ( $g{output}  eq 'xymon' ) {
         my $dm_msg  = dm_stat_msg();
         my $msgsize = length $dm_msg;
-        do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 3 ) if $g{debug};
+        do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 4 ) if $g{debug};
         eval {
             local $SIG{ALRM} = sub { die "Connecting and sending dm message timed out\n" };
             alarm 10;
             socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp') )
-                or do_log( "ERROR MESG: Failed to create socket ($!)", 0 )
+                or do_log( "ERROR MESG: Failed to create socket ($!)", 1 )
                 and return;
             connect( SOCK, $p_addr )
-                or do_log( "ERROR MESG: Can't connect to display server ($!)", 0 )
+                or do_log( "ERROR MESG: Can't connect to display server ($!)", 1 )
                 and return;
 
             print SOCK "$dm_msg\n";
@@ -215,13 +212,13 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             alarm 0;
         };
         if ($@) {
-            do_log( "ERROR MESG: Timed out connecting and sending dm: $!", 0 );
+            do_log( "ERROR MESG: Timed out connecting and sending dm: $!", 1 );
             close SOCK;
             return;
         }
     }
 
-    do_log( "INFOR MESG: Done sending messages", 2 );
+    do_log( "INFOR MESG: Done sending messages", 3 );
 }
 
 # Spit out various data about our devmon process

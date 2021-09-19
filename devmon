@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '0.21.12.09';
+our $VERSION = '0.21.09';
 
 #    Devmon: An SNMP data collecteor & page generator for the BigBrother &
 #    Hobbit network monitoring systems
@@ -31,7 +31,7 @@ use dm_msg;
 initialize($VERSION);
 
 # Enter main loop
-do_log( "INFOR MAIN: Entering poll loop", 0 );
+do_log( "INFOR MAIN: Entering poll loop", 3 );
 while (1) {
 
     # Read in template data

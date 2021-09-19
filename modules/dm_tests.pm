@@ -56,7 +56,7 @@ sub tests {
     # Timestamp
     $g{testtime} = time;
 
-    do_log( 'INFOR TEST: Performing tests', 1 );
+    do_log( 'INFOR TEST: Performing tests', 3 );
 
     # Now go through each device and perform the test logic it needs
     for my $device ( sort keys %{ $g{dev_data} } ) {
@@ -100,12 +100,13 @@ sub tests {
 
         # Separate tests, perform individual test logic
         for my $test ( split /,/, $tests ) {
-            do_log( "DEBUG TEST: Starting test for $test on device $device", 2 ) if $g{debug};
 
-            # Make sure test template exists
-            do_log( "ERROR TEST: Could not find test template for '$test' on $device", 0 )
-                and next
-                if !defined $g{templates}{$vendor}{$model}{tests}{$test};
+            #Filter if requested
+            # Honor 'probe' and 'match' command line
+            if ( defined $g{match_test} and $test !~ /$g{match_test}/  ) {
+               next;
+            }
+            do_log( "DEBUG TEST: Starting test for $test on device $device", 4 ) if $g{debug};
 
             # Hash shortcut
             my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
@@ -157,7 +158,7 @@ sub tests {
 
     # Finish timestamp
     $g{testtime} = time - $g{testtime};
-    do_log( "INFOR TEST: Done with test logic", 2 );
+#    do_log( "INFOR TEST: Done with test logic", 3 );
 }
 
 # Create a oid hash ref that will eventually contain all gathered
@@ -213,7 +214,7 @@ sub oid_hash {
             or !defined $snmp->{$num}{val} )
         {
             # log this problem if xymon_color (normally "conn" ping) is green
-            do_log( "ERROR TEST: No SNMP data found (Nil) for $oid on $device", 0 )
+            do_log( "ERROR TEST: No SNMP data found (Nil) for $oid on $device", 1 )
                 if ( $g{xymon_color}{$device} eq 'green' );
         }
 
@@ -283,7 +284,7 @@ sub transform {
     # Make sure we inherit repeatability from previous types
     my $trans_sub = "trans_" . $trans_type;
     no strict 'refs';
-    do_log("DEBUG TEST: Doing $trans_type transform on $device/$oid")
+    do_log("DEBUG TEST: Doing $trans_type transform on $device/$oid",4)
         if $g{debug};
     if ( defined &$trans_sub ) {
         eval {
@@ -325,7 +326,7 @@ sub trans_delta {
 
     # Check our parent oids for any errors
     if ( not validate_deps( $device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$' ) ) {
-        do_log("INFOR TEST: Delta transform on $device/$oid do not have valid dependencies: skipping") if $g{debug};
+        do_log("INFOR TEST: Delta transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
         return;
     }
 
@@ -376,7 +377,7 @@ sub trans_delta {
                         next LEAF;
                     }
 
-                    do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data " . "last: $last_data delta: $delta", 0 ) if $g{debug};
+                    do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data " . "last: $last_data delta: $delta", 4 ) if $g{debug};
 
                     # Otherwise do normal delta calc
                 } else {
@@ -445,7 +446,7 @@ sub trans_delta {
                     return;
                 }
 
-                do_log( "Counterwrap on $oid on $device (this: $this_data " . "last: $last_data delta: $delta", 0 )
+                do_log( "Counterwrap on $oid on $device (this: $this_data " . "last: $last_data delta: $delta", 4 )
                     if $g{debug};
 
                 # Otherwise do normal delta calc
@@ -501,7 +502,7 @@ sub trans_math {
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids, '^[-+]?\d+(\.\d+)?$' ) ) {
 
         #if ( not validate_deps($device, $oids, $oid, \@dep_oids ) ) {
-        do_log("INFOR TEST: Math transform on $device/$oid do not have valid dependencies: skipping") if $g{debug};
+        do_log("INFOR TEST: Math transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
         return;
     }
 
@@ -965,7 +966,7 @@ sub trans_pack {
             my @packed = split $seperator, $dep_oid_h->{val}{$leaf};
             my $val    = pack $type, @packed;
 
-            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", 0 ) if $g{debug};
+            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", 4 ) if $g{debug};
 
             $oid_h->{val}{$leaf}  = $val;
             $oid_h->{time}{$leaf} = time;
@@ -1966,7 +1967,7 @@ sub trans_regsub {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids ) ) {
-        do_log("INFOR TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping") if $g{debug};
+        do_log("INFOR TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
         return;
     }
 
@@ -2252,7 +2253,7 @@ sub trans_sort {
     validate_deps( $device, $oids, $oid, [$src_oid] )
         or return;
 
-    do_log( "DEBUG TEST: Transforming $src_oid to $oid via 'sort' transform", 0 ) if $g{debug};
+    do_log( "DEBUG TEST: Transforming $src_oid to $oid via 'sort' transform", 5 ) if $g{debug};
 
     # This transform should probably only work for repeater sources
     my $src_h = \%{ $oids->{$src_oid} };
@@ -2354,7 +2355,7 @@ sub trans_index {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, [$src_oid] ) ) {
-        do_log("INFOR TEST: Index transform on $device/$oid do not have valid dependencies: skipping") if $g{debug};
+        do_log("INFOR TEST: Index transform on $device/$oid do not have valid dependencies: skipping",4) if $g{debug};
         return;
     }
 
@@ -2416,7 +2417,7 @@ sub trans_match {
     validate_deps( $device, $oids, $oid, [$src_oid], '.*' )
         or return;
 
-    do_log( "DEBUG TEST: Transforming $src_oid to $oid via match transform matching $expr", 0 ) if $g{debug};
+    do_log( "DEBUG TEST: Transforming $src_oid to $oid via match transform matching $expr", 4 ) if $g{debug};
 
     my $src_h = \%{ $oids->{$src_oid} };
 
@@ -2484,7 +2485,7 @@ sub render_msg {
     my $hostname     = $device;
     $hostname =~ s/\./,/g;
 
-    do_log("DEBUG TEST: Rendering $test message for $device") if $g{debug};
+    do_log("DEBUG TEST: Rendering $test message for $device",4) if $g{debug};
 
     # Build readable timestamp
     my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
@@ -2733,7 +2734,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     my $val   = $oid_h->{repeat} ? $oid_h->{val}{$leaf}   : $oid_h->{val};
                     my $color = $oid_h->{repeat} ? $oid_h->{color}{$leaf} : $oid_h->{color};
                     if ( !defined $val ) {
-                        do_log("WARNI TEST: Undefined value for $oid in test $test on $device, ignoring row for $pri_val") if $g{debug};
+                        do_log("WARNI TEST: Undefined value for $oid in test $test on $device, ignoring row for $pri_val",4) if $g{debug};
                         next T_LEAF;
                     }
 
@@ -2946,7 +2947,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
                     if ( $temp_data =~ /^(U:)+/ ) {
 
-                        do_log("WARNI TEST: Text values in data for rrd repeater, dropping rrd for $pri_val")
+                        do_log("WARNI TEST: Text values in data for rrd repeater, dropping rrd for $pri_val",4)
                             if $g{debug};
                         next;
                     }
@@ -3133,7 +3134,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
     {
         my $start_clear = $g{numclears}{$device}{$test};
         if ( time - $start_clear < $g{cleartime} ) {
-            do_log( "DEBUG TEST: $device had some clear errors " . "during test $test" ) if $g{debug};
+            do_log( "DEBUG TEST: $device had some clear errors " . "during test $test",4 ) if $g{debug};
             return;
         }
     }
