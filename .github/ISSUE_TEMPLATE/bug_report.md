@@ -5,14 +5,13 @@ title: ''
 labels: 'bug'
 assignees: ''
 ---
-* Please use the 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to show that you are affected by the same issue.
+* Please use the 👍 to show that you are affected by the same issue.
 * Subscribe to receive notifications on status change and new comments. 
 
 ### Describe the bug
-A clear and concise description of what the bug is.
 
->If applicable you can fill the template below
 
+>If it can help you you can fill the template below
 ### Steps to reproduce
 1.
 2.
