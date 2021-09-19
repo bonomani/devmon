@@ -70,8 +70,9 @@ sub poll_devices {
         # Ask xymon for ssh, conn, http, telnet tests green on all devices
         print $sock "xymondboard test=conn|ssh|http|telnet color=green fields=hostname";
         shutdown( $sock, 1 );
-        while (my $device=<$sock>) {
+        while ( my $device = <$sock> ) {
             chomp $device;
+
             #my ( $device, $color, $line1 ) = split /\|/;
             #chomp $line1; #and do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 4 ) if $g{debug};
 
@@ -80,10 +81,11 @@ sub poll_devices {
             #    do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 5 ) if $g{debug};
             #    next;
             #} elsif ( $line1 =~ /ok/i ) {
-        $g{xymon_color}{$device} = 'green';
+            $g{xymon_color}{$device} = 'green';
+
             #    do_log( "DEBUG SNMP: $device has Xymon status $color and msg $line1", 4 ) if $g{debug};
             #}
-        #do_log("$line");
+            #do_log("$line");
         }
     }
 
@@ -97,11 +99,11 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
         # Skip this device if we are running a Xymon server and the
         # server thinks that it isn't reachable
         if ( !defined $g{xymon_color}{$device} ) {
-            do_log("DEBUG SNMP: $device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...",4);
+            do_log( "DEBUG SNMP: $device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...", 4 );
             --$g{numsnmpdevs};
             next QUERYHASH;
         } elsif ( $g{xymon_color}{$device} ne 'green' ) {
-            do_log("INFOR SNMP: $device has a non-green Xymon status, skipping SNMP.",4);
+            do_log( "INFOR SNMP: $device has a non-green Xymon status, skipping SNMP.", 4 );
             --$g{numsnmpdevs};
             next QUERYHASH;
         }
