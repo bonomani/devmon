@@ -242,7 +242,7 @@ sub initialize {
             'case'    => 1
         },
         'snmpeng' => {
-            'default' => 'session',    # new: 'snmp' , old: 'session', auto: 'snmp' if available, fallback to 'session'
+            'default' => 'auto',    # new: 'snmp' , old: 'session', auto: 'snmp' if available, fallback to 'session'
             'regex'   => '\S+',
             'set'     => 0,
             'case'    => 1
