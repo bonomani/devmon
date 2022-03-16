@@ -3,7 +3,7 @@ TempDescrRaw                    : CHAIN  : {TempRowIndex} {entPhysicalName}
 TempDescr                       : REGSUB : {TempDescrRaw} /^Temp: (\S+)/$1/
 TempValue                       : CHAIN  : {TempRowIndex} {entSensorValue}
 TempStatusRaw                   : CHAIN  : {TempRowIndex} {entSensorStatus}
-TempStatus                      : SWITCH : {TempStatusRaw} 1=ok,2=unavailable,3=nonoperational
+TempStatus                      : SWITCH : {TempStatusRaw} 1=OK,2=unavailable,3=nonoperational
 TempIndexRaw                    : INDEX  : {TempDescr}
 TempIndex                       : REGSUB : {TempIndexRaw} /(.*)/Temp#$1/
 

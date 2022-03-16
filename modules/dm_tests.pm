@@ -65,14 +65,7 @@ sub tests {
 
         # Check to see if this device was unreachable in xymon
         # If so skip device
-        if ( !defined $g{xymon_color}{$device} or $g{xymon_color}{$device} ne 'green' ) {
-
-            #   $g{xymon_color}{$device} = 'clear';
-            next;
-
-            #} elsif ( $g{xymon_color}{$device} ne 'green') {
-            #   next;
-        }
+        next if  !defined $g{xymon_color}{$device} or $g{xymon_color}{$device} ne 'green' ; 
 
         # Get template-specific variables
         my $vendor = $g{dev_data}{$device}{vendor};
@@ -93,19 +86,9 @@ sub tests {
             $tests = join ',', keys %valid_tests;
         }
 
-        # Copious, uncessary error checking, but whatever
-        do_log( "No vendor found for $device!", 0 ) and next if !defined $vendor;
-        do_log( "No model found for $device!",  0 ) and next if !defined $model;
-        do_log( "No tests found for $device!",  0 ) and next if !defined $tests;
-
         # Separate tests, perform individual test logic
         for my $test ( split /,/, $tests ) {
 
-            #Filter if requested
-            # Honor 'probe' and 'match' command line
-            if ( defined $g{match_test} and $test !~ /$g{match_test}/ ) {
-                next;
-            }
             do_log( "DEBUG TEST: Starting test for $test on device $device", 4 ) if $g{debug};
 
             # Hash shortcut
@@ -119,22 +102,47 @@ sub tests {
             # from going insane when we start doing transforms
             oid_hash( $oids, $device, $tmpl, $thr );
 
-            # Check to see if this device was unreachable in xymon
-            # If so, don't bother doing transforms or rendering the message
-            # A TEST IN THE BEGINNING SHOULD OF THIS SUB SHOULD REPLACE THIS TEST..TO BE REMOVED
-            if ( !defined $g{xymon_color}{$device}
-                or $g{xymon_color}{$device} eq 'green' )
-            {
 
-                # If the value is not yet calculated, perform the transformation.
-                # Otherwise this is polled oid, then perform the threshold
-                # checks only.
-                # do_log ("@{$tmpl->{sorted_oids}}");
+            # Perform the transform 
+            for my $oid ( @{ $tmpl->{sorted_oids} } ) {
+                next if !$oids->{$oid}{transform};
 
-                for my $oid ( @{ $tmpl->{sorted_oids} } ) {
-                    next if !$oids->{$oid}{transform};
-                    unless ( defined $oids->{$oid}{'val'} ) {
-                        transform( $device, $oids, $oid, $thr );
+                transform( $device, $oids, $oid, $thr );
+                
+                # Do some debug if requested
+                if ( $g{debug} ) {
+                    my $oid_h = \%{ $oids->{$oid} };
+                    if ( $oid_h->{repeat} ) {
+                        my $line;
+                    LEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
+                            $line .= "i:$leaf v:$oid_h->{val}{$leaf}";
+                            if ( $g{trace} ) {
+                                $line .= " c:$oid_h->{color}{$leaf}" if defined $oid_h->{color}{$leaf};
+                                $line .= " e:$oid_h->{error}{$leaf}" if defined $oid_h->{error}{$leaf};
+                                $line .= " m:$oid_h->{msg}{$leaf}"   if defined $oid_h->{msg}{$leaf};
+                                $line .= " t:$oid_h->{time}{$leaf}"  if defined $oid_h->{time}{$leaf};
+                                do_log( "TRACE TEST: $line", 5 );
+                                $line = '';
+                            } else {
+                                $line .= ' ';
+                            }
+                        }
+                        unless ( $g{trace} ) {
+                            do_log( "DEBUG TEST: $line", 4 );
+                        }
+
+                    } else {
+                        my $line;
+                        $line = "v:$oid_h->{val}";
+                        if ( $g{trace} ) {
+                            $line .= " c:$oid_h->{color}" if defined $oid_h->{color};
+                            $line .= " e:$oid_h->{error}" if defined $oid_h->{error};
+                            $line .= " m:$oid_h->{msg}"   if defined $oid_h->{msg};
+                            $line .= " t:$oid_h->{time}"  if defined $oid_h->{time};
+                            do_log( "TRACE TEST: $line", 5 );
+                        } else {
+                            do_log( "DEBUG TEST: $line", 4 );
+                        }
                     }
                 }
             }
@@ -285,8 +293,7 @@ sub transform {
     # Make sure we inherit repeatability from previous types
     my $trans_sub = "trans_" . $trans_type;
     no strict 'refs';
-    do_log( "DEBUG TEST: Doing $trans_type transform on $device/$oid", 4 )
-        if $g{debug};
+    do_log( "DEBUG TEST: Doing $trans_type transform on $device/$oid", 4 ) if $g{debug};
     if ( defined &$trans_sub ) {
         eval {
             local $SIG{ALRM} = sub { die "Timeout\n" };
@@ -2431,7 +2438,9 @@ sub trans_match {
         # Tag the target as a repeater
         $oid_h->{repeat} = 2;
         my $idx = 0;
-        for my $leaf ( sort { $a <=> $b } keys %{ $src_h->{val} } ) {
+        #for my $leaf ( sort { $a <=> $b } keys %{ $src_h->{val} } ) {
+        my @sorted_leafs  = oid_sort( keys %{ $src_h->{val} } );
+        for my $leaf (@sorted_leafs) {
 
             # Skip if our source oid is freaky-deaky
             next if $oid_h->{error}{$leaf};

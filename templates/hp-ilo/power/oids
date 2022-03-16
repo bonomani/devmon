@@ -1,0 +1,20 @@
+cpqHeFltTolPwrSupplyCondition         : 1.3.6.1.4.1.232.6.2.9.1.0    : leaf
+#cpqHeFltTolPwrSupplyStatus            : 1.3.6.1.4.1.232.6.2.9.2.0    : leaf
+cpqHeFltTolPowerSupplyBay             : 1.3.6.1.4.1.232.6.2.9.3.1.2  : branch
+cpqHeFltTolPowerSupplyPresent         : 1.3.6.1.4.1.232.6.2.9.3.1.3  : branch
+cpqHeFltTolPowerSupplyStatus          : 1.3.6.1.4.1.232.6.2.9.3.1.5  : branch
+cpqHeFltTolPowerSupplyMainVoltage     : 1.3.6.1.4.1.232.6.2.9.3.1.6  : branch
+cpqHeFltTolPowerSupplyCapacityUsed    : 1.3.6.1.4.1.232.6.2.9.3.1.7  : branch
+cpqHeFltTolPowerSupplyCapacityMaximum : 1.3.6.1.4.1.232.6.2.9.3.1.8  : branch
+
+cpqHeSysBackupBatteryCondition        : 1.3.6.1.4.1.232.6.2.17.1.0   : leaf
+cpqHeSysBatteryIndex                  : 1.3.6.1.4.1.232.6.2.17.2.1.2 : branch
+cpqHeSysBatteryPresent                : 1.3.6.1.4.1.232.6.2.17.2.1.3 : branch
+cpqHeSysBatteryCondition              : 1.3.6.1.4.1.232.6.2.17.2.1.4 : branch
+cpqHeSysBatteryCapacityMaximum        : 1.3.6.1.4.1.232.6.2.17.2.1.6 : branch
+
+
+
+
+
+

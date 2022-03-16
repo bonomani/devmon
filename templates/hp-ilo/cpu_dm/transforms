@@ -1,0 +1,5 @@
+ipAddrTableIdx       : INDEX  : {ipAddrTable}
+ipAdEntAddrIdx       : MATCH  : {ipAddrTableIdx} /\.1\./
+ipAdEntAddr          : CHAIN  : {ipAdEntAddrIdx} {ipAddrTable}
+cpqHeMibRev          : REGSUB : {cpqHeMibRevMajor} /(.*)/$1.{cpqHeMibRevMinor}/
+cpqHeMibConditionTxt : SWITCH : {cpqHeMibCondition} 1=Other,2=OK,3=Degraded,4=Failed

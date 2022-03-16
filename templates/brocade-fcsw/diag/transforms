@@ -4,14 +4,14 @@ connUnitDomainIdNum   : UNPACK        : {connUnitDomainId} H6
 connUnitDomainIdTxt   : REGSUB        : {connUnitDomainIdNum} /^0+//
 connUnitTypeTxt : SWITCH        : {connUnitType} 1=unknown,2=other,3=hub,4=switch,5=gateway,6=converter,7=hba,8=proxy-agent,9=storage-device,10=host,11=storage-subsystem,12=module,13=swdriver,14=storage-access-device,15=wdm,16=ups,17=nas
 connUnitStateTxt        : SWITCH        : {connUnitState} 1=unknown,2=online,3=offline
-connUnitStatusTxt       : SWITCH        : {connUnitStatus} 1=unknown,2=unused,3=ok,4=warning,5=failed
+connUnitStatusTxt       : SWITCH        : {connUnitStatus} 1=unknown,2=unused,3=OK,4=warning,5=failed
 connUnitUpTimeSecs	: MATH	: {connUnitUpTime} / 100 : 0
 connUnitUpTimeTxt	: ELAPSED	: {connUnitUpTimeSecs}
 connUnitProxyMasterTxt  : SWITCH        : {connUnitProxyMaster} 1=unknown,2=no,3=yes
 connUnitPrincipalTxt    : SWITCH        : {connUnitPrincipal} 1=unknown,2=no,3=yes
 connUnitControlTxt      : SWITCH        : {connUnitControl} 1=unknown,2=invalid,3=resetColdStart,4=resetWarmStart,5=offline,6=online
 #connUnitEventFilterTxt  : SWITCH        : {connUnitEventFilter} 1=unknown,2=emergency,3=alert,4=critical,5=error,6=warning,7=notify,8=info,9=debug,10=mark
-connUnitSensorStatusTxt : SWITCH        : {connUnitSensorStatus} 1=unknown,2=other,3=ok,4=warning,5=failed
+connUnitSensorStatusTxt : SWITCH        : {connUnitSensorStatus} 1=unknown,2=other,3=OK,4=warning,5=failed
 connUnitSensorTypeTxt   : SWITCH        : {connUnitSensorType} 1=unknown,2=other,3=battery,4=fan,5=PSU,6=transmitter,7=ENC,8=board,9=receiver
 connUnitSensorCharacteristicTxt : SWITCH        : {connUnitSensorCharacteristic} 1=unknown,2=other,3=Temp,4=Pressure,5=EMF,6=Current,7=Airflow,8=Freq,9=Power,10=Door
 connUnitSensorValue : REGSUB        : {connUnitSensorMessage} /.* value is (\S+)\s*/$1/

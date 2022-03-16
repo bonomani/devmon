@@ -4,7 +4,7 @@ PwrRowIndex         : MATCH  : {entPhysicalName} /.*pwr.*/
 PwrDescrRaw         : CHAIN  : {PwrRowIndex} {entPhysicalName}
 PwrDescr            : REGSUB : {PwrDescrRaw} /P: (\S+)/$1/
 PwrStatusRaw        : CHAIN  : {PwrRowIndex} {entSensorStatus}
-PwrStatus           : SWITCH : {PwrStatusRaw} 1=ok,2=unavailable,3=nonoperational
+PwrStatus           : SWITCH : {PwrStatusRaw} 1=OK,2=unavailable,3=nonoperational
 PsuRowIndex         : MATCH  : {entPhysicalModelName} /PWR/
 PsuDescrRaw         : CHAIN  : {PsuRowIndex} {entPhysicalModelName}
 PsuDescr            : REGSUB : {PsuDescrRaw} /(\S+)/$1/

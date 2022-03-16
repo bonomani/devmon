@@ -4,5 +4,5 @@ FailoverForceStandby_T : SWITCH : {FailoverForceStandby} 0 = No, 1 = Yes
 FailoverIsRedundant_T : SWITCH : {FailoverIsRedundant}  0 = No, 1 = Yes
 FailoverUnitMask_T : SWITCH : {FailoverUnitMask} 0 = STANDBY, 3 = ACTIVE
 FailoverChangeStat : DELTA : {FailoverUnitMask}
-FailoverIsOk_T : MATH : {FailoverUnitMask} + {FailoverForceActive}
-FailoverIsOk_T_T : SWITCH : {FailoverIsOk_T} 2 = NOK, 3 = OK, 0 = OK, 4 = OK
+FailoverIsOK_T : MATH : {FailoverUnitMask} + {FailoverForceActive}
+FailoverIsOK_T_T : SWITCH : {FailoverIsOK_T} 2 = NOK, 3 = OK, 0 = OK, 4 = OK

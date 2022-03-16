@@ -1,0 +1,4 @@
+vendor	: hp
+model	: ilo
+snmpver	: 2
+sysdesc : Lights-Out

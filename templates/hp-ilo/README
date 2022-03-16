@@ -1,0 +1,9 @@
+This template was created by Bonomani.
+
+Adjust xymon hosts.cfg
+192.168.1.10 ilo # DEVMON:except(fans;cpqHeFltTolFanIdxTxt;na:Fan#1$|Fan#2$)
+
+NOTE: This does not imply any support responsibilities, liabiltiy in
+case of this template or devmon causing phsyical, monetary or emotional
+damanges, or any other such obligations.  It is merely to provide 
+credit to the original author of the template. 

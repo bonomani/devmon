@@ -1,0 +1,14 @@
+cpqHeFltTolPwrSupplyConditionTxt : SWITCH : {cpqHeFltTolPwrSupplyCondition} 1=Other,2=OK,3=Degraded,4=Failed
+#cpqHeFltTolPwrSupplyStatusTxt    : SWITCH : {cpqHeFltTolPwrSupplyStatus}  1=Other,2=Not supported,3=Not installed,4=Installed
+cpqHeFltTolPowerSupplyIdxTxt     : REGSUB : {cpqHeFltTolPowerSupplyBay} /(.*)/Power#$1/
+cpqHeFltTolPowerSupplyPresentTxt : SWITCH : {cpqHeFltTolPowerSupplyPresent} 1=Other,2=Absent,3=OK
+cpqHeFltTolPowerSupplyStatusTxt  : SWITCH : {cpqHeFltTolPowerSupplyStatus} 1=OK,2=General failure, 3=Bist failure,4=Fan failure,5=Temperature failure, 6=Interlock open,\
+                                                                         7=Eprom failed,8=Vref failed,9=Dac failed,10=Ram test failed,11= voltage channel failed,\
+                                                                         12=Orringdiode failed,13=Brown out,14=Giveup on startup,15=Nvram invalid,\
+                                                                         16=Calibration table invalid,17=No power input
+
+cpqHeSysBackupBatteryConditionTxt : SWITCH : {cpqHeSysBackupBatteryCondition}  1=Other,2=OK,3=Degraded,4=Failed
+cpqHeSysBatteryIdxTxt             : REGSUB : {cpqHeSysBatteryIndex} /(.*)/Battery#$1/
+cpqHeSysBatteryPresentTxt         : SWITCH : {cpqHeSysBatteryPresent} 1=Other,2=Absent,3=OK
+cpqHeSysBatteryConditionTxt       : SWITCH : {cpqHeSysBatteryCondition}  1=Other,2=OK,3=Degraded,4=Failed
+

@@ -1,0 +1,5 @@
+Overall temperature
+TABLE:
+Idx|Location|Status|Temp|Thresh|Type
+{cpqHeTemperatureIdxTxt}|{cpqHeTemperatureLocaleTxt}|{cpqHeTemperatureConditionTxt.color}{cpqHeTemperatureConditionTxt}|{cpqHeTemperatureCelsius}&#186;|{cpqHeTemperatureThreshold}&#186;|{cpqHeTemperatureThresholdTypeTxt}
+
