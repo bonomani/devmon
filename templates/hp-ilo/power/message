@@ -1,0 +1,12 @@
+Overall fault tolerant power  : {cpqHeFltTolPwrSupplyConditionTxt.color}{cpqHeFltTolPwrSupplyConditionTxt}
+#Overall fault tolerant power status    : {cpqHeFltTolPwrSupplyStatusTxt.color}{cpqHeFltTolPwrSupplyStatusTxt}
+Overall system backup battery : {cpqHeSysBackupBatteryConditionTxt.color}{cpqHeSysBackupBatteryConditionTxt}
+
+TABLE:
+Bay|Present|Status|Main Voltage|Used Power|Max Power 
+{cpqHeFltTolPowerSupplyIdxTxt}|{cpqHeFltTolPowerSupplyPresentTxt.color}{cpqHeFltTolPowerSupplyPresentTxt}|{cpqHeFltTolPowerSupplyStatusTxt.color}{cpqHeFltTolPowerSupplyStatusTxt}|{cpqHeFltTolPowerSupplyMainVoltage}V|{cpqHeFltTolPowerSupplyCapacityUsed}W|{cpqHeFltTolPowerSupplyCapacityMaximum}W
+
+TABLE:
+Idx|Present|Status|Max Power
+{cpqHeSysBatteryIdxTxt}|{cpqHeSysBatteryPresentTxt.color}{cpqHeSysBatteryPresentTxt}|{cpqHeSysBatteryConditionTxt.color}{cpqHeSysBatteryConditionTxt}|{cpqHeSysBatteryCapacityMaximum}W
+

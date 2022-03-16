@@ -1,0 +1,5 @@
+cpqHeTemperatureIdxTxt             : REGSUB : {cpqHeTemperatureIndex} /(.*)/Temp#$1/
+cpqHeTemperatureLocaleTxt          : SWITCH : {cpqHeTemperatureLocale} 1=Other,2=Unknown,3=System,4=System board,5=IO board,6=CPU,7=Memory,8=Storage,9=Removable media,10=Power supply,11=Ambient,12=Chassis,13=Bridge card
+cpqHeTemperatureConditionTxt       : SWITCH : {cpqHeTemperatureCondition} 1=Other,2=OK,3=Degraded,4=Failed
+cpqHeTemperatureThresholdTypeTxt   : SWITCH : {cpqHeTemperatureThresholdType} 1=Other,5=Blowout,9=Caution,15=Critical,default=
+

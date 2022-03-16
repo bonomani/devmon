@@ -1,0 +1,12 @@
+cpqHeThermalSystemFanStatusTxt : red    : Failed|Other
+cpqHeThermalSystemFanStatusTxt : yellow : Degraded|Other
+cpqHeThermalSystemFanStatusTxt : green  : OK
+
+cpqHeFltTolFanConditionTxt     : red    : 
+cpqHeFltTolFanConditionTxt     : yellow : Degraded
+cpqHeFltTolFanConditionTxt     : clear  : Absent
+cpqHeFltTolFanConditionTxt     : green  : OK
+
+cpqHeFltTolFanSpeedTxt         : red    :
+cpqHeFltTolFanSpeedTxt         : yellow : High
+cpqHeFltTolFanSpeedTxt         : green  : OK

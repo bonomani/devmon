@@ -2,7 +2,7 @@ package dm_config;
 require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(initialize sync_servers time_test do_log db_connect
-    na nd db_get db_get_array db_do log_fatal);
+    na nd db_get db_get_array db_do log_fatal oid_sort);
 @EXPORT_OK = qw(%c);
 
 #    Devmon: An SNMP data collector & page generator for the
@@ -55,7 +55,7 @@ sub initialize {
         'verbose'       => 2,
         'debug'         => 0,
         'oneshot'       => undef,
-        'output'        => 0,
+        'output'        => undef,
         'shutting_down' => 0,
         'active'        => '',
         'pidfile'       => '',
@@ -104,15 +104,12 @@ sub initialize {
         'snmptimeout' => 0,
         'snmptries'   => 0,
         'snmpcids'    => '',
-
         'secnames'   => '',
         'seclevels'  => '',
         'authprotos' => '',
         'authpasss'  => '',
         'privprotos' => '',
         'privpasss'  => '',
-
-        'snmplib' => '',
 
         # Now our global data subhashes
         'templates'    => {},
@@ -245,7 +242,7 @@ sub initialize {
             'case'    => 1
         },
         'snmpeng' => {
-            'default' => 'auto',    # new: 'snmp' , old: 'session', auto: 'snmp' if available, fallback to 'session'
+            'default' => 'session',    # new: 'snmp' , old: 'session', auto: 'snmp' if available, fallback to 'session'
             'regex'   => '\S+',
             'set'     => 0,
             'case'    => 1
@@ -317,7 +314,7 @@ sub initialize {
             'case'    => 0
         },
         'snmptimeout' => {
-            'default' => 2,
+            'default' => 4, # 2 Seems the very mininum, 4 if you use ilo
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -337,7 +334,7 @@ sub initialize {
     # Parse command line options
     my ( $syncconfig, $synctemps, $resetowner, $readhosts, );
     $syncconfig = $synctemps = $resetowner = $readhosts = 0;
-    my ( %match, $hostonly, $probe );
+    my ( %match, $hostonly, $poll, $outputs_ref );
 
     GetOptions(
         "help|?"                   => \&help,
@@ -350,11 +347,11 @@ sub initialize {
         "configfile=s"             => \$g{configfile},
         "dbfile=s"                 => \$g{dbfile},
         "foreground"               => \$g{foreground},
-        "output:s"                 => \$g{output},
+        "output:s@"                => \$outputs_ref,
         "1!"                       => \$g{oneshot},
         "match=s%"                 => sub { push( @{ $match{ $_[1] } }, $_[2] ) },
         "hostonly=s"               => \$hostonly,
-        "probe=s"                  => \$probe,
+        "poll=s"                   => \$poll,
         "debug"                    => \$g{debug},
         "trace"                    => \$g{trace},
         "syncconfig"               => \$syncconfig,
@@ -383,78 +380,200 @@ sub initialize {
         $g{foreground} = 1;
     }
 
-    #  probe mode
-    if ($probe) {
-        $g{foreground} = 1;
-        $g{oneshot}    = 1        if not defined $g{oneshot};
-        $g{output}     = 'STDOUT' if $g{output} eq '0';
-        ( $g{match_iphost}, $g{match_test} ) = split '=', $probe;
+    # Check mutually exclusive option
+    if ( $syncconfig + $synctemps + $resetowner + $readhosts > 1 ) {
+        print "Can't have more than one mutually exclusive option\n\n";
+        usage();
+    }
+    
+    # Now read in our local config info from our file
+    read_local_config();
+ 
+    # Open the log file
+    open_log();
+    
+    # Autodetect our nodename on user request
+    if ( $g{nodename} eq 'HOSTNAME' ) {
+        my $hostname = hostname();
+
+        # Remove domain info, if any
+        # Xymon best practice is to use fqdn, if the user doesn't want it
+        # we assume they have set NODENAME correctly in devmon.cfg
+        # $hostname =~ s/\..*//;
+        $g{nodename} = $hostname;
+        do_log( "INFOR CONF: Nodename autodetected as $hostname", 3 );
+    }
+   
+    # Make sure we have a nodename
+    die "Unable to determine nodename!\n" if !defined $g{nodename} and $g{nodename} =~ /^\S+$/;
+
+    # Set up DB handle
+    db_connect(1);
+
+    # Connect to the cluster
+    cluster_connect();
+
+    # Read our global variables
+    read_global_config();
+
+    # Check our global config
+    check_global_config();
+
+    # Check output options
+    if ((not defined $outputs_ref) and ($hostonly or $poll or %match)) { # set -o for options that need it
+        ${ $outputs_ref}[0] = '';
+    }
+    if ( not defined $outputs_ref ) { # no -o
+      for my $dispsrv ( split /,/, $g{dispserv} ) {
+         $g{output}{"xymon://$dispsrv"}{protocol} = 'xymon';
+         $g{output}{"xymon://$dispsrv"}{target} = "$dispsrv";
+          $g{output}{"xymon://$dispsrv"}{rrd} = 1;
+         $g{output}{"xymon://$dispsrv"}{stat} = 1;
+       }
+      
+    }
+    elsif (scalar @{ $outputs_ref}  == 1 and  ${ $outputs_ref}[0] eq '')  {     #shortform (no options) -o only
+      for my $dispsrv ( split /,/, $g{dispserv} ) {
+         $g{output}{"xymon://$dispsrv"}{protocol} = 'xymon';
+         $g{output}{"xymon://$dispsrv"}{target} = "$dispsrv";
+          $g{output}{"xymon://$dispsrv"}{rrd} = 0;
+         $g{output}{"xymon://$dispsrv"}{stat} = 0;
+       }
+       $g{output}{'xymon://stdout'}{protocol} = 'xymon';
+       $g{output}{'xymon://stdout'}{target} = 'stdout';
+       $g{output}{'xymon://stdout'}{rrd} = 0;
+       $g{output}{'xymon://stdout'}{stat} = 1;
+       $g{foreground} = 1;
+       $g{oneshot}    = 1        if not defined $g{oneshot};
+    } else {
+        @{$outputs_ref} = split(/,/,join(',', @{$outputs_ref} ));
+        my $idx=0;
+        for my $output ( @{$outputs_ref} ) {
+            usage("Duplicate output '".$output."'")if (exists $g{output}{$output}) ;
+            ( $g{output}{ $output }{protocol}, $g{output}{ $output }{target} ) = split '://', $output;
+            usage("Invalid output -o (only)") if not defined $g{output}{ $output }{protocol} ;
+            usage("Unknown protocol '$g{output}{ $output }{protocol}'") if $g{output}{ $output }{protocol} !~ '^xymon$' ;
+            usage("Invalid target in '".$output."'") if not defined $g{output}{ $output }{target};
+            if ($g{output}{ $output }{target} eq 'stdout') {
+            }
+        }
+    }
+
+    # hostonly mode (deprecated by poll)
+    if ($hostonly) {
+      do_log("WARNIN CONF: hostonly is deprecated use '-p[oll]' instead");
+      if (defined $poll or %match) {
+         usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only"); 
+       } else {
+      $poll = $hostonly if not defined $poll;
+       }
+    }
+
+    #  Poll mode
+    if ($poll) {
+        ( my $match_iphost,  my $match_test ) = split '=', $poll;
+         if (exists $match{$match_iphost} ) {
+             usage("Conflit o=$poll -m iphost=$match_iphost");
+         } else {
+            push @{ $match{iphost} }, $match_iphost;
+         } 
+         if (defined $match_test) {
+            if (exists $match{$match_test} ) {
+                usage("Conflit o=$poll -m test=$match_test");
+            } else {
+               push @{ $match{test} }, $match_test;
+            }
+         }
+
     }
 
     #  Match filter mode
-    elsif (%match) {
-        $g{foreground} = 1;
-        $g{oneshot}    = 1        if not defined $g{oneshot};
-        $g{output}     = 'STDOUT' if $g{output} eq '0';
+    if (%match) {
         foreach my $match_key ( keys %match ) {
             if ( $match_key eq 'ip' ) {
                 $g{match_ip} = join( '|', map {"(?:$_)"} @{ $match{ip} } );
             } elsif ( $match_key eq 'host' ) {
                 $g{match_host} = join( '|', map {"(?:$_)"} @{ $match{host} } );
+            } elsif ( $match_key eq 'iphost' ) {
+                $g{match_iphost} = join( '|', map {"(?:$_)"} @{ $match{iphost} } );
             } elsif ( $match_key eq 'test' ) {
                 $g{match_test} = join( '|', map {"(?:$_)"} @{ $match{test} } );
+            } elsif ( $match_key eq 'rrd' ) {
+                for my $output ( @{ $match{rrd} } ) {
+                   if (exists $g{output}{$output}){
+                      if (defined  $g{output}{$output}{rrd}) {
+                          usage("Duplicate -m rrd=$output");
+                      } else { 
+                         $g{output}{$output}{rrd} =1;
+                      }
+                   } else {
+                      usage("$output is not a defined output, set it with -o=$output");
+                   }
+                } 
+            } elsif ( $match_key eq 'stat' ) {
+                for my $output ( @{ $match{stat} } ) {
+                    if (exists $g{output}{$output}){
+                       if (defined  $g{output}{$output}{stat}) {
+                           usage("Duplicate -m stat=$output");
+                       } else {
+                          $g{output}{$output}{stat} =1;
+                       }
+                    } else {
+                        usage("$output is not a defined output, set it with -o=$output");
+                    }
+                }
             } else {
-                do_log( 'Option match, unkown key "' . $match_key . '"' );
-                usage();
+                usage('Option match, unkown key "' . $match_key . '"' );
             }
         }
     }
-
-    # If we check only 1 host, do not daemonize (deprecated by probe)
-    elsif ($hostonly) {
-        $g{foreground}   = 1;
-        $g{oneshot}      = 1        if not defined $g{oneshot};
-        $g{output}       = 'STDOUT' if $g{output} eq '0';
-        $g{match_iphost} = $hostonly;
+    # Debug
+    if ($g{debug}) {
+    for my $output ( keys $g{output} ) {
+       my $cmd_line="devmon -o=$output";
+       if ($g{output}{$output}{stat}) {
+          $cmd_line.=" -m stat=$output";
+       }
+       if ($g{output}{$output}{rrd}) {
+          $cmd_line.=" -m rrd=$output";
+       }                    
+       for my $match_iphost ( @{ $match{iphost} }) {
+           $cmd_line.=" -m iphost=$match_iphost";
+       }
+       for my $match_ip ( @{ $match{ip} }) {
+           $cmd_line.=" -m ip=$match_ip";
+       }
+       for my $match_host ( @{ $match{host} }) {
+           $cmd_line.=" -m host=$match_host";
+       }
+       for my $match_test ( @{ $match{test} }) {
+           $cmd_line.=" -m test=$match_test";
+       }
+       if ($g{foreground}) {
+           $cmd_line.=" -f";
+       }
+       if ($g{trace}) {
+           $cmd_line.=" -t";
+       }
+       elsif ($g{debug}) {
+           $cmd_line.=" -de";
+       }
+       if ($g{oneshot}) {
+           $cmd_line.=" -1";
+       }
+       do_log($cmd_line);
     }
-
-    # Check output options
-    if ( $g{output} eq '0' ) {    #no option -o on cmd line
-        $g{output} = 'xymon';
-    } elsif ( $g{output} =~ 'STDOUT' ) {
-        $g{foreground} = 1;
-        $g{output}     = 'STDOUT';    # Exclude other possibilities
-    } elsif ( $g{output} eq 'xymon' ) {
-        $g{output} = 'xymon';         # Current alternate option and default
-    } elsif ( $g{output} eq '' ) {    # Option, without optionnel arg
-        $g{foreground} = 1;
-        $g{output}     = 'STDOUT';
     }
-
-    # Now read in our local config info from our file
-    read_local_config();
-
-    # Prevent multiple mutually exclusives
-    if ( $syncconfig + $synctemps + $resetowner + $readhosts > 1 ) {
-        print "Can't have more than one mutually exclusive option\n\n";
-        usage();
-    }
-
-    # Open the log file
-    open_log();
 
     # Check mutual exclusions (run-and-die options)
     sync_global_config()           if $syncconfig;
     dm_templates::sync_templates() if $synctemps;
     reset_ownerships()             if $resetowner;
 
-    # check snmp config before last run-and-die options
-    # as it will start a snmp discovery
+    # check snmp config before snmp discovery 
     check_snmp_config();
-    read_hosts_cfg() if $readhosts;
+    read_hosts_cfg() if $readhosts; #  (run-and-die options)
 
-    # Open the log file
-    #open_log();
 
     # Daemonize if need be
     daemonize();
@@ -488,43 +607,11 @@ sub initialize {
         $pid_handle->close;
     }
 
-    # Autodetect our nodename on user request
-    if ( $g{nodename} eq 'HOSTNAME' ) {
-        my $hostname = hostname();
-
-        # Remove domain info, if any
-        # Xymon best practice is to use fqdn, if the user doesn't want it
-        # we assume they have set NODENAME correctly in devmon.cfg
-        # $hostname =~ s/\..*//;
-
-        $g{nodename} = $hostname;
-
-        do_log( "INFOR CONF: Nodename autodetected as $hostname", 3 );
-    }
-
-    # Make sure we have a nodename
-    die "Unable to determine nodename!\n"
-        if !defined $g{nodename}
-        and $g{nodename} =~ /^\S+$/;
-
-    # Set up DB handle
-    db_connect(1);
-
-    # Connect to the cluster
-    cluster_connect();
-
-    # Read our global variables
-    read_global_config();
-
-    # Check our global config
-    check_global_config();
 
     # Throw out a little info to the log
-    do_log( "---Initializing devmon...",                                          0 );
-    do_log( "INFOR CONF: Verbosity level: $g{verbose}",                           3 );
-    do_log( "INFOR CONF: Logging to $g{logfile}",                                 3 );
-    do_log( "INFOR CONF: Node $g{my_nodenum} reporting to Xymon at $g{dispserv}", 3 );
-    do_log( "INFOR CONF: Running under process id: $g{mypid}",                    3 );
+    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---",   0 );
+    do_log( "WARNI CONF: Logging to $g{logfile}",                                             2 ) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
+    do_log( "INFO  CONF: Node#$g{my_nodenum}                                  ",              3 );
 
     # Dump some configs in debug mode
     if ( $g{debug} ) {
@@ -1146,7 +1233,7 @@ sub read_global_config_file {
     # Log any options not set
     for my $opt ( sort keys %{ $g{globals} } ) {
         next if $g{globals}{$opt}{set};
-        do_log( "DEBUG CONF: Option '$opt' defaulting to: $g{globals}{$opt}{default}.", 5 );
+        do_log( "DEBUG CONF: Option '$opt' defaulting to: $g{globals}{$opt}{default}", 5 );
         $g{$opt} = $g{globals}{$opt}{default};
         $g{globals}{$opt}{set} = 1;
     }
@@ -2410,7 +2497,7 @@ sub read_hosts {
             my ( $name, $ip, $vendor, $model, $tests, $cid ) = @$host;
 
             # Filter if requested
-            # Honor 'probe' command line
+            # Honor 'poll' command line
             if ( defined $g{match_iphost} and not( ( $name =~ /$g{match_iphost}/ ) or ( $ip =~ /$g{match_iphost}/ ) ) ) {
                 next;
             }
@@ -2479,7 +2566,7 @@ sub read_hosts {
             ++$linenumber;
 
             # Filter if requested
-            # Honor 'probe' command line
+            # Honor 'poll' command line
             if ( defined $g{match_iphost} and not( ( $name =~ /$g{match_iphost}/ ) or ( $ip =~ /$g{match_iphost}/ ) ) ) {
                 next;
             }
@@ -2646,43 +2733,42 @@ Usage:
   $prog -? -he[lp] 
 
 Template development:
-  $prog -p iphost=test
-  $prog -o -p iphost=test 
-  $prog -t -o -p iphost=test 
+  $prog -p iphost=test                           run devmon for only 1 test on 1 host
+  $prog -p iphost=test -de                       debug 
+  $prog -p iphost=test -t                        trace
+  $prog -p iphost=test -m rrd=xymon://localhost  send rrd data to xymon only for graph rendering 
 
-Options:
- -c[onfigfile]    Specify config file location  
- -db[file]        Specify database file location  
- -de[bug]         Print debug output (this can be quite extensive)
- -f[oreground]    Run in foreground (fg). Prevents running in daemon mode  
- -o[utput]        Don't send message to display server but print it on (std)out (previously -print, which has been removed) 
-                   default: -o=xymon (supported options: xymon,STDOUT) 
- -t[race]         Trace (same -f -de -vvvvv)
- -v -vv           Verbose mode. The more -v's, the more verbose logging max 5: -vvvvv (default: -vv; quiet:-nov[erbose]) 
-                   Level: 0 -> quiet, 1 -> error, 2 -> warning, 3 -> info, 4 -> debug, 5 -> trace
- -1               Oneshot: run only 1 times and die (default: -no1)
+ -c[onfigfile]     Specify config file location  
+ -db[file]         Specify database file location  
+ -de[bug] -t[race] Print debug ot trace 
+ -v -vv -nov       Verbose mode: 0 -> quiet, 1 -> error, 2 -> warning(default), 3 -> info, 4 -> debug, 5 -> trace            
 
-Template debugging options:
- -p[robe]         Probe (regexp) a host for a test: -p host1=fan or -p 1.1.1.1=fan or -p host2
-                   Include -f -1 -o=STDOUT
- -m[atch]         Match multiple (regexp) pattern: -m host=host1 -m host=host2 -m ip=1.1.1.1 -m test=fan
-                   Include -f -1 -o=STDOUT
- -ho[stonly]      Poll only hosts matching the pattern that follows (DEPRECATED by "probe")
+ -f[oreground]     Run in foreground (fg). Prevents running in daemon mode  
+ -o[utput]         Send message to defined output(s)  
+                    Format             : -o=protocol1://target1 -o=protocol2://target2 (or short format -o only, see below) 
+                    Default            : -o=xymon://localhost 
+                    Short: -o (alone)  : -o=xymon://localhost -o=xymon://stdout
+ -1                Oneshot: run only 1 times and exit (default: -no1)
+
+Template building facility options:
+ -p[oll]           Poll iphost(s) for test(s) that match host and test regexp,
+                    Same as            : -m iphost={ip|hostname} -m test={test}   
+ -m[atch]          Poll multiple pattern and report that match:
+                    Format by keyword : -m host=host1 -m host=host2
+                                      : -m ip=1.1.1.1
+                                      : -m iphost=2.2.2.2
+                                      : -m test=fan
+                                      : -m stat=xymon://localhost (default: no stat)
+                                      : -m rrd=xymon://localhost  (default: rrd=xymon://stdout), if set overides default)  
+                    Imply: -1 -o
+                    Warning: if ip(s) and host(s) are used together, both should match (different that iphost)
 
 Mutually exclusive options:  
- -rea[dhostscfg]  Read in data from the Xymon hosts.cfg file  
- -syncc[onfig]    Update multinode DB with the global config options
-                  configured on this local node  
- -synct[emplates] Update multinode device templates with the template
-                  data on this local node  
- -res[etowners]   Reset multinode device ownership data.  This will
-                  cause all nodes to recalculate ownership data
-
-Removed options:
- -print           Replaced by -o (v0.21.09) without deprecation notice
-
-Deprecated option (Still working, but remove soon)
--ho[stonly]       Replaced by -p
+ -rea[dhostscfg]   Read in data from the Xymon hosts.cfg file  
+ -syncc[onfig]     Update multinode DB with the global config options configured on this local node  
+ -synct[emplates]  Update multinode device templates with the template data on this local node  
+ -res[etowners]    Reset multinode device ownership data.  This will
+                   cause all nodes to recalculate ownership data
 EOF
     exit(1);
 }
@@ -2725,6 +2811,16 @@ sub quit {
     }
 
     exit $retcode;
+}
+
+sub oid_sort(@) {
+    return @_ unless ( @_ > 1 );
+    map { $_->[0] } sort { $a->[1] cmp $b->[1] } map {
+        my $oid = $_;
+        $oid =~ s/^\.//o;
+        $oid =~ s/ /\.0/og;
+        [ $_, pack( 'N*', split( '\.', $oid ) ) ]
+    } @_;
 }
 
 END {

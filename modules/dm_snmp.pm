@@ -30,6 +30,7 @@ use IO::Socket::INET;
 use POSIX ":sys_wait_h";
 use Math::BigInt;
 use Storable qw(nfreeze thaw);
+#use dm_config qw(oid_sort);
 use dm_config;
 
 # Our global variable hash
@@ -708,7 +709,7 @@ DEVICE: while (1) {    # We should never leave this loop
                     } else {
                         my $snmp_err;
                         ( $snmp_err = $SNMP_Session::errmsg ) =~ s/\n.*//s;
-                        my $error_str = "snmpget $dev ($snmp_err)";
+                        my $error_str = "snmpget2 $dev ($snmp_err)";
                         $data_out{error}{$error_str} = 1;
                         send_data( $sock, \%data_out );
                         next DEVICE;
@@ -786,7 +787,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpvars{RemotePort}    = $data_in{port} || 161;                                                            # Default to 161 if not specified
                 $snmpvars{DestHost}      = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $data_in{dev};
                 $snmpvars{Timeout}       = $data_in{timeout} * 1000000;
-                $snmpvars{Retries}       = $data_in{snmptries} - 1;
+                $snmpvars{Retries}       = $data_in{snmptries} - 1 ;
                 $snmpvars{UseNumeric}    = 1;
                 $snmpvars{NonIncreasing} = 1;
                 $snmpvars{Version}       = $snmp_ver;
@@ -874,12 +875,12 @@ DEVICE: while (1) {    # We should never leave this loop
                             # maximize the number of answers, but some oids will fail.
                             # To maximize the result and the perf, we have to find if the oid is really
                             # a repeater or not. Devmon non-repeater term are not exactly what snmp means
-                            # (i think) are some cannot be polled as they are a part of a repeater
+                            # (i think) some non-repeater cannot be polled as they are a part of a repeater
                             # We will build a hash that will contains the information (%poll_oid) and
                             # and another hash that will contains if it is a repeater (%is_repeater)
                             # In the first polling cycle we take a slow path to
                             # and initialze all the oid with their parent oid and as repeater
-                            # At the end, we should have the real value created: repreater or not
+                            # At the end, we should have the real value created: repeater or not
                             # and parent or self as poll_oid. Hope the will optimize perf, but is
                             # seems also to work without that. (you can set path_is_slow below to
                             # always take the slow path and rediscover everythinig each cycle.
@@ -908,14 +909,19 @@ DEVICE: while (1) {    # We should never leave this loop
 
                                     # Slow path
                                     # As we dont know we suppose the oid that should be polled is the parent oid,
-                                    # but/ we suppose that it can also fail
+                                    # but we suppose that it can also fail
                                     ${$path_is_slow} = 1;
                                     if ($is_devmon_repeater) {
                                         $poll_oid->{$oid} = \$oid;
+                                        ${ $is_repeater->{$oid} } = 1;
                                     } else {
                                         $poll_oid->{$oid} = \( $oid =~ s/\.\d*$//r );
+                                        if ( $oid =~ /\.0$/ ) {
+                                            ${ $is_repeater->{$oid} } = 0;
+                                        } else {
+                                            ${ $is_repeater->{$oid} } = 1; 
+                                        }
                                     }
-                                    ${ $is_repeater->{$oid} } = 1;
                                 }
                             }
 
@@ -949,6 +955,15 @@ DEVICE: while (1) {    # We should never leave this loop
                             # polling, so lets do this polling
                             my $nrvars = new SNMP::VarList(@varlists);
                             do_log( "INFOR SNMP($fork_num): Do bulkwalk", 5 ) if $g{debug};
+#                            do_log( "$$nrep_count $$oid_count $nrvars");
+#                            my $tempnrcount;
+#                            if ($$nrep_count == 0) {
+#                               $tempnrcount= $$oid_count; 
+#                               $tempnrcount= $$nrep_count;
+#                            } else {
+#                               $tempnrcount= $$nrep_count;
+#                            }
+                            #my @nrresp = $session->bulkwalk( $tempnrcount, $$oid_count, $nrvars );
                             my @nrresp = $session->bulkwalk( $$nrep_count, $$oid_count, $nrvars );
                             if ( $session->{ErrorNum} ) {
                                 if ( $session->{ErrorNum} == -24 ) {
@@ -989,6 +1004,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                     $vbarr_counter++;
                                     next;
                                 }
+#sleep(5);
                                 if ( ( scalar @$vbarr ) == 0 ) {
                                     do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 0 );
                                 }
@@ -1186,12 +1202,12 @@ sub REAPER {
     $SIG{CHLD} = \&REAPER;
 }
 
-sub oid_sort(@) {
-    return @_ unless ( @_ > 1 );
-    map { $_->[0] } sort { $a->[1] cmp $b->[1] } map {
-        my $oid = $_;
-        $oid =~ s/^\.//o;
-        $oid =~ s/ /\.0/og;
-        [ $_, pack( 'N*', split( '\.', $oid ) ) ]
-    } @_;
-}
+#sub oid_sort(@) {
+#    return @_ unless ( @_ > 1 );
+#    map { $_->[0] } sort { $a->[1] cmp $b->[1] } map {
+#        my $oid = $_;
+#        $oid =~ s/^\.//o;
+#        $oid =~ s/ /\.0/og;
+#        [ $_, pack( 'N*', split( '\.', $oid ) ) ]
+#    } @_;
+#}

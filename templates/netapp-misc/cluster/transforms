@@ -1,5 +1,5 @@
 State		    : SWITCH : {cfState}		1=dead,2=can Takeover,3=cannot Takeover,4=Takeover
-PartnerStatus	    : SWITCH : {cfPartnerStatus}	1=maybe down,2=ok,3=dead
-CannotTakeoverCause : SWITCH : {cfCannotTakeoverCause}	1=ok,2=unknown Reason,3=disabled by Operator,4=Interconnect Offline,5=disabled by Partner,6=Takeover failed
+PartnerStatus	    : SWITCH : {cfPartnerStatus}	1=maybe down,2=OK,3=dead
+CannotTakeoverCause : SWITCH : {cfCannotTakeoverCause}	1=OK,2=unknown Reason,3=disabled by Operator,4=Interconnect Offline,5=disabled by Partner,6=Takeover failed
 InterconnectStatus  : SWITCH : {cfInterconnectStatus}	1=not Present,2=down,3=partial Failure,4=up
 Settings	    : SWITCH : {cfSettings}		1=not Configured,2=enabled,3=disabled,4=Takeover by Partner disabled,5=Node Dead

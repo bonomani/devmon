@@ -1,0 +1,27 @@
+cpqHeFltTolPwrSupplyConditionTxt : red    :
+cpqHeFltTolPwrSupplyConditionTxt : yellow : Degraded|Failed|Other
+cpqHeFltTolPwrSupplyConditionTxt : green  : OK
+
+#cpqHeFltTolPwrSupplyStatusTxt    : red    : Other
+#cpqHeFltTolPwrSupplyStatusTxt    : yellow :
+#cpqHeFltTolPwrSupplyStatusTxt    : green  :
+
+cpqHeFltTolPowerSupplyStatusTxt   : red    :
+cpqHeFltTolPowerSupplyStatusTxt   : yellow : No power input
+cpqHeFltTolPowerSupplyStatusTxt   : green  : OK
+
+cpqHeFltTolPowerSupplyPresentTxt  : red    :
+cpqHeFltTolPowerSupplyPresentTxt  : yellow : Absent
+cpqHeFltTolPowerSupplyPresentTxt  : green  : OK
+
+cpqHeSysBackupBatteryConditionTxt : red    :
+cpqHeSysBackupBatteryConditionTxt : yellow : Degraded|Failed|Other
+cpqHeSysBackupBatteryConditionTxt : green  : OK
+
+cpqHeSysBatteryPresentTxt         : red    :
+cpqHeSysBatteryPresentTxt         : yellow : Absent
+cpqHeSysBatteryPresentTxt         : green  : OK
+
+#cpqHeSysBatteryConditionTxt       : red    :
+cpqHeSysBatteryConditionTxt       : yellow : 
+cpqHeSysBatteryConditionTxt       : green  : OK

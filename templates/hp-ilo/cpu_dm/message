@@ -1,0 +1,17 @@
+<b>Health       : {cpqHeMibConditionTxt.color}{cpqHeMibConditionTxt}</b>
+
+<b>Hostname     : {sysHostname}</b>
+Description  : {sysDescr}
+Mib Version  : {cpqHeMibRev}
+Product Name : {cpqSiProductName}
+
+<b>Managed Host : {cpqHoSystemName}</b>
+OS           : {cpqHoName}
+Version      : {cpqHoVersion}
+Description  : {cpqHoDesc}
+SysDesc      : {cpqHosysDescr}
+
+TABLE:noalarmsmsg
+IP Adresses
+{ipAdEntAddr}
+

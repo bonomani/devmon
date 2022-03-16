@@ -1,0 +1,4 @@
+cpqHeMibConditionTxt : red    :               : Error#{cpqHeMibCondition}
+cpqHeMibConditionTxt : red    : Failed|Other
+cpqHeMibConditionTxt : yellow : Degraded
+cpqHeMibConditionTxt : green  : OK

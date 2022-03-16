@@ -1,0 +1,7 @@
+cpqHeFltTolFanIndex        : 1.3.6.1.4.1.232.6.2.6.7.1.2 : branch
+cpqHeFltTolFanLocale       : 1.3.6.1.4.1.232.6.2.6.7.1.3 : branch
+cpqHeFltTolFanPresent      : 1.3.6.1.4.1.232.6.2.6.7.1.4 : branch
+cpqHeFltTolFanSpeed        : 1.3.6.1.4.1.232.6.2.6.7.1.6 : branch
+cpqHeFltTolFanRedundant    : 1.3.6.1.4.1.232.6.2.6.7.1.7 : branch
+cpqHeFltTolFanCondition    : 1.3.6.1.4.1.232.6.2.6.7.1.9 : branch
+cpqHeThermalSystemFanStatus: 1.3.6.1.4.1.232.6.2.6.4.0     : leaf

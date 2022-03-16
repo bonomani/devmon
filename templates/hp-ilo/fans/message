@@ -1,0 +1,7 @@
+Overall fans status: {cpqHeThermalSystemFanStatusTxt.color}{cpqHeThermalSystemFanStatusTxt}
+
+TABLE:
+Fan Idx|Location|Redundant|Status|Speed
+{cpqHeFltTolFanIdxTxt}|{cpqHeFltTolFanLocaleTxt}|{cpqHeFltTolFanRedundantTxt}|{cpqHeFltTolFanConditionTxt.color}{cpqHeFltTolFanConditionTxt}|{cpqHeFltTolFanSpeedTxt.color}{cpqHeFltTolFanSpeedTxt}
+
+

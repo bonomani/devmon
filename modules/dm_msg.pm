@@ -29,33 +29,78 @@ use vars qw(%g);
 
 # Send our test results to the Xymon server
 sub send_msgs {
+    do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
+    for my $output ( keys %{ $g{output} }) {
+        if ($g{output}{$output}{protocol} eq 'xymon' ) {
+             
+             if ($g{output}{$output}{target} eq 'stdout') {
+                 send_xymon_msgs_to_stdout();
+             } else {
+                 send_xymon_msgs_to_host($g{output}{$output}{target});
+             }
+        } else {
+           
+            print $output."\n";
+       }
+   } 
+} 
+sub send_xymon_msgs_to_stdout {
+   $g{msgxfrtime}  = time;
+   my $nummsg = scalar @{ $g{test_results} };
+   do_log( "INFOR MESG: Sending $nummsg messages to 'xymon://stdout'", 3 );
+   if  (defined $g{test_results}) {
+      my $msg = join "\n", @{ $g{test_results} };
+      $g{sentmsgsize} = length($msg); 
+      if  ($g{output}{'xymon://stdout'}{stat} ) {
+          $g{msgxfrtime} = time - $g{msgxfrtime};
+          $msg .= prepare_xymon_stat_msg('stdout');
+      }
+      else {
+         $g{msgxfrtime} = time - $g{msgxfrtime};
+      }
+      # Honor rrd filtering if requested
+      if (not $g{output}{'xymon://stdout'}{rrd}) {
+         $msg =~ s/<!--.*?-->//sg;
+      }
+      print $msg;
+   } else {
+    $g{msgxfrtime} = time - $g{msgxfrtime};
+   }
+}
+
+sub send_xymon_msgs_to_host {
+    my $host = shift;
     $g{msgxfrtime}  = time;
     $g{sentmsgsize} = 0;
 
-    do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
+    #do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
     my $nummsg = scalar @{ $g{test_results} };
-    do_log( "INFOR MESG: Sending $nummsg messages to '$g{output}'", 3 );
+    do_log( "INFOR MESG: Sending $nummsg messages to 'xymon://$host'", 3 );
 
     # Determine the address we are connecting to
-    my $host = $g{dispserv};
+    #my $host = $g{dispserv};
     my $addr = inet_aton($host)
         or do_log( "ERROR MESG: Can't resolve display server $host ($!)", 1 )
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
 
     # Print messages to output if requested
-    if ( $g{output} eq 'STDOUT' and defined $g{test_results} ) {
-        print join "\n", @{ $g{test_results} };
+    #if ( $g{output} eq 'STDOUT' and defined $g{test_results} ) {
+    #    print join "\n", @{ $g{test_results} };
 
         #TO BE ADDED: PRINT STAT ONLY IF REQUESTED
-        $g{msgxfrtime} = time - $g{msgxfrtime};
+        #$g{msgxfrtime} = time - $g{msgxfrtime};
 
         #print dm_stat_msg();
-        return;
-    }
+     #   return;
+    #}
 
     my $msg_sent = 0;
     do_log( "DEBUG MESG: Looping through messages for this socket", 4 ) if $g{debug};
+    my $msg = join "\n", @{ $g{test_results} }; 
+    if (not $g{output}{'xymon://'.$host}{rrd}) {
+      $msg =~ s/<!--.*?-->//sg;
+    }
 
     # Run until we are out of messages to send
 SOCKLOOP: while ( @{ $g{test_results} } ) {
@@ -195,8 +240,8 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
     # Now send our dm status message !
-    if ( $g{output} eq 'xymon' ) {
-        my $dm_msg  = dm_stat_msg();
+    if ( $g{output}{"xymon://$host"}{stat}  ) {
+        my $dm_msg  = prepare_xymon_stat_msg($host);
         my $msgsize = length $dm_msg;
         do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 4 ) if $g{debug};
         eval {
@@ -224,7 +269,8 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 }
 
 # Spit out various data about our devmon process
-sub dm_stat_msg {
+sub prepare_xymon_stat_msg {
+    my $host = shift;
     my $color          = 'green';
     my $this_poll_time = $g{snmppolltime} + $g{testtime} + $g{msgxfrtime};
 
@@ -295,10 +341,10 @@ sub dm_stat_msg {
     $message .= "<!--\n" . "PollTime : $this_poll_time\n" . "-->";
 
     # Add the header
-    my $host = $g{nodename};
-    $host =~ s/\./,/g;    # Don't forget our FQDN stuff
+    my $xymon_nodename = $g{nodename};
+    $xymon_nodename =~ s/\./,/g;    # Don't forget our FQDN stuff
     my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
-    $message = "status $host.dm $color $now\n\n$message\n";
+    $message = "status $xymon_nodename.dm $color $now\n\n$message\n";
 
     return $message;
 }

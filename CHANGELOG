@@ -1,7 +1,19 @@
 Devmon changelog.  Contributors of specific features/patches are listed
 in parenthesis next to the respective entry.
-Devmon v0.21.08.13
-Changes since v0.21.07.14
+Devmon v0.21.09
+Changes since v0.21.08
+  Stabilyze SNMPv3 (thanks to Stef Coene)
+  New command line option:
+  - Single device and single test: devmon -o 1.1.1.1=fan   
+  - Dont need to stop devmon anymore 
+  - Print result to sdtout and to xymon
+  - See devmon -?
+  Logging restructured (need more work)
+  - See discussion
+  - devmon -t[race] for very detailled info 
+
+Devmon v0.21.08
+Changes since v0.21.07
   First SNMPv3 version (read install)
   Update template for vmware7 (thanks to Roemer)
   Update wiki (mainly for devmon dev)
@@ -9,14 +21,14 @@ Changes since v0.21.07.14
   Update logs
   Fix bugs
 
-Devmon v0.21.07.14
-Changes since v0.21.06.09
+Devmon v0.21.07
+Changes since v0.21.06
   No new Feature, nor bug resolved
   Move Wiki (Github Wikis are not indexed by Google)
   Update README and CHANGELOG 
 
-Devmon v0.21.06.09
-Changes since v0.16.12.15
+Devmon v0.21.06
+Changes since v0.16.12
   New features
   - CPU revamp (Cisco, Huawei), mainly the "uptime" part
     - Reboot cause analysis with a auto disable timer
@@ -34,7 +46,7 @@ Changes since v0.16.12.15
 
 !!Some change are missing here!!
 
-Devmon v0.16.12.15 
+Devmon v0.16.12 
   Changes since v0.3.1-beta1
   - Fork Soureforge
   - New release versioning

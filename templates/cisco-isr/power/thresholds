@@ -1,4 +1,4 @@
 PwrStatus      : red           : nonoperational
 PwrStatus      : yellow        : unavailable
-PwrStatus      : green         : ok
+PwrStatus      : green         : OK
 
