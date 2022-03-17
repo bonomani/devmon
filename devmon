@@ -17,6 +17,7 @@ our $VERSION = '0.22.03';
 
 # Global Modules
 use strict;
+use warnings;
 
 # Devmon specific modules
 use FindBin;
