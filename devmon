@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '0.21.09';
+our $VERSION = '0.22.03';
 
 #    Devmon: An SNMP data collecteor & page generator for the BigBrother &
 #    Hobbit network monitoring systems

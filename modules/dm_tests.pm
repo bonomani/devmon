@@ -65,7 +65,7 @@ sub tests {
 
         # Check to see if this device was unreachable in xymon
         # If so skip device
-        next if  !defined $g{xymon_color}{$device} or $g{xymon_color}{$device} ne 'green' ; 
+        next if !defined $g{xymon_color}{$device} or $g{xymon_color}{$device} ne 'green';
 
         # Get template-specific variables
         my $vendor = $g{dev_data}{$device}{vendor};
@@ -102,13 +102,12 @@ sub tests {
             # from going insane when we start doing transforms
             oid_hash( $oids, $device, $tmpl, $thr );
 
-
-            # Perform the transform 
+            # Perform the transform
             for my $oid ( @{ $tmpl->{sorted_oids} } ) {
                 next if !$oids->{$oid}{transform};
 
                 transform( $device, $oids, $oid, $thr );
-                
+
                 # Do some debug if requested
                 if ( $g{debug} ) {
                     my $oid_h = \%{ $oids->{$oid} };
@@ -2438,8 +2437,9 @@ sub trans_match {
         # Tag the target as a repeater
         $oid_h->{repeat} = 2;
         my $idx = 0;
+
         #for my $leaf ( sort { $a <=> $b } keys %{ $src_h->{val} } ) {
-        my @sorted_leafs  = oid_sort( keys %{ $src_h->{val} } );
+        my @sorted_leafs = oid_sort( keys %{ $src_h->{val} } );
         for my $leaf (@sorted_leafs) {
 
             # Skip if our source oid is freaky-deaky

@@ -30,42 +30,43 @@ use vars qw(%g);
 # Send our test results to the Xymon server
 sub send_msgs {
     do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
-    for my $output ( keys %{ $g{output} }) {
-        if ($g{output}{$output}{protocol} eq 'xymon' ) {
-             
-             if ($g{output}{$output}{target} eq 'stdout') {
-                 send_xymon_msgs_to_stdout();
-             } else {
-                 send_xymon_msgs_to_host($g{output}{$output}{target});
-             }
+    for my $output ( keys %{ $g{output} } ) {
+        if ( $g{output}{$output}{protocol} eq 'xymon' ) {
+
+            if ( $g{output}{$output}{target} eq 'stdout' ) {
+                send_xymon_msgs_to_stdout();
+            } else {
+                send_xymon_msgs_to_host( $g{output}{$output}{target} );
+            }
         } else {
-           
-            print $output."\n";
-       }
-   } 
-} 
+
+            print $output. "\n";
+        }
+    }
+}
+
 sub send_xymon_msgs_to_stdout {
-   $g{msgxfrtime}  = time;
-   my $nummsg = scalar @{ $g{test_results} };
-   do_log( "INFOR MESG: Sending $nummsg messages to 'xymon://stdout'", 3 );
-   if  (defined $g{test_results}) {
-      my $msg = join "\n", @{ $g{test_results} };
-      $g{sentmsgsize} = length($msg); 
-      if  ($g{output}{'xymon://stdout'}{stat} ) {
-          $g{msgxfrtime} = time - $g{msgxfrtime};
-          $msg .= prepare_xymon_stat_msg('stdout');
-      }
-      else {
-         $g{msgxfrtime} = time - $g{msgxfrtime};
-      }
-      # Honor rrd filtering if requested
-      if (not $g{output}{'xymon://stdout'}{rrd}) {
-         $msg =~ s/<!--.*?-->//sg;
-      }
-      print $msg;
-   } else {
-    $g{msgxfrtime} = time - $g{msgxfrtime};
-   }
+    $g{msgxfrtime} = time;
+    my $nummsg = scalar @{ $g{test_results} };
+    do_log( "INFOR MESG: Sending $nummsg messages to 'xymon://stdout'", 3 );
+    if ( defined $g{test_results} ) {
+        my $msg = join "\n", @{ $g{test_results} };
+        $g{sentmsgsize} = length($msg);
+        if ( $g{output}{'xymon://stdout'}{stat} ) {
+            $g{msgxfrtime} = time - $g{msgxfrtime};
+            $msg .= prepare_xymon_stat_msg('stdout');
+        } else {
+            $g{msgxfrtime} = time - $g{msgxfrtime};
+        }
+
+        # Honor rrd filtering if requested
+        if ( not $g{output}{'xymon://stdout'}{rrd} ) {
+            $msg =~ s/<!--.*?-->//sg;
+        }
+        print $msg;
+    } else {
+        $g{msgxfrtime} = time - $g{msgxfrtime};
+    }
 }
 
 sub send_xymon_msgs_to_host {
@@ -88,18 +89,18 @@ sub send_xymon_msgs_to_host {
     #if ( $g{output} eq 'STDOUT' and defined $g{test_results} ) {
     #    print join "\n", @{ $g{test_results} };
 
-        #TO BE ADDED: PRINT STAT ONLY IF REQUESTED
-        #$g{msgxfrtime} = time - $g{msgxfrtime};
+    #TO BE ADDED: PRINT STAT ONLY IF REQUESTED
+    #$g{msgxfrtime} = time - $g{msgxfrtime};
 
-        #print dm_stat_msg();
-     #   return;
+    #print dm_stat_msg();
+    #   return;
     #}
 
     my $msg_sent = 0;
     do_log( "DEBUG MESG: Looping through messages for this socket", 4 ) if $g{debug};
-    my $msg = join "\n", @{ $g{test_results} }; 
-    if (not $g{output}{'xymon://'.$host}{rrd}) {
-      $msg =~ s/<!--.*?-->//sg;
+    my $msg = join "\n", @{ $g{test_results} };
+    if ( not $g{output}{ 'xymon://' . $host }{rrd} ) {
+        $msg =~ s/<!--.*?-->//sg;
     }
 
     # Run until we are out of messages to send
@@ -240,7 +241,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
     # Now send our dm status message !
-    if ( $g{output}{"xymon://$host"}{stat}  ) {
+    if ( $g{output}{"xymon://$host"}{stat} ) {
         my $dm_msg  = prepare_xymon_stat_msg($host);
         my $msgsize = length $dm_msg;
         do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 4 ) if $g{debug};
@@ -270,7 +271,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
 # Spit out various data about our devmon process
 sub prepare_xymon_stat_msg {
-    my $host = shift;
+    my $host           = shift;
     my $color          = 'green';
     my $this_poll_time = $g{snmppolltime} + $g{testtime} + $g{msgxfrtime};
 
