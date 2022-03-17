@@ -30,6 +30,7 @@ use IO::Socket::INET;
 use POSIX ":sys_wait_h";
 use Math::BigInt;
 use Storable qw(nfreeze thaw);
+
 #use dm_config qw(oid_sort);
 use dm_config;
 
@@ -787,7 +788,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpvars{RemotePort}    = $data_in{port} || 161;                                                            # Default to 161 if not specified
                 $snmpvars{DestHost}      = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $data_in{dev};
                 $snmpvars{Timeout}       = $data_in{timeout} * 1000000;
-                $snmpvars{Retries}       = $data_in{snmptries} - 1 ;
+                $snmpvars{Retries}       = $data_in{snmptries} - 1;
                 $snmpvars{UseNumeric}    = 1;
                 $snmpvars{NonIncreasing} = 1;
                 $snmpvars{Version}       = $snmp_ver;
@@ -916,10 +917,10 @@ DEVICE: while (1) {    # We should never leave this loop
                                         ${ $is_repeater->{$oid} } = 1;
                                     } else {
                                         $poll_oid->{$oid} = \( $oid =~ s/\.\d*$//r );
-                                        if ( $oid =~ /\.0$/ ) {
+                                        if ( $oid =~ /\.0$/ ) {                  #BUG74, SNMP Scalar (end with .0) are leaf and should be counted as non-repeater 
                                             ${ $is_repeater->{$oid} } = 0;
                                         } else {
-                                            ${ $is_repeater->{$oid} } = 1; 
+                                            ${ $is_repeater->{$oid} } = 1;
                                         }
                                     }
                                 }
@@ -955,15 +956,7 @@ DEVICE: while (1) {    # We should never leave this loop
                             # polling, so lets do this polling
                             my $nrvars = new SNMP::VarList(@varlists);
                             do_log( "INFOR SNMP($fork_num): Do bulkwalk", 5 ) if $g{debug};
-#                            do_log( "$$nrep_count $$oid_count $nrvars");
-#                            my $tempnrcount;
-#                            if ($$nrep_count == 0) {
-#                               $tempnrcount= $$oid_count; 
-#                               $tempnrcount= $$nrep_count;
-#                            } else {
-#                               $tempnrcount= $$nrep_count;
-#                            }
-                            #my @nrresp = $session->bulkwalk( $tempnrcount, $$oid_count, $nrvars );
+
                             my @nrresp = $session->bulkwalk( $$nrep_count, $$oid_count, $nrvars );
                             if ( $session->{ErrorNum} ) {
                                 if ( $session->{ErrorNum} == -24 ) {
@@ -1004,8 +997,8 @@ DEVICE: while (1) {    # We should never leave this loop
                                     $vbarr_counter++;
                                     next;
                                 }
-#sleep(5);
-                                if ( ( scalar @$vbarr ) == 0 ) {
+
+                                if ( ( scalar @$vbarr ) == 0 ) { # CAN MAKE SOME PROBLEM: BUG#74 error are not trapped: should be modify to trap them
                                     do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 0 );
                                 }
 

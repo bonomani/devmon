@@ -104,12 +104,12 @@ sub initialize {
         'snmptimeout' => 0,
         'snmptries'   => 0,
         'snmpcids'    => '',
-        'secnames'   => '',
-        'seclevels'  => '',
-        'authprotos' => '',
-        'authpasss'  => '',
-        'privprotos' => '',
-        'privpasss'  => '',
+        'secnames'    => '',
+        'seclevels'   => '',
+        'authprotos'  => '',
+        'authpasss'   => '',
+        'privprotos'  => '',
+        'privpasss'   => '',
 
         # Now our global data subhashes
         'templates'    => {},
@@ -314,7 +314,7 @@ sub initialize {
             'case'    => 0
         },
         'snmptimeout' => {
-            'default' => 4, # 2 Seems the very mininum, 4 if you use ilo
+            'default' => 4,       # 2 Seems the very mininum, 4 if you use ilo
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -385,13 +385,13 @@ sub initialize {
         print "Can't have more than one mutually exclusive option\n\n";
         usage();
     }
-    
+
     # Now read in our local config info from our file
     read_local_config();
- 
+
     # Open the log file
     open_log();
-    
+
     # Autodetect our nodename on user request
     if ( $g{nodename} eq 'HOSTNAME' ) {
         my $hostname = hostname();
@@ -403,7 +403,7 @@ sub initialize {
         $g{nodename} = $hostname;
         do_log( "INFOR CONF: Nodename autodetected as $hostname", 3 );
     }
-   
+
     # Make sure we have a nodename
     die "Unable to determine nodename!\n" if !defined $g{nodename} and $g{nodename} =~ /^\S+$/;
 
@@ -420,70 +420,69 @@ sub initialize {
     check_global_config();
 
     # Check output options
-    if ((not defined $outputs_ref) and ($hostonly or $poll or %match)) { # set -o for options that need it
-        ${ $outputs_ref}[0] = '';
+    if ( ( not defined $outputs_ref ) and ( $hostonly or $poll or %match ) ) {    # set -o for options that need it
+        ${$outputs_ref}[0] = '';
     }
-    if ( not defined $outputs_ref ) { # no -o
-      for my $dispsrv ( split /,/, $g{dispserv} ) {
-         $g{output}{"xymon://$dispsrv"}{protocol} = 'xymon';
-         $g{output}{"xymon://$dispsrv"}{target} = "$dispsrv";
-          $g{output}{"xymon://$dispsrv"}{rrd} = 1;
-         $g{output}{"xymon://$dispsrv"}{stat} = 1;
-       }
-      
-    }
-    elsif (scalar @{ $outputs_ref}  == 1 and  ${ $outputs_ref}[0] eq '')  {     #shortform (no options) -o only
-      for my $dispsrv ( split /,/, $g{dispserv} ) {
-         $g{output}{"xymon://$dispsrv"}{protocol} = 'xymon';
-         $g{output}{"xymon://$dispsrv"}{target} = "$dispsrv";
-          $g{output}{"xymon://$dispsrv"}{rrd} = 0;
-         $g{output}{"xymon://$dispsrv"}{stat} = 0;
-       }
-       $g{output}{'xymon://stdout'}{protocol} = 'xymon';
-       $g{output}{'xymon://stdout'}{target} = 'stdout';
-       $g{output}{'xymon://stdout'}{rrd} = 0;
-       $g{output}{'xymon://stdout'}{stat} = 1;
-       $g{foreground} = 1;
-       $g{oneshot}    = 1        if not defined $g{oneshot};
+    if ( not defined $outputs_ref ) {                                             # no -o
+        for my $dispsrv ( split /,/, $g{dispserv} ) {
+            $g{output}{"xymon://$dispsrv"}{protocol} = 'xymon';
+            $g{output}{"xymon://$dispsrv"}{target}   = "$dispsrv";
+            $g{output}{"xymon://$dispsrv"}{rrd}      = 1;
+            $g{output}{"xymon://$dispsrv"}{stat}     = 1;
+        }
+
+    } elsif ( scalar @{$outputs_ref} == 1 and ${$outputs_ref}[0] eq '' ) {        #shortform (no options) -o only
+        for my $dispsrv ( split /,/, $g{dispserv} ) {
+            $g{output}{"xymon://$dispsrv"}{protocol} = 'xymon';
+            $g{output}{"xymon://$dispsrv"}{target}   = "$dispsrv";
+            $g{output}{"xymon://$dispsrv"}{rrd}      = 0;
+            $g{output}{"xymon://$dispsrv"}{stat}     = 0;
+        }
+        $g{output}{'xymon://stdout'}{protocol} = 'xymon';
+        $g{output}{'xymon://stdout'}{target}   = 'stdout';
+        $g{output}{'xymon://stdout'}{rrd}      = 0;
+        $g{output}{'xymon://stdout'}{stat}     = 1;
+        $g{foreground}                         = 1;
+        $g{oneshot}                            = 1 if not defined $g{oneshot};
     } else {
-        @{$outputs_ref} = split(/,/,join(',', @{$outputs_ref} ));
-        my $idx=0;
+        @{$outputs_ref} = split( /,/, join( ',', @{$outputs_ref} ) );
+        my $idx = 0;
         for my $output ( @{$outputs_ref} ) {
-            usage("Duplicate output '".$output."'")if (exists $g{output}{$output}) ;
-            ( $g{output}{ $output }{protocol}, $g{output}{ $output }{target} ) = split '://', $output;
-            usage("Invalid output -o (only)") if not defined $g{output}{ $output }{protocol} ;
-            usage("Unknown protocol '$g{output}{ $output }{protocol}'") if $g{output}{ $output }{protocol} !~ '^xymon$' ;
-            usage("Invalid target in '".$output."'") if not defined $g{output}{ $output }{target};
-            if ($g{output}{ $output }{target} eq 'stdout') {
+            usage( "Duplicate output '" . $output . "'" ) if ( exists $g{output}{$output} );
+            ( $g{output}{$output}{protocol}, $g{output}{$output}{target} ) = split '://', $output;
+            usage("Invalid output -o (only)")                           if not defined $g{output}{$output}{protocol};
+            usage("Unknown protocol '$g{output}{ $output }{protocol}'") if $g{output}{$output}{protocol} !~ '^xymon$';
+            usage( "Invalid target in '" . $output . "'" )              if not defined $g{output}{$output}{target};
+            if ( $g{output}{$output}{target} eq 'stdout' ) {
             }
         }
     }
 
     # hostonly mode (deprecated by poll)
     if ($hostonly) {
-      do_log("WARNIN CONF: hostonly is deprecated use '-p[oll]' instead");
-      if (defined $poll or %match) {
-         usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only"); 
-       } else {
-      $poll = $hostonly if not defined $poll;
-       }
+        do_log("WARNIN CONF: hostonly is deprecated use '-p[oll]' instead");
+        if ( defined $poll or %match ) {
+            usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only");
+        } else {
+            $poll = $hostonly if not defined $poll;
+        }
     }
 
     #  Poll mode
     if ($poll) {
-        ( my $match_iphost,  my $match_test ) = split '=', $poll;
-         if (exists $match{$match_iphost} ) {
-             usage("Conflit o=$poll -m iphost=$match_iphost");
-         } else {
+        ( my $match_iphost, my $match_test ) = split '=', $poll;
+        if ( exists $match{$match_iphost} ) {
+            usage("Conflit o=$poll -m iphost=$match_iphost");
+        } else {
             push @{ $match{iphost} }, $match_iphost;
-         } 
-         if (defined $match_test) {
-            if (exists $match{$match_test} ) {
+        }
+        if ( defined $match_test ) {
+            if ( exists $match{$match_test} ) {
                 usage("Conflit o=$poll -m test=$match_test");
             } else {
-               push @{ $match{test} }, $match_test;
+                push @{ $match{test} }, $match_test;
             }
-         }
+        }
 
     }
 
@@ -500,69 +499,69 @@ sub initialize {
                 $g{match_test} = join( '|', map {"(?:$_)"} @{ $match{test} } );
             } elsif ( $match_key eq 'rrd' ) {
                 for my $output ( @{ $match{rrd} } ) {
-                   if (exists $g{output}{$output}){
-                      if (defined  $g{output}{$output}{rrd}) {
-                          usage("Duplicate -m rrd=$output");
-                      } else { 
-                         $g{output}{$output}{rrd} =1;
-                      }
-                   } else {
-                      usage("$output is not a defined output, set it with -o=$output");
-                   }
-                } 
+                    if ( exists $g{output}{$output} ) {
+                        if ( defined $g{output}{$output}{rrd} ) {
+                            usage("Duplicate -m rrd=$output");
+                        } else {
+                            $g{output}{$output}{rrd} = 1;
+                        }
+                    } else {
+                        usage("$output is not a defined output, set it with -o=$output");
+                    }
+                }
             } elsif ( $match_key eq 'stat' ) {
                 for my $output ( @{ $match{stat} } ) {
-                    if (exists $g{output}{$output}){
-                       if (defined  $g{output}{$output}{stat}) {
-                           usage("Duplicate -m stat=$output");
-                       } else {
-                          $g{output}{$output}{stat} =1;
-                       }
+                    if ( exists $g{output}{$output} ) {
+                        if ( defined $g{output}{$output}{stat} ) {
+                            usage("Duplicate -m stat=$output");
+                        } else {
+                            $g{output}{$output}{stat} = 1;
+                        }
                     } else {
                         usage("$output is not a defined output, set it with -o=$output");
                     }
                 }
             } else {
-                usage('Option match, unkown key "' . $match_key . '"' );
+                usage( 'Option match, unkown key "' . $match_key . '"' );
             }
         }
     }
+
     # Debug
-    if ($g{debug}) {
-    for my $output ( keys $g{output} ) {
-       my $cmd_line="devmon -o=$output";
-       if ($g{output}{$output}{stat}) {
-          $cmd_line.=" -m stat=$output";
-       }
-       if ($g{output}{$output}{rrd}) {
-          $cmd_line.=" -m rrd=$output";
-       }                    
-       for my $match_iphost ( @{ $match{iphost} }) {
-           $cmd_line.=" -m iphost=$match_iphost";
-       }
-       for my $match_ip ( @{ $match{ip} }) {
-           $cmd_line.=" -m ip=$match_ip";
-       }
-       for my $match_host ( @{ $match{host} }) {
-           $cmd_line.=" -m host=$match_host";
-       }
-       for my $match_test ( @{ $match{test} }) {
-           $cmd_line.=" -m test=$match_test";
-       }
-       if ($g{foreground}) {
-           $cmd_line.=" -f";
-       }
-       if ($g{trace}) {
-           $cmd_line.=" -t";
-       }
-       elsif ($g{debug}) {
-           $cmd_line.=" -de";
-       }
-       if ($g{oneshot}) {
-           $cmd_line.=" -1";
-       }
-       do_log($cmd_line);
-    }
+    if ( $g{debug} ) {
+        for my $output ( keys $g{output} ) {
+            my $cmd_line = "devmon -o=$output";
+            if ( $g{output}{$output}{stat} ) {
+                $cmd_line .= " -m stat=$output";
+            }
+            if ( $g{output}{$output}{rrd} ) {
+                $cmd_line .= " -m rrd=$output";
+            }
+            for my $match_iphost ( @{ $match{iphost} } ) {
+                $cmd_line .= " -m iphost=$match_iphost";
+            }
+            for my $match_ip ( @{ $match{ip} } ) {
+                $cmd_line .= " -m ip=$match_ip";
+            }
+            for my $match_host ( @{ $match{host} } ) {
+                $cmd_line .= " -m host=$match_host";
+            }
+            for my $match_test ( @{ $match{test} } ) {
+                $cmd_line .= " -m test=$match_test";
+            }
+            if ( $g{foreground} ) {
+                $cmd_line .= " -f";
+            }
+            if ( $g{trace} ) {
+                $cmd_line .= " -t";
+            } elsif ( $g{debug} ) {
+                $cmd_line .= " -de";
+            }
+            if ( $g{oneshot} ) {
+                $cmd_line .= " -1";
+            }
+            do_log($cmd_line);
+        }
     }
 
     # Check mutual exclusions (run-and-die options)
@@ -570,10 +569,9 @@ sub initialize {
     dm_templates::sync_templates() if $synctemps;
     reset_ownerships()             if $resetowner;
 
-    # check snmp config before snmp discovery 
+    # check snmp config before snmp discovery
     check_snmp_config();
-    read_hosts_cfg() if $readhosts; #  (run-and-die options)
-
+    read_hosts_cfg() if $readhosts;    #  (run-and-die options)
 
     # Daemonize if need be
     daemonize();
@@ -607,11 +605,10 @@ sub initialize {
         $pid_handle->close;
     }
 
-
     # Throw out a little info to the log
-    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---",   0 );
-    do_log( "WARNI CONF: Logging to $g{logfile}",                                             2 ) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
-    do_log( "INFO  CONF: Node#$g{my_nodenum}                                  ",              3 );
+    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---", 0 );
+    do_log( "WARNI CONF: Logging to $g{logfile}",                                           2 ) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
+    do_log( "INFO  CONF: Node#$g{my_nodenum}                                  ",            3 );
 
     # Dump some configs in debug mode
     if ( $g{debug} ) {
