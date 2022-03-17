@@ -209,51 +209,44 @@
   In SNMP, we have 'tables' and 'scalars'
   In Devmon, we have oids of type 'branch' and 'leaf'
   - A 'branch' is a table
-  - A 'leaf' can be a 'scalar' (end with 0) or an element of a table (do not end with 0) 
-  The main difference is that 'branch' have indexes, but not 'leaf'
-  
-  An example of an index of an oid.1.3.4.6.9.4.3.1.20.3 (type 'branch')
-  We can do an "snmpget/snmpwalk" query 1 value on this oid:
-
-    snmpget -v2c c public MYDEVICE .1.3.4.6.9.
-                                              ^ Remark that it is not the OID in the example 
-    snmpget answer:                .1.3.4.6.9.4.3.1.20.3 = 8732588786
-                                              ^ Remark that ^ we recieve 2 infomations!
-                                   <-  oid -> <- index-> = <-result->
-
-  In the answer, we get 2 different information: The "result" and its "index" 
-
-  Concept of OID in devmon need some explaination
+  - A 'leaf' can be a 'snmp scalar' (end with 0) or an element of a 'snmp table' (do not end with 0) 
 
   In a 'leaf' type oid, only 1 result is expected: There is no index, it considered as as scalar 
-  - snmp{oid} = oid_value                -> so 1 value
+  - snmp{oid} = oid_value                ->  1 value
 
-  In a "branch" type oid, each leaf have an index,
-  (the index is usually just an integer, but could also be integer dot integer.... (same as an oid)
+  In a 'branch' type oid, each leaf have an index. An 'index' has 'value type' of an 'oid'
+  (but generaly its is only an interger) and is considered as such in devmon
   - snmp{oid} = oid_values{oid_indexes}  ->  n values (1 for each index)
+
+  Example
+    snmpget -v2c c public MYDEVICE .1.3.4.6.9.
+                                              ^ Remark that it is not the OID in the example
+    snmpget answer:                .1.3.4.6.9.4.3.1.20.3 = 8732588786
+                                              ^ Remark that ^ we recieve 2 infomation!
+                                   <-  oid -> <- index-> = <-result->
   
-  As a leaf OID can be an element of a table: try to transform it to a 'branch' as it us more scalable
+  In the answer, we get 2 different information: The "result" and its "index"
+
+  As a leaf oid can be an element of a table: try to transform it to a 'branch' as it us more scalable
   and it will probably be more efficient (add here an example: hp-ilo/cpu_dm)
 
-  For simplicity the term 'oid' is also used for the name of the result of a transform or a snmp polling 
+  For simplicity the term 'oid' design the snmp oid with its for the 'result' (a leaf or a branch) after a transform or a snmp polling 
   (of course it is not the SNMP standard) 
-  - oidX=transform{oidY} 
+  - oidT=transform{oidS} or oid=snmppoll{snmp_oid}
 
   Transform can have multiple oids: (not in snmp)
-  - oidX=transform{oidY, ..., oidZ}
+  - oidT=transform{oidS1, oidS2, ... }
+  - In case of a 'branch', the indexes of the result have the same indexes as the 'primary oid' (=the first sources oids: oidS1)  
 
-  The 'primary oid' is the "first" sources oids
-  - prim_oid = oidX for transform(oidX, oidY, ..., oidZ)
-
-  Choose carefully the primary oid in transforms that accept multiple OID (MATH, BEST...) 
-  as the result depend on it: note that Index_X from the first source is the same as the target oid index!
-  - target_oid(index_X) = transform(source_oidX(index_X),..., source_oidZ(index_Z) 
+  Choose carefully the primary oid in transforms that accept multiple oids (MATH, BEST...) 
+  as the result depend on it! 
 
   Conclusion:
-  - "source oid(s)" is/are what is polled or transformed 
-  - "target oid" is the result after a transformation or a polling
-  - "oid indexes" are the the indexes returned by snmp
-  - "oid values" are the results that correspond to their indexes
+  - 'source oid(s)' is/are what is polled or transformed 
+    - primary oid, is the first source oids
+  - 'target oid' is the result after a transformation or a polling
+    - 'target oid indexes' are the the indexes returned by snmp (if it is a branch)
+    - 'target oid values' are the results returned by snmp
 
   ----------------------------------
   -- The 'transforms' file
