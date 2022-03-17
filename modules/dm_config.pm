@@ -25,6 +25,7 @@ use vars qw(%g);
 
 # Modules
 use strict;
+use warnings;
 require dm_tests;
 require dm_templates;
 use IO::File;
@@ -529,7 +530,7 @@ sub initialize {
 
     # Debug
     if ( $g{debug} ) {
-        for my $output ( keys $g{output} ) {
+        for my $output ( keys %{$g{output}} ) {
             my $cmd_line = "devmon -o=$output";
             if ( $g{output}{$output}{stat} ) {
                 $cmd_line .= " -m stat=$output";
@@ -560,7 +561,7 @@ sub initialize {
             if ( $g{oneshot} ) {
                 $cmd_line .= " -1";
             }
-            do_log($cmd_line);
+            do_log("$cmd_line");
         }
     }
 
