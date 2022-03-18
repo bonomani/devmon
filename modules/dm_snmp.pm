@@ -917,7 +917,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                         ${ $is_repeater->{$oid} } = 1;
                                     } else {
                                         $poll_oid->{$oid} = \( $oid =~ s/\.\d*$//r );
-                                        if ( $oid =~ /\.0$/ ) {                  #BUG74, SNMP Scalar (end with .0) are leaf and should be counted as non-repeater 
+                                        if ( $oid =~ /\.0$/ ) {    #BUG74, SNMP Scalar (end with .0) are leaf and should be counted as non-repeater
                                             ${ $is_repeater->{$oid} } = 0;
                                         } else {
                                             ${ $is_repeater->{$oid} } = 1;
@@ -998,62 +998,65 @@ DEVICE: while (1) {    # We should never leave this loop
                                     next;
                                 }
 
-                                if ( ( scalar @$vbarr ) == 0 ) { # CAN MAKE SOME PROBLEM: BUG#74 error are not trapped: should be modify to trap them
-                                    do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 0 );
-                                }
+                                if ( scalar @{ $vbarr // [] } ) {    # test the number of response for 1 oid. BUG#74: Test definedness of vbarr
 
-                                # Extract the returned list of varbinds using the SNMP::Varbind methods.
-                                foreach my $nrv (@$vbarr) {
-                                    my $snmp_oid  = $nrv->name;
-                                    my $snmp_val  = $nrv->val;
-                                    my $snmp_type = $nrv->type;
+                                    # Extract the returned list of varbinds using the SNMP::Varbind methods.
+                                    foreach my $nrv (@$vbarr) {
+                                        my $snmp_oid  = $nrv->name;
+                                        my $snmp_val  = $nrv->val;
+                                        my $snmp_type = $nrv->type;
 
-                                    #do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
-                                    if ($is_devmon_repeater) {
-                                        do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
-                                        my $leaf = substr( $snmp_oid, length($oid) + 1 );
+                                        #do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
+                                        if ($is_devmon_repeater) {
+                                            do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
+                                            my $leaf = substr( $snmp_oid, length($oid) + 1 );
 
-                                        $data_out->{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
-                                        $data_out->{$stripped_oid}{'time'}{$leaf} = time;
-                                        $leaf_found++;
+                                            $data_out->{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
+                                            $data_out->{$stripped_oid}{'time'}{$leaf} = time;
+                                            $leaf_found++;
 
-                                    } else {
-                                        if ( ${path_is_slow} > 0 ) {
-
-                                            # Slow path
-                                            # Test if answer match
-                                            if ( $snmp_oid eq $oid ) {
-                                                do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
-                                                if ( ( scalar @$vbarr ) == 1 ) {
-                                                    if ( ${ $is_repeater->{$oid} } == 0 ) {
-                                                    } else {
-                                                        ${ $is_repeater->{$oid} } = 0;
-                                                        ${ $poll_oid->{$oid} }    = $snmp_poll_oid;
-                                                    }
-                                                }
-                                                $data_out->{$stripped_oid}{val}  = $snmp_val;
-                                                $data_out->{$stripped_oid}{time} = time;
-                                                $vbarr_counter++;
-                                                $oid_found++;
-                                                $leaf_found++;
-                                                next VBARR;
-                                            } else {
-                                                $leaf_found++;
-                                            }
                                         } else {
+                                            if ( ${path_is_slow} > 0 ) {
 
-                                            # Fast path
-                                            if ( $snmp_oid eq $oid ) {
-                                                do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 4 ) if $g{debug};
-                                                $data_out->{$stripped_oid}{val}  = $snmp_val;
-                                                $data_out->{$stripped_oid}{time} = time;
-                                                $vbarr_counter++;
-                                                $oid_found++;
-                                                $leaf_found++;
-                                                next VBARR;
+                                                # Slow path
+                                                # Test if answer match
+                                                if ( $snmp_oid eq $oid ) {
+                                                    do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
+                                                    if ( ( scalar @$vbarr ) == 1 ) {
+                                                        if ( ${ $is_repeater->{$oid} } == 0 ) {
+                                                        } else {
+                                                            ${ $is_repeater->{$oid} } = 0;
+                                                            ${ $poll_oid->{$oid} }    = $snmp_poll_oid;
+                                                        }
+                                                    }
+                                                    $data_out->{$stripped_oid}{val}  = $snmp_val;
+                                                    $data_out->{$stripped_oid}{time} = time;
+                                                    $vbarr_counter++;
+                                                    $oid_found++;
+                                                    $leaf_found++;
+                                                    next VBARR;
+                                                } else {
+                                                    $leaf_found++;
+                                                }
+                                            } else {
+
+                                                # Fast path
+                                                if ( $snmp_oid eq $oid ) {
+                                                    do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 4 ) if $g{debug};
+                                                    $data_out->{$stripped_oid}{val}  = $snmp_val;
+                                                    $data_out->{$stripped_oid}{time} = time;
+                                                    $vbarr_counter++;
+                                                    $oid_found++;
+                                                    $leaf_found++;
+                                                    next VBARR;
+                                                }
                                             }
                                         }
                                     }
+                                } else {
+
+                                    # there is no response (vbarr) or an undefined one #BUG74. TODO: Make it more explicit + Change error to warn if we can handle it properly
+                                    do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 0 );
                                 }
                                 if ($is_devmon_repeater) {
                                     $vbarr_counter++;
