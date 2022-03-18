@@ -2738,7 +2738,7 @@ Template development:
 
  -c[onfigfile]     Specify config file location  
  -db[file]         Specify database file location  
- -de[bug] -t[race] Print debug ot trace 
+ -de[bug] -t[race] Print debug or trace 
  -v -vv -nov       Verbose mode: 0 -> quiet, 1 -> error, 2 -> warning(default), 3 -> info, 4 -> debug, 5 -> trace            
 
  -f[oreground]     Run in foreground (fg). Prevents running in daemon mode  

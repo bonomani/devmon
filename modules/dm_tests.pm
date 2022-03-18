@@ -222,7 +222,7 @@ sub oid_hash {
             or !defined $snmp->{$num}{val} )
         {
             # log this problem if xymon_color (normally "conn" ping) is green
-            do_log( "ERROR TEST: No SNMP data found (Nil) for $oid on $device", 1 )
+            do_log( "DEBUG TEST: No SNMP data found (Nil) for $oid on $device", 5 )
                 if ( $g{xymon_color}{$device} eq 'green' );
         }
 
@@ -2673,7 +2673,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Make sure we have leaf data for our primary oid
             if ( !defined $oids->{$pri}{val} ) {
-                do_log( "ERROR TEST: Missing repeater data for $pri for $test msg on $device", 1 );
+                do_log( "DEBUG TEST: Missing repeater data for $pri for $test msg on $device", 4 );
                 $msg .= "&clear Missing repeater data for primary OID $pri\n";
                 $worst_color = 'clear';
                 next;
@@ -4095,7 +4095,7 @@ sub validate_deps {
 
             # Throw one error message
             do_log( "DEBUG TEST: '$oid_h->{val}' while parsing '$dep_oid' on $device", 4 ) if $oid_h->{error};
-            return 0                                                                      if $oid_h->{error};
+            return 0                                                                       if $oid_h->{error};
         }
     }
     $all_error ? return 0 : return 1;
