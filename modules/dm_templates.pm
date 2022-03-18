@@ -174,12 +174,12 @@ sub read_template_files {
     # Get all dirs in templates subdir
     my $template_dir = $g{homedir} . "/templates";
     opendir TEMPLATES, $template_dir
-        or log_fatal( "Template error: Unable to open template directory ($!)", 0 );
+        or log_fatal( "Template error: Unable to open template directory ($!)", 1 );
 
     my @dirs;
     for my $entry ( readdir TEMPLATES ) {
         my $dir = "$template_dir/$entry";
-        do_log( "ERROR TMPL: Folder $dir is not readable, skipping this template", 0 )
+        do_log( "ERROR TMPL: Folder $dir is not readable, skipping this template", 1 )
             and next
             if !-r $dir;
         push @dirs, $dir if -d $dir and $entry !~ /^\..*$/;    # . and .svn or .cvs

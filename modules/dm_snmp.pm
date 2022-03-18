@@ -101,11 +101,11 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
         # Skip this device if we are running a Xymon server and the
         # server thinks that it isn't reachable
         if ( !defined $g{xymon_color}{$device} ) {
-            do_log( "DEBUG SNMP: $device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...", 4 );
+            do_log( "INFOR SNMP: $device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...", 3 );
             --$g{numsnmpdevs};
             next QUERYHASH;
         } elsif ( $g{xymon_color}{$device} ne 'green' ) {
-            do_log( "INFOR SNMP: $device has a non-green Xymon status, skipping SNMP.", 4 );
+            do_log( "INFOR SNMP: $device has a non-green Xymon status, skipping SNMP.", 3 );
             --$g{numsnmpdevs};
             next QUERYHASH;
         }
@@ -144,7 +144,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
     TESTTYPE: for my $test ( split /,/, $tests ) {
 
             # Make sure we have our device_type info
-            do_log( "WARNIN SNMP: No test '$test' template found for host $device, skipping.", 0 )
+            do_log( "WARNI SNMP: No test '$test' template found for host $device, skipping.", 2 )
                 and next TESTTYPE
                 if !defined $g{templates}{$vendor}{$model}{tests}{$test};
 
@@ -186,7 +186,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{dev_data} } ) {
             my $expected
                 = ( scalar keys %{ $snmp_input{$dev}{nonreps} } ) + ( scalar keys %{ $snmp_input{$dev}{reps} } );
             my $received = ( scalar keys %{ $g{snmp_data}{$dev} } );
-            do_log( "INFOR SNMP: Queried $dev: expected $expected, received $received", 0 )
+            do_log( "DEBUG SNMP: Queried $dev: expected $expected, received $received", 4 )
                 if ( $expected != $received );
         }
     }
@@ -225,7 +225,7 @@ sub snmp_query {
                 my $select = IO::Select->new( $g{forks}{$fork}{CS} );
                 if ( $select->can_read(0.01) ) {
 
-                    do_log( "DEBUG SNMP: Fork $fork has data for device $dev, reading it", 3 ) if $g{debug};
+                    do_log( "DEBUG SNMP: Fork $fork has data for device $dev, reading it", 4 ) if $g{debug};
 
                     # Okay, we know we have something in the buffer, keep reading
                     # till we get an EOF
@@ -246,19 +246,19 @@ sub snmp_query {
                     if ($@) {
                         do_log( "ERROR SNMP: Fork $g{forks}{$fork}, pid $g{forks}{$fork}{pid} stalled on device $dev: $@. Killing this fork.", 1 );
                         kill 15, $g{forks}{$fork}{pid}
-                            or do_log( "ERROR SNMP: Sending $fork TERM signal failed: $!", 2 );
+                            or do_log( "ERROR SNMP: Sending $fork TERM signal failed: $!", 1 );
                         close $g{forks}{$fork}{CS}
-                            or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 2 );
+                            or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                         delete $g{forks}{$fork};
                         next;
                     }
-                    do_log( "DEBUG SNMP: Fork $fork returned complete message for device $dev", 3 ) if $g{debug};
+                    do_log( "DEBUG SNMP: Fork $fork returned complete message for device $dev", 4 ) if $g{debug};
 
                     # Looks like we got some data
                     my $hashref = thaw($data_in);
                     my %returned;
                     if ( defined $hashref ) {
-                        do_log( "DEBUG SNMP: Dethawing data for $dev", 0 ) if $g{debug};
+                        do_log( "DEBUG SNMP: Dethawing data for $dev", 4 ) if $g{debug};
                         %returned = %{ thaw($data_in) };
 
                         # If we got good data, reset the fail counter to 0
@@ -274,7 +274,7 @@ sub snmp_query {
                     # Sift through returned errors
                     for my $error ( keys %{ $returned{error} } ) {
                         my $fatal = $returned{error}{$error};
-                        do_log( "ERROR SNMP: $error", 2 );
+                        do_log( "ERROR SNMP: $error", 1 );
 
                         # Increment our fail counter if the query died fatally
                         ++$g{fail}{$dev} if $fatal;
@@ -302,11 +302,11 @@ sub snmp_query {
 
                     # See if we've exceeded our max poll time
                     if ( ( time - $g{forks}{$fork}{time} ) > $g{maxpolltime} ) {
-                        do_log( "WARNING: Fork $fork ($pid) exceeded poll time polling $dev", 0 );
+                        do_log( "WARNI SNMP: Fork $fork ($pid) exceeded poll time polling $dev", 2 );
 
                         # Kill it
-                        kill 15, $pid or do_log( "WARNING: Sending fork $fork TERM signal failed: $!", 0 );
-                        close $g{forks}{$fork}{CS} or do_log( "WARNING: Closing socket to fork $fork failed: $!", 1 );
+                        kill 15, $pid or do_log( "ERROR SNMP: Sending fork $fork TERM signal failed: $!", 1 );
+                        close $g{forks}{$fork}{CS} or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                         delete $g{forks}{$fork};
                         --$active_forks;
                         fork_queries();
@@ -321,7 +321,7 @@ sub snmp_query {
                     } elsif ( !kill 0, $pid ) {
 
                         # Whoops, looks like our fork died somewhow
-                        do_log( "ERROR SNMP: Fork $fork ($pid) died polling $dev", 0 );
+                        do_log( "ERROR SNMP: Fork $fork ($pid) died polling $dev", 1 );
                         close $g{forks}{$fork}{CS}
                             or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                         delete $g{forks}{$fork};
@@ -361,9 +361,9 @@ sub snmp_query {
                     alarm 0;
                 };
                 if ($@) {
-                    do_log( "ERROR SNMP: Fork $g{forks}{$fork}, pid $g{forks}{$fork}{pid} not responding: $@. Killing this fork.", 0 );
+                    do_log( "ERROR SNMP: Fork $g{forks}{$fork}, pid $g{forks}{$fork}{pid} not responding: $@. Killing this fork.", 1 );
                     kill 15, $g{forks}{$fork}{pid}
-                        or do_log( "ERROR SNMP: Sending TERM signal to fork $fork failed: $!", 0 );
+                        or do_log( "ERROR SNMP: Sending TERM signal to fork $fork failed: $!", 1 );
                     close $g{forks}{$fork}{CS} or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                     delete $g{forks}{$fork};
                     next;
@@ -402,11 +402,11 @@ sub snmp_query {
                             alarm 0;
                         };
                         if ($@) {
-                            do_log("ERROR SNMP: Fork $fork, pid $g{forks}{$fork}{pid} stalled on reply to ping: $@. Killing this fork.");
+                            do_log( "ERROR SNMP: Fork $fork, pid $g{forks}{$fork}{pid} stalled on reply to ping: $@. Killing this fork.", 1 );
                             kill 15, $g{forks}{$fork}{pid}
-                                or do_log("ERROR SNMP: Sending $fork TERM signal failed: $!");
+                                or do_log( "ERROR SNMP: Sending $fork TERM signal failed: $!", 1 );
                             close $g{forks}{$fork}{CS}
-                                or do_log("ERROR SNMP: Closing socket to fork $fork failed: $!");
+                                or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                             delete $g{forks}{$fork};
                             next;
                         }
@@ -429,17 +429,17 @@ sub snmp_query {
                             do_log( "DEBUG SNMP: Fork $fork didn't send an appropriate response, killing it", 4 )
                                 if $g{debug};
                             kill 15, $g{forks}{$fork}{pid}
-                                or do_log("ERROR SNMP: Sending $fork TERM signal failed: $!");
+                                or do_log( "ERROR SNMP: Sending $fork TERM signal failed: $!", 1 );
                             close $g{forks}{$fork}{CS}
-                                or do_log("ERROR SNMP: Closing socket to fork $fork failed: $!");
+                                or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                             delete $g{forks}{$fork};
                             next;
                         }
 
                     } else {
-                        do_log( "ERROR SNMP: Fork $fork seems not to have replied to our ping, killing it", 4 );
-                        kill 15, $g{forks}{$fork}{pid} or do_log("ERROR SNMP: Sending $fork TERM signal failed: $!");
-                        close $g{forks}{$fork}{CS} or do_log("ERROR SNMP: Closing socket to fork $fork failed: $!");
+                        do_log( "ERROR SNMP: Fork $fork seems not to have replied to our ping, killing it", 1 );
+                        kill 15, $g{forks}{$fork}{pid} or do_log( "ERROR SNMP: Sending $fork TERM signal failed: $!", 1 );
+                        close $g{forks}{$fork}{CS} or do_log("ERROR SNMP: Closing socket to fork $fork failed: $!"), 1;
                         delete $g{forks}{$fork};
                         next;
                     }
@@ -455,10 +455,10 @@ sub snmp_query {
                         alarm 0;
                     };
                     if ($@) {
-                        do_log("ERROR SNMP: Fork $g{forks}{$fork}, pid $g{forks}{$fork}{pid} not responding: $@. Killing this fork.");
+                        do_log( "ERROR SNMP: Fork $g{forks}{$fork}, pid $g{forks}{$fork}{pid} not responding: $@. Killing this fork.", 1 );
                         kill 15, $g{forks}{$fork}{pid}
-                            or do_log("ERROR SNMP: Sending TERM signal to fork $fork failed: $!");
-                        close $g{forks}{$fork}{CS} or do_log("ERROR SNMP: Closing socket to fork $fork failed: $!");
+                            or do_log( "ERROR SNMP: Sending TERM signal to fork $fork failed: $!", 1 );
+                        close $g{forks}{$fork}{CS} or do_log( "ERROR SNMP: Closing socket to fork $fork failed: $!", 1 );
                         delete $g{forks}{$fork};
                         next;
                     }
@@ -497,7 +497,7 @@ sub fork_queries {
             SOCK_STREAM,
             PF_UNSPEC
             )
-            or do_log("ERROR SNMP: Unable to open forked socket pair ($!)")
+            or do_log( "ERROR SNMP: Unable to open forked socket pair ($!)", 1 )
             and exit;
 
         $g{forks}{$num}{CS}->autoflush(1);
@@ -506,28 +506,28 @@ sub fork_queries {
         if ( $pid = fork ) {
 
             # Parent code here
-            do_log("DEBUG SNMP: Fork number $num started with pid $pid") if $g{debug};
+            do_log( "DEBUG SNMP: Fork number $num started with pid $pid", 4 ) if $g{debug};
             close $g{forks}{$num}{PS}
-                or do_log("ERROR SNMP: Closing socket to ourself failed: $!\n");    # don't need to communicate with ourself
+                or do_log( "ERROR SNMP: Closing socket to ourself failed: $!\n", 1 );    # don't need to communicate with ourself
             $g{forks}{$num}{pid}  = $pid;
             $g{forks}{$num}{time} = time;
             $g{forks}{$num}{CS}->blocking(0);
         } elsif ( defined $pid ) {
 
             # Child code here
-            $g{parent} = 0;                                                         # We aren't the parent any more...
-            do_log("DEBUG SNMP: Fork $num using sockets $g{forks}{$num}{PS} <-> $g{forks}{$num}{CS} for IPC")
+            $g{parent} = 0;                                                              # We aren't the parent any more...
+            do_log( "DEBUG SNMP: Fork $num using sockets $g{forks}{$num}{PS} <-> $g{forks}{$num}{CS} for IPC", 4 )
                 if $g{debug};
             foreach ( sort { $a <=> $b } keys %{ $g{forks} } ) {
-                do_log("DEBUG SNMP: Fork $num closing socket (child $_) $g{forks}{$_}{PS}") if $g{debug};
+                do_log( "DEBUG SNMP: Fork $num closing socket (child $_) $g{forks}{$_}{PS}", 4 ) if $g{debug};
                 $g{forks}{$_}{CS}->close
-                    or do_log("ERROR SNMP: Closing socket for fork $_ failed: $!");    # Same as above
+                    or do_log( "ERROR SNMP: Closing socket for fork $_ failed: $!", 1 );    # Same as above
             }
-            $0 = "devmon-$num";                                                        # Remove our 'master' tag
-            fork_sub($num);                                                            # Enter our neverending query loop
-            exit;                                                                      # We should never get here, but just in case
+            $0 = "devmon-$num";                                                             # Remove our 'master' tag
+            fork_sub($num);                                                                 # Enter our neverending query loop
+            exit;                                                                           # We should never get here, but just in case
         } else {
-            do_log( "ERROR SNMP: Spawning snmp worker fork ($!)", 0 );
+            do_log( "ERROR SNMP: Spawning snmp worker fork ($!)", 1 );
         }
     }
 
@@ -566,13 +566,13 @@ DEVICE: while (1) {    # We should never leave this loop
             # Our getline timed out, which means we haven't gotten any data
             # in a while.  Make sure our parent is still there
             if ($@) {
-                do_log( "WARNI SNMP($fork_num): Fork $fork_num timed out waiting for data from parent: $@", 3 );
+                do_log( "WARNI SNMP($fork_num): Fork $fork_num timed out waiting for data from parent: $@", 2 );
                 if ( !kill 0, $g{mypid} ) {
-                    do_log("ERROR SNMP($fork_num): Parent is no longer running, fork $fork_num exiting");
+                    do_log( "ERROR SNMP($fork_num): Parent is no longer running, fork $fork_num exiting", 1 );
                     exit 1;
                 }
                 my $sleeptime = $g{cycletime} / 2;
-                do_log( "WARNI SNMP($fork_num): Parent ($g{mypid}) seems to be running, fork $fork_num sleeping for $sleeptime", 3 );
+                do_log( "WARNI SNMP($fork_num): Parent ($g{mypid}) seems to be running, fork $fork_num sleeping for $sleeptime", 2 );
                 sleep $sleeptime;
             }
 
@@ -757,7 +757,7 @@ DEVICE: while (1) {    # We should never leave this loop
                     # injected as last parameter of map_table_4
                     $data_out{maxrep}{$oid} = $num_reps + 1;
                 }
-                do_log( "WARNI SNMP($fork_num): Failed queries $failed_query", 0 )
+                do_log( "WARNI SNMP($fork_num): Failed queries $failed_query", 2 )
                     if ( $g{debug} and $failed_query gt 0 );
 
                 # We don't want to do every table if we are failing alot of walks
@@ -777,7 +777,7 @@ DEVICE: while (1) {    # We should never leave this loop
         } elsif ( ( ( ( $g{snmpeng} eq 'snmp' ) or ( $g{snmpeng} eq 'auto' ) ) and ( $snmp_ver eq '2' or $snmp_ver eq '2c' ) ) or $snmp_ver eq '3' ) {
             eval { require SNMP; };
             if ($@) {
-                do_log("WARNI SNMP($fork_num): SNMP is not installed: $@ yum install net-snmp or apt install snmp");
+                do_log( "WARNI SNMP($fork_num): SNMP is not installed: $@ yum install net-snmp or apt install snmp", 2 );
             } else {
 
                 # Get SNMP variables
@@ -955,19 +955,19 @@ DEVICE: while (1) {    # We should never leave this loop
                             # The hash function is now populated with the parent oid and the array is prepared for the
                             # polling, so lets do this polling
                             my $nrvars = new SNMP::VarList(@varlists);
-                            do_log( "INFOR SNMP($fork_num): Do bulkwalk", 5 ) if $g{debug};
+                            do_log( "INFOR SNMP($fork_num): Do bulkwalk", 4 ) if $g{debug};
 
                             my @nrresp = $session->bulkwalk( $$nrep_count, $$oid_count, $nrvars );
                             if ( $session->{ErrorNum} ) {
                                 if ( $session->{ErrorNum} == -24 ) {
-                                    do_log( "ERROR SNMP($fork_num): Bulkwalk timeout: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))" );
+                                    do_log( "ERROR SNMP($fork_num): Bulkwalk timeout: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 1 );
                                 } else {
-                                    do_log("ERROR SNMP($fork_num): Cannot do bulkwalk: $session->{ErrorStr} ($session->{ErrorNum})");
+                                    do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                                 }
                                 return 0;
 
                             } elsif ( ( scalar @nrresp ) == 0 ) {
-                                do_log( "ERROR SNMP($fork_num): Empty answer from device $dev", 0 );
+                                do_log( "ERROR SNMP($fork_num): Empty answer from device $dev", 1 );
                             }
 
                             # Now that the polling is done we have to process the answers
@@ -977,7 +977,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 # reference passed to bulkwalk().
                                 # First, detect some errors
                                 if ( $vbarr_counter > ${$oid_count} ) {
-                                    do_log( "DEBUG SNMP($fork_num): ERROR snmplib give extra answer for device $dev", 3 )
+                                    do_log( "DEBUG SNMP($fork_num): Snmplib give extra answer for device $dev", 4 )
                                         if $g{debug};
                                     ${$path_is_slow} = 1;
                                     next;
@@ -991,7 +991,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 my $leaf_found          = 0;
 
                                 if ( not defined $snmp_poll_oid ) {
-                                    do_log( "DEBUG SNMP($fork_num): ERROR $snmp_poll_oid not defined for device $dev, oid $oid", 3 ) if $g{debug};
+                                    do_log( "DEBUG SNMP($fork_num): $snmp_poll_oid not defined for device $dev, oid $oid", 4 ) if $g{debug};
                                     @remain_oids = push( @remain_oids, $oid );
                                     ${$path_is_slow} = 1;
                                     $vbarr_counter++;
@@ -1056,7 +1056,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 } else {
 
                                     # there is no response (vbarr) or an undefined one #BUG74. TODO: Make it more explicit + Change error to warn if we can handle it properly
-                                    do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 0 );
+                                    do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 1 );
                                 }
                                 if ($is_devmon_repeater) {
                                     $vbarr_counter++;
@@ -1065,7 +1065,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                     $data_out->{'maxrep'}{stripped_oid} = $leaf_found;
 
                                 } else {
-                                    do_log( "DEBUG SNMP($fork_num): ERROR All the smnp answer were parsed, but we not found a match for oid $oid on device $dev", 0 ) if $g{debug};
+                                    do_log( "ERROR SNMP($fork_num): All the smnp answer were parsed, but we not found a match for oid $oid on device $dev", 1 );
                                     @remain_oids = push( @remain_oids, $oid );
                                     ${$path_is_slow} = 2;
                                     $vbarr_counter++;
@@ -1096,24 +1096,24 @@ DEVICE: while (1) {    # We should never leave this loop
                             if (   ( ${$rep_count} ne $previous_rep_count )
                                 or ( ${$nrep_count} ne $previous_nrep_count ) )
                             {
-                                do_log( "DEBUG SNMP($fork_num): Swap oid type repeaters:${previous_rep_count}->${$rep_count} non-repeaters:${previous_nrep_count}->${$nrep_count} for device $dev", 0 ) if $g{debug};
+                                do_log( "DEBUG SNMP($fork_num): Swap oid type repeaters:${previous_rep_count}->${$rep_count} non-repeaters:${previous_nrep_count}->${$nrep_count} for device $dev", 4 ) if $g{debug};
                             } elsif ( ( ${$oid_count} - $oid_found ) == 0 ) {
                                 if ($is_devmon_repeater) {
-                                    do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids of type 'branch' for device $dev", 0 ) if $g{debug};
+                                    do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids of type 'branch' for device $dev", 4 ) if $g{debug};
                                 } else {
-                                    do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids of type 'leaf' or device $dev", 0 ) if $g{debug};
+                                    do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids of type 'leaf' or device $dev", 4 ) if $g{debug};
                                 }
                                 ${$path_is_slow}-- if ${$path_is_slow} != 0;
 
                             } else {
 
                                 # houston we have a problem
-                                do_log("ERROR SNMP($fork_num): Found only $oid_found/${$oid_count} oids for device $dev");
+                                do_log( "ERROR SNMP($fork_num): Found only $oid_found/${$oid_count} oids for device $dev", 1 );
                                 ${$path_is_slow} = 1;
 
                                 ############### do something to recover ##############START
                                 foreach my $oid (@remain_oids) {
-                                    do_log("ERROR SNMP($fork_num): Unable to poll $oid on device $dev");
+                                    do_log( "ERROR SNMP($fork_num): Unable to poll $oid on device $dev", 1 );
                                 }
                                 ############### do something to recover ##############END
                             }
@@ -1151,7 +1151,7 @@ DEVICE: while (1) {    # We should never leave this loop
 
                     if ( $data_out{error} ) {
                         foreach my $error ( keys %{ $data_out{error} } ) {
-                            do_log( "SNMP ERROR: $error", 1 );
+                            do_log( "ERROR SNMP: $error", 1 );
                         }
                     }
                     send_data( $sock, \%data_out );

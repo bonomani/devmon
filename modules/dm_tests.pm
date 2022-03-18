@@ -333,7 +333,7 @@ sub trans_delta {
 
     # Check our parent oids for any errors
     if ( not validate_deps( $device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$' ) ) {
-        do_log( "INFOR TEST: Delta transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "DEBUG TEST: Delta transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -509,7 +509,7 @@ sub trans_math {
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids, '^[-+]?\d+(\.\d+)?$' ) ) {
 
         #if ( not validate_deps($device, $oids, $oid, \@dep_oids ) ) {
-        do_log( "INFOR TEST: Math transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "DEBUG TEST: Math transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -1733,7 +1733,7 @@ sub trans_switch {
                     $then_oid_val = $oids->{$then_oid}{val};
                 }
                 if ( !defined $then_oid_val ) {
-                    do_log( "Missing repeater data for trans_switch on $oid on $device", 0 );
+                    do_log( "Missing repeater data for trans_switch on $oid on $device", 1 );
                     $then_oid_val = 'Undefined';
                     if ( !defined $oid_h->{color}{$leaf} ) {
                         $oid_h->{color}{$leaf} = $oids->{$then_oid}{color};
@@ -1974,7 +1974,7 @@ sub trans_regsub {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids ) ) {
-        do_log( "INFOR TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "DEBUG TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -2362,7 +2362,7 @@ sub trans_index {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, [$src_oid] ) ) {
-        do_log( "INFOR TEST: Index transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "DEBUG TEST: Index transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
         return;
     }
 
@@ -2673,7 +2673,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Make sure we have leaf data for our primary oid
             if ( !defined $oids->{$pri}{val} ) {
-                do_log( "ERROR TEST: Missing repeater data for $pri for $test msg on $device", 0 );
+                do_log( "ERROR TEST: Missing repeater data for $pri for $test msg on $device", 1 );
                 $msg .= "&clear Missing repeater data for primary OID $pri\n";
                 $worst_color = 'clear';
                 next;
@@ -2681,7 +2681,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Make sure our primary OID is a repeater
             if ( !$oids->{$pri}{repeat} ) {
-                do_log( "ERROR TEST: Primary OID $pri in $test table is a non-repeater", 0 );
+                do_log( "ERROR TEST: Primary OID $pri in $test table is a non-repeater", 1 );
                 $msg .= "&yellow primary OID $pri in table is a non-repeater\n";
                 $worst_color = 'yellow';
                 next;
@@ -3996,12 +3996,12 @@ sub validate_deps {
                 }
 
                 # Throw one error message
-                do_log( "ERROR TEST: '$oid_h->{val}{$leaf}' while parsing '$dep_oid' for '$leaf' on $device", 5 )
+                do_log( "DEBUG TEST: '$oid_h->{val}{$leaf}' while parsing '$dep_oid' for '$leaf' on $device", 5 )
                     if $oid_h->{error}{$leaf};
             }
 
             # Throw one error message per leaf, to prevent log bloat
-            do_log( "ERROR TEST: '$oid_h->{val}{$leaf}' while parsing '$leaf' on $device", 4 )
+            do_log( "DEBUG TEST: '$oid_h->{val}{$leaf}' while parsing '$leaf' on $device", 4 )
                 if $oid_h->{error}{$leaf};
 
             # Only return an error value all of the dependent oids leaves failed
@@ -4094,8 +4094,8 @@ sub validate_deps {
             }
 
             # Throw one error message
-            do_log( "ERROR TEST: '$oid_h->{val}' while parsing '$dep_oid' on $device", 4 ) if $oid_h->{error};
-            return 0                                                                       if $oid_h->{error};
+            do_log( "DEBUG TEST: '$oid_h->{val}' while parsing '$dep_oid' on $device", 4 ) if $oid_h->{error};
+            return 0                                                                      if $oid_h->{error};
         }
     }
     $all_error ? return 0 : return 1;
