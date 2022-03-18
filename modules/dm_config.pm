@@ -461,7 +461,7 @@ sub initialize {
 
     # hostonly mode (deprecated by poll)
     if ($hostonly) {
-        do_log("WARNIN CONF: hostonly is deprecated use '-p[oll]' instead");
+        do_log( "WARNI CONF: hostonly is deprecated use '-p[oll]' instead", 2 );
         if ( defined $poll or %match ) {
             usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only");
         } else {
@@ -640,35 +640,35 @@ sub check_snmp_config {
             do_log( "WARNI CONF: Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, trying to fallback to SNMP_Session", 2 );
             eval { require SNMP_Session; };
             if ($@) {
-                log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 0 );
+                log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
             } else {
                 $g{snmpeng} = 'session';
-                do_log( "INFOR CONF: SNMP_Session is installed and provides SNMPv1 SNMPv2c ", 3 );
+                do_log( "INFOR CONF: SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 SNMPv2c ", 3 );
             }
 
         } else {
-            do_log( "INFOR CONF: Net-SNMP is installed and provides SNMPv2c and SNMPv3", 3 );
+            do_log( "INFOR CONF: Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", 3 );
             eval { require SNMP_Session; };
             if ($@) {
                 do_log( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
                 $g{snmpeng} = 'snmp';
             } else {
-                do_log( "INFOR CONF: SNMP_Session is installed and provides SNMPv1", 3 );
+                do_log( "INFOR CONF: SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1", 3 );
             }
         }
     } elsif ( $g{snmpeng} eq 'snmp' ) {
         eval { require SNMP; };
         if ($@) {
-            log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, exiting...", 0 );
+            log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, exiting...", 1 );
         } else {
-            do_log( "INFOR CONF: Net-SNMP is installed and provides SNMPv2c and SNMPv3", 3 );
+            do_log( "INFOR CONF: Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", 3 );
         }
     } elsif ( $g{snmpeng} eq 'session' ) {
         eval { require SNMP_Session; };
         if ($@) {
-            log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 0 );
+            log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
         } else {
-            do_log( "INFOR CONF: SNMP_Session is installed and provides SNMPv1 and SNMPv2c", 3 );
+            do_log( "INFOR CONF: SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 and SNMPv2c", 3 );
         }
     } else {
         do_log( "ERROR CONF: Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...", 1 );
@@ -1314,7 +1314,7 @@ sub open_log {
     return if $g{logfile} =~ /^\s*$/ or $g{foreground};
 
     $g{log} = new IO::File $g{logfile}, 'a'
-        or log_fatal( "ERROR: Unable to open logfile $g{logfile} ($!)", 0 );
+        or log_fatal( "ERROR: Unable to open logfile $g{logfile} ($!)", 1 );
     $g{log}->autoflush(1);
 }
 
@@ -2219,7 +2219,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                                 # Skip if this host doesn't match the regex
                                                 my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                                                 if ( $sysdesc !~ /$regex/ ) {
-                                                    do_log( "INFOR CONF: $host did not match $vendor / $model : $regex", 4 )
+                                                    do_log( "DEBUG CONF: $host did not match $vendor / $model : $regex", 4 )
                                                         if $g{debug};
                                                     next CUSTOMMODEL;
                                                 }
