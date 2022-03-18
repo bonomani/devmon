@@ -530,7 +530,7 @@ sub initialize {
 
     # Debug
     if ( $g{debug} ) {
-        for my $output ( keys %{$g{output}} ) {
+        for my $output ( keys %{ $g{output} } ) {
             my $cmd_line = "devmon -o=$output";
             if ( $g{output}{$output}{stat} ) {
                 $cmd_line .= " -m stat=$output";
