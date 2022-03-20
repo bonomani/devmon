@@ -315,13 +315,13 @@ sub initialize {
             'case'    => 0
         },
         'snmptimeout' => {
-            'default' => 4,       # 2 Seems the very mininum, 4 if you use ilo
+            'default' => 5,       # 2 Seems the very mininum, 4 if you use ilo
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
         },
         'snmptries' => {
-            'default' => 2,
+            'default' => 3,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
