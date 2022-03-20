@@ -830,168 +830,152 @@ DEVICE: while (1) {    # We should never leave this loop
 
                     # do our bulkwalk for non-repeaters and repeaters and send back our data
                     my $snmpbulkwalk_succeeded = 1;
-                    if ( scalar( keys %{ $data_in{nonreps} } ) ) {
-                        $snmpbulkwalk_succeeded = snmp_bulkwalk( \%bulkwalk, \%snmp_persist_storage, 0 );
-                    }
-                    if ( ( scalar( keys %{ $data_in{reps} } ) ) and $snmpbulkwalk_succeeded ) {
-                        $snmpbulkwalk_succeeded = snmp_bulkwalk( \%bulkwalk, \%snmp_persist_storage, 1 );
-                    }
+
+                    #$snmpbulkwalk_succeeded = snmp_bulkwalk( \%bulkwalk, \%snmp_persist_storage, 0 );
+                    $snmpbulkwalk_succeeded = snmp_bulkwalk( \%bulkwalk, \%snmp_persist_storage );
                     send_data( $sock, \%data_out );
 
                     # Our bulkwalk subroutine
                     sub snmp_bulkwalk {
-                        my ( $bulkwalk, $storage, $is_devmon_repeater ) = @_;
+
+                        #my ( $bulkwalk, $storage, $is_devmon_repeater ) = @_;
+                        my ( $bulkwalk, $storage ) = @_;
 
                         #create shortcut
-
                         my $dev      = $bulkwalk->{'dev'};                   # deref{a ref of hash of scalar    }
                         my $fork_num = $bulkwalk->{'fork_num'};              # deref{a ref of hash of scalar    }
                         my $session  = ${ \${ $bulkwalk->{'session'} } };    # deref an object (a ref) from a hash passed be ref to a sub
                         my $data_out = \%{ $bulkwalk->{'data_out'} };        # ref deref{hash of hash__ref }
                         my %oid;
-                        if ($is_devmon_repeater) {
-                            %oid = %{ $bulkwalk->{'reps'} };                 # deref{a ref of hash of array_ref }
-                        } else {
-                            %oid = %{ $bulkwalk->{'nonreps'} };              # deref{a ref of hash of array_ref }
+
+                        my $poll_oid           = \%{ $storage->{$dev}{'poll_oid'} };
+                        my $uniq_rep_poll_oid  = \%{ $storage->{$dev}{'uniq_rep_poll_oid'} };
+                        my $uniq_nrep_poll_oid = \%{ $storage->{$dev}{'uniq_nrep_poll_oid'} };
+                        my $rep_count          = \${ $storage->{$dev}{'rep_count'} };
+                        my $nrep_count         = \${ $storage->{$dev}{'nrep_count'} };
+                        my $oid_count          = \${ $storage->{$dev}{'oid_count'} };
+                        my $path_is_slow       = \${ $storage->{$dev}{'path_is_slow'} };
+
+                        # First we need to build an array containing the oids that need to be polled.
+                        # We have 2 paths: a slow one to discover all the info that we need and the second on: a fast path.
+                        # After the first polling cycle we should take the fast path and if we need to rediscover thing we
+                        # can take the slow path again (TODO)
+
+                        # The slow path:
+                        # First step is to build a uniq array with the non-repeater follow by the repeaters
+                        # To maximize the result and the perf, we have to find if the oid is really
+                        # a repeater or not. Devmon leaf can be both: part of a repeter or a real non repeater
+                        # in the snmp meaninging. As we dont know for each leaf, we will take its parent oid for
+                        # the oid to be polled and consider it as a repeater. The list of all parent OIDs is deduplicated.
+
+                        # For the polling with the SNMP lib, we have to prepare an array of array, with  right order
+                        # Total number of varbinds in the response message is (N + M x R).
+                        # N is the minimum of the value of the Non-Repeaters (a field of the request)
+                        # The number of variable bindings in the request is M
+                        # M is the Max-Repetitions (number of Repeaters, but not exactly) (a field of the request)
+                        # R is the maximum of the number of variable bindings in the request
+
+                        my @varlists;
+                        my @repeaters;
+                        my @non_repeaters;
+                        my @remain_oids;
+                        my $vbarr_counter = 0;
+                        my $oid_found     = 0;
+
+                        foreach my $oid ( keys %{ $bulkwalk->{'reps'} } ) {
+
+                            $oid = "." . $oid;    # add a . as we dont have one and its needed later
+                            if ( ( not defined $poll_oid->{$oid}{oid} ) or ( not exists $uniq_rep_poll_oid->{$oid} ) ) {
+
+                                # Slow path
+                                # As we dont know we suppose the oid that should be polled is the parent oid,
+                                # but we suppose that it can also fail
+                                ${$path_is_slow} = 1;
+                                $poll_oid->{$oid}{oid} = \$oid;
+                                $uniq_rep_poll_oid->{$oid} = undef;
+                            }
                         }
 
-                        my $poll_oid     = \%{ $storage->{$dev}{$is_devmon_repeater}{'poll_oid'} };
-                        my $poll_oids    = \@{ $storage->{$dev}{$is_devmon_repeater}{'poll_oids'} };
-                        my $is_repeater  = \%{ $storage->{$dev}{$is_devmon_repeater}{'is_repeater'} };
-                        my $rep_count    = \${ $storage->{$dev}{$is_devmon_repeater}{'rep_count'} };
-                        my $nrep_count   = \${ $storage->{$dev}{$is_devmon_repeater}{'nrep_count'} };
-                        my $oid_count    = \${ $storage->{$dev}{$is_devmon_repeater}{'oid_count'} };
-                        my $path_is_slow = \${ $storage->{$dev}{$is_devmon_repeater}{'path_is_slow'} };
+                        foreach my $oid ( keys %{ $bulkwalk->{'nonreps'} } ) {
 
-                        my @oids = keys %oid;
-                        if (@oids) {
+                            $oid = "." . $oid;    # add a . as we dont have one and its needed later
+                                                  #test paretin?
+                            if ( ( not defined $poll_oid->{$oid}{oid} ) ) {
 
-                            # First we need to build an array containing the non-repeater
-                            # oids that need to be polled. We have 2 paths: a slow one
-                            # to discover the info that we need to build the second on: the fast path.
-                            # After the first polling cycle we should always take the fast path.
+                                # or (( not exists $uniq_nrep_poll_oid->{$oid} ) and ( not exists $uniq_rep_poll_oid->{$oid}))) {
+                                # Slow path
 
-                            # The slow path:
-                            # First step is to build a hash mapping with the parent oid as it
-                            # maximize the number of answers, but some oids will fail.
-                            # To maximize the result and the perf, we have to find if the oid is really
-                            # a repeater or not. Devmon non-repeater term are not exactly what snmp means
-                            # (i think) some non-repeater cannot be polled as they are a part of a repeater
-                            # We will build a hash that will contains the information (%poll_oid) and
-                            # and another hash that will contains if it is a repeater (%is_repeater)
-                            # In the first polling cycle we take a slow path to
-                            # and initialze all the oid with their parent oid and as repeater
-                            # At the end, we should have the real value created: repeater or not
-                            # and parent or self as poll_oid. Hope the will optimize perf, but is
-                            # seems also to work without that. (you can set path_is_slow below to
-                            # always take the slow path and rediscover everythinig each cycle.
+                                # As we dont know we suppose the oid that should be polled is the parent oid,
+                                # but we suppose that it can also fail
+                                ${$path_is_slow} = 1;
 
-                            # For the polling we have prepare an array of array, with a right order
-                            # Total number of varbinds in the response message is (N + M x R).
-                            # N is the minimum of the value of the Non-Repeaters (a field of the request)
-                            # The number of variable bindings in the request is M
-                            # M is the Max-Repetitions (value of Repeaters, but not exactly) (a field of the request)
-                            # R is the maximum of the number of variable bindings in the request
+                                # We take the parent oid
+                                my $polled_oid = $oid =~ s/\.\d*$//r;
+                                $poll_oid->{$oid}{oid} = \$polled_oid;
+                                $uniq_rep_poll_oid->{$polled_oid} = undef;
 
-                            my @varlists;
-                            my @repeaters;
-                            my @non_repeaters;
-                            my @remain_oids;
-                            my $vbarr_counter = 0;
-                            my $oid_found     = 0;
-                            my $leaf_found    = 0;
+                                #if ( $oid =~ /\.A0$/ ) {    #BUG, SNMP Scalar (end with .0) are leaf and should be counted as non-repeater
+                                #} else {
 
-                            # ${$path_is_slow} = 1;
-
-                            foreach my $oid (@oids) {
-                                $oid = "." . $oid;    # add a . as we dont have one and its needed later
-
-                                if ( not exists $poll_oid->{$oid} ) {
-
-                                    # Slow path
-                                    # As we dont know we suppose the oid that should be polled is the parent oid,
-                                    # but we suppose that it can also fail
-                                    ${$path_is_slow} = 1;
-                                    if ($is_devmon_repeater) {
-                                        $poll_oid->{$oid} = \$oid;
-                                        ${ $is_repeater->{$oid} } = 1;
-                                    } else {
-                                        $poll_oid->{$oid} = \( $oid =~ s/\.\d*$//r );
-                                        if ( $oid =~ /\.0$/ ) {    #BUG74, SNMP Scalar (end with .0) are leaf and should be counted as non-repeater
-                                            ${ $is_repeater->{$oid} } = 0;
-                                        } else {
-                                            ${ $is_repeater->{$oid} } = 1;
-                                        }
-                                    }
-                                }
+                                #}
                             }
+                        }
 
-                            # Now we pass a blow for any situation
-                            # As devmon rep vs non-rep are diffent than snmp
-                            # we have to compute them: we do that in a block
-                            #
-                            {
-                                my %repeater;
-                                my %non_repeater;
+                        # Now we pass a blow for any situation
+                        # As devmon rep vs non-rep are diffent than snmp
+                        # we have to compute them: we do that in a block
+                        my @polled_oids;
+                        {
+                            @repeaters     = oid_sort( keys $uniq_rep_poll_oid );
+                            @non_repeaters = oid_sort( keys $uniq_nrep_poll_oid );
+                            @polled_oids   = ( @non_repeaters, @repeaters );
+                            ${$rep_count}  = scalar @repeaters;
+                            ${$nrep_count} = scalar @non_repeaters;
 
-                                foreach my $oid (@oids) {
-                                    if ( ${ $is_repeater->{$oid} } == 1 ) {
-                                        $repeater{$oid} = undef;
-                                    } else {
-                                        $non_repeater{$oid} = undef;
-                                    }
-                                }
-                                @repeaters     = oid_sort( keys %repeater );
-                                @non_repeaters = oid_sort( keys %non_repeater );
-                                @oids          = ( @non_repeaters, @repeaters );
-                                ${$rep_count}  = scalar @repeaters;
-                                ${$nrep_count} = scalar @non_repeaters;
+                        }
+
+                        @varlists = map [$_], @polled_oids;
+
+                        # The hash function is now populated with the parent oid and the array is prepared for the
+                        # polling, so lets do this polling
+                        my $nrvars = new SNMP::VarList(@varlists);
+                        do_log( "INFOR SNMP($fork_num): Doing bulkwalk", 3 );
+
+                        my @nrresp = $session->bulkwalk( ${$nrep_count}, ${$rep_count} + ${$nrep_count}, $nrvars );
+                        if ( $session->{ErrorNum} ) {
+                            if ( $session->{ErrorNum} == -24 ) {
+                                do_log( "ERROR SNMP($fork_num): Bulkwalk timeout: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 1 );
+                            } else {
+                                do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                             }
-                            @{$poll_oids} = map ${ $poll_oid->{$_} }, @oids;
-                            ${$oid_count} = ${$rep_count} + ${$nrep_count};
+                            return 0;
 
-                            @varlists = map [$_], @{$poll_oids};
+                        } elsif ( ( scalar @nrresp ) == 0 ) {
+                            do_log( "ERROR SNMP($fork_num): Empty answer from device $dev without an error message", 1 );
+                            return 0;
+                        }
 
-                            # The hash function is now populated with the parent oid and the array is prepared for the
-                            # polling, so lets do this polling
-                            my $nrvars = new SNMP::VarList(@varlists);
-                            do_log( "INFOR SNMP($fork_num): Do bulkwalk", 4 ) if $g{debug};
-
-                            my @nrresp = $session->bulkwalk( $$nrep_count, $$oid_count, $nrvars );
-                            if ( $session->{ErrorNum} ) {
-                                if ( $session->{ErrorNum} == -24 ) {
-                                    do_log( "ERROR SNMP($fork_num): Bulkwalk timeout: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 1 );
-                                } else {
-                                    do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
-                                }
-                                return 0;
-
-                            } elsif ( ( scalar @nrresp ) == 0 ) {
-                                do_log( "ERROR SNMP($fork_num): Empty answer from device $dev", 1 );
-                            }
-
-                            # Now that the polling is done we have to process the answers
+                        # Now that the polling is done we have to process the answers
+                        my @oids = ( keys %{ $bulkwalk->{'reps'} }, keys %{ $bulkwalk->{'nonreps'} } );
+                        ${$oid_count} = scalar @oids;
+                    OID: foreach my $oid_wo_dot (@oids) {
+                            my $oid = "." . $oid_wo_dot;
+                            $vbarr_counter = 0;
                         VBARR: foreach my $vbarr (@nrresp) {
 
                                 # Determine which OID this request queried.  This is kept in the VarList
                                 # reference passed to bulkwalk().
-                                # First, detect some errors
-                                if ( $vbarr_counter > ${$oid_count} ) {
-                                    do_log( "DEBUG SNMP($fork_num): Snmplib give extra answer for device $dev", 4 )
-                                        if $g{debug};
-                                    ${$path_is_slow} = 1;
-                                    next;
-                                }
-                                my $oid                 = $oids[$vbarr_counter];
-                                my $polled_oid          = ${ $poll_oid->{$oid} };
+                                my $polled_oid          = ${ $poll_oid->{$oid}{oid} };
                                 my $stripped_oid        = substr $oid,        1;
                                 my $stripped_polled_oid = substr $polled_oid, 1;
                                 my $snmp_poll_oid       = $$nrvars[$vbarr_counter]->tag();
-                                my $polled_oid_len      = ( length $polled_oid ) + 1;
-                                my $leaf_found          = 0;
+
+                                #my $polled_oid_len      = ( length $polled_oid ) + 1;
+                                #my $leaf_found          = 0;
+                                my $leaf_table_found = 0;
 
                                 if ( not defined $snmp_poll_oid ) {
-                                    do_log( "DEBUG SNMP($fork_num): $snmp_poll_oid not defined for device $dev, oid $oid", 4 ) if $g{debug};
+                                    do_log( "WARNI SNMP($fork_num): $snmp_poll_oid not defined for device $dev, oid $oid", 2 );
                                     @remain_oids = push( @remain_oids, $oid );
                                     ${$path_is_slow} = 1;
                                     $vbarr_counter++;
@@ -999,125 +983,87 @@ DEVICE: while (1) {    # We should never leave this loop
                                 }
 
                                 if ( scalar @{ $vbarr // [] } ) {    # test the number of response for 1 oid. BUG#74: Test definedness of vbarr
-
-                                    # Extract the returned list of varbinds using the SNMP::Varbind methods.
                                     foreach my $nrv (@$vbarr) {
                                         my $snmp_oid  = $nrv->name;
                                         my $snmp_val  = $nrv->val;
                                         my $snmp_type = $nrv->type;
 
-                                        #do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
-                                        if ($is_devmon_repeater) {
+                                        #do_log( "_DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
+                                        if ( $snmp_poll_oid eq $oid ) {
+
                                             do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
                                             my $leaf = substr( $snmp_oid, length($oid) + 1 );
-
                                             $data_out->{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
                                             $data_out->{$stripped_oid}{'time'}{$leaf} = time;
-                                            $leaf_found++;
-
+                                            $leaf_table_found++;
                                         } else {
                                             if ( ${path_is_slow} > 0 ) {
-
-                                                # Slow path
-                                                # Test if answer match
                                                 if ( $snmp_oid eq $oid ) {
                                                     do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
                                                     if ( ( scalar @$vbarr ) == 1 ) {
-                                                        if ( ${ $is_repeater->{$oid} } == 0 ) {
-                                                        } else {
-                                                            ${ $is_repeater->{$oid} } = 0;
-                                                            ${ $poll_oid->{$oid} }    = $snmp_poll_oid;
-                                                        }
+                                                        delete( $uniq_rep_poll_oid->{$polled_oid} );
+                                                        $uniq_nrep_poll_oid->{$polled_oid} = undef;
                                                     }
                                                     $data_out->{$stripped_oid}{val}  = $snmp_val;
                                                     $data_out->{$stripped_oid}{time} = time;
-                                                    $vbarr_counter++;
-                                                    $oid_found++;
-                                                    $leaf_found++;
-                                                    next VBARR;
-                                                } else {
-                                                    $leaf_found++;
-                                                }
-                                            } else {
 
-                                                # Fast path
-                                                if ( $snmp_oid eq $oid ) {
-                                                    do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 4 ) if $g{debug};
-                                                    $data_out->{$stripped_oid}{val}  = $snmp_val;
-                                                    $data_out->{$stripped_oid}{time} = time;
-                                                    $vbarr_counter++;
                                                     $oid_found++;
-                                                    $leaf_found++;
-                                                    next VBARR;
+
+                                                    #$leaf_found++;
+                                                    next OID;
                                                 }
                                             }
                                         }
                                     }
+                                    if ( $leaf_table_found > 0 ) {
+                                        $oid_found++;
+                                        next OID;
+                                    }
+
                                 } else {
 
                                     # there is no response (vbarr) or an undefined one #BUG74. TODO: Make it more explicit + Change error to warn if we can handle it properly
                                     do_log( "ERROR SNMP($fork_num): Empty oid $oid on device $dev", 1 );
+
                                 }
-                                if ($is_devmon_repeater) {
-                                    $vbarr_counter++;
-                                    $oid_found++;
+                                $vbarr_counter++;
 
-                                    $data_out->{'maxrep'}{stripped_oid} = $leaf_found;
-
-                                } else {
-                                    do_log( "ERROR SNMP($fork_num): All the smnp answer were parsed, but we not found a match for oid $oid on device $dev", 1 );
-                                    @remain_oids = push( @remain_oids, $oid );
-                                    ${$path_is_slow} = 2;
-                                    $vbarr_counter++;
-                                }
-
-                            }
-
-                            # Ok lets summarize our results
-                            my $previous_rep_count  = ${$rep_count};
-                            my $previous_nrep_count = ${$nrep_count};
-
-                            if ( ${$path_is_slow} > 0 ) {
-                                my %repeater;
-                                my %non_repeater;
-
-                                foreach my $oid (@oids) {
-                                    if ( ${ $is_repeater->{$oid} } == 1 ) {
-                                        $repeater{$oid} = undef;
-                                    } else {
-                                        $non_repeater{$oid} = undef;
-                                    }
-                                }
-                                ${$rep_count}  = scalar( keys %repeater );
-                                ${$nrep_count} = scalar( keys %non_repeater );
-
-                            }
-
-                            if (   ( ${$rep_count} ne $previous_rep_count )
-                                or ( ${$nrep_count} ne $previous_nrep_count ) )
-                            {
-                                do_log( "DEBUG SNMP($fork_num): Swap oid type repeaters:${previous_rep_count}->${$rep_count} non-repeaters:${previous_nrep_count}->${$nrep_count} for device $dev", 4 ) if $g{debug};
-                            } elsif ( ( ${$oid_count} - $oid_found ) == 0 ) {
-                                if ($is_devmon_repeater) {
-                                    do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids of type 'branch' for device $dev", 4 ) if $g{debug};
-                                } else {
-                                    do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids of type 'leaf' or device $dev", 4 ) if $g{debug};
-                                }
-                                ${$path_is_slow}-- if ${$path_is_slow} != 0;
-
-                            } else {
-
-                                # houston we have a problem
-                                do_log( "ERROR SNMP($fork_num): Found only $oid_found/${$oid_count} oids for device $dev", 1 );
-                                ${$path_is_slow} = 1;
-
-                                ############### do something to recover ##############START
-                                foreach my $oid (@remain_oids) {
-                                    do_log( "ERROR SNMP($fork_num): Unable to poll $oid on device $dev", 1 );
-                                }
-                                ############### do something to recover ##############END
                             }
                         }
+
+                        # Ok lets summarize our results
+                        my $previous_rep_count  = ${$rep_count};
+                        my $previous_nrep_count = ${$nrep_count};
+
+                        if ( ${$path_is_slow} > 0 ) {
+
+                            ${$rep_count}  = scalar( keys $uniq_rep_poll_oid );
+                            ${$nrep_count} = scalar( keys $uniq_nrep_poll_oid );
+
+                        }
+
+                        if (   ( ${$rep_count} ne $previous_rep_count )
+                            or ( ${$nrep_count} ne $previous_nrep_count ) )
+                        {
+                            do_log( "INFOR SNMP($fork_num): Swap polled oid type repeaters:${previous_rep_count}->${$rep_count} non-repeaters:${previous_nrep_count}->${$nrep_count} for device $dev", 3 );
+                        }
+                        if ( ( scalar @oids ) == $oid_found ) {
+                            do_log( "DEBUG SNMP($fork_num): Found $oid_found/${$oid_count} oids for device $dev", 4 ) if $g{debug};
+                            ${$path_is_slow}--                                                                        if ${$path_is_slow} != 0;
+
+                        } else {
+
+                            # houston we have a problem
+                            do_log( "ERROR SNMP($fork_num): Found $oid_found/${$oid_count} oids for device $dev", 1 );
+                            ${$path_is_slow} = 1;
+
+                            ############### do something to recover ##############START
+                            foreach my $oid (@remain_oids) {
+                                do_log( "ERROR SNMP($fork_num): Unable to poll $oid on device $dev", 1 );
+                            }
+                            ############### do something to recover ##############END
+                        }
+
                         return 1;
                     }
                 } elsif (0) {    # previous code from S. Coene, we keep it as it is an implementation with getnext
