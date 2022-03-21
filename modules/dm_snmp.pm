@@ -926,8 +926,8 @@ DEVICE: while (1) {    # We should never leave this loop
                         # we have to compute them: we do that in a block
                         my @polled_oids;
                         {
-                            @repeaters     = oid_sort( keys $uniq_rep_poll_oid );
-                            @non_repeaters = oid_sort( keys $uniq_nrep_poll_oid );
+                            @repeaters     = oid_sort( keys %{$uniq_rep_poll_oid} );
+                            @non_repeaters = oid_sort( keys %{$uniq_nrep_poll_oid} );
                             @polled_oids   = ( @non_repeaters, @repeaters );
                             ${$rep_count}  = scalar @repeaters;
                             ${$nrep_count} = scalar @non_repeaters;
@@ -958,14 +958,14 @@ DEVICE: while (1) {    # We should never leave this loop
                         # Now that the polling is done we have to process the answers
                         my @oids = ( keys %{ $bulkwalk->{'reps'} }, keys %{ $bulkwalk->{'nonreps'} } );
                         ${$oid_count} = scalar @oids;
-                    OID: foreach my $oid_wo_dot (@oids) {
+                    OID: foreach my $oid_wo_dot (@oids) {    # INVERSING OID AND VBARR loop should increase perf)
                             my $oid = "." . $oid_wo_dot;
                             $vbarr_counter = 0;
                         VBARR: foreach my $vbarr (@nrresp) {
 
                                 # Determine which OID this request queried.  This is kept in the VarList
                                 # reference passed to bulkwalk().
-                                my $polled_oid          = ${ $poll_oid->{$oid}{oid} };
+                                my $polled_oid          = ${ $poll_oid->{$oid}{oid} };    # Alwayse the same as the SNMP POLLED OID: poid=spoid
                                 my $stripped_oid        = substr $oid,        1;
                                 my $stripped_polled_oid = substr $polled_oid, 1;
                                 my $snmp_poll_oid       = $$nrvars[$vbarr_counter]->tag();
@@ -1037,8 +1037,8 @@ DEVICE: while (1) {    # We should never leave this loop
 
                         if ( ${$path_is_slow} > 0 ) {
 
-                            ${$rep_count}  = scalar( keys $uniq_rep_poll_oid );
-                            ${$nrep_count} = scalar( keys $uniq_nrep_poll_oid );
+                            ${$rep_count}  = scalar( keys %{$uniq_rep_poll_oid} );
+                            ${$nrep_count} = scalar( keys %{$uniq_nrep_poll_oid} );
 
                         }
 
