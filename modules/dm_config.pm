@@ -1892,7 +1892,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         # First query hosts with custom cids
         if ( $custom_cids and $snmpver < 3 ) {
 
-            do_log( "INFOR CONF: $hosts_left new host(s) and $custom_cids custom cid(s) trying using snmp v$snmpver", 3 );
+            do_log( "INFOR CONF: $hosts_left host(s) left and $custom_cids custom cid(s) trying using snmp v$snmpver", 3 );
 
             # Zero out our data in and data out hashes
             %{ $g{snmp_data} } = ();
@@ -1908,7 +1908,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                 # Skip if they don't have a custom cid
                 next if !defined $hosts_cfg{$host}{cid};
-                do_log( "INFOR CONF: Valid new host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", 3 );
+                do_log( "INFOR CONF: Trying valid host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", 3 );
 
                 # Skip if version > 2
                 #next if $snmpver > 2;
@@ -2004,7 +2004,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Don't bother if we don't have any hosts left to query
                 next if $hosts_left < 1;
 
-                do_log( "INFOR CONF: $hosts_left new host(s) left, trying cid:'$cid' and snmp v$snmpver", 3 );
+                do_log( "INFOR CONF: $hosts_left host(s) left, trying cid:'$cid' and snmp v$snmpver", 3 );
 
                 # Zero out our data in and data out hashes
                 %{ $g{snmp_data} } = ();
@@ -2024,7 +2024,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                     # Skip if ip is not defined (name resolution)
                     next if !defined $hosts_cfg{$host}{ip};
 
-                    do_log( "INFOR CONF: Valid new host:$host with cid:'$cid' using snmp v$snmpver", 3 );
+                    do_log( "INFOR CONF: Trying valid host:$host with cid:'$cid' using snmp v$snmpver", 3 );
 
                     %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -2143,7 +2143,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                     # Don't bother if we don't have any hosts left to query
                                     next if $hosts_left < 1;
 
-                                    do_log( "INFOR CONF: $hosts_left new host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 3 );
+                                    do_log( "INFOR CONF: $hosts_left host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 3 );
 
                                     # Zero out our data in and data out hashes
                                     %{ $g{snmp_data} } = ();
@@ -2159,7 +2159,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                         # Skip if ip is not defined (name resolution)
                                         next if !defined $hosts_cfg{$host}{ip};
 
-                                        do_log( "INFOR CONF: Valid new host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 3 );
+                                        do_log( "INFOR CONF: Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 3 );
 
                                         %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 

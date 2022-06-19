@@ -3,7 +3,7 @@ cpmCPUTotal5minRev              : yellow        : >30                           
 cpmCPUTotal5minRev              : green         :                               :
 
 UpTime                          : red           : <600                          : <b>{UpTimeTxt}, device rebooted recently</b>
-UpTime                          : yellow        : <5000                         : <b>{UpTimeTxt}, device rebooted recently</b>
+UpTime                          : yellow        : <7200                         : <b>{UpTimeTxt}, device rebooted recently</b>
 UpTime                          : green         :                               : <b>{UpTimeTxt}</b>
 
 UpTimeModState                  : yellow        : =0                            : <b>Not OK</b>, diff(snmp;system)={UpTimeMod}[sec] is not in range [-5..300] [sec]
@@ -11,15 +11,15 @@ UpTimeModState                  : green         : >=1                           
 UpTimeModStateNoAlarm           : yellow        :                               : 
 UpTimeModStateNoAlarm           : green         :                               :
 
-sysBootReason                   : yellow        : PowerOn,power-on              : <b>Not OK</b>
+sysBootReason                   : yellow        : power-on                      : <b>Ambiguous</b>
 sysBootReason                   : yellow        :                               : <b>Critical</b>, but lower alarm level to warning
 sysBootReason                   : green         :                               : <b>OK</b>
 sysBootReason                   : blue          :                               : <b>Disabled</b> by timer
 
-sysReloadReasonClone            : red           :                               : <b>{sysReloadReasonClone}</b> is <b>critical</b> and must be investigated
-#sysReloadReason                 : yellow        : PowerOn                       : <b>{sysReloadReasonClone}</b> is <b>ambiguous</b>: a deliberate reboot or power outage ?
-sysReloadReasonClone            : yellow        : PowerOn, power-on             : <b>{sysReloadReasonClone}</b> is <b>not OK</b> and generally means a power outage
-sysReloadReasonClone            : green         : Reload Command, reload        : <b>{sysReloadReasonClone}</b> is <b>OK</b> as it is a deliberate action
+sysReloadReasonClone            : red           :                               : <b>{sysReloadReason}</b> is <b>critical</b> and must be investigated
+sysReloadReasonClone            : yellow        : power-on                       : <b>{sysReloadReason}</b> is <b>ambiguous</b>: a deliberate reboot or power outage ?
+#sysReloadReasonClone            : yellow        : power-on                       : <b>{sysReloadReason}</b> is <b>not OK</b> and generally means a power outage
+sysReloadReasonClone            : green         : Reload Command                : <b>{sysReloadReason}</b> is <b>OK</b> as it is a deliberate action
 
 sysBootReasonDelayTimerEnable   : red           : >0                            : <b>Not expired</b> yet, remaining: {sysBootReasonDelayTimerTxt} / timeout: {sysBootReasonDelayTxt}
 sysBootReasonDelayTimerEnable   : blue          : <=0                           : <b>Expired</b>, timeout: {sysBootReasonDelayTxt}

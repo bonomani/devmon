@@ -3,7 +3,7 @@ cpmCPUTotal5minRev              : yellow        : >30                           
 cpmCPUTotal5minRev              : green         :                               :
 
 UpTime                          : red           : <600                          : <b>{UpTimeTxt}, device rebooted recently</b>
-UpTime                          : yellow        : <5000                         : <b>{UpTimeTxt}, device rebooted recently</b>
+UpTime                          : yellow        : <7200                         : <b>{UpTimeTxt}, device rebooted recently</b>
 UpTime                          : green         :                               : <b>{UpTimeTxt}</b>
 
 UpTimeModState                  : yellow        : =0                            : <b>Not OK</b>, diff(snmp;system)={UpTimeMod}[sec] is not in range [-5..300] [sec]
