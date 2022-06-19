@@ -1,0 +1,21 @@
+Drive Array Health: {cpqDaMibConditionTxt.color}{cpqDaMibConditionTxt}
+
+Controller status:
+TABLE: noalarmsmsg
+ID|Model|Firmware Rev|Condition|Status
+{cntrlIndex}|{cntrlModTxt}|{cntrlFwRev}|{cntrlCondTxt.color}{cntrlCondTxt}|{cntrlStatTxt.color}{cntrlStatTxt}
+
+Logical drive status:
+TABLE: noalarmsmsg
+ID|Controller|Fault Tolerance|Size|Physical IDs|Spare IDs|Status
+{logDrvIndex}|{logDrvCntIndex}|{logFaultTolTxt}|{logDrvSize}[MB]|{logPhysIdTxt}&nbsp;|{logSprIdTxt}&nbsp;|{logStatTxt.color}{logStatTxt}
+
+Physical drive status:
+TABLE: noalarmsmsg
+ID|Controller|Bay|Model|Firmware Rev|Speed|Size|Serial|Status
+{phyDrvIndex}|{phyDrvCntIndex}|{phyDrvBay}|{phyDrvModel}|{phyDrvFwRev}|{phyDrvSpdTxt}|{phyDrvSize}[MB]|{phyDrvSerial}|{phyStatTxt.color}{phyStatTxt}
+
+#Spare drive status:
+#TABLE: noalarmsmsg
+#Physical Drive ID|Controller|Status
+#{sprDrvIndex}|{sprDrvCntIndex}|{sprStatTxt.color}{sprStatTxt}

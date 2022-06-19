@@ -1,0 +1,16 @@
+cpqDaMibConditionTxt : SWITCH        : {cpqDaMibCondition} 1=Other,2=OK,3=Degraded,4=Failed
+
+cntrlModTxt     : SWITCH        : {cntrlModel} 1=Other,2=IDA,3=IDA Expansion,4=IDA-2,5=SMART,6=SMART-2/E,7=SMART-2/P,8=SMART-2SL,9=Smart 3100ES,10=Smart 3200,11=SMART-2DH,12=Smart Array 221,13=Smart Array 4250ES,14=Smart Array 4200,15=Integrated Smart Array,16=Smart Array 431,17=Smart Array 5300,18=RAID LC2,19=Smart Array 5i,20=Smary Array 532,21=Smart Array 5312,22=Smart Array 641,23=Smart Array 642,24=Smart Array 6400,25=Smart Array 6400EM,26=Smart Array 6i,27=Generic Smart Array,29=Smart Array P600,30=Smart Array P400,31=Smart Array E200,32=Smart Array E200i,33=Smart Array P400i,34=Smart Array P800,35=Smart Array E500,36=Smart Array P700m,37=Smart Array P212,38=Smart Array P410,39=Smart Array P410i,40=Smart Array P411,41=Smart Array B110i SATA RAID,42=Smart Array P712m,43=Smart Array P711m,44=Smart Array P812,45=StorageWorks 1210m,46=Smart Array P220i ,47=Smart Array P222 ,48=Smart Array P420,49=Smart Array P420i,50=Smart Array P421,51=Smart Array B320i,52=Smart Array P822,53=Smart Array P721m,54=Smart Array B120i,55=HP Storage p1224 ,56=HP Storage p1228,57=HP Storage p1228m,58=Smart Array P822se,59=HP Storage p1224e,60=HP Storage p1228e,61=HP Storage p1228em,62=Smart Array P230i,63=Smart Array P430i,64=Smart Array P430,65=Smart Array P431,66=Smart Array P731m,67=Smart Array P830i,68=Smart Array P830,69=Smart Array P831,70=Smart Array P530 ,71=Smart Array P531 ,72=Smart Array P244br,73=Smart Array P246br,74=Smart Array P440,75=Smart Array P440ar,76=Smart Array P441 ,77=Smart Array P741m,78=Smart Array P840 ,79=Smart Array P841,80=Smart HBA H240ar,81=Smart HBA H244br ,82=Smart HBA H240,83=Smart HBA H241,84=Smart Array B140i ,85=Generic HBA ,86=Smart Array P240nr ,87=Smart HBA H240nr,88=Smart Array P840ar,89=Smart Array P542D,90=Smart Array S100i ,91=Smart Array E208i-p,92=Smart Array E208i-a,93=Smart Array E208i-c,94=Smart Array E208e-p,95=Smart Array P204i-b,96=Smart Array P204i-c,97=Smart Array P408i-p,98=Smart Array P408i-a,99=Smart Array P408e-p,100=Smart Array P408i-c,101=Smart Array P408e-m,102=Smart Array P416ie-m ,103=Smart Array P816i-a,104=Smart Array P408i-sb,default=Unknown({cntrlModel})
+cntrlCondTxt    : SWITCH        : {cntrlCondition} 1=Other,2=OK,3=Degraded,4=Failed
+cntrlStatTxt    : SWITCH        : {cntrlStatus} 1=Other,2=OK,3=General failure,4=Cable problem,5=Powered off
+
+
+logFaultTolTxt  : SWITCH        : {logDrvFaultTol} 0=Other,2=None,3=Raid 1,4=Raid 4,5=Raid 5,6=Raid 6,7=Raid 6,8=Raid 50,9=Raid 60,10=Raid 1 ADM, 11=Raid 10 ADM,12=Raid 10
+logStatTxt      : SWITCH        : {logDrvStatus} 2=OK,3=Failed,4=Unconfigured,5=Recovering,6=Read rebuild,7=Rebuilding,8=Wrong drive,9=Bad connect,10=Overheating,11=Shutdown,12=Expanding,13=Not available,14=Queued for expansion
+logSprIdTxt     : UNPACK        : {logDrvSprIds} C* ","
+logPhysIdTxt    : UNPACK        : {logDrvPhysIds} C* ","
+
+phyStatTxt      : SWITCH        : {phyDrvStatus} 1=Other,2=OK,3=Failed,4=Predictive Failure,5=Erasing,6=Erase Done,7=Erase Queued,8=SSD Wear Out,9=Not Authenticated
+phyDrvSpdTxt    : SWITCH        : {phyDrvSpeed} 1=Other,2=7200 rpm,3=10k rpm,4=15k rpm
+
+sprStatTxt      : SWITCH        : {sprDrvStatus} 3=Failed,4=Inactive,5=Building,6=Active

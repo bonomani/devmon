@@ -1,6 +1,9 @@
 This template was created by Bonomani.
+Tested with hp ilo v5
 
-Adjust xymon hosts.cfg
+1. Enable snmp v1 (even if you use snmpv2) or use snmpv3 (not tested)
+
+2. Adjust xymon hosts.cfg
 192.168.1.10 ilo # DEVMON:except(fans;cpqHeFltTolFanIdxTxt;na:Fan#1$|Fan#2$)
 
 NOTE: This does not imply any support responsibilities, liabiltiy in
