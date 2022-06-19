@@ -13,7 +13,7 @@ UpTime                       : MATH            : {UpTimeClone}
 UpTimeTxt                    : ELAPSED         : {UpTimeClone}
 CPUIndex                     : SORT            : {cpmCPUTotal5minRev}
 
-# Create a clone (so we avoid error propagation on sysReloadReason)
+# Create a clone (no threshold apply on clone)
 sysReloadReasonClone         : REGSUB          : {sysReloadReason} /^(.*)$/$1/
 
 # Boot Alarm automatically disable after 1 week or 604800s
@@ -21,7 +21,7 @@ sysBootReasonDelay           : MATH            : 604800
 sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
 sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {UpTimeClone}
 sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
-sysBootReasonDelayTimerEnable: SWITCH          : {sysReloadReason} 'Reload_Commmand'=disable,default={sysBootReasonDelayTimer}
+sysBootReasonDelayTimerEnable: SWITCH          : {sysReloadReason} 'Reload_Commmand'=disable,'reload'=disable, default={sysBootReasonDelayTimer}
 sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {sysReloadReasonClone}
 
 # Create a duplicate oid to be able to override the message alarm
