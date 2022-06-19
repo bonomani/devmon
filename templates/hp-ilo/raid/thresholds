@@ -1,0 +1,21 @@
+cpqDaMibConditionTxt : red : Other|Degraded|Failed
+cntrlCondTxt    : green         : OK
+cntrlCondTxt    : yellow        : Other|Degraded
+cntrlCondTxt    : red           : Failed
+
+cntrlStatTxt    : green         : OK
+cntrlStatTxt    : yellow        : Other
+cntrlStatTxt    : red           : General failure|Cable problem|Powered off
+
+logStatTxt      : green         : OK|Expanding|Queued for expansion
+logStatTxt      : yellow        : Unconfigured|Recovering|Read rebuild|Rebuilding|Not available
+logStatTxt      : red           : Failed|Wrong drive|Bad connect|Overheating|Shutdown
+
+phyStatTxt      : green         : OK
+phyStatTxt      : yellow        : Other
+phyStatTxt      : red           : Failed|Predictive Failure
+
+#sprStatTxt      : green         : Inactive
+#sprStatTxt      : yellow        : Building|Active
+#sprStatTxt      : red           : Failed
+
