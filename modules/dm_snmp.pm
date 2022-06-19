@@ -790,7 +790,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpvars{Timeout}       = $data_in{timeout} * 1000000;
                 $snmpvars{Retries}       = $data_in{snmptries} - 1;
                 $snmpvars{UseNumeric}    = 1;
-                $snmpvars{NonIncreasing} = 1;
+                $snmpvars{NonIncreasing} = 0;
                 $snmpvars{Version}       = $snmp_ver;
 
                 # We store the security name for v3 also in cid so we keep the same data format
@@ -804,7 +804,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpvars{PrivPass}  = $data_in{privpass}  if defined $data_in{privpass};
 
                 # Establish SNMP session
-
+#$SNMP::debugging = 2;
                 my $session = new SNMP::Session(%snmpvars);
                 my @nonreps = ();
                 if ($session) {
@@ -902,22 +902,21 @@ DEVICE: while (1) {    # We should never leave this loop
                                                   #test paretin?
                             if ( ( not defined $poll_oid->{$oid}{oid} ) ) {
 
-                                # or (( not exists $uniq_nrep_poll_oid->{$oid} ) and ( not exists $uniq_rep_poll_oid->{$oid}))) {
-                                # Slow path
-
-                                # As we dont know we suppose the oid that should be polled is the parent oid,
-                                # but we suppose that it can also fail
                                 ${$path_is_slow} = 1;
+                                # if a leaf does end with .0 it is a real scalar so we count is as a non-repeater
+                                # but if not it is branch so with take it parent oid for polling and cout is as a repeater
 
+
+                                if ( $oid =~ /\.0$/ ) {    # is an SNMP Scalar (end with .0) are real non-repeater
+                                    my $polled_oid = $oid =~ s/\.\d*$//r;
+                                    $poll_oid->{$oid}{oid} = \$polled_oid;
+                                    $uniq_nrep_poll_oid->{$polled_oid} = undef;
+                                } else {
                                 # We take the parent oid
-                                my $polled_oid = $oid =~ s/\.\d*$//r;
-                                $poll_oid->{$oid}{oid} = \$polled_oid;
-                                $uniq_rep_poll_oid->{$polled_oid} = undef;
-
-                                #if ( $oid =~ /\.A0$/ ) {    #BUG, SNMP Scalar (end with .0) are leaf and should be counted as non-repeater
-                                #} else {
-
-                                #}
+                                    my $polled_oid = $oid =~ s/\.\d*$//r;
+                                    $poll_oid->{$oid}{oid} = \$polled_oid;
+                                    $uniq_rep_poll_oid->{$polled_oid} = undef;
+                                }
                             }
                         }
 
@@ -941,10 +940,17 @@ DEVICE: while (1) {    # We should never leave this loop
                         my $nrvars = new SNMP::VarList(@varlists);
                         do_log( "INFOR SNMP($fork_num): Doing bulkwalk", 3 );
 
-                        my @nrresp = $session->bulkwalk( ${$nrep_count}, ${$rep_count} + ${$nrep_count}, $nrvars );
+                        #my @nrresp = $session->bulkwalk( ${$nrep_count}, ${$rep_count} + ${$nrep_count}, $nrvars );
+                        my @nrresp = $session->bulkwalk( ${$nrep_count} , ${$rep_count} , $nrvars );
+
                         if ( $session->{ErrorNum} ) {
                             if ( $session->{ErrorNum} == -24 ) {
                                 do_log( "ERROR SNMP($fork_num): Bulkwalk timeout: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 1 );
+                                # case1: no answe but alive and should answer
+                                # 
+                            } elsif ( $session->{ErrorNum} == -58 ) {
+                                do_log( "ERROR SNMP($fork_num): End of mib during bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 ); 
+                                # 
                             } else {
                                 do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                             }
