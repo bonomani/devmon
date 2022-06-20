@@ -804,7 +804,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpvars{PrivPass}  = $data_in{privpass}  if defined $data_in{privpass};
 
                 # Establish SNMP session
-#$SNMP::debugging = 2;
+                #$SNMP::debugging = 2;
                 my $session = new SNMP::Session(%snmpvars);
                 my @nonreps = ();
                 if ($session) {
@@ -903,16 +903,17 @@ DEVICE: while (1) {    # We should never leave this loop
                             if ( ( not defined $poll_oid->{$oid}{oid} ) ) {
 
                                 ${$path_is_slow} = 1;
+
                                 # if a leaf does end with .0 it is a real scalar so we count is as a non-repeater
                                 # but if not it is branch so with take it parent oid for polling and cout is as a repeater
-
 
                                 if ( $oid =~ /\.0$/ ) {    # is an SNMP Scalar (end with .0) are real non-repeater
                                     my $polled_oid = $oid =~ s/\.\d*$//r;
                                     $poll_oid->{$oid}{oid} = \$polled_oid;
                                     $uniq_nrep_poll_oid->{$polled_oid} = undef;
                                 } else {
-                                # We take the parent oid
+
+                                    # We take the parent oid
                                     my $polled_oid = $oid =~ s/\.\d*$//r;
                                     $poll_oid->{$oid}{oid} = \$polled_oid;
                                     $uniq_rep_poll_oid->{$polled_oid} = undef;
@@ -941,16 +942,17 @@ DEVICE: while (1) {    # We should never leave this loop
                         do_log( "INFOR SNMP($fork_num): Doing bulkwalk", 3 );
 
                         #my @nrresp = $session->bulkwalk( ${$nrep_count}, ${$rep_count} + ${$nrep_count}, $nrvars );
-                        my @nrresp = $session->bulkwalk( ${$nrep_count} , ${$rep_count} , $nrvars );
+                        my @nrresp = $session->bulkwalk( ${$nrep_count}, ${$rep_count}, $nrvars );
 
                         if ( $session->{ErrorNum} ) {
                             if ( $session->{ErrorNum} == -24 ) {
                                 do_log( "ERROR SNMP($fork_num): Bulkwalk timeout: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 1 );
+
                                 # case1: no answe but alive and should answer
-                                # 
+                                #
                             } elsif ( $session->{ErrorNum} == -58 ) {
-                                do_log( "ERROR SNMP($fork_num): End of mib during bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 ); 
-                                # 
+                                do_log( "ERROR SNMP($fork_num): End of mib during bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
+                                #
                             } else {
                                 do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                             }
