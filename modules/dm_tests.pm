@@ -2502,13 +2502,13 @@ sub render_msg {
 
     # No message template?
     if ( !defined $msg_template ) {
-        return "status $hostname.$test clear $now" . "\n\nCould not locate template for this device.\n" . "Please check devmon logs.\n\n" . "Devmon version $g{version} running on $g{nodename}\n";
+        return "status $hostname.$test clear $now\n\nCould not locate template for this device.\nPlease check devmon logs.\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
 
         # Do we have a xymon color, and if so, is it green?
     } elsif ( defined $g{xymon_color}{$device}
         and $g{xymon_color}{$device} ne 'green' )
     {
-        return "status $hostname.$test clear $now" . "\n\nXymon reports this device is unreachable.\n" . "Suspending this test until reachability is restored\n\n" . "Devmon version $g{version} running on $g{nodename}\n";
+        return "status $hostname.$test clear $now\n\nXymon reports this device is unreachable.\nSuspending this test until reachability is restored\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
     }
 
     # Our outbound message
@@ -3123,7 +3123,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
     $msg = "status $hostname.$test $worst_color $now" . "$extrastatus\n\n$msg";
 
     # Add our oh-so-stylish devmon footer
-    $msg .= "\n\nDevmon version $g{version} " . "running on $g{nodename}\n";
+    $msg .= "\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> " . "running on $g{nodename}\n";
 
     # Now add a bit of logic to allow a 'cleartime' window, where a test on
     # a device can be clear for an interval without being reported as such
