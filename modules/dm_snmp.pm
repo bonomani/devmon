@@ -804,7 +804,52 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpvars{PrivPass}  = $data_in{privpass}  if defined $data_in{privpass};
 
                 # Establish SNMP session
-                #$SNMP::debugging = 2;
+                #                $SNMP::debugging = 2;
+                #
+                # Net-SNMP BUG https://github.com/net-snmp/net-snmp/issues/133 (Unable to switch AuthProto/PrivProto in same Perl process)
+                # Confirmed in v5.0702 from > 5.05.60? to 5.09? )
+                # Affect SNNPv3 only
+                # - Perl object session not clear: should be cleared when going out of the scope the object is created
+                # - Credential not updated if already exist: shoule be update if those credential changes
+                # This workaround can be completely remove it if would worked...
+                # This workaround affect only the discovery process (as the credential try to be discovered)
+
+                if ( not defined $data_in{reps} ) {
+                    if ( ( keys $data_in{nonreps} ) == 1 ) {
+                        if ( $snmp_ver == 3 ) {
+                            if ( ( keys $data_in{nonreps} )[0] eq "1.3.6.1.2.1.1.1.0" ) {
+                                my $Community = $snmpvars{Community} // '';
+                                my $SecName   = $snmpvars{SecName}   // '';
+                                my $SecLevel  = $snmpvars{SecLevel}  // '';
+                                my $AuthProto = $snmpvars{AuthProto} // '';
+                                my $AuthPass  = $snmpvars{AuthPass}  // '';
+                                my $PrivProto = $snmpvars{PrivProto} // '';
+                                my $PrivPass  = $snmpvars{PrivPass}  // '';
+
+                                my $snmp_disco = <<EOF;
+perl -e '
+use SNMP;
+my \$sess = new SNMP::Session(Device => "$snmpvars{Device}", RemotePort => "$snmpvars{RemotePort}", DestHost => "$snmpvars{DestHost}", Timeout => "$snmpvars{Timeout}", Retries => "$snmpvars{Retries}", UseNumeric => "$snmpvars{UseNumeric}", NonIncreasing => "$snmpvars{NonIncreasing}", Version => "$snmpvars{Version}", Community => "$Community", SecName => "$SecName", SecLevel => "$SecLevel", AuthProto => "$AuthProto", AuthPass => "$AuthPass", PrivProto => "$PrivProto", PrivPass => "$PrivPass");
+print \$sess->get(".1.3.6.1.2.1.1.1.0");
+'
+EOF
+                                my $disco_result = `$snmp_disco`;
+                                if ( $disco_result eq '' ) {
+                                    my $error_str = "Empty or no answer from $data_in{dev}";
+                                    $data_out{error}{$error_str} = 1;
+                                    send_data( $sock, \%data_out );
+                                    next DEVICE;
+                                } else {
+                                    $data_out{'1.3.6.1.2.1.1.1.0'}{'val'}  = $disco_result;
+                                    $data_out{'1.3.6.1.2.1.1.1.0'}{'time'} = time;
+                                    send_data( $sock, \%data_out );
+                                    next DEVICE;
+                                }
+                            }
+                        }
+                    }
+                }    # end of the workaround
+
                 my $session = new SNMP::Session(%snmpvars);
                 my @nonreps = ();
                 if ($session) {
@@ -951,8 +996,9 @@ DEVICE: while (1) {    # We should never leave this loop
                                 # case1: no answe but alive and should answer
                                 #
                             } elsif ( $session->{ErrorNum} == -58 ) {
-                                do_log( "ERROR SNMP($fork_num): End of mib during bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
-                                #
+                                do_log( "ERROR SNMP($fork_num): End of mib on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
+                            } elsif ( $session->{ErrorNum} == -35 ) {
+                                do_log( "ERROR SNMP($fork_num): Auth Failure on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                             } else {
                                 do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                             }
