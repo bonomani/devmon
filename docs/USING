@@ -58,6 +58,7 @@ MONITORING HOSTS WITH DEVMON
 
     tests()   : Specifies that Devmon should only run certain tests
                 against this device
+    notests() : Same as above, but the negative form of it
 
     thresh()  : Overrides the default thresholds for a single OID
                 on a single test.
@@ -155,6 +156,9 @@ MONITORING HOSTS WITH DEVMON
       This will cause Devmon to only run the cpu and if_err tests for
       this host.
 
+        DEVMON:notests(fans)
+
+      This will cause Devmon to run all tests but the fans for this host.
 
 
     thresh()

@@ -66,6 +66,7 @@ the bb-hosts tag.  They are:</p>
 
     tests()   : Specifies that Devmon should only run certain tests
                 against this device
+    notests() : Same as above, but the negative form of it
 
     thresh()  : Overrides the default thresholds for a single OID
                 on a single test.
@@ -144,7 +145,7 @@ example, and unnecessary whitespace in the other two.</p>
 </pre>
 
 <a name='testsexm'></a>
-    <b>tests()</b>
+    <b>tests() or notest()</b>
 <pre>
       If you only want to run a certain subset of the tests provided 
       by a devices templates, you can use the tests tag like so:
@@ -153,6 +154,9 @@ example, and unnecessary whitespace in the other two.</p>
 
       This will cause Devmon to only run the cpu and if_err tests for
       this host.
+      
+        DEVMON:notests(fans)
+      This will cause Devmon to run all tests but the fans for this host.
 
 </pre>
 
