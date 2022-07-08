@@ -13,4 +13,4 @@ logPhysIdTxt    : UNPACK        : {logDrvPhysIds} C* ","
 phyStatTxt      : SWITCH        : {phyDrvStatus} 1=Other,2=OK,3=Failed,4=Predictive Failure,5=Erasing,6=Erase Done,7=Erase Queued,8=SSD Wear Out,9=Not Authenticated
 phyDrvSpdTxt    : SWITCH        : {phyDrvSpeed} 1=Other,2=7200 rpm,3=10k rpm,4=15k rpm
 
-sprStatTxt      : SWITCH        : {sprDrvStatus} 3=Failed,4=Inactive,5=Building,6=Active
+#sprStatTxt      : SWITCH        : {sprDrvStatus} 3=Failed,4=Inactive,5=Building,6=Active
