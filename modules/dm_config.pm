@@ -1703,14 +1703,19 @@ FILEREAD: do {
                     }
 
                     # Default to all tests if they aren't defined
-                    my $tests = $1 if $options =~ s/(?:,|^)tests\((\S+?)\)//;
-                    $tests = 'all' if !defined $tests;
-
+                    if ( $options =~ s/(?:,|^)tests\((\S+?)\)// ) {
+                        $hosts_cfg{$host}{tests} = $1;
+                    } elsif ( $options =~ s/(?:,|^)notests\((\S+?)\)// ) {
+                        $hosts_cfg{$host}{tests} = '!' . $1;
+                    } else {
+                        $hosts_cfg{$host}{tests} = 'all';
+                    }
                     do_log( "Unknown devmon option ($options) on line $. of $hostscfg", 1 ) and next
                         if $options ne '';
 
-                    $hosts_cfg{$host}{ip}    = $ip;
-                    $hosts_cfg{$host}{tests} = $tests;
+                    $hosts_cfg{$host}{ip} = $ip;
+
+                    #$hosts_cfg{$host}{tests} = $tests;
 
                     # Incremement our host counter, used to tell if we should bother
                     # trying to query for new hosts...
