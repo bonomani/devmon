@@ -1819,9 +1819,11 @@ FILEREAD: do {
     # Now go through our resulting snmp-data
 OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-        $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-        do_log( "DEBUG CONF: $host sysdesc = $sysdesc ", 4 ) if $g{debug};
-        next OLDHOST                                         if $sysdesc eq 'UNDEFINED';
+        if ( not defined $sysdesc ) {
+            $sysdesc = 'UNDEFINED';
+            do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+            next OLDHOST;
+        }
 
         # add vendor/models override with the model() option
         if ( defined $hosts_cfg{$host}{vendor} ) {
@@ -1937,9 +1939,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
             # Now go through our resulting snmp-data
         NEWHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-                $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-                do_log( "DEBUG CONF: $host sysdesc = $sysdesc ", 4 ) if $g{debug};
-                next NEWHOST                                         if $sysdesc eq 'UNDEFINED';
+                if ( not defined $sysdesc ) {
+                    $sysdesc = 'UNDEFINED';
+                    do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+                    next NEWHOST;
+                }
 
                 # Catch vendor/models override with the model() option
                 if ( defined $hosts_cfg{$host}{vendor} ) {
@@ -2050,9 +2054,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Now go through our resulting snmp-data
             CUSTOMHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                     my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-                    $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-                    do_log( "DEBUG CONF: $host sysdesc = $sysdesc ", 4 ) if $g{debug};
-                    next CUSTOMHOST                                      if $sysdesc eq 'UNDEFINED';
+                    if ( not defined $sysdesc ) {
+                        $sysdesc = 'UNDEFINED';
+                        do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+                        next CUSTOMHOST;
+                    }
 
                     # Catch vendor/models override with the model() option
                     if ( defined $hosts_cfg{$host}{vendor} ) {
@@ -2191,9 +2197,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                     # Now go through our resulting snmp-data
                                 CUSTOMHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                         my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
-                                        $sysdesc = 'UNDEFINED' if !defined $sysdesc;
-                                        do_log( "$host sysdesc = $sysdesc ", 4 ) if $g{debug};
-                                        next CUSTOMHOST                          if $sysdesc eq 'UNDEFINED';
+                                        if ( not defined $sysdesc ) {
+                                            $sysdesc = 'UNDEFINED';
+                                            do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+                                            next CUSTOMHOST;
+                                        }
 
                                         # Catch vendor/models override with the model() option
                                         if ( defined $hosts_cfg{$host}{vendor} ) {
