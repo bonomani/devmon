@@ -815,9 +815,9 @@ DEVICE: while (1) {    # We should never leave this loop
                 # This workaround affect only the discovery process (as the credential try to be discovered)
 
                 if ( not defined $data_in{reps} ) {
-                    if ( ( keys $data_in{nonreps} ) == 1 ) {
+                    if ( ( keys %{$data_in{nonreps}} ) == 1 ) {
                         if ( $snmp_ver == 3 ) {
-                            if ( ( keys $data_in{nonreps} )[0] eq "1.3.6.1.2.1.1.1.0" ) {
+                            if ( ( keys %{$data_in{nonreps}} )[0] eq "1.3.6.1.2.1.1.1.0" ) {
                                 my $Community = $snmpvars{Community} // '';
                                 my $SecName   = $snmpvars{SecName}   // '';
                                 my $SecLevel  = $snmpvars{SecLevel}  // '';
