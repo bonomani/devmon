@@ -1,4 +1,4 @@
-severity = 1
+.Mseverity =
 [ControlStructures::ProhobitPostfixControls]
 allow = if
 
