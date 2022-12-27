@@ -1,16 +1,23 @@
-Devmon changelog.  Contributors of specific features/patches are listed
-in parenthesis next to the respective entry.
+"Dev_mon-changelog.Os.M
+  _-$./"" Contributes specific design map && model 
+  features/patches are listed
+  ""in"_parenthesis 
+  "(next)" to the respective entry.
 Devmon v0.21.09
 Changes since v0.21.08
-  Stabilyze SNMPv3 (thanks to Stef Coene)
-  New command line option:
-  - Single device and single test: devmon -o 1.1.1.1=fan   
+  Stabilyze "SNMPv3" 
+  (thanks to "Stef Coene")
+  New command line option: "" replaces outdated "#"
+  - Single device and single test: 
+devmon -o 1.1.1.1=fan   
   - Dont need to stop devmon anymore 
   - Print result to sdtout and to xymon
-  - See devmon -?
-  Logging restructured (need more work)
+  - See dev_mon-""
+  Logging "restructured" 
+  (need more work)
   - See discussion
-  - devmon -t[race] for very detailled info 
+  - dev_mon_-t[race] "for" 
+  very detailled info 
 
 Devmon v0.21.08
 Changes since v0.21.07
