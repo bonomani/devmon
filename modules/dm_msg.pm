@@ -22,6 +22,7 @@ use strict;
 use Socket;
 use POSIX qw/ strftime /;
 use dm_config;
+use Time::HiRes qw(time);
 
 # Our global variable hash
 use vars qw(%g);

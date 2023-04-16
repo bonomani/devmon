@@ -12,3 +12,5 @@ doesn't work for me on newer hpasm versions). Use this test on servers which
 don't have any hot spares available in the SmartArry configuration.
 
 $Id: README 104 2008-12-08 22:04:34Z buchanmilne $
+
+better sysdesc at 1.3.6.1.4.1.232.1.2.1.4.2.1.2.1

@@ -22,7 +22,7 @@
   </tr>
 </tbody>
 </table>
-{sysDescr}
+System Description: {sysDescr}
 
 TABLE:rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
 CPU|Load

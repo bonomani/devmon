@@ -1,4 +1,4 @@
 TABLE:
-Fan location|Fan state
-{FanDescr}|{FanStatus.color}{FanStatus}
+FanIdx|Fan Name|Fan state
+{FanIndex}|{FanDesc}|{FanStatus.color}{FanStatus}{FanStatus.errors}
 #{FanDescr}

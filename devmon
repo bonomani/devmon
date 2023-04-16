@@ -22,13 +22,19 @@ use dm_templates;
 use dm_snmp;
 use dm_tests;
 use dm_msg;
+use Data::Dumper;
 
 # Do start-up housekeeping
 initialize($VERSION);
 
 # Enter main loop
 do_log( "INFOR MAIN: Entering poll loop", 3 );
+use vars qw(%g);
+*g = \%dm_config::g;
+
 while (1) {
+    ++$g{current_cycle};
+    do_log( "DEBUG MAIN: Current cycle: " . $g{current_cycle}, 1 );
 
     # Read in template data
     read_templates();
@@ -44,7 +50,6 @@ while (1) {
 
     # Now send messages
     send_msgs();
-
-    # Do time tests and then sleep
     time_test();
+
 }

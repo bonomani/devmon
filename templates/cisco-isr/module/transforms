@@ -19,3 +19,4 @@ entRelPosAndIndexCollec                    : COLTRE : {entPhysicalContainedIn} {
 entRelPosCollec                            : REGSUB : {entRelPosAndIndexCollec} /\(\s*\w+\s*\)//g
 entRelPosCollecOrder                       : REGSUB : {entRelPosAndIndexCollec} /^(.+)$/$1.     {entPhysicalClassTxt}/
 moduleSorted                               : SORT   : {entRelPosCollecOrder}
+cefcModuleIndex                            : INDEX  : {cefcModuleAdminStatus}

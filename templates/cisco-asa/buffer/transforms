@@ -1,0 +1,8 @@
+buff_block_value_idx     : INDEX  : {buff_block_value}
+buff_block_val_max_idx   : MATCH  : {buff_block_value_idx} /\.3/
+buff_block_val_low_idx   : MATCH  : {buff_block_value_idx} /\.5/
+buff_block_val_cur_idx   : MATCH  : {buff_block_value_idx} /\.8/
+buff_block_size          : REGSUB : {buff_block_val_cur_idx} /(\d)\..*/$1/
+buff_block_val_max       : CHAIN  : {buff_block_val_max_idx} {buff_block_value}
+buff_block_val_low       : CHAIN  : {buff_block_val_low_idx} {buff_block_value}
+buff_block_val_cur       : CHAIN  : {buff_block_val_cur_idx} {buff_block_value}
