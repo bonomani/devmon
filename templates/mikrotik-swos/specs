@@ -1,0 +1,4 @@
+vendor	: Microtik
+model	: CSS610-8G-2S
+snmpver	: 2
+sysdesc : SwOS

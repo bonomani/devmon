@@ -1,0 +1,22 @@
+ifDescr                 : .1.3.6.1.2.1.2.2.1.2          : branch
+#ifName                 : .1.3.6.1.2.1.31.1.1.1.1       : branch
+ifAlias                 : .1.3.6.1.2.1.31.1.1.1.18      : branch
+
+ifInDiscards            : .1.3.6.1.2.1.2.2.1.13         : branch
+ifOutDiscards           : .1.3.6.1.2.1.2.2.1.19         : branch
+
+ifHCInUcastPkts         : .1.3.6.1.2.1.31.1.1.1.7       : branch
+ifHCInMulticastPkts     : .1.3.6.1.2.1.31.1.1.1.8       : branch
+ifHCInBroadcastPkts     : .1.3.6.1.2.1.31.1.1.1.9       : branch
+ifHCOutUcastPkts        : .1.3.6.1.2.1.31.1.1.1.11      : branch
+ifHCOutMulticastPkts    : .1.3.6.1.2.1.31.1.1.1.12      : branch
+ifHCOutBroadcastPkts    : .1.3.6.1.2.1.31.1.1.1.13      : branch
+
+#ifInUcastPkts           : .1.3.6.1.2.1.2.2.1.11          : branch
+#ifInMulticastPkts       : .1.3.6.1.2.1.31.1.1.1.2        : branch
+#ifInBroadcastPkts       : .1.3.6.1.2.1.31.1.1.1.3        : branch
+#ifOutUcastPkts          : .1.3.6.1.2.1.2.2.1.17          : branch
+#ifOutMulticastPkts      : .1.3.6.1.2.1.31.1.1.1.4        : branch
+#ifOutBroadcastPkts      : .1.3.6.1.2.1.31.1.1.1.5        : branch
+ifOperStatNum           : .1.3.6.1.2.1.2.2.1.8          : branch
+

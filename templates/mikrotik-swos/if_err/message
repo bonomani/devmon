@@ -1,0 +1,9 @@
+<b>Errors:</b>
+Rates are per second, averaged over a 60 second interval
+Traffic percentages(%) are based on error/packet ratio
+Input alarm thresholds (traffic%):  yellow={ifInErrTraf.thresh:yellow}%, red={ifInErrTraf.thresh:red}% 
+Output alarm thresholds (traffic%): yellow={ifOutErrTraf.thresh:yellow}%, red={ifOutErrTraf.thresh:red}% 
+TABLE:rrd(DS:ds0:ifInErrors:COUNTER; DS:ds1:ifOutErrors:COUNTER)
+Ifc name|Errors in|Rate in (Ratio%)|Errors out|Rate out (Ratio%)
+{ifPri}{ifAliasBox}|{ifInErrors}|{ifInErrTrafTxt.color}{ifInErrPps} ({ifInErrTrafTxt}){ifInErrTrafTxt.errors}|{ifOutErrors}|{ifOutErrTrafTxt.color}{ifOutErrPps} ({ifOutErrTrafTxt}){ifOutErrTrafTxt.errors}
+#{ifPri}{ifAliasBox}|{ifInPkts} {ifInPps}|{ifOutPkts} {ifOutPps}|{ifInErrors} {ifInErrPps}|{ifOutErrors} {ifOutErrPps}
