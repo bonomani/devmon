@@ -14,9 +14,6 @@ User=xymon
 Group=xymon
 RuntimeDirectory=devmon
 # Change the devmon filder according to you settings !
-ExecStartPre=/var/xymon/server/ext/devmon/devmon --readbbhosts
 ExecStart=/var/xymon/server/ext/devmon/devmon
 ExecReload=/var/xymon/server/ext/devmon/devmon --readbbhosts
 Type=forking
-# timeout as ExecStartPre can take some time if some devices are unreachable
-TimeoutSec=900
