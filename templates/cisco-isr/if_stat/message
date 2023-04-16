@@ -9,4 +9,4 @@ Alarming on:  DEVMON:except(if_stat;ifPri;na:.*INT1$|.*INT2$)
 
 TABLE: noalarmsmsg
 Ifc name|Admin / Oper
-{ifPri}{ifAliasBox}|{ifStatStat.color}{ifAdminOperStat}{ifStatStat.errors}
+{ifPriStat}{ifAliasBox}|{ifStatStat.color}{ifAdminOperStat}{ifStatStat.errors}

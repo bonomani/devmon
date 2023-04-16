@@ -32,6 +32,7 @@ use IO::File;
 use FindBin;
 use Getopt::Long;
 use Sys::Hostname;
+use Time::HiRes qw(time);
 
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;    # Sort the keys in the output
@@ -56,6 +57,7 @@ sub initialize {
         'verbose'       => 2,
         'debug'         => 0,
         'oneshot'       => undef,
+        'current_cycle' => 0,
         'output'        => undef,
         'shutting_down' => 0,
         'active'        => '',
@@ -114,9 +116,10 @@ sub initialize {
 
         # Now our global data subhashes
         'templates'    => {},
-        'dev_data'     => {},
+        'devices'      => {},
         'dev_hist'     => {},
         'tmp_hist'     => {},
+        'hist'         => {},
         'clear_data'   => {},
         'snmp_data'    => {},
         'fails'        => {},
@@ -724,12 +727,24 @@ sub sync_servers {
 
     # If we are multinode='no', just load our tests and return
     if ( $g{multinode} ne 'yes' ) {
-        %{ $g{dev_data} } = read_hosts();
 
-        # test if there are some hosts
-        if ( not %{ $g{dev_data} } ) {
+        my %devices = read_hosts();
+        if (%devices) {
+            for my $device ( keys %devices ) {
+                for my $device_h_key ( keys $devices{$device} ) {
+                    $g{devices}{$device}{$device_h_key} = $devices{$device}{$device_h_key};
+                }
+            }
+        } else {
             usage("Cannot find any machting host in local db '$g{dbfile}'");
         }
+
+        #%{ $g{devices} } = read_hosts();
+
+        # test if there are some hosts
+        #if ( not %{ $g{devices} } ) {
+        #    usage("Cannot find any machting host in local db '$g{dbfile}'");
+        #}
         return;
     }
 
@@ -757,7 +772,7 @@ sub sync_servers {
     # We need an init by default, but if anybody has any tests, set to 0
     $need_init = 1;
 
-    %{ $g{dev_data} } = ();
+    %{ $g{devices} } = ();
 
     # Assume we have 0 tests to begin with
     $my_num_tests = 0;
@@ -808,10 +823,10 @@ sub sync_servers {
         # If this test is ours, claim it!
         if ( $owner == $g{my_nodenum} ) {
             $my_num_tests += $dev_tests;
-            $g{dev_data}{$device} = $device_hash{$device};
-            %{ $g{dev_data}{$device}{thresh} } = %{ $custom_threshs{$device} }
+            $g{devices}{$device} = $device_hash{$device};
+            %{ $g{devices}{$device}{thresh} } = %{ $custom_threshs{$device} }
                 if defined $custom_threshs{$device};
-            %{ $g{dev_data}{$device}{except} } = %{ $custom_excepts{$device} }
+            %{ $g{devices}{$device}{except} } = %{ $custom_excepts{$device} }
                 if defined $custom_excepts{$device};
         }
 
@@ -890,10 +905,10 @@ sub sync_servers {
 
                     # Now stick the pertinent data in our variables
                     $my_num_tests += $test_count{$device};
-                    $g{dev_data}{$device} = $device_hash{$device};
-                    %{ $g{dev_data}{$device}{thresh} } = %{ $custom_threshs{$device} }
+                    $g{devices}{$device} = $device_hash{$device};
+                    %{ $g{devices}{$device}{thresh} } = %{ $custom_threshs{$device} }
                         if defined $custom_threshs{$device};
-                    %{ $g{dev_data}{$device}{except} } = %{ $custom_excepts{$device} }
+                    %{ $g{devices}{$device}{except} } = %{ $custom_excepts{$device} }
                         if defined $custom_excepts{$device};
                 }
 
@@ -923,10 +938,10 @@ sub sync_servers {
                     my $old_owner = $device_hash{$device}{owner};
 
                     # Add data to our hashes
-                    $g{dev_data}{$device} = $device_hash{$device};
-                    %{ $g{dev_data}{$device}{thresh} } = %{ $custom_threshs{$device} }
+                    $g{devices}{$device} = $device_hash{$device};
+                    %{ $g{devices}{$device}{thresh} } = %{ $custom_threshs{$device} }
                         if defined $custom_threshs{$device};
-                    %{ $g{dev_data}{$device}{except} } = %{ $custom_excepts{$device} }
+                    %{ $g{devices}{$device}{except} } = %{ $custom_excepts{$device} }
                         if defined $custom_excepts{$device};
 
                     # Log where this device came from
@@ -973,7 +988,7 @@ sub sync_servers {
         }
 
         # Now go through the devices and assign any I can
-        for my $device ( keys %{ $g{dev_data} } ) {
+        for my $device ( keys %{ $g{devices} } ) {
 
             # Make sure this test isn't too big
             next if $test_count{$device} > $biggest_test_needed
@@ -1004,14 +1019,14 @@ sub sync_servers {
             #        }
 
             # Now delete the test from our hash
-            delete $g{dev_data}{$device};
+            delete $g{devices}{$device};
         }
     }
 
     # Record some statistics
     $g{numtests}     = $my_num_tests;
     $g{avgtestsnode} = $avg_tests_node;
-    $g{numdevs}      = scalar keys %{ $g{dev_data} };
+    $g{numdevs}      = scalar keys %{ $g{devices} };
 }
 
 # Sub to update node status & configuration

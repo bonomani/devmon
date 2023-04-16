@@ -1,6 +1,10 @@
-FanRowIndex         : MATCH  : {entPhysicalName} /.*RPM.*/
-FanDescrRaw         : CHAIN  : {FanRowIndex} {entPhysicalName}
-FanDescr            : REGSUB : {FanDescrRaw} /RPM: (\S+)/$1/
-FanStatusRaw        : CHAIN  : {FanRowIndex} {entSensorStatus}
+FanPri              : MATCH  : {entPhysicalName} /.*RPM.*/
+#FanPriIndex         : INDEX  : {FanPri}
+FanIndex            : INDEX  : {FanPri}
+FanDescRaw          : CHAIN  : {FanPri} {entPhysicalName}
+FanDesc             : REGSUB : {FanDescRaw} /RPM: (fan\d+\s\S+)$/$1/
+
+
+FanStatusRaw        : CHAIN  : {FanPri} {entSensorStatus}
 FanStatus           : SWITCH : {FanStatusRaw} 1=OK,2=unavailable,3=nonoperational
 

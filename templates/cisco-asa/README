@@ -1,4 +1,8 @@
 This template was created by Lacroix Francois.
+And updated by Bruno Manzoni
+
+Depends on you config you will have to add in your xymon pseudo hosts file to exclude some interface from the monitoring:
+x.x.x.x fw # DEVMON:except(if_stat;ifPri;na:.*Internal-Data1/2$)
 
 NOTE: This does not imply any support responsibilities, liabiltiy in
 case of this template or devmon causing phsyical, monetary or emotional

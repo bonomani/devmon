@@ -1,39 +1,4 @@
 <b>Free memory buffers:</b>
-<table border='1' width='100%' cellpadding='5'>
-	<tr>
-		<th>Value</th><th>Description</th>
-	</tr>
-	<tr>
-		<td>{buff_block_0v} </td><td> {buff_block_0}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_4v} </td><td> {buff_block_4}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_80v} </td><td> {buff_block_80}</td>
-	</tr>
-		<td>{buff_block_256v} </td><td> {buff_block_256}</td>
-	</tr>	
-	<tr>
-		<td>{buff_block_1550v} </td><td> {buff_block_1550}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_2048v} </td><td> {buff_block_2048}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_2560v} </td><td> {buff_block_2560}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_4096v} </td><td> {buff_block_4096}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_8192v} </td><td> {buff_block_8192}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_16384v} </td><td> {buff_block_16384}</td>
-	</tr>
-	<tr>
-		<td>{buff_block_65536v} </td><td> {buff_block_65536}</td>
-	</tr>
-</table>
-
+TABLE: noalarmsmsg
+Buffer byte block|Current available|Max available|Lowest available
+{buff_block_size}|{buff_block_val_cur}|{buff_block_val_max}|{buff_block_val_low}

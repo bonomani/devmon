@@ -1,8 +1,8 @@
 TABLE:
 PSU
-{PsuDescr}
+{PsuDescr}{PsuDescr.errors}
 
 TABLE:
 Pwr|State
-{PwrDescr}|{PwrStatus.color}{PwrStatus}
+{PwrDescr}|{PwrStatus.color}{PwrStatus}{PwrStatus.errors}
 
