@@ -1,2 +1,0 @@
-#ifName : ignore : Stack.+|Nu.+
-ifPri : ignore : ^\S*NVI.+|^\S*aal5.+

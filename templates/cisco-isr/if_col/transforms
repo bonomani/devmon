@@ -15,16 +15,6 @@ ifOutColPct	: MATH		: ({ifOutCps} / {ifOutCPps}) x 100
 
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox     	: REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-
 ifDS     	: SWITCH	: {dot3StatsDuplexStatus} 1=?,2=Half,3=Full
-
-#ifIndex         : INDEX         : {ifDescr}
 ifIndexCol      : INDEX         : {ifOutCollisions}
-#ifDescrCol      : CHAIN         : {ifIndexCol} {ifDescr}
 ifPriCol        : REGSUB        : {ifIndexCol} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescrCol}/e
-
-ifIndexDS       : INDEX         : {ifDS}
-#ifDescrDS       : CHAIN         : {ifIndexDS} {ifDescr}
-ifPriDS         : REGSUB        : {ifIndexDS} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
-#ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
-ifPriCol        : REGSUB        : {ifIndexCol} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
