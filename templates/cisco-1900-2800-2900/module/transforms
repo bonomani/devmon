@@ -1,7 +1,15 @@
 entPhysicalIsFRUTxt	                   : SWITCH : {entPhysicalIsFRU}      1=True,2=False
 cefcModuleAdminStatusTxt                   : SWITCH : {cefcModuleAdminStatus} 1=Enable,2=Disable,3=Reset,4=Out of service admin
-cefcModuleOperStatusTxt                    : SWITCH : {cefcModuleOperStatus}  1=Unknown,2=OK,3=Disabled,4=OK but diag failed,5=Boot,6=Self test,7=Failed,8=Missing,9=Mismatch with parent,10=Mismatch config,11=Diag failed,12=Dormant,13=Out of service admin,14=Out of service env temp,15=Powered down,16=Powered up,17=Power denied,18=Power cycled,19=OK but power over warning,20=OK but power over critical,21=Sync in progress,22=Upgrading,23=OK but auth failed
-cefcModuleResetReasonTxt                   : SWITCH : {cefcModuleResetReason} 1=Unknown,2=Power up,3=Parity error,4=Clear config reset,5=Manual reset,6=Watch dog timeout reset,7=Resource overflow reset,8=Missing task reset,9=Low voltage reset,10=Controller reset,11=System reset,12=Switchover reset,13=Upgrade reset,14=Downgrade reset,15=Cache error reset,16=Device driver reset,17=Software exception reset,18=Restore config reset,19=Abort rev reset,20=Burn boot reset,21=Standby cd healthier reset,22=Non native config clear reset,23=Memory protection error reset
+cefcModuleOperStatusTxt                    : SWITCH : {cefcModuleOperStatus}  1=Unknown,2=OK,3=Disabled,4=OK but diag failed,5=Boot,6=Self test,7=Failed,\
+                                                                              8=Missing,9=Mismatch with parent,10=Mismatch config,11=Diag failed,12=Dormant,\
+                                                                              13=Out of service admin,14=Out of service env temp,15=Powered down,16=Powered up,\
+                                                                              17=Power denied,18=Power cycled,19=OK but power over warning,20=OK but power over critical,\
+                                                                              21=Sync in progress,22=Upgrading,23=OK but auth failed
+cefcModuleResetReasonTxt                   : SWITCH : {cefcModuleResetReason} 1=Unknown,3=Parity error,4=Clear config reset,5=Manual reset,6=Watch dog timeout reset,\
+                                                                              7=Resource overflow reset,8=Missing task reset,9=Low voltage reset,10=Controller reset,\
+                                                                              11=System reset,12=Switchover reset,13=Upgrade reset,14=Downgrade reset,15=Cache error reset,\
+                                                                              16=Device driver reset,17=Software exception reset,18=Restore config reset,19=Abort rev reset,\
+                                                                              20=Burn boot reset,21=Standby cd healthier reset,22=Non native config clear reset,23=Memory protection error reset,2=Power up
 entPhysicalClassTxt                        : SWITCH : {entPhysicalClass} 1=Other,2=Unknown,3=Chassis,4=Backplane,5=Container,6=Power Supply,7=Fan,8=Sensor,9=Module,10=Port,11=Stack,12=CPU
 
 entPhysicalIndex                           : INDEX  : {entPhysicalParentRelPos}
@@ -11,3 +19,4 @@ entRelPosAndIndexCollec                    : COLTRE : {entPhysicalContainedIn} {
 entRelPosCollec                            : REGSUB : {entRelPosAndIndexCollec} /\(\s*\w+\s*\)//g
 entRelPosCollecOrder                       : REGSUB : {entRelPosAndIndexCollec} /^(.+)$/$1.     {entPhysicalClassTxt}/
 moduleSorted                               : SORT   : {entRelPosCollecOrder}
+cefcModuleIndex                            : INDEX  : {cefcModuleAdminStatus}
