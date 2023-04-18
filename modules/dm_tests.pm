@@ -21,7 +21,7 @@ require Exporter;
 # Modules
 use strict;
 use dm_config;
-use Math::BigInt::Calc;
+#use Math::BigInt::Calc;
 use POSIX qw/ strftime /;
 use Scalar::Util qw(looks_like_number);
 use Data::Dumper;
@@ -445,7 +445,8 @@ sub trans_delta {
 
                     # Otherwise do normal delta calc
                 } else {
-                    $delta = ( $this_data - $last_data ) / ( $this_time - $last_time );
+                    use bignum;
+                    $delta = ($this_data - $last_data) / ($this_time - $last_time);
                 }
 
                 # Round delta to two decimal places
