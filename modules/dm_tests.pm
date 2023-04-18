@@ -119,31 +119,33 @@ sub tests {
                     my $oid_h = \%{ $oids->{$oid} };
                     if ( $oid_h->{repeat} and ( defined $oid_h->{val} and %{ $oid_h->{val} } ) ) {
                         my $line;
-                    LEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
-                            $line .= "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
+                    LEAF: for my $leaf ( sort keys %{ $oid_h->{val} } ) {
+                            #$line .= "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
                             if ( $g{trace} ) {
+                                $line = "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
                                 $line .= " c:$oid_h->{color}{$leaf}" if defined $oid_h->{color}{$leaf};
                                 $line .= " e:$oid_h->{error}{$leaf}" if defined $oid_h->{error}{$leaf};
                                 $line .= " m:$oid_h->{msg}{$leaf}"   if defined $oid_h->{msg}{$leaf};
                                 $line .= " t:$oid_h->{time}{$leaf}"  if defined $oid_h->{time}{$leaf};
                                 do_log( "TRACE TEST: $line", 5 );
-                                $line = '';
                             } else {
-                                $line .= ' ';
+                                $line .=  "$leaf:".( $oid_h->{val}{$leaf} // "undef" )." ";
                             }
+                        }
+                        if ( not $g{trace} ) {
+                           do_log( "DEBUG TEST: $line", 4 );
                         }
                     } else {
                         my $line;
-
-                        $line = "v:" . ( $oid_h->{val} // "undef" );
-
                         if ( $g{trace} ) {
+                            $line = "v:" . ( $oid_h->{val} // "undef" );
                             $line .= " c:$oid_h->{color}" if defined $oid_h->{color};
                             $line .= " e:$oid_h->{error}" if defined $oid_h->{error};
                             $line .= " m:$oid_h->{msg}"   if defined $oid_h->{msg};
                             $line .= " t:$oid_h->{time}"  if defined $oid_h->{time};
                             do_log( "TRACE TEST: $line", 5 );
                         } else {
+                            $line = ( $oid_h->{val} // "undef" );
                             do_log( "DEBUG TEST: $line", 4 );
                         }
                     }
@@ -604,9 +606,6 @@ sub trans_math {
     if ( $oid_h->{repeat} ) {
         my @dep_val;
 
-        # Map our oids in the expression to a position on the temp 'dep_val' array
-        # Sure, we could just do a regsub for every dep_oid on every leaf, but
-        # thats pretty expensive CPU-wise
         for ( my $i = 0; $i <= $#repeaters; $i++ ) {
             $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
         }
@@ -1010,9 +1009,6 @@ sub trans_eval {
     # Handle repeater-type oids
     if ( $oid_h->{repeat} ) {
 
-        # Map our oids in the expression to a position on the temp 'dep_val' array
-        # Sure, we could just do a regsub for every dep_oid on every leaf, but
-        # thats pretty expensive CPU-wise
         for ( my $i = 0; $i <= $#repeaters; $i++ ) {
             $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
         }
@@ -1937,8 +1933,6 @@ sub trans_chain {
         my $trg_val = $trg_h->{val}{$sub_oid};
         if ( !defined $trg_val ) {
             $oid_h->{val} = undef;
-
-            #   $oid_h->{val}   = $trg_oid . ' ' . $oid_h->{val} if $g{debug};
             $oid_h->{time}  = time;
             $oid_h->{color} = defined $trg_h->{color}         ? $trg_h->{color}         : "clear";
             $oid_h->{msg}   = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "Parent value n/a";
@@ -2600,7 +2594,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Now go through all oid vals, using the primary's leaves
             if ( !@table_leaves ) {
-                @table_leaves = ('#');    # introduce the fake oid "#" to have at lease 1 row
+                @table_leaves = ('#');    # add a fake oid "#" to have at lease 1 row
             }
 
         T_LEAF: for my $leaf (@table_leaves) {
@@ -2635,7 +2629,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     my $val;
                     my $color;
                     if ( $leaf eq '#' ) {
-                        $val   = 'Undef';
+                        $val   = 'NoOID';
                         $color = $oid_h->{color} if defined $oid_h->{color};
                     } elsif ( $oid_h->{repeat} ) {
                         $val = $oid_h->{val}{$leaf} if defined $oid_h->{val}{$leaf};
@@ -2643,15 +2637,12 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             $color = "";    # there is an error
                         } elsif ( $oid_h->{color} eq "red" or $oid_h->{color} eq "yellow" or $oid_h->{color} eq "green" or $oid_h->{color} eq "clear" or $oid_h->{color} eq "blue" ) {
                             $color = $oid_h->{color};
-
-                            #} elsif ( $oid_h->{color}{$leaf} eq "red" or $oid_h->{color}{$leaf} eq "yellow" or $oid_h->{color}{$leaf} eq "green" or $oid_h->{color}{$leaf} eq "clear" or $oid_h->{color}{$leaf} eq "blue" ) {
                         } elsif ( defined $oid_h->{color}{$leaf} ) {
                             $color = $oid_h->{color}{$leaf};
                         } else {
                             $color = "blue";
                         }
 
-                        #$color = ref $oid_h->{color} eq ref {} ? $oid_h->{color}{$leaf} : $oid_h->{color};
                     } else {
                         $val   = $oid_h->{val}   if defined $oid_h->{val};
                         $color = $oid_h->{color} if defined $oid_h->{color};
@@ -2659,6 +2650,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                     if ( !defined $val ) {
                         do_log( "INFOR TEST: Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", 3 ) if $g{trace};
+                        $val = 'NoOID';
 
                         #next T_LEAF;
 
@@ -2710,10 +2702,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     # Display a Xymon color string (i.e. "&red ")
                     if ( defined $flag ) {
 
-                        #my $oid_msg = $oid_h->{msg}{$leaf};
-                        #$oid_msg = 'Undefined' if !defined $oid_msg;
-                        #$oid_msg = parse_deps($oids, $oid_msg, $leaf);
-
                         my $oid_msg;
                         if ( $leaf eq '#' ) {
                             $oid_msg = parse_deps( $oids, $oid_h->{msg}, $leaf ) if defined $oid_h->{msg};
@@ -2732,7 +2720,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # but verify first that this test should compute the worst color
                             if ( ( defined $oid_msg ) and ( not $no_global_wcolor{$oid} ) and ( $oid_msg ne '' ) ) {
 
-                                #if ( (not $no_global_wcolor{$oid}) and ($oid_msg ne '') ) {
                                 $worst_color = $color
                                     if !defined $worst_color
                                     or $colors{$worst_color} < $colors{$color};
@@ -2760,8 +2747,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                                 # Get oid msg and replace any inline oid dependencies
                             } else {
 
-                                #my $oid_msg = $oid_h->{msg}{$leaf};
-                                #$oid_msg = 'Undefined' if !defined $oid_msg;
                                 $oid_msg = parse_deps( $oids, $oid_msg, $leaf );
 
                                 # If the message is an empty string it means that we dont want to raise an error
@@ -2772,7 +2757,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                                         or $colors{$worst_color} < $colors{$color};
 
                                     # Now add it to our msg
-                                    #$errors .= "&$color $oid_msg\n";
                                     my $error_key = "&$color $oid_msg";
                                     $errors{$error_key} = undef;
                                 }
@@ -2809,9 +2793,10 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Otherwise just display the oid val
                     } else {
-                        my $substr = $oids->{$root}{repeat} ? $oids->{$root}{val}{$leaf} : $oids->{$root}{val};
-                        $substr = 'Undef' if !defined $substr;
-                        $row_data =~ s/\{$root\}/$substr/;
+                        #my $substr = $oids->{$root}{repeat} ? $oids->{$root}{val}{$leaf} : $oids->{$root}{val};
+                        #$substr = 'Undef' if !defined $substr;
+                        #$row_data =~ s/\{$root\}/$substr/;
+                        $row_data =~ s/\{$root\}/$val/;   
                     }
 
                 }
@@ -3045,7 +3030,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
     # > * If there is, this overrides the calculation here.
     # Simply comment the 2 following lines to revert this workaround
 
-    #my $rrdmsg  = $1 if $msg =~ s/(<!--DEVMON.*-->)//s;
     if ( $msg =~ s/(<!--DEVMON.*-->)//s ) {
         $msg .= $1;
     }
@@ -3647,7 +3631,7 @@ sub validate_deps {
             } else {
 
                 #Throw one error message per leaf, to prevent log bloat
-                do_log( "DEBUG TEST: '$oid_h->{val}{$leaf}' while parsing for '$leaf' on '$device'", 4 );
+                do_log( "DEBUG TEST: 'No valid dep for leaf '$leaf' on '$device'", 4 );
             }
         }
 
