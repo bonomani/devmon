@@ -151,7 +151,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{devices} } ) {
         $snmp_input{$device}{port}       = $g{devices}{$device}{port};
         $snmp_input{$device}{privpass}   = $g{devices}{$device}{privpass};
         $snmp_input{$device}{privproto}  = $g{devices}{$device}{privproto};
-        $snmp_input{$device}{reps}       = $g{devices}{$device}{reps};
+        #$snmp_input{$device}{reps}       = $g{devices}{$device}{reps};
         $snmp_input{$device}{resolution} = $g{devices}{$device}{resolution};
         $snmp_input{$device}{seclevel}   = $g{devices}{$device}{seclevel};
         $snmp_input{$device}{secname}    = $g{devices}{$device}{secname};
