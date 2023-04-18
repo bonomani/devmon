@@ -755,6 +755,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         my ( $leaf, $value ) = @_;
                         $value                       = pretty_print($value);
                         $data_out{$oid}{val}{$leaf}  = $value;
+                        do_log("DEBUG SNMP($fork_num): oid:$oid leaf:$leaf val:$value; " ,4);
                         $data_out{$oid}{time}{$leaf} = time;
                     },
                     $max_reps
