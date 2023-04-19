@@ -2,7 +2,7 @@ ifAdminStatTxt	  : SWITCH        : {ifAdminStatNum} 1=up,2=down,3=testing
 ifOperStatTxt	  : SWITCH        : {ifOperStatNum} 1=up,2=down,3=testing,4=unknown,5=dormant,6=not present,7=lower layer down
 ifAdminOperStat	  : REGSUB        : {ifAdminStatTxt} /(.*)/$1 \/ {ifOperStatTxt}/
 ifStatSwitchAlias : SWITCH        : {ifAlias} "^(CDP|PO|LLDP|MONI|Internal)"=on, ".*"=off
-ifStatSwitchAuto  : SWITCH        : {ifDescr} "Ethernet|^Management"=off, ".*"=on
+ifStatSwitchAuto  : SWITCH        : {ifDescr} "Ethernet|Data|^Management"=off, ".*"=on
 ifStatSwitch      : SWITCH        : {ifStatSwitchAlias} 'on'=on,".*"={ifStatSwitchAuto}
 
 ifStatAlarmingOn  : SWITCH        : {ifDescr} ".*"={ifDescr}
@@ -11,5 +11,5 @@ ifStatSta1        : WORST         : {ifStatSwitch} , {ifStatAlarmingOn}
 ifStatStat        : BEST          : {ifStatSta1} , {ifAdminOperStat}
 
 ifAliasBox        : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-ifIndex           : INDEX         : {ifDescr}
-ifPri             : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
+ifIndexStat       : INDEX         : {ifAdminStatNum}
+ifPriStat         : REGSUB        : {ifIndexStat} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
