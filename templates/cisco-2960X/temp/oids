@@ -1,0 +1,11 @@
+#ciscoEnvMonTemperatureStatusDescr	: 1.3.6.1.4.1.9.9.13.1.3.1.2   	: branch
+#ciscoEnvMonTemperatureStatusValue	: 1.3.6.1.4.1.9.9.13.1.3.1.3   	: branch
+#ciscoEnvMonTemperatureThresholdHigh 	: 1.3.6.1.4.1.9.9.13.1.3.1.4    : branch
+#ciscoEnvMonTemperatureStateRaw		: 1.3.6.1.4.1.9.9.13.1.3.1.6 	: branch
+entPhysicalName             : .1.3.6.1.2.1.47.1.1.1.1.7     : branch
+entSensorValue              : .1.3.6.1.4.1.9.9.91.1.1.1.1.4 : branch
+entSensorStatus             : .1.3.6.1.4.1.9.9.91.1.1.1.1.5 : branch
+entSensorThresholdRelation  : .1.3.6.1.4.1.9.9.91.1.2.1.1.3 : branch
+entSensorThresholdValue     : .1.3.6.1.4.1.9.9.91.1.2.1.1.4 : branch
+
+entPhysicalContainedIn	: .1.3.6.1.2.1.47.1.1.1.1.4	: branch
