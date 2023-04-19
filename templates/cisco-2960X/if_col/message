@@ -1,0 +1,9 @@
+<b>Collisions:</b>
+Rates are per second
+Traffic percentages are based on an collision/(collision+ouput packet) ratio
+Output alarm thresholds (traffic%): yellow={ifOutColPct.thresh:yellow}%, red={ifOutColPct.thresh:red}%
+TABLE:rrd(DS:ds0:ifOutCollisions:COUNTER)
+Ifc name|Collisions|Duplex|Rate out(traffic%)
+{ifPriCol}{ifAliasBox}|{ifOutCollisions}|{ifDS}|{ifOutColPct.color}{ifOutCps} ({ifOutColPct}%){ifOutColPct.errors}
+
+
