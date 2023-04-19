@@ -1,3 +1,0 @@
-TABLE:sort=moduleSorted,noalarmsmsg
-Entity Idx|Path to Entity|Description|Class|Hardware Rev|Firmware Rev|Software Rev|Serial|Model Name|Removable
-{entPhysicalIndex}|{entRelPosCollec}|{entPhysicalDescr}|{entPhysicalClassTxt}|{entPhysicalHardwareRev}|{entPhysicalFirmwareRev}|{entPhysicalSoftwareRev}|{entPhysicalSerialNum}|{entPhysicalModelName}|{entPhysicalIsFRUTxt}

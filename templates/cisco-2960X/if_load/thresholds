@@ -1,6 +1,0 @@
-ifInLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
-ifInLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-#ifInLoad        : yellow        : NaN   :
-ifOutLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
-ifOutLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-#ifOutLoad       : yellow        : NaN   :

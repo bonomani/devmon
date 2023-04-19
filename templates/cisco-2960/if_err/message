@@ -5,4 +5,4 @@ Input alarm thresholds (traffic%):  yellow={ifInErrTraf.thresh:yellow}%, red={if
 Output alarm thresholds (traffic%): yellow={ifOutErrTraf.thresh:yellow}%, red={ifOutErrTraf.thresh:red}% 
 TABLE:rrd(DS:ds0:ifInErrors:COUNTER; DS:ds1:ifOutErrors:COUNTER)
 Ifc name|Errors in|Rate in (traffic%)|Errors out|Rate out (traffic%)
-{ifPri}{ifAliasBox}|{ifInErrors}|{ifInErrTraf.color}{ifInErrPps} ({ifInErrTraf}%){ifInErrTraf.errors}|{ifOutErrors}|{ifOutErrTraf.color}{ifOutErrPps} ({ifOutErrTraf}%){ifOutErrTraf.errors}
+{ifPriErr}{ifAliasBox}|{ifInErrors}|{ifInErrTraf.color}{ifInErrPps} ({ifInErrTraf}%){ifInErrTraf.errors}|{ifOutErrors}|{ifOutErrTraf.color}{ifOutErrPps} ({ifOutErrTraf}%){ifOutErrTraf.errors}

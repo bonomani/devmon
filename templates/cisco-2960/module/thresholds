@@ -1,0 +1,2 @@
+cefcModuleOperStatusTxt           : red           : ^(?!OK)                                        : Module {entPhysicalDescr} [{entPhysicalIndex}] operational status is "{cefcModuleOperStatusTxt}"
+cefcModuleOperStatusTxt           : yellow        : ^OK but                                        : Module {entPhysicalDescr} [{entPhysicalIndex}] operational status is "{cefcModuleOperStatusTxt}"
