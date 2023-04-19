@@ -1,4 +1,0 @@
-vendor	: cisco
-model	: 2960L
-snmpver	: 2
-sysdesc : C2960L
