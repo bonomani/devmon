@@ -1,31 +1,5 @@
-TempRowIndex                    : MATCH  : {entPhysicalName} /^Temp: /
-TempDescrRaw                    : CHAIN  : {TempRowIndex} {entPhysicalName}
-TempDescr                       : REGSUB : {TempDescrRaw} /^Temp: (\S+)/$1/
-TempValue                       : CHAIN  : {TempRowIndex} {entSensorValue}
-TempStatusRaw                   : CHAIN  : {TempRowIndex} {entSensorStatus}
-TempStatus                      : SWITCH : {TempStatusRaw} 1=OK,2=unavailable,3=nonoperational
-TempIndexRaw                    : INDEX  : {TempDescr}
-TempIndex                       : REGSUB : {TempIndexRaw} /(.*)/Temp#$1/
+ciscoEnvMonTemperatureThresholdLow	: MATH		: {ciscoEnvMonTemperatureThresholdHigh} - 10 : 0
+ciscoEnvMonTemperatureStatusIndex	: REGSUB 	: {ciscoEnvMonTemperatureStatusDescr} /\D+(\d+)\D+(\d+)\D+/$1.$2/
+ciscoEnvMonTemperatureState             : SWITCH        : {ciscoEnvMonTemperatureStateRaw} 1=normal,2=warning,3=critical,4=shutdown,5=non present,6=not functioning
 
-entSensorThresholdRelationOp    : SWITCH : {entSensorThresholdRelation} 1=<,2=<=,3=>,4=>=,5===,6=!=
 
-TempSensorThresholdIndex1       : REGSUB : {TempRowIndex} /(.*)/$1.1/
-TempSensorThresholdValue1       : CHAIN  : {TempSensorThresholdIndex1} {entSensorThresholdValue}
-TempSensorThresholdRelation1    : CHAIN  : {TempSensorThresholdIndex1} {entSensorThresholdRelationOp}
-
-TempSensorThresholdIndex2       : REGSUB : {TempRowIndex} /(.*)/$1.2/
-TempSensorThresholdValue2       : CHAIN  : {TempSensorThresholdIndex2} {entSensorThresholdValue}
-TempSensorThresholdRelation2    : CHAIN  : {TempSensorThresholdIndex2} {entSensorThresholdRelationOp}
-TempSensorThresholdRelationValue2 : REGSUB : {TempSensorThresholdRelation2} /(.*)/$1 {TempSensorThresholdValue2}/
-
-TempSensorThresholdIndex3       : REGSUB : {TempRowIndex} /(.*)/$1.3/
-TempSensorThresholdValue3       : CHAIN  : {TempSensorThresholdIndex3} {entSensorThresholdValue}
-TempSensorThresholdRelation3    : CHAIN  : {TempSensorThresholdIndex3} {entSensorThresholdRelationOp}
-TempSensorThresholdRelationValue3 : REGSUB : {TempSensorThresholdRelation3} /(.*)/$1 {TempSensorThresholdValue3}/
-
-ValueIsBelowThreshold1a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation1}{TempSensorThresholdValue1}||0/
-ValueIsBelowThreshold1          : REGSUB : {ValueIsBelowThreshold1a} /(.*)/$1/ee
-ValueIsBelowThreshold2a         : REGSUB : {TempValue} /(.*)/$1{TempSensorThresholdRelation2}{TempSensorThresholdValue2}||0/
-ValueIsBelowThreshold2          : REGSUB : {ValueIsBelowThreshold2a} /(.*)/$1/ee
-ValueIsBelowThreshold3a         : REGSUB : {TempValue} /(.*)/($1{TempSensorThresholdRelation3}{TempSensorThresholdValue3})? 1 : 0 /
-ValueIsBelowThreshold3          : REGSUB : {ValueIsBelowThreshold3a} /(.*)/$1/ee
