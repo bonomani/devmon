@@ -148,9 +148,10 @@ QUERYHASH: for my $device ( sort keys %{ $g{devices} } ) {
         $snmp_input{$device}{ip}        = $g{devices}{$device}{ip};
 
         #  $snmp_input{$device}{model}         = $g{devices}{$device}{model};
-        $snmp_input{$device}{port}       = $g{devices}{$device}{port};
-        $snmp_input{$device}{privpass}   = $g{devices}{$device}{privpass};
-        $snmp_input{$device}{privproto}  = $g{devices}{$device}{privproto};
+        $snmp_input{$device}{port}      = $g{devices}{$device}{port};
+        $snmp_input{$device}{privpass}  = $g{devices}{$device}{privpass};
+        $snmp_input{$device}{privproto} = $g{devices}{$device}{privproto};
+
         #$snmp_input{$device}{reps}       = $g{devices}{$device}{reps};
         $snmp_input{$device}{resolution} = $g{devices}{$device}{resolution};
         $snmp_input{$device}{seclevel}   = $g{devices}{$device}{seclevel};
@@ -753,9 +754,9 @@ DEVICE: while (1) {    # We should never leave this loop
                     sub {
                         # Decode our result and add to our result hash
                         my ( $leaf, $value ) = @_;
-                        $value                       = pretty_print($value);
-                        $data_out{$oid}{val}{$leaf}  = $value;
-                        do_log("DEBUG SNMP($fork_num): oid:$oid leaf:$leaf val:$value; " ,4);
+                        $value = pretty_print($value);
+                        $data_out{$oid}{val}{$leaf} = $value;
+                        do_log( "DEBUG SNMP($fork_num): oid:$oid leaf:$leaf val:$value; ", 4 );
                         $data_out{$oid}{time}{$leaf} = time;
                     },
                     $max_reps
