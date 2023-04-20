@@ -21,6 +21,7 @@ require Exporter;
 # Modules
 use strict;
 use dm_config;
+
 #use Math::BigInt::Calc;
 use POSIX qw/ strftime /;
 use Scalar::Util qw(looks_like_number);
@@ -120,6 +121,7 @@ sub tests {
                     if ( $oid_h->{repeat} and ( defined $oid_h->{val} and %{ $oid_h->{val} } ) ) {
                         my $line;
                     LEAF: for my $leaf ( sort keys %{ $oid_h->{val} } ) {
+
                             #$line .= "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
                             if ( $g{trace} ) {
                                 $line = "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
@@ -129,11 +131,11 @@ sub tests {
                                 $line .= " t:$oid_h->{time}{$leaf}"  if defined $oid_h->{time}{$leaf};
                                 do_log( "TRACE TEST: $line", 5 );
                             } else {
-                                $line .=  "$leaf:".( $oid_h->{val}{$leaf} // "undef" )." ";
+                                $line .= "$leaf:" . ( $oid_h->{val}{$leaf} // "undef" ) . " ";
                             }
                         }
                         if ( not $g{trace} ) {
-                           do_log( "DEBUG TEST: $line", 4 );
+                            do_log( "DEBUG TEST: $line", 4 );
                         }
                     } else {
                         my $line;
@@ -375,11 +377,11 @@ sub trans_delta {
             $hist->{oid}{$dep_oid}{keep_hist_count} = $keep_dep_hist_cycle;
         }
     }
-    if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-        # We should always ave a primary oid with this transform, so make a fatal error 
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
     }
-
 
     # Check our parent oids for any errors
     if ( not validate_deps( $device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$' ) ) {
@@ -451,7 +453,7 @@ sub trans_delta {
                     # Otherwise do normal delta calc
                 } else {
                     use bignum;
-                    $delta = ($this_data - $last_data) / ($this_time - $last_time);
+                    $delta = ( $this_data - $last_data ) / ( $this_time - $last_time );
                 }
 
                 # Round delta to two decimal places
@@ -586,7 +588,8 @@ sub trans_math {
     my @dep_oids = $expr =~ /\{(.+?)\}/g;
 
     # Define our primary oid
-    define_pri_oid( $oids, $oid, \@dep_oids ) ;
+    define_pri_oid( $oids, $oid, \@dep_oids );
+
     # We have a primary set if the is one
 
     # Validate our dependencies
@@ -721,9 +724,10 @@ sub trans_statistic {
     $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
-    if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-       # We should always ave a primary oid with this transform, so make a fatal error
-    log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
     }
 
     # Do not use function validate_deps. It will make this oid to be of the
@@ -830,11 +834,11 @@ sub trans_substr {
     $length = undef if $length eq '';
 
     # Define our primary oid
-    if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
         # We should always ave a primary oid with this transform, so make a fatal error
         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-      }
-   
+    }
 
     validate_deps( $device, $oids, $oid, [$dep_oid] ) or return;
 
@@ -879,11 +883,11 @@ sub trans_pack {
     my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
-    if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-     # We should always ave a primary oid with this transform, so make a fatal error
-          log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-     }
-    
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, [$dep_oid] ) or return;
@@ -931,11 +935,11 @@ sub trans_unpack {
     my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
-        if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-      # We should always ave a primary oid with this transform, so make a fatal error
-               log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
-                           
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, [$dep_oid] ) or return;
@@ -982,11 +986,11 @@ sub trans_convert {
     my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
-        if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-               # We should always ave a primary oid with this transform, so make a fatal error
-                        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
-                            
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, [$dep_oid] ) or return;
@@ -1038,8 +1042,6 @@ sub trans_eval {
 
     # Extract all our our parent oids from the expression, first
     my @dep_oids = $expr =~ /\{(.+?)\}/g;
-
-
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, \@dep_oids )
@@ -1494,10 +1496,11 @@ sub trans_elapsed {
     my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
-         if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-                 # We should always ave a primary oid with this transform, so make a fatal error
-                         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, [$dep_oid], '^[+-]?\d+(\.\d+)?$' )
@@ -1631,10 +1634,11 @@ sub trans_speed {
     my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
-         if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-                 # We should always ave a primary oid with this transform, so make a fatal error
-                         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, [$dep_oid], '^[+-]?\d+([.]\d+)?$' )
@@ -1692,11 +1696,11 @@ sub trans_switch {
     my $default    = $trans_data->{default};
 
     # Define our primary oid
-         if ( not define_pri_oid( $oids, $oid, [$dep_oid] )) {
-                 # We should always ave a primary oid with this transform, so make a fatal error
-                        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
+    if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     # We cannot validate globally all dependencies, but we can validate the first
@@ -1880,11 +1884,12 @@ sub trans_regsub {
     my ( $device, $oids, $oid, $thr ) = @_;
     my $oid_h      = \%{ $oids->{$oid} };
     my $trans_data = $oid_h->{trans_data};
-    my ( $main_oid, $expr) = ( $1, $2, )
+    my ( $main_oid, $expr ) = ( $1, $2, )
         if $trans_data =~ /^\{(.+)\}\s*(\/.+\/.*\/[eg]*)$/;
-        #if $trans_data =~ /^\{(.+)\}\s*\/(.+)\/(.*)\/[eg]*)$/;
-    my ( $src_expr, $trg_expr)  = ($1, $2 )
-        if $expr =~ /^(.+)\/(.*)/; 
+
+    #if $trans_data =~ /^\{(.+)\}\s*\/(.+)\/(.*)\/[eg]*)$/;
+    my ( $src_expr, $trg_expr ) = ( $1, $2 )
+        if $expr =~ /^(.+)\/(.*)/;
 
     # Extract all our our parent oids from the expression, first
     #    my @dep_oids = $trans_data =~ /\{(.+?)\}/g;
@@ -1892,12 +1897,11 @@ sub trans_regsub {
     unshift @dep_oids, ($main_oid);
 
     # Define our primary oid
-         if ( ! define_pri_oid( $oids, $oid, \@dep_oids ) ) {
-                 # We should always ave a primary oid with this transform, so make a fatal error
-                         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
+    if ( !define_pri_oid( $oids, $oid, \@dep_oids ) ) {
 
-
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids ) ) {
@@ -1982,11 +1986,12 @@ sub trans_chain {
     # Extract all our our parent oids from the expression, first
     my ( $src_oid, $trg_oid ) = $oid_h->{trans_data} =~ /\{(.+?)\}/g;
 
-        # Define our primary oid
-             if ( not define_pri_oid( $oids, $oid, [$src_oid] )) {
-                     # We should always ave a primary oid with this transform, so make a fatal error
-                             log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                                 }
+    # Define our primary oid
+    if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies, have to do them seperately
     # Cannot validate the target oid has it has not the same hash keys as our result
@@ -2016,7 +2021,7 @@ sub trans_chain {
         my $sub_oid = $src_h->{val};
         my $trg_val = $trg_h->{val}{$sub_oid};
         if ( !defined $trg_val ) {
-            $oid_h->{val} = undef;
+            $oid_h->{val}   = undef;
             $oid_h->{time}  = time;
             $oid_h->{color} = defined $trg_h->{color}         ? $trg_h->{color}         : "clear";
             $oid_h->{msg}   = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "Parent value n/a";
@@ -2082,10 +2087,11 @@ sub trans_coltre {
     my ( $src_oid, $trg_oid ) = $expr =~ /\{(.+)\}\s+\{(.+)\}$/;
 
     # Define our primary oid
-             if ( not define_pri_oid( $oids, $oid, [$src_oid] )) {
-                     # We should always ave a primary oid with this transform, so make a fatal error
-                             log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                                 }
+    if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies, have to do them seperately
     validate_deps( $device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+' ) and validate_deps( $device, $oids, $oid, [$trg_oid] )
@@ -2181,10 +2187,11 @@ sub trans_sort {
     my ($src_oid) = $expr =~ /^\{(.+)\}$/;
 
     # Define our primary oid
-         if ( not define_pri_oid( $oids, $oid, [$src_oid] )) {
-                 # We should always ave a primary oid with this transform, so make a fatal error
-                         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
+    if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # We dont validate dep as it valid and value: we ony work on index
     #validate_deps( $device, $oids, $oid, [$src_oid] )
@@ -2288,11 +2295,12 @@ sub trans_index {
 
     my $src_h = \%{ $oids->{$src_oid} };
 
-     #Define our primary oid
-         if ( not define_pri_oid( $oids, $oid, [$src_oid] )) {
-                 # We should always ave a primary oid with this transform, so make a fatal error
-                         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                             }
+    #Define our primary oid
+    if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
+
+        # We should always ave a primary oid with this transform, so make a fatal error
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # we do not validate our dependencies as we are  working ony on index
     if ( not validate_deps( $device, $oids, $oid, [$src_oid] ) ) {
@@ -2366,11 +2374,12 @@ sub trans_match {
     my ( $src_oid, $expr ) = ( $1, $2 )
         if $trans_data =~ /^\{(\S+)\}\s+(\/.+\/)$/;
 
-   # Define our primary oid
-       if ( not define_pri_oid( $oids, $oid, [$src_oid] )) {
+    # Define our primary oid
+    if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
+
         # We should always ave a primary oid with this transform, so make a fatal error
-                        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
-                }
+        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+    }
 
     # Validate our dependencies
     # Cannot validate dependencies as it has not the same hash keys as our result dont have the same key
@@ -2901,10 +2910,11 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Otherwise just display the oid val
                     } else {
+
                         #my $substr = $oids->{$root}{repeat} ? $oids->{$root}{val}{$leaf} : $oids->{$root}{val};
                         #$substr = 'Undef' if !defined $substr;
                         #$row_data =~ s/\{$root\}/$substr/;
-                        $row_data =~ s/\{$root\}/$val/;   
+                        $row_data =~ s/\{$root\}/$val/;
                     }
 
                 }
@@ -3596,17 +3606,18 @@ sub validate_deps {
     }
 
     # if repeater type is not set, it because there are not any dependecies
-     my $pri_oid = $oid_h->{pri_oid};
-  if ( not defined $pri_oid ) {
+    my $pri_oid = $oid_h->{pri_oid};
+    if ( not defined $pri_oid ) {
         return 1;    # Success to validate nothing!
     }
+
     # Check first if we have a global error
     for my $dep_oid (@$dep_arr) {
-        if ( (ref $oids->{$dep_oid}{error} ne 'HASH') and ( defined $oids->{$dep_oid}{error}) and $oids->{$dep_oid}{error} ) {
-            $oid_h->{color}='clear';
-            $oid_h->{msg}=$oids->{$dep_oid}{msg} if defined $oids->{$dep_oid}{msg};
-            $oid_h->{time} =$oids->{$dep_oid}{time} if defined $oids->{$dep_oid}{time}; 
-            $oid_h->{error}=1;
+        if ( ( ref $oids->{$dep_oid}{error} ne 'HASH' ) and ( defined $oids->{$dep_oid}{error} ) and $oids->{$dep_oid}{error} ) {
+            $oid_h->{color} = 'clear';
+            $oid_h->{msg}   = $oids->{$dep_oid}{msg}  if defined $oids->{$dep_oid}{msg};
+            $oid_h->{time}  = $oids->{$dep_oid}{time} if defined $oids->{$dep_oid}{time};
+            $oid_h->{error} = 1;
             return 0;
         }
     }
@@ -3636,16 +3647,16 @@ sub validate_deps {
                 my $dep_error;
                 my $dep_color;
                 my $dep_msg;
-                if ( $dep_oid_h->{repeat}) {
+                if ( $dep_oid_h->{repeat} ) {
                     if ( ( exists $dep_oid_h->{error} ) and ( defined $dep_oid_h->{error}{$leaf} ) and ( $dep_oid_h->{error}{$leaf} ) ) {
-                        $dep_error       = 1;
+                        $dep_error = 1;
                     }
                     $dep_val   = $dep_oid_h->{val}{$leaf};
                     $dep_color = defined $dep_oid_h->{color}{$leaf} ? $dep_oid_h->{color}{$leaf} : "clear";
                     $dep_msg   = $dep_oid_h->{msg}{$leaf} if ( defined $dep_oid_h->{msg} ) and ( $dep_oid_h->{msg}{$leaf} );
                 } else {
                     if ( ( defined $dep_oid_h->{error} ) and $dep_oid_h->{error} ) {
-                        $dep_error       = 1;
+                        $dep_error = 1;
                     }
                     $dep_color = $dep_oid_h->{color};
                     $dep_msg   = $dep_oid_h->{msg} if defined $dep_oid_h->{msg};
@@ -3655,10 +3666,10 @@ sub validate_deps {
 
                     # We should never be here with an undef val as it
                     # should be alread treated: severity increase to yellow
-                    $oid_h->{val}{$leaf} = undef;
+                    $oid_h->{val}{$leaf}   = undef;
                     $oid_h->{color}{$leaf} = $dep_color;
                     $oid_h->{error}{$leaf} = 1;
-                    $oid_h->{msg}{$leaf} = $dep_msg if defined $dep_msg;
+                    $oid_h->{msg}{$leaf}   = $dep_msg if defined $dep_msg;
                     next LEAF;    #
                 } elsif ( defined $dep_val and $dep_val eq 'wait' ) {
                     $oid_h->{val}{$leaf}   = 'wait';
@@ -3671,9 +3682,9 @@ sub validate_deps {
                     if ( !defined $oid_h->{color}{$leaf} or ( $colors{$dep_color} > $colors{ $oid_h->{color}{$leaf} } ) ) {
                         $oid_h->{val}{$leaf}   = $dep_val;
                         $oid_h->{color}{$leaf} = $dep_color;
-                        $oid_h->{msg}{$leaf}   = $dep_msg if defined $dep_msg ;
+                        $oid_h->{msg}{$leaf}   = $dep_msg if defined $dep_msg;
                     } elsif ( $oid_h->{color}{$leaf} eq $dep_color ) {
-                         
+
                         # in case of error we should have an undefined value but let it like that for now
                         # until we handle properly error info
                         if ( defined $dep_val and ( $dep_val ne '' ) ) {
@@ -3703,7 +3714,7 @@ sub validate_deps {
                     $oid_h->{error}{$leaf} = 1;
                     next LEAF;
                 } else {
-                  $leaf_deps_valid = 1;
+                    $leaf_deps_valid = 1;
                 }
             }
 
