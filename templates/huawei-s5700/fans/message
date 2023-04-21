@@ -1,3 +1,3 @@
 TABLE:
-Fan Id|Mode|Speed|Status
-{FanDescr}|{hwEntityFanSpdAdjModeTxt}|{hwEntityFanSpeed}|{FanStatus.color}{FanStatus}
+Slot.Idx|Mode|Speed|Status
+{FanIndex}|{hwEntityFanSpdAdjModeTxt}|{hwEntityFanSpeed}|{FanStatus.color}{FanStatus}{FanStatus.errors}

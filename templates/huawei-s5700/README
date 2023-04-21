@@ -1,6 +1,10 @@
-This template was created by Eric Schwimmer.
+This template was created by Bruno Manzoni
 
 NOTE: This does not imply any support responsibilities, liabiltiy in
 case of this template or devmon causing phsyical, monetary or emotional
 damanges, or any other such obligations.  It is merely to provide 
 credit to the original author of the template. 
+
+Comments: 
+- Some Huawei Switch do not answer to the fan mib: add to xymon
+1.1.1.1 myhost # DEVMON:notests(fans)

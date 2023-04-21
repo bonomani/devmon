@@ -11,6 +11,6 @@ Output alarm status      : Best of ...
 - Ratio to total traffic : yellow={ifOutDscPct.thresh:yellow}%, red={ifOutDscPct.thresh:red}%
 
 TABLE:rrd(DS:ds0:ifInDiscards:COUNTER; DS:ds1:ifOutDiscards:COUNTER)
-Ifc name|Dsc in|Rate in|Ratio In%|Dsc out|Rate out|Ratio out%|Alarm
-{ifPri}{ifAliasBox}|{ifInDiscards}|{ifInDscPpsTxt.color}{ifInDscPpsTxt}|{ifInDscPctTxt.color}{ifInDscPctTxt}|{ifOutDiscards}|{ifOutDscPpsTxt.color}{ifOutDscPpsTxt}|{ifOutDscPctTxt.color}{ifOutDscPctTxt}|{ifDscAlarm.color}{ifDscAlarm.errors}
+Ifc name|Dsc in|Rate in|Traf In%|Dsc out|Rate out|Traf out%|Alarm
+{ifPri}{ifAliasBox}|{ifInDiscards}|{ifInDscPps.color}{ifInDscPps}|{ifInDscPct.color}{ifInDscPct}%|{ifOutDiscards}|{ifOutDscPps.color}{ifOutDscPps}|{ifOutDscPct.color}{ifOutDscPct}%|{ifDscAlarm.color}{ifDscAlarm.errors}
 

@@ -1,12 +1,9 @@
 # Create thresholds for all the error rate counters
 # oid name	: color		: limit	: Error message
 
-ifInErrTraf	: yellow	: 5        : {ifDescr}{ifAliasBox} - High input error rate ({ifInErrTraf}%)
-ifInErrTraf	: red		: 10       : {ifDescr}{ifAliasBox} - Very high input error rate ({ifInErrTraf}%)
-ifInErrTrafNaN  : green         : NaN      : 
-ifInErrTrafTxt  : clear         : ifDown   :
-ifOutErrTraf	: yellow	: 5	   : {ifDescr}{ifAliasBox} - High output error rate ({ifOutErrTraf}%)
-ifOutErrTraf	: red		: 10	   : {ifDescr}{ifAliasBox} - Very high output error rate ({ifOutErrTraf}%)
-ifOutErrTrafNaN : green         : NaN      :
-ifOutErrTrafTxt : clear         : ifDown   :
-
+ifInErrTraf	: yellow	: 5	: {ifDescr}{ifAliasBox} - High input error rate ({ifInErrTraf}%)
+ifInErrTraf	: red		: 10	: {ifDescr}{ifAliasBox} - Very high input error rate ({ifInErrTraf}%)
+ifInErrTraf     : clear         : NaN   : 
+ifOutErrTraf	: yellow	: 5	: {ifDescr}{ifAliasBox} - High output error rate ({ifOutErrTraf}%)
+ifOutErrTraf	: red		: 10	: {ifDescr}{ifAliasBox} - Very high output error rate ({ifOutErrTraf}%)
+ifOutErrTraf    : clear         : NaN   :
