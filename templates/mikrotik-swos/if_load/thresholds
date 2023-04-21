@@ -1,8 +1,6 @@
-ifInLoad	: yellow	: 75	           : {ifDescr}{ifAliasBox} load is high
-ifInLoad	: red		: 95	           : {ifDescr}{ifAliasBox} load is very high
-ifInLoadNaN     : green         : NaN              :
-ifInLoadTxt     : clear         : ifDown,NullSpeed :
-ifOutLoad	: yellow	: 75	           : {ifDescr}{ifAliasBox} load is high
-ifOutLoad	: red		: 95	           : {ifDescr}{ifAliasBox} load is very high
-ifOutLoadNaN    : green         : NaN              :
-ifOutLoadTxt    : clear         : ifDown,NullSpeed :
+ifInLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
+ifInLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
+#ifInLoad        : yellow        : NaN   :
+ifOutLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
+ifOutLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
+#ifOutLoad       : yellow        : NaN   :

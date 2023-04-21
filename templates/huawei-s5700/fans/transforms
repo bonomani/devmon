@@ -5,4 +5,4 @@ hwEntityFanStateTxt      : SWITCH : {hwEntityFanState} 1=normal,2=abnormal
 
 FanStatus                : REGSUB : {hwEntityFanStateTxt} /(\S+.*)/$1-{hwEntityFanPresentTxt}/
 FanIndex                 : INDEX  : {hwEntityFanSlot}
-FanDescr                 : REGSUB : {FanIndex} /(\S+.*)/Fan $1/
+#Fan                 : REGSUB : {FanIndex} /(\S+.*)/Fan $1/
