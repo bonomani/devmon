@@ -304,7 +304,7 @@ sub post_template_load {
                     # to do it on a per-oid basis later
                     if ( $trans_type eq 'switch' or $trans_type eq 'tswitch' ) {
                         my ( $dep_oid, $switch_data ) = ( $1, $2 )
-                            if $oid_h->{trans_data} =~ /\{(.+?)}\s*(.+)/;
+                            if $oid_h->{trans_data} =~ /\{(.+?)\}\s*(.+)/;
                         next if !defined $dep_oid;
 
                         $oid_h->{trans_edata} = {};

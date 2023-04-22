@@ -11,5 +11,5 @@ ifStatSta1        : WORST         : {ifStatSwitch} , {ifStatAlarmingOn}
 ifStatStat        : BEST          : {ifStatSta1} , {ifAdminOperStat}
 
 ifAliasBox        : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-ifIndex           : INDEX         : {ifDescr}
-ifPri             : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
+ifIndexStat       : INDEX         : {ifAdminStatNum}
+ifPriStat         : REGSUB        : {ifIndexStat} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e

@@ -12,5 +12,5 @@ Output alarm status      : Best of ...
 
 TABLE:rrd(DS:ds0:ifInDiscards:COUNTER; DS:ds1:ifOutDiscards:COUNTER)
 Ifc name|Dsc in|Rate in|Traf In%|Dsc out|Rate out|Traf out%|Alarm
-{ifPri}{ifAliasBox}|{ifInDiscards}|{ifInDscPps.color}{ifInDscPps}|{ifInDscPct.color}{ifInDscPct}%|{ifOutDiscards}|{ifOutDscPps.color}{ifOutDscPps}|{ifOutDscPct.color}{ifOutDscPct}%|{ifDscAlarm.color}{ifDscAlarm.errors}
+{ifPriDsc}{ifAliasBox}|{ifInDiscards}|{ifInDscPps.color}{ifInDscPps}|{ifInDscPct.color}{ifInDscPct}%|{ifOutDiscards}|{ifOutDscPps.color}{ifOutDscPps}|{ifOutDscPct.color}{ifOutDscPct}%|{ifDscAlarm.color}{ifDscAlarm.errors}
 

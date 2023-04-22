@@ -1,6 +1,14 @@
-ifAdminStatTxt	: green		: admin down					: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
-ifAdminStatTxt	: yellow	: testing					: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
-ifAdminStatTxt	: red		: up						: Interface {ifName}{ifAliasBox} is {ifAdminStatTxt}
-ifOperStatTxt	: green		: up 						: Interface {ifName}{ifAliasBox} is {ifOperStatTxt}
-ifOperStatTxt	: yellow	: dormant|testing|yellow|not present|layer down : Interface {ifName}{ifAliasBox} is {ifOperStatTxt}
-ifOperStatTxt	: red		: down                                          : Interface {ifName}{ifAliasBox} is {ifOperStatTxt}
+ifAdminOperStat    : blue       : up / up|up / lower layer down                                  :
+ifAdminOperStat    : green      : up / up|up / dormant                                           : 
+ifAdminOperStat    : yellow     : down / down                                                    : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+ifAdminOperStat    : red        : up / down                                                      : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+
+ifStatAlarmingOn   : blue       : .                                                              : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+#ifStatAlarmingOn   : red        : ^$                                                             : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+
+ifStatSwitch       : blue       : off                                                            : 
+ifStatSwitch       : red        : on                                                             : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+
+
+#ifStatSta1         : blue       :                                                                : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
+#ifStatSta1         : red        :                                                                 : Interface {ifDescr} is "admin {ifAdminStatTxt}, oper {ifOperStatTxt}"
