@@ -1693,7 +1693,7 @@ sub trans_switch {
     my $dep_oid_h  = \%{ $oids->{$dep_oid} };
     my $cases      = \%{ $trans_data->{cases} };
     my $case_nums  = \@{ $trans_data->{case_nums} };
-    my $default    = $trans_data->{default};
+    my $default    = $trans_data->{default} if defined $trans_data->{default};
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
@@ -1734,11 +1734,14 @@ sub trans_switch {
             }
 
             my $then;
+            my $then_default;
             if ( defined $num ) {
-                $then = $cases->{$num}{then};
-            } else {
+                $then         = $cases->{$num}{then};
+                $then_default = $default;
+            } elsif ( defined $default ) {
                 $then = $default;
             }
+
             while ( $then =~ /\{(\S+)\}/g ) {
                 my $dep_oid   = $1;
                 my $dep_oid_h = \%{ $oids->{$dep_oid} };
@@ -1756,16 +1759,24 @@ sub trans_switch {
                     $dep_msg   = $dep_oid_h->{msg} if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) );
                 }
                 if ( !defined $dep_val ) {
+                    if ( defined $then_default ) {
+                        $then         = $then_default;
+                        $then_default = undef;
+                        next;
+                    } else {
 
-                    # We should never be here with an undef val as it
-                    # should be alread treated: severity increase to yellow
+                        # We should never be here with an undef val as it
+                        # should be alread treated: severity increase to yellow
+                        $dep_val = undef;
 
-                    $dep_val               = undef;
-                    $oid_h->{color}{$leaf} = 'clear';
-                    $oid_h->{msg}{$leaf}   = 'parent value n/a';
+                        #$oid_h->{color}{$leaf} = 'clear';
+                        #$oid_h->{msg}{$leaf}   = 'parent value n/a';
+                        last;
+                    }
                 } elsif ( $dep_val eq 'wait' ) {
                     $oid_h->{color}{$leaf} = 'clear';
                     $oid_h->{msg}{$leaf}   = 'wait';
+                    last;
                 } else {
 
                     # Find de worst color

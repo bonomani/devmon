@@ -1,7 +1,10 @@
-# Get bit speed delta (so we dont have to provide custom delta limit)
-ifInPkts      : MATH    : {ifHCInUcastPkts} + {ifHCInMulticastPkts} + {ifHCInBroadcastPkts}
-ifOutPkts     : MATH    : {ifHCOutUcastPkts} + {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
-
+# Calc Total Trafic
+ifHCInNUcastPkts  : MATH    : {ifHCInMulticastPkts} + {ifHCInBroadcastPkts}
+ifHCOutNUcastPkts : MATH    : {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
+ifInNuPkts        : SWITCH  : {ifInNUcastPkts} ".*"={ifHCInNUcastPkts}, default={ifInNUcastPkts}
+ifOutNuPkts       : SWITCH  : {ifOutNUcastPkts} ".*"={ifHCOutNUcastPkts}, default={ifOutNUcastPkts}
+ifInPkts          : MATH    : {ifHCInUcastPkts} + {ifInNuPkts}
+ifOutPkts         : MATH    : {ifHCOutUcastPkts} + {ifOutNuPkts}
 # Do delta transform on all counters
 ifInPps        	: DELTA         : {ifInPkts}
 ifOutPps       	: DELTA         : {ifOutPkts}
@@ -12,6 +15,6 @@ ifInErrTraf	: MATH		: ({ifInErrPps} / {ifInPps}) x 100
 ifOutErrTraf	: MATH		: ({ifOutErrPps} / {ifOutPps}) x 100
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-ifIndex         : INDEX         : {ifDescr}
-ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
+ifIndexErr      : INDEX         : {ifInErrors}
+ifPriErr        : REGSUB        : {ifIndexErr} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
 

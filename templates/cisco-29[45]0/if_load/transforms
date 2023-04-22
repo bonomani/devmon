@@ -2,8 +2,8 @@
 ifBps           : MATH          : {ifHighSpeed} x 1000000
 ifSpeed		: SPEED		: {ifBps}
 # Use HC for Vlan                                                                                   
-iIO             : SWITCH        : {ifDescr} "Vl.*"={ifHCInOctets},".*"={ifInOctets}
-iOO             : SWITCH        : {ifDescr} "Vl.*"={ifHCOutOctets},".*"={ifOutOctets}
+iIO             : SWITCH        : {ifDescr} ".*"={ifHCInOctets},default={ifInOctets}
+iOO             : SWITCH        : {ifDescr} ".*"={ifHCOutOctets},default={ifOutOctets}
 # Get bit speed delta (so we dont have to provide custom delta limit)
 ifInOps  	: DELTA		: {iIO}
 ifOutOps 	: DELTA		: {iOO}
@@ -18,5 +18,5 @@ ifInLoad	: MATH		: ({ifInBps} / {ifBps}) x 100
 ifOutLoad	: MATH		: ({ifOutBps} / {ifBps}) x 100
 # Create an alias in a bracketed box, or nothing if alias is blank
 ifAliasBox      : REGSUB        : {ifAlias} /(\S+.*)/ [$1]/
-ifIndex         : INDEX         : {ifDescr}
-ifPri           : REGSUB        : {ifIndex} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e
+ifIndexLoad     : INDEX         : {ifInOctets}
+ifPriLoad       : REGSUB        : {ifIndexLoad} /(\S+.*)/sprintf('%05s', $1).'-'.{ifDescr}/e

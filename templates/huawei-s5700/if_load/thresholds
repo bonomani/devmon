@@ -4,5 +4,5 @@ ifInLoad        : blue          : NaN   : Configure your Interface Bandwidth if 
 ifInLoad        : clear         : wait  : wait
 ifOutLoad	: yellow	: 75	: {ifDescr}{ifAliasBox} load is high
 ifOutLoad	: red		: 95	: {ifDescr}{ifAliasBox} load is very high
-ifOutLoad       : bluw          : NaN   : Configure your Interface Bandwidth if possible or change :thresh(if_load;ifOutLoad;c:NaN:)
+ifOutLoad       : blue          : NaN   : Configure your Interface Bandwidth if possible or change :thresh(if_load;ifOutLoad;c:NaN:)
 ifOutLoad       : clear         : wait  : wait
