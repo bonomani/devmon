@@ -265,7 +265,7 @@ sub oid_hash {
 
                 }
             } else {
-                do_log("WARNI TEST: No SNMP answer for $oid");
+                do_log("WARNI TEST: No SNMP answer for '$oid' on '$device' (see notests) ");
                 $oids->{$oid}{val}   = undef;
                 $oids->{$oid}{color} = "clear";
                 $oids->{$oid}{msg}   = "No SNMP answer for $oid";
