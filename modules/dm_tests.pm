@@ -1827,9 +1827,11 @@ sub trans_switch {
         }
 
         my $then;
+        my $then_default; 
         if ( defined $num ) {
             $then = $cases->{$num}{then};
-        } else {
+            $then_default = $default;
+        } elsif ( defined $default ) {
             $then = $default;
         }
         while ( $then =~ /\{(\S+)\}/g ) {
@@ -1851,13 +1853,20 @@ sub trans_switch {
                 $dep_msg   = $dep_oid_h->{msg};
             }
             if ( !defined $dep_val ) {
+                if ( defined $then_default ) {
+                   $then         = $then_default;
+                   $then_default = undef;
+                 next;
+               } else {
 
                 # We should never be here with an undef val as it
                 # should be alread treated: severity increase to yellow
 
-                $dep_val        = undef;
-                $oid_h->{color} = 'clear';
-                $oid_h->{msg}   = 'parent value n/a';
+                #$dep_val        = undef;
+                #$oid_h->{color} = 'clear';
+                #$oid_h->{msg}   = 'parent value n/a';
+                last;
+                }
             } elsif ( $dep_val eq 'wait' ) {
                 $oid_h->{color} = 'clear';
                 $oid_h->{msg}   = 'wait';
