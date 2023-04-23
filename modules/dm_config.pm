@@ -1548,20 +1548,24 @@ sub read_hosts_cfg {
     # Now open the hosts.cfg file and read it in
     # Also read in any other host files that are included in the hosts.cfg
     my @hostscfg = ( $g{hostscfg} );
-    my $etcdir   = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
-    $etcdir = $g{homedir} if !defined $etcdir;
+    log_fatal( "FATAL CONF: No hosts.cfg file", 0 ) unless @hostscfg;
 
-FILEREAD: do {
+    my $etcdir = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
+    $etcdir = $g{homedir} if !defined $etcdir;
+    my $loop_idx = 0;
+
+FILEREAD: while (@hostscfg) {
+        ++$loop_idx;
         my $hostscfg = shift @hostscfg;
         next if !defined $hostscfg;    # In case next FILEREAD bypasses the while
 
         # Die if we fail to open our Xymon root file, warn for all others
-        if ( $hostscfg eq $g{hostscfg} ) {
+        if ( $loop_idx == 1 ) {
             open HOSTSCFG, $hostscfg
                 or log_fatal( "Unable to open hosts.cfg file '$g{hostscfg}' ($!)", 0 );
-        } else {
+        } elsif ( $hostscfg ne $g{hostscfg} ) {
             open HOSTSCFG, $hostscfg
-                or do_log( "Unable to open file '$g{hostscfg}' ($!)", 1 )
+                or do_log( "Unable to open file '$hostscfg' ($!)", 1 )
                 and next FILEREAD;
         }
 
@@ -1740,7 +1744,7 @@ FILEREAD: do {
         }
         close HOSTSCFG;
 
-    } while @hostscfg;    # End of do {} loop
+    }    # End of while loop
 
     # Gather our existing hosts
     my %old_hosts = read_hosts();
