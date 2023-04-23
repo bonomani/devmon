@@ -23,6 +23,7 @@ use Socket;
 use POSIX qw/ strftime /;
 use dm_config;
 use Time::HiRes qw(time);
+use Data::Dumper;
 
 # Our global variable hash
 use vars qw(%g);
@@ -294,12 +295,22 @@ sub prepare_xymon_stat_msg {
     $this_poll_time = sprintf( "%3d   [s]", $this_poll_time );
 
     # Determine our number of clear msgs sent
-    my $num_clears = 0;
-    for my $dev ( keys %{ $g{cleardata} } ) {
-        $num_clears += scalar keys %{ $g{cleardata}{$dev} };
+    my $num_clear_branches = 0;
+    my $num_clear_leaves   = 0;
+
+    for my $dev ( keys %{ $g{devices} } ) {
+        for my $oid ( keys %{ $g{devices}{$dev}{oids} } ) {
+            if ( ( ref $g{devices}{$dev}{oids}{$oid}{color} ne 'HASH' ) and ( $g{devices}{$dev}{oids}{$oid}{color} eq "clear" ) ) {
+                if ( $g{devices}{$dev}{oids}{$oid}{repeat} == 0 ) {
+                    ++$num_clear_leaves;
+                } else {
+                    ++$num_clear_branches;
+                }
+            }
+        }
     }
 
-    my $message = "devmon, version $g{version}\n" . "\n" . "Node name:           $g{nodename}\n" . "Node number:         $g{my_nodenum}\n" . "Process ID:          $g{mypid}\n" . "\n" . "Cycle time:          $g{cycletime} [s]\n" . "Dead time:           $g{deadtime} [s]\n" . "\n" . "Polled devices:      $g{numdevs}\n" . "Polled tests:        $g{numtests}\n" . "Avg tests/node:      $g{avgtestsnode}\n" . "# clear msgs:        $num_clears\n" . "Xymon msg xfer size: $g{sentmsgsize}\n" . "\n" . "SNMP test time:      $snmp_poll_time\n" . "Test logic time:     $test_time\n" . "Xymon msg xfer time: $msg_xfr_time\n" . "This poll period:    $this_poll_time\n" . "Avg poll time:      ";
+    my $message = "devmon, version $g{version}\n\nNode name:           $g{nodename}\nNode number:         $g{my_nodenum}\nProcess ID:          $g{mypid}\n\nCycle time:          $g{cycletime} [s]\nDead time:           $g{deadtime} [s]\n\nPolled devices:      $g{numdevs}\nPolled tests:        $g{numtests}\nAvg tests/node:      $g{avgtestsnode}\nClear branches:      $num_clear_branches\nClear leaves:        $num_clear_leaves\nXymon msg xfer size: $g{sentmsgsize}\n\nSNMP test time:      $snmp_poll_time\nTest logic time:     $test_time\nXymon msg xfer time: $msg_xfr_time\nThis poll period:    $this_poll_time\nAvg poll time:      ";
 
     # Calculate avg poll time over the last 5 poll cycles
     my $num_polls = scalar @{ $g{avgpolltime} };

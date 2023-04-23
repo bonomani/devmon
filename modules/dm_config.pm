@@ -731,7 +731,7 @@ sub sync_servers {
         my %devices = read_hosts();
         if (%devices) {
             for my $device ( keys %devices ) {
-                for my $device_h_key ( keys $devices{$device} ) {
+                for my $device_h_key ( keys %{ $devices{$device} } ) {
                     $g{devices}{$device}{$device_h_key} = $devices{$device}{$device_h_key};
                 }
             }
