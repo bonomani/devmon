@@ -739,8 +739,10 @@
     a - b   : Source alias is between 'a' and 'b', inclusive
     's'     : Source alias matches this string exactly (case sensitive)
     "s"     : Source alias matches this regular expression (non-anchored)
-    default : Default value for the target alias, used in case none of
-              the other statements match (what about ,=?)
+              ".*" match anything! (similar to default: prefer it)
+    default : Default value for the target alias, used in cas of undefined
+              values or any unmatch statement (specially usefull for incomplet
+              oids, prefer ".*" if there is no reason to use it!
 
  Note that switch statements are applied in a left to right order; so if you
  have a value that matches the source value on multiple switch statements, the
@@ -760,21 +762,7 @@
  TSWITCH transform instead.
 
 
- ### TSWITCH transform (DEPRECATED)
-
- The TSWITCH transform is functionally equivalent to the SWITCH transform in
- every way, with one exception: if any OID alias is used as a data source for
- the target alias, such as the 'dhcpAvail' alias in this transform:
-
-    dhcpStatus : TSWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
-
- The threshold values for that alias will be copied to the target alias (in
- this case, 'dhcpStatus'), and no further thresholds will be applied to the
- target alias. Any non-OID data sources can still have thresholds applied
- against them (for instance, if 'dhcpStatus' had been assigned the string 'No
- DHCP' by this transform, you could have matched a threshold against that
- value). This is useful if you have two seperate OIDs and you need to do a
- compound threshold involving them both.
+ ### TSWITCH transform (DEPRECATED, replace by SWITCH)
 
  ### UNPACK transform
 
