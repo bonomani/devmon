@@ -1,0 +1,4 @@
+vendor	: default
+model	: default
+snmpver	: 2
+sysdesc : default

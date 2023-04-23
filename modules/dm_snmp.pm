@@ -1049,18 +1049,18 @@ EOF
 
                         if ( $session->{ErrorNum} ) {
                             if ( $session->{ErrorNum} == -24 ) {
-                                do_log( "INFOR SNMP($fork_num): Bulkwalk timeout on device $dev: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 1 );
+                                do_log( "INFOR SNMP($fork_num): Bulkwalk timeout on device $dev: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 3 );
 
                                 # Several problem can occure: let maka some test if it is the first run (we try to discover)
                                 #do_log("toto: ${ $run_count }");
                                 if ( ${$run_count} == 1 ) {
 
                                     # try to see if bulwalk answer with sysdesc
-                                    do_log("INFOR SNMP($fork_num): Try snmp recovering from timeout: Try 'bulkwalk' work for sysdesc as varbind (1 value)");
+                                    do_log( "INFOR SNMP($fork_num): Try snmp recovering from timeout: Try 'bulkwalk' work for sysdesc as varbind (1 value)", 3 );
                                     my $sdvars = new SNMP::VarList( ['.1.3.6.1.2.1.1.1.0'] );
                                     my @sdresp = $session->bulkwalk( 1, 0, $sdvars );
                                     if ( $session->{ErrorNum} == 0 ) {
-                                        do_log("INFOR SNMP($fork_num): Workaround #1 (Max repeater set to 0) successfully recover snmp polling");
+                                        do_log( "INFOR SNMP($fork_num): Workaround #1 (Max repeater set to 0) successfully recover snmp polling", 3 );
 
                                         # TRY WORKAROUND #1: max-repeter set to 0, if sucessfull we will mark set this workaround (a just after all tests)
                                         #@nrresp = $session->bulkwalk( ${$nrep_count},  0 , $nrvars );
