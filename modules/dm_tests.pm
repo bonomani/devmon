@@ -1827,9 +1827,9 @@ sub trans_switch {
         }
 
         my $then;
-        my $then_default; 
+        my $then_default;
         if ( defined $num ) {
-            $then = $cases->{$num}{then};
+            $then         = $cases->{$num}{then};
             $then_default = $default;
         } elsif ( defined $default ) {
             $then = $default;
@@ -1854,18 +1854,18 @@ sub trans_switch {
             }
             if ( !defined $dep_val ) {
                 if ( defined $then_default ) {
-                   $then         = $then_default;
-                   $then_default = undef;
-                 next;
-               } else {
+                    $then         = $then_default;
+                    $then_default = undef;
+                    next;
+                } else {
 
-                # We should never be here with an undef val as it
-                # should be alread treated: severity increase to yellow
+                    # We should never be here with an undef val as it
+                    # should be alread treated: severity increase to yellow
 
-                #$dep_val        = undef;
-                #$oid_h->{color} = 'clear';
-                #$oid_h->{msg}   = 'parent value n/a';
-                last;
+                    #$dep_val        = undef;
+                    #$oid_h->{color} = 'clear';
+                    #$oid_h->{msg}   = 'parent value n/a';
+                    last;
                 }
             } elsif ( $dep_val eq 'wait' ) {
                 $oid_h->{color} = 'clear';
@@ -3183,27 +3183,27 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
     # Now add a bit of logic to allow a 'cleartime' window, where a test on
     # a device can be clear for an interval without being reported as such
-    if ( $worst_color eq 'clear' ) {
-        $g{numclears}{$device}{$test} = time
-            if !defined $g{numclears}{$device}{$test};
-    } else {
+    #if ( $worst_color eq 'clear' ) {
+    #    $g{numclears}{$device}{$test} = time
+    #        if !defined $g{numclears}{$device}{$test};
+    #} else {
 
-        # Clear our clear counter if this message wasnt clear
-        delete $g{numclears}{$device}{$test}
-            if defined $g{numclears}{$device}
-            and defined $g{numclears}{$device}{$test};
-    }
+    # Clear our clear counter if this message wasnt clear
+    #    delete $g{numclears}{$device}{$test}
+    #        if defined $g{numclears}{$device}
+    #        and defined $g{numclears}{$device}{$test};
+    #}
 
     # Now return null if we are in our 'cleartime' window
-    if (    defined $g{numclears}{$device}
-        and defined $g{numclears}{$device}{$test} )
-    {
-        my $start_clear = $g{numclears}{$device}{$test};
-        if ( time - $start_clear < $g{cleartime} ) {
-            do_log( "DEBUG TEST: $device had some clear errors " . "during test $test", 4 ) if $g{debug};
-            return;
-        }
-    }
+    #if (    defined $g{numclears}{$device}
+    #    and defined $g{numclears}{$device}{$test} )
+    #{
+    #    my $start_clear = $g{numclears}{$device}{$test};
+    #    if ( time - $start_clear < $g{cleartime} ) {
+    #        do_log( "DEBUG TEST: $device had some clear errors " . "during test $test", 4 ) if $g{debug};
+    #        return;
+    #    }
+    #}
 
     # Looks like we are good to return our completed message
     return $msg;
