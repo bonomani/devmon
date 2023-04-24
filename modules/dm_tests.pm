@@ -1178,9 +1178,7 @@ sub trans_best {
                                 } else {
                                     if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
                                         delete $oid_h->{msg}{$leaf};
-                                        if ( not $oid_h->{msg} ) {
-                                            delete $oid_h->{msg};
-                                        }
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
                                 $oid_h->{time}{$leaf} = time;
@@ -1215,9 +1213,7 @@ sub trans_best {
                                 } else {
                                     if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
                                         delete $oid_h->{msg}{$leaf};
-                                        if ( not $oid_h->{msg} ) {
-                                            delete $oid_h->{msg};
-                                        }
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
                                 $oid_h->{time}{$leaf} = time;
@@ -1368,9 +1364,7 @@ sub trans_worst {
                                 } else {
                                     if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
                                         delete $oid_h->{msg}{$leaf};
-                                        if ( not $oid_h->{msg} ) {
-                                            delete $oid_h->{msg};
-                                        }
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
                                 $oid_h->{time}{$leaf} = time;
@@ -1407,9 +1401,7 @@ sub trans_worst {
                                 } else {
                                     if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
                                         delete $oid_h->{msg}{$leaf};
-                                        if ( not $oid_h->{msg} ) {
-                                            delete $oid_h->{msg};
-                                        }
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
                                 $oid_h->{time}{$leaf} = time;
@@ -3368,9 +3360,9 @@ sub apply_threshold {
             delete $oid_h->{error}{$leaf}  unless ( defined ${ $oid_r{error} } );
 
         }
-        delete $oid_h->{thresh} unless ( $oid_h->{thresh} );
-        delete $oid_h->{msg}    unless ( $oid_h->{msg} );
-        delete $oid_h->{error}  unless ( $oid_h->{error} );
+        delete $oid_h->{thresh} unless ( %{ $oid_h->{thresh} } );
+        delete $oid_h->{msg}    unless ( %{ $oid_h->{msg} } );
+        delete $oid_h->{error}  unless ( %{ $oid_h->{error} } );
     } else {
 
         # Skip to next if there is an error as color is already defined
