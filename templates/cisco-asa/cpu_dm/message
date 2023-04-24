@@ -12,6 +12,6 @@
 </table>
 {sysDescr}
 
-TABLE:sort=CPUIndex,rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
+TABLE:rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
 CPU|Load
 {CPUIndex}|{cpmCPUTotal5minRev.color}{cpmCPUTotal5minRev}%{cpmCPUTotal5minRev.errors}
