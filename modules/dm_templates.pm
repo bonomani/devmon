@@ -991,7 +991,7 @@ sub calc_template_test_deps {
     }
 
     #load dep_oid from trans_file
-    foreach my $oid ( keys $tmpl->{new_oids} ) {
+    foreach my $oid ( keys %{ $tmpl->{new_oids} } ) {
         if ( ( exists $tmpl->{new_oids}{$oid}{trans_data} ) and ( $tmpl->{new_oids}{$oid}{trans_data} =~ /\{.+?\}/ ) ) {
             my $data = $tmpl->{new_oids}{$oid}{trans_data};
             while ( $data =~ s/\{(.+?)\}// ) {
@@ -1021,8 +1021,8 @@ sub calc_template_test_deps {
         if ( exists $tmpl->{new_oids}{$oid} ) {
 
             # Validate any oids in the threshold and in the message
-        COLOR: foreach my $color ( keys $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold} ) {
-                foreach my $thresh ( keys $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold}{$color} ) {
+        COLOR: foreach my $color ( keys %{ $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold} } ) {
+                foreach my $thresh ( keys %{ $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold}{$color} } ) {
                     my $tmp_threshold = $thresh;
                     while ( ( defined $tmp_threshold ) and ( $tmp_threshold =~ s/\{(.+?)\}// ) ) {
                         my $dep_oid = $1;
