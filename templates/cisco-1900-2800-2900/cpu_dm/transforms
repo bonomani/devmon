@@ -11,7 +11,7 @@ UpTimeClone                  : SWITCH          : {UpTimeDiff} >=0={snmpEngineTim
 # Create a clone of Uptime (UpTimeClone and Uptime) to have UptimeClone not affected by UpTime threshold tests (in fact UpTime is a clone from UpTimeClone)
 UpTime                       : MATH            : {UpTimeClone}
 UpTimeTxt                    : ELAPSED         : {UpTimeClone}
-CPUIndex                     : SORT            : {cpmCPUTotal5minRev}
+CPUIndex                     : INDEX           : {cpmCPUTotal5minRev}
 
 # Create a clone (no threshold apply on clone)
 sysReloadReasonClone         : REGSUB          : {sysReloadReason} /^(.*)$/$1/

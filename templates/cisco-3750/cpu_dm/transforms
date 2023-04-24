@@ -12,7 +12,7 @@ maxUpTime                    : SWITCH          : {UpTimeDiff} >=0={snmpEngineTim
 # Create a duplicate Uptime (maxUpTime and Uptime) to have UptimeClone not affected by threshold tests (so keep maxUpTime green)
 UpTime                       : MATH            : {maxUpTime}
 UpTimeTxt                    : ELAPSED         : {UpTime}
-CPUIndex                     : SORT            : {cpmCPUTotal5minRev}
+CPUIndex                     : INDEX           : {cpmCPUTotal5minRev}
 
 # Create a clone (so we avoid error propagation on sysReloadReason)
 sysReloadReasonClone         : REGSUB          : {sysReloadReason} /^(.*)$/$1/
