@@ -1951,12 +1951,10 @@ sub trans_regsub {
 
             my $exp_val = $oids->{$main_oid}{val}{$leaf};
             my $result;
-            my $temp = "\$exp_val =~ s$expr";
             $result = eval "\$exp_val =~ s$expr";
             if ($@) {
                 do_log( "ERROR TEST: Failed eval for REGSUB transform on leaf $leaf of " . "$oid on $device ($@)", 1 );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
-                $oid_h->{time}{$leaf}  = time;
                 $oid_h->{color}{$leaf} = 'clear';
 
                 next;
@@ -1974,7 +1972,6 @@ sub trans_regsub {
         if ($@) {
             do_log( "Failed eval for REGSUB transform on $oid on $device ($@)", 0 );
             $oid_h->{val}   = 'Failed eval';
-            $oid_h->{time}  = time;
             $oid_h->{color} = 'clear';
 
             return;
