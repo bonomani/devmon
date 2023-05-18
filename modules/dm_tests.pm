@@ -2056,7 +2056,9 @@ sub trans_chain {
                 if ( ref $oid_h->{color} eq 'HASH' ) {
                     $oid_h->{color}{$leaf} = defined $trg_h->{color}{$sub_oid} ? $trg_h->{color}{$sub_oid} : "clear";
                 }
-                $oid_h->{msg}{$leaf} = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "";    # should be "parent n/a"
+                if ( ref $oid_h->{msg} eq 'HASH' ) {
+                    $oid_h->{msg}{$leaf} = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "";    # should be "parent n/a"
+                }
                 next;
             }
             $oid_h->{val}{$leaf}   = $trg_val;
