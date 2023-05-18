@@ -29,6 +29,9 @@ use IO::Socket::INET;
 use Data::Dumper;
 
 use POSIX ":sys_wait_h";
+
+# Get system error numbers for checking $!.
+use POSIX qw(:errno_h);
 use Math::BigInt;
 use Storable qw(nfreeze thaw);
 use Time::HiRes qw(time);
@@ -323,8 +326,11 @@ sub snmp_query {
                     my $pid = $g{forks}{$fork}{pid};
 
                     # See if we've exceeded our max poll time
-                    if ( ( time - $g{forks}{$fork}{time} ) > $g{maxpolltime} ) {
-                        do_log( "WARNI SNMP: Fork $fork ($pid) exceeded poll time polling $dev", 2 );
+                    my $forktime = time - $g{forks}{$fork}{time};
+
+                    #if ( ( time - $g{forks}{$fork}{time} ) > $g{maxpolltime} ) {
+                    if ( $forktime > $g{maxpolltime} ) {
+                        do_log( "WARNI SNMP: Fork $fork ($pid) time exceed max poll time polling $g{maxpolltime} on device $dev", 2 );
 
                         # Kill it
                         kill 15, $pid or do_log( "ERROR SNMP: Sending fork $fork TERM signal failed: $!", 1 );
@@ -803,29 +809,42 @@ DEVICE: while (1) {    # We should never leave this loop
                 do_log( "WARNI SNMP($fork_num): SNMP is not installed: $@ yum install net-snmp or apt install snmp", 2 );
             } else {
 
+                #create shortcut
+                my $dev = $data_in{dev};
+
                 # Get SNMP variables
                 my %snmpvars;
-                my $tmp_dev = $data_in{dev};
-                $snmpvars{Device}     = $data_in{dev};
-                $snmpvars{RemotePort} = $data_in{port} || 161;                                                            # Default to 161 if not specified
-                $snmpvars{DestHost}   = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $data_in{dev};
+                $snmpvars{Device}     = $dev;
+                $snmpvars{RemotePort} = $data_in{port} || 161;                                                   # Default to 161 if not specified
+                $snmpvars{DestHost}   = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $dev;
 
                 # The timeout logic
-                if ( ( defined ${ $snmp_persist_storage{$tmp_dev}{run_count} } ) and ( defined ${ $snmp_persist_storage{$tmp_dev}{polling_time_max} } ) ) {
-                    if ( ( ${ $snmp_persist_storage{$tmp_dev}{polling_time_max} } * 3 ) < 2 ) {
-                        $snmpvars{Timeout} = 2 * 1000000;    # 2 minimal timeout;
-                    } elsif ( ( ${ $snmp_persist_storage{$tmp_dev}{polling_time_max} } * 3 ) < $data_in{timeout} ) {
-                        $snmpvars{Timeout} = ${ $snmp_persist_storage{$tmp_dev}{polling_time_max} } * 3 * 1000000;
-                    } else {
+                if ( ( defined ${ $snmp_persist_storage{$dev}{run_count} } ) and ( ${ $snmp_persist_storage{$dev}{run_count} } > ( 86400 / $g{cycletime} ) ) ) {
+
+                    # Optimize timeout after 1 day learing time
+                    if ( ( ${ $snmp_persist_storage{$dev}{polling_time_min} } ) > 1 ) {
+
+                        # Use default timer
                         $snmpvars{Timeout} = $data_in{timeout} * 1000000;
+                    } elsif ( ${ $snmp_persist_storage{$dev}{polling_time_max} } <= 0.5 ) {
+
+                        # Pollin is very quick but, let dont put it under 0.5 sec
+                        $snmpvars{Timeout} = $data_in{timeout} * 0.5 * 1000000;
+                    } else {
+
+                        #between 0.5 and 1
+                        $snmpvars{Timeout} = $data_in{timeout} * ${ $snmp_persist_storage{$dev}{polling_time_max} } * 1000000;
                     }
                     $snmpvars{Retries} = $data_in{snmptries} - 1;
+
+                    #$snmpvars{Retries} = 2;
                 } else {
 
                     # We are in a discovery so initial timer and retries
-                    $snmpvars{Timeout} = 5 * 1000000;    # 5 sec initail timeout
-                    $snmpvars{Retries} = 0;              # no retries
+                    $snmpvars{Timeout} = $data_in{timeout} * 1000000;    # 5 sec initial timeout in ms
+                    $snmpvars{Retries} = $data_in{snmptries} - 1;        # no retries
                 }
+
                 $snmpvars{UseNumeric}    = 1;
                 $snmpvars{NonIncreasing} = 0;
                 $snmpvars{Version}       = $snmp_ver;
@@ -872,7 +891,7 @@ print \$sess->get(".1.3.6.1.2.1.1.1.0");
 EOF
                                 my $disco_result = `$snmp_disco`;
                                 if ( $disco_result eq '' ) {
-                                    my $error_str = "Empty or no answer from $data_in{dev}";
+                                    my $error_str = "Empty or no answer from $dev";
                                     $data_out{error}{$error_str} = 1;
                                     send_data( $sock, \%data_out );
                                     next DEVICE;
@@ -887,9 +906,52 @@ EOF
                     }
                 }    # end of the workaround
 
-                my $session = new SNMP::Session(%snmpvars);
+                $! = 0;    # Reset system errno before calling new() (?!)
                 my @nonreps = ();
-                if ($session) {
+                my $session = new SNMP::Session(%snmpvars);
+
+                if ( ( not defined $session ) or ( not $session ) ) {
+                    do_log("INFOR SNMP($fork_num): Undefined/existing Session on device $dev");
+                    my $err;
+                    unless ($!) {
+
+                        # Couldn't look up the host, so set the error code
+                        # especially for this.
+                        $err = "Couldn't resolve hostname";
+
+                    } else {
+
+                        # Some system-level error occurred.  Handle a few simple
+                        # resource problems by (hopefully) waiting for things to
+                        # subside, and retry later.
+                        #
+                        # Copy error string, and force numeric errno
+                        $err = "" . $!;
+                        my $errno = $! + 0;
+                        if (( $errno == EINTR )  ||    # Interrupted system call
+                            ( $errno == EAGAIN ) ||    # Resource temp. unavailable
+                            ( $errno == ENOMEM ) ||    # No memory (temporary)
+                            ( $errno == ENFILE ) ||    # Out of file descriptors
+                            ( $errno == EMFILE )
+                            )                          # Too many open fd's
+                        {
+                            $err .= " (ressource busy)";
+
+                        } else {
+                            $err .= " (other problem)";
+
+                        }
+                    }
+
+                    my $error_str = "SNMP session did not start for device $dev: ${SNMP::ErrorStr} : $err";
+                    do_log("INFOR SNMP($fork_num):${SNMP::ErrorStr} : $err");
+                    $data_out{error}{$error_str} = 1;
+                    send_data( $sock, \%data_out );
+                    undef $session;
+                    next DEVICE;
+
+                } else {    # session is defined
+
                     if ( $g{debug} ) {
                         do_log( "DEBUG SNMP($fork_num): SNMP session started: Device=$snmpvars{Device}, RemotePort=$snmpvars{RemotePort}, DestHost=$snmpvars{DestHost}, Version=$snmp_ver", 4 );
                         if ( $snmp_ver eq '3' ) {
@@ -899,48 +961,24 @@ EOF
                         }
                     }
 
-                    # Start initializing variable for our bulkwalk
-
-                    my %bulkwalk;                               # should be removed?
-                    $bulkwalk{session}  = \$session;            # ref (object_ref)
-                    $bulkwalk{dev}      = $data_in{dev};
-                    $bulkwalk{data_out} = \%data_out;           # hash_ref
-                    $bulkwalk{fork_num} = $fork_num;            # scalar
-                    $bulkwalk{nonreps}  = $data_in{nonreps};    # bulkwalk non repreaters
-                    $bulkwalk{reps}     = $data_in{reps};
-
-                    # do our bulkwalk for non-repeaters and repeaters and send back our data
-                    #my $snmpbulkwalk_succeeded = 1;
-                    #$snmpbulkwalk_succeeded =
-                    snmp_bulkwalk( \%bulkwalk, \%snmp_persist_storage );
-                    send_data( $sock, \%data_out );
-
-                    # Our bulkwalk subroutine
-                    sub snmp_bulkwalk {
-
-                        #my ( $bulkwalk, $storage, $is_devmon_repeater ) = @_;
-                        my ( $bulkwalk, $storage ) = @_;
-
-                        #create shortcut
-                        my $dev      = $bulkwalk->{'dev'};                   # deref{a ref of hash of scalar    }
-                        my $fork_num = $bulkwalk->{'fork_num'};              # deref{a ref of hash of scalar    }
-                        my $session  = ${ \${ $bulkwalk->{'session'} } };    # deref an object (a ref) from a hash passed be ref to a sub
-                        my $data_out = \%{ $bulkwalk->{'data_out'} };        # ref deref{hash of hash__ref }
+                    # Use a block for our snmp bulkwalk pseudo-subroutine
+                    {
+                        # Start initializing variable for our bulkwalk
                         my %oid;
 
-                        my $poll_oid           = \%{ $storage->{$dev}{'poll_oid'} };
-                        my $uniq_rep_poll_oid  = \%{ $storage->{$dev}{'uniq_rep_poll_oid'} };
-                        my $uniq_nrep_poll_oid = \%{ $storage->{$dev}{'uniq_nrep_poll_oid'} };
-                        my $rep_count          = \${ $storage->{$dev}{'rep_count'} };
-                        my $nrep_count         = \${ $storage->{$dev}{'nrep_count'} };
-                        my $oid_count          = \${ $storage->{$dev}{'oid_count'} };
-                        my $path_is_slow       = \${ $storage->{$dev}{'path_is_slow'} };
-                        my $run_count          = \${ $storage->{$dev}{'run_count'} };
-                        my $workaround         = \${ $storage->{$dev}{'workaround'} };
-                        my $polling_time_cur   = \${ $storage->{$dev}{'polling_time_cur'} };
-                        my $polling_time_max   = \${ $storage->{$dev}{'polling_time_max'} };
-                        my $polling_time_min   = \${ $storage->{$dev}{'polling_time_min'} };
-                        my $polling_time_avg   = \${ $storage->{$dev}{'polling_time_avg'} };
+                        my $poll_oid           = \%{ $snmp_persist_storage{$dev}{'poll_oid'} };
+                        my $uniq_rep_poll_oid  = \%{ $snmp_persist_storage{$dev}{'uniq_rep_poll_oid'} };
+                        my $uniq_nrep_poll_oid = \%{ $snmp_persist_storage{$dev}{'uniq_nrep_poll_oid'} };
+                        my $rep_count          = \${ $snmp_persist_storage{$dev}{'rep_count'} };
+                        my $nrep_count         = \${ $snmp_persist_storage{$dev}{'nrep_count'} };
+                        my $oid_count          = \${ $snmp_persist_storage{$dev}{'oid_count'} };
+                        my $path_is_slow       = \${ $snmp_persist_storage{$dev}{'path_is_slow'} };
+                        my $run_count          = \${ $snmp_persist_storage{$dev}{'run_count'} };
+                        my $workaround         = \${ $snmp_persist_storage{$dev}{'workaround'} };
+                        my $polling_time_cur   = \${ $snmp_persist_storage{$dev}{'polling_time_cur'} };
+                        my $polling_time_max   = \${ $snmp_persist_storage{$dev}{'polling_time_max'} };
+                        my $polling_time_min   = \${ $snmp_persist_storage{$dev}{'polling_time_min'} };
+                        my $polling_time_avg   = \${ $snmp_persist_storage{$dev}{'polling_time_avg'} };
 
                         # Count the number of run
                         #do_log("toto: ${ $run_count } ");
@@ -972,7 +1010,7 @@ EOF
                         my $vbarr_counter = 0;
                         my $oid_found     = 0;
 
-                        foreach my $oid ( keys %{ $bulkwalk->{'reps'} } ) {
+                        foreach my $oid ( keys %{ $data_in{'reps'} } ) {
 
                             $oid = "." . $oid;    # add a . as we dont have one and its needed later
                             if ( ( not defined $poll_oid->{$oid}{oid} ) or ( not exists $uniq_rep_poll_oid->{$oid} ) ) {
@@ -986,7 +1024,7 @@ EOF
                             }
                         }
 
-                        foreach my $oid ( keys %{ $bulkwalk->{'nonreps'} } ) {
+                        foreach my $oid ( keys %{ $data_in{'nonreps'} } ) {
 
                             $oid = "." . $oid;    # add a . as we dont have one and its needed later
                                                   #test paretin?
@@ -1045,11 +1083,11 @@ EOF
                             @nrresp = $session->bulkwalk( ${$nrep_count}, ${$rep_count}, $nrvars );
                         }
 
-                        #my @nrresp = $session->bulkwalk(  ${$nrep_count} + ${$rep_count}, 0 , $nrvars );
-
                         if ( $session->{ErrorNum} ) {
+
+                            #do_log("$fork_num toto3");
                             if ( $session->{ErrorNum} == -24 ) {
-                                do_log( "INFOR SNMP($fork_num): Bulkwalk timeout on device $dev: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 3 );
+                                do_log( "WARNI SNMP($fork_num): Bulkwalk timeout on device $dev: " . $session->{Timeout} * ( $session->{Retries} + 1 ) / 1000000 . "[sec] (Timeout=" . $session->{Timeout} / 1000000 . " * (1 + Retries=$session->{Retries}))", 2 );
 
                                 # Several problem can occure: let maka some test if it is the first run (we try to discover)
                                 #do_log("toto: ${ $run_count }");
@@ -1082,11 +1120,12 @@ EOF
                             } else {
                                 do_log( "ERROR SNMP($fork_num): Cannot do bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", 1 );
                             }
-                            return 0;
+                            undef $session;
 
                         } elsif ( ( scalar @nrresp ) == 0 ) {
                             do_log( "ERROR SNMP($fork_num): Empty answer from device $dev without an error message", 1 );
-                            return 0;
+                            undef $session;
+
                         }
 
                         # Now that the polling is done and we have some the answers, first calc the time
@@ -1102,7 +1141,7 @@ EOF
                         }
 
                         # Now that the polling is done we have to process the answers
-                        my @oids = ( keys %{ $bulkwalk->{'reps'} }, keys %{ $bulkwalk->{'nonreps'} } );
+                        my @oids = ( keys %{ $data_in{'reps'} }, keys %{ $data_in{'nonreps'} } );
                         ${$oid_count} = scalar @oids;
 
                         # Check first that we have some answer
@@ -1115,8 +1154,7 @@ EOF
                             $vbarr_counter++;
                         }
 
-                        #my $any_found = 0;
-                    OID: foreach my $oid_wo_dot (@oids) {    # INVERSING OID AND VBARR loop should increase perf)
+                    OID: foreach my $oid_wo_dot (@oids) {         # INVERSING OID AND VBARR loop should increase perf)
                             my $found = 0;
                             my $oid   = "." . $oid_wo_dot;
                             $vbarr_counter = 0;
@@ -1154,15 +1192,15 @@ EOF
 
                                         do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
                                         my $leaf = substr( $snmp_oid, length($oid) + 1 );
-                                        $data_out->{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
-                                        $data_out->{$stripped_oid}{'time'}{$leaf} = time;
+                                        $data_out{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
+                                        $data_out{$stripped_oid}{'time'}{$leaf} = time;
                                         $leaf_table_found++;
 
                                     } elsif ( $snmp_oid eq $oid ) {
                                         $found = 1;
                                         do_log( "DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
-                                        $data_out->{$stripped_oid}{val}  = $snmp_val;
-                                        $data_out->{$stripped_oid}{time} = time;
+                                        $data_out{$stripped_oid}{val}  = $snmp_val;
+                                        $data_out{$stripped_oid}{time} = time;
                                         $oid_found++;
                                         next OID;
                                     }
@@ -1176,9 +1214,7 @@ EOF
                             }
                             if ( !$found ) {
                                 do_log( "ERROR SNMP($fork_num): No polled oid for $oid on device $dev", 1 );
-                            } else {
 
-                                #    $any_found = 1;
                             }
                         }
 
@@ -1198,9 +1234,11 @@ EOF
                             ############### do something to recover ##############END
                         }
 
-                        return 1;
                     }
-                } elsif (0) {    # previous code from S. Coene, we keep it as it is an implementation with getnext
+                    send_data( $sock, \%data_out );
+                    next DEVICE;
+                }
+                if (0) {    # previous code from S. Coene, we keep it as it is an implementation with getnext
 
                     foreach my $oid ( sort keys %{ $data_in{nonreps} } ) {
                         next if defined $data_out{error};
@@ -1235,16 +1273,17 @@ EOF
                         }
                     }
                     send_data( $sock, \%data_out );
-                } else {
-                    my $error_str = "SNMP session did not start for device $snmpvars{Device}";
-                    $data_out{error}{$error_str} = 1;
-                    send_data( $sock, \%data_out );
+
+                    #} else {
+                    #    my $error_str = "SNMP session did not start for device $snmpvars{Device}";
+                    #    $data_out{error}{$error_str} = 1;
+                    #    send_data( $sock, \%data_out );
                 }
             }
 
             # Whoa, we don't support this version of SNMP
         } else {
-            my $error_str = "Unsupported SNMP version for data_in{dev} ($snmp_ver)";
+            my $error_str = "Unsupported SNMP version for $data_in{dev} ($snmp_ver)";
             $data_out{error}{$error_str} = 1;
             send_data( $sock, \%data_out );
             next DEVICE;
