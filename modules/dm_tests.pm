@@ -2049,13 +2049,14 @@ sub trans_chain {
 
             # Our oid sub leaf
             my $sub_oid = $src_h->{val}{$leaf};
-
             my $trg_val = $trg_h->{val}{$sub_oid};
             if ( !defined $trg_val ) {
-                $oid_h->{val}{$leaf}   = undef;
-                $oid_h->{time}{$leaf}  = time;
-                $oid_h->{color}{$leaf} = defined $trg_h->{color}{$sub_oid} ? $trg_h->{color}{$sub_oid} : "clear";
-                $oid_h->{msg}{$leaf}   = defined $trg_h->{msg}{$sub_oid}   ? $trg_h->{msg}{$sub_oid}   : "";        # should be "parent n/a"
+                $oid_h->{val}{$leaf}  = undef;
+                $oid_h->{time}{$leaf} = time;
+                if ( ref $oid_h->{color} eq 'HASH' ) {
+                    $oid_h->{color}{$leaf} = defined $trg_h->{color}{$sub_oid} ? $trg_h->{color}{$sub_oid} : "clear";
+                }
+                $oid_h->{msg}{$leaf} = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "";    # should be "parent n/a"
                 next;
             }
             $oid_h->{val}{$leaf}   = $trg_val;
