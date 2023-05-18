@@ -1,17 +1,16 @@
-# maxUpTime do not have threshold applyed: it will not propagate errors msg to other oids
 sysUpTime100                 : MATH            : {sysUpTime}  / 100 : 0
 UpTimeMod                    : MATH            : {sysUpTime100} - ({snmpEngineTime} % 42949672.96 ) : 0
-UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-5 - 0=2, default=0
+UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-300 - 0=2,default=0
 
 # Create a clone (no threshold apply on clone)
 UpTimeModState               : MATH            : {UpTimeModStateClone}
 snmpEngineTimeAdjusted       : MATH            : {snmpEngineTime} + (({UpTimeModStateClone} % 2) x {UpTimeMod})
 UpTimeDiff                   : MATH            : {snmpEngineTimeAdjusted} - {sysUpTime100}
-maxUpTime                    : SWITCH          : {UpTimeDiff} >=0={snmpEngineTimeAdjusted}, default={sysUpTime100}
+UpTimeClone                  : SWITCH          : {UpTimeDiff} >=0={snmpEngineTimeAdjusted},default={sysUpTime100}
 
-# Create a duplicate Uptime (maxUpTime and Uptime) to have UptimeClone not affected by threshold tests (so keep maxUpTime green)
-UpTime                       : MATH            : {maxUpTime}
-UpTimeTxt                    : ELAPSED         : {UpTime}
+# Create a clone of Uptime (UpTimeClone and Uptime) to have UptimeClone not affected by UpTime threshold tests (in fact UpTime is a clone from UpTimeClone)
+UpTime                       : MATH            : {UpTimeClone}
+UpTimeTxt                    : ELAPSED         : {UpTimeClone}
 CPUIndex                     : INDEX           : {cpmCPUTotal5minRev}
 
 # Create a clone (so we avoid error propagation on sysReloadReason)
@@ -20,7 +19,7 @@ sysReloadReasonClone         : REGSUB          : {sysReloadReason} /^(.*)$/$1/
 # Boot Alarm automatically disable after 1 week or 604800s
 sysBootReasonDelay           : MATH            : 604800
 sysBootReasonDelayTxt        : ELAPSED         : {sysBootReasonDelay}
-sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {maxUpTime}
+sysBootReasonDelayTimer      : MATH            : {sysBootReasonDelay} - {UpTimeClone}
 sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
 sysBootReasonDelayTimerEnable: SWITCH          : {sysReloadReason} 'Reload_Commmand'=disable,default={sysBootReasonDelayTimer}
 sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {sysReloadReasonClone}

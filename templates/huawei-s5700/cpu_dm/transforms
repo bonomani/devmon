@@ -1,6 +1,6 @@
 sysUpTime100                 : MATH            : {sysUpTime}  / 100 : 0
 UpTimeMod                    : MATH            : {sysUpTime100} - ({snmpEngineTime} % 42949672.96 ) : 0
-UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-5 - 0=2, default=0
+UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-300 - 0=2, default=0
 
 # Create a clone (no threshold apply on clone)
 UpTimeModState               : MATH            : {UpTimeModStateClone}
