@@ -2741,7 +2741,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     = $dev->{except}{$test}{$pri}{noalarm}
                     || $dev->{except}{all}{$pri}{noalarm}
                     || $tmpl->{oids}{$pri}{except}{noalarm};
-                $alarm = 0 if defined $na_val and $pri_val =~ /^(?:$na_val)$/;
+                $alarm = 0 if ( defined $na_val ) and ( defined $pri_val ) and ( $pri_val =~ /^(?:$na_val)$/ );
 
                 # Now go through all the oids in our table row and replace them
                 for my $root ( $row_data =~ /\{(.+?)\}/g ) {
