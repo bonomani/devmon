@@ -476,7 +476,7 @@ sub trans_delta {
                 $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{val}{$leaf}  = $this_data;
                 $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{time}{$leaf} = $this_time;
                 push( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} }, $g{current_cycle} );
-                if ( ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
+                if ( (defined $hist->{oid}{$dep_oid}{keep_hist_count}) and ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
                     my $expired_hist_cycle = shift( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } );
                     delete( $hist->{oid}{$dep_oid}{hist}{$expired_hist_cycle} );
                 }
