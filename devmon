@@ -19,6 +19,7 @@ use FindBin;
 use lib "$FindBin::Bin/modules";
 use dm_config;
 use dm_templates;
+use dm_config qw(FATAL ERROR WARN INFO DEBUG TRACE);
 use dm_snmp;
 use dm_tests;
 use dm_msg;
@@ -28,13 +29,13 @@ use Data::Dumper;
 initialize($VERSION);
 
 # Enter main loop
-do_log( "INFOR MAIN: Entering poll loop", 3 );
+do_log( "Entering poll loop", INFO );
 use vars qw(%g);
 *g = \%dm_config::g;
 
 while (1) {
     ++$g{current_cycle};
-    do_log( "DEBUG MAIN: Current cycle: " . $g{current_cycle}, 1 );
+    do_log( "Current cycle: " . $g{current_cycle}, INFO );
 
     # Read in template data
     read_templates();

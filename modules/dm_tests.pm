@@ -20,6 +20,7 @@ require Exporter;
 
 # Modules
 use strict;
+use dm_config qw(FATAL ERROR WARN INFO DEBUG TRACE);
 use dm_config;
 
 #use Math::BigInt::Calc;
@@ -60,7 +61,7 @@ sub tests {
     # Timestamp
     $g{testtime} = time;
 
-    do_log( 'INFOR TEST: Performing tests', 3 );
+    do_log( 'Performing tests', INFO );
 
     # Now go through each device and perform the test logic it needs
     for my $device ( sort keys %{ $g{devices} } ) {
@@ -94,7 +95,7 @@ sub tests {
         # Separate tests, perform individual test logic
         for my $test ( split /,/, $tests ) {
 
-            do_log( "DEBUG TEST: Starting test for $test on device $device", 4 ) if $g{debug};
+            do_log( "Starting test for $test on device $device", DEBUG ) if $g{debug};
 
             # Hash shortcut
             my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
@@ -129,13 +130,13 @@ sub tests {
                                 $line .= " e:$oid_h->{error}{$leaf}" if defined $oid_h->{error}{$leaf};
                                 $line .= " m:$oid_h->{msg}{$leaf}"   if defined $oid_h->{msg}{$leaf};
                                 $line .= " t:$oid_h->{time}{$leaf}"  if defined $oid_h->{time}{$leaf};
-                                do_log( "TRACE TEST: $line", 5 );
+                                do_log( "$line", TRACE );
                             } else {
                                 $line .= "$leaf:" . ( $oid_h->{val}{$leaf} // "undef" ) . " ";
                             }
                         }
                         if ( not $g{trace} ) {
-                            do_log( "DEBUG TEST: $line", 4 );
+                            do_log( "$line", DEBUG );
                         }
                     } else {
                         my $line;
@@ -145,10 +146,10 @@ sub tests {
                             $line .= " e:$oid_h->{error}" if defined $oid_h->{error};
                             $line .= " m:$oid_h->{msg}"   if defined $oid_h->{msg};
                             $line .= " t:$oid_h->{time}"  if defined $oid_h->{time};
-                            do_log( "TRACE TEST: $line", 5 );
+                            do_log( "$line", TRACE );
                         } else {
                             $line = ( $oid_h->{val} // "undef" );
-                            do_log( "DEBUG TEST: $line", 4 );
+                            do_log( "$line", DEBUG );
                         }
                     }
                 }
@@ -176,7 +177,7 @@ sub oid_hash {
     my $snmp = \%{ $g{snmp_data}{$device} };
 
     if ( !%{$snmp} ) {
-        do_log( "WARNI TEST: No SNMP data found on $device", 2 ) if ( $g{xymon_color}{$device} eq 'green' );
+        do_log( "No SNMP data found on $device", WARN ) if ( $g{xymon_color}{$device} eq 'green' );
     }
 
     #First clean the hash: delete all but keep the val struct of repeater
@@ -265,7 +266,7 @@ sub oid_hash {
 
                 }
             } else {
-                do_log("WARNI TEST: No SNMP answer for '$oid' on '$device' (see notests) ");
+                do_log("No SNMP answer for '$oid' on '$device' (see notests) ", WARN);
                 $oids->{$oid}{val}   = undef;
                 $oids->{$oid}{color} = "clear";
                 $oids->{$oid}{msg}   = "No SNMP answer for $oid";
@@ -327,7 +328,7 @@ sub transform {
     # Make sure we inherit repeatability from previous types
     my $trans_sub = "trans_" . $trans_type;
     no strict 'refs';
-    do_log( "DEBUG TEST: Doing $trans_type transform on $device/$oid", 4 ) if $g{debug};
+    do_log( "Doing $trans_type transform on $device/$oid", DEBUG ) if $g{debug};
     if ( defined &$trans_sub ) {
         eval {
             local $SIG{ALRM} = sub { die "Timeout\n" };
@@ -338,15 +339,15 @@ sub transform {
 
         if ($@) {
             if ( $@ eq "Timeout\n" ) {
-                do_log( "Timed out waiting for $trans_type transform " . "on oid $oid for $device to complete." );
+                do_log( "Timed out waiting for $trans_type transform on oid $oid for $device to complete", ERROR );
             } else {
-                do_log( "Got unexpected error while performing $trans_type " . "transform on oid $oid for $device: $@" );
+                do_log( "Got unexpected error while performing $trans_type transform on oid $oid for $device: $@", ERROR );
             }
         }
     } else {
 
         # Theoretically we should never get here, but whatever
-        do_log( "Undefined transform type '$trans_type' found for $device", 0 )
+        do_log( "Undefined transform type '$trans_type' found for $device", ERROR )
             and return;
     }
     use strict 'refs';
@@ -385,7 +386,7 @@ sub trans_delta {
 
     # Check our parent oids for any errors
     if ( not validate_deps( $device, $oids, $oid, [$dep_oid], '^[-+]?\d+(\.\d+)?$' ) ) {
-        do_log( "DEBUG TEST: Delta transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "Delta transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
         return;
     }
 
@@ -440,7 +441,7 @@ sub trans_delta {
 
                         # Otherwise something is seriously wrong
                     } else {
-                        do_log( "Data type too large for leaf $leaf of  " . "$dep_oid on $device.", 0 );
+                        do_log( "Data type too large for leaf $leaf of $dep_oid on $device.", WARN );
                         $oid_h->{val}{$leaf}   = 'Too large';
                         $oid_h->{time}{$leaf}  = time;
                         $oid_h->{color}{$leaf} = 'yellow';
@@ -448,7 +449,7 @@ sub trans_delta {
                         next LEAF;
                     }
 
-                    do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data " . "last: $last_data delta: $delta", 4 ) if $g{debug};
+                    do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG ) if $g{debug};
 
                     # Otherwise do normal delta calc
                 } else {
@@ -524,7 +525,7 @@ sub trans_delta {
 
                     # Otherwise something is seriously wrong
                 } else {
-                    do_log( "Data type too large for $dep_oid on $device.", 0 );
+                    do_log( "Data type too large for $dep_oid on $device.", ERROR );
 
                     $oid_h->{val}   = undef;
                     $oid_h->{time}  = time;
@@ -533,7 +534,7 @@ sub trans_delta {
                     return;
                 }
 
-                do_log( "Counterwrap on $oid on $device (this: $this_data " . "last: $last_data delta: $delta", 4 )
+                do_log( "Counterwrap on $oid on $device (this: $this_data last: $last_data delta: $delta", DEBUG )
                     if $g{debug};
 
                 # Otherwise do normal delta calc
@@ -596,7 +597,7 @@ sub trans_math {
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids, '^[-+]?\d+(\.\d+)?$' ) ) {
 
         #if ( not validate_deps($device, $oids, $oid, \@dep_oids ) ) {
-        do_log( "DEBUG TEST: Math transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "Math transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
         return;
     }
 
@@ -650,7 +651,7 @@ sub trans_math {
                     #delete $oid_h->{thresh}{$leaf};
 
                 } else {
-                    do_log( "ERROR TEST: Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)", 1 );
+                    do_log( "Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)", ERROR );
                     $oid_h->{val}{$leaf}   = undef;
                     $oid_h->{color}{$leaf} = 'clear';
                     $oid_h->{msg}{$leaf}   = $@;
@@ -681,7 +682,7 @@ sub trans_math {
                 $oid_h->{color} = 'clear';
                 $oid_h->{msg}   = '';
             } else {
-                do_log( "ERROR TEST: Failed eval for TRANS_MATH on $oid: $expr ($@)", 1 );
+                do_log( "Failed eval for TRANS_MATH on $oid: $expr ($@)", ERROR );
                 $oid_h->{val}   = undef;
                 $oid_h->{color} = 'clear';
                 $oid_h->{msg}   = $@;
@@ -907,7 +908,7 @@ sub trans_pack {
             my @packed = split $seperator, $dep_oid_h->{val}{$leaf};
             my $val    = pack $type, @packed;
 
-            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", 4 ) if $g{debug};
+            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", DEBUG ) if $g{debug};
 
             $oid_h->{val}{$leaf} = $val;
         }
@@ -1080,7 +1081,7 @@ sub trans_eval {
             if ( $@ =~ /^Undefined subroutine/ ) {
                 $result = 0;
             } elsif ($@) {
-                do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)");
+                do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)", WARN);
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{color}{$leaf} = 'clear';
                 $oid_h->{error}{$leaf} = 1;
@@ -1100,7 +1101,7 @@ sub trans_eval {
         if ( $@ =~ /^Undefined subroutine/ ) {
             $result = 0;
         } elsif ($@) {
-            do_log("Failed eval for TRANS_STR on $oid: $expr ($@)");
+            do_log("Failed eval for TRANS_STR on $oid: $expr ($@)", WARN);
             $oid_h->{val}   = 'Failed eval';
             $oid_h->{color} = 'clear';
             $oid_h->{error} = 1;
@@ -1834,7 +1835,7 @@ sub trans_switch {
             my $dep_color;
             my $dep_msg;
             if ( $oids->{$dep_oid}{repeat} ) {
-                do_log( "Cant switch to a repeater OID when using a non-repeater" . "source OID for trans_switch on $oid", 0 );
+                do_log( "Cant switch to a repeater OID when using a non-repeater source OID for trans_switch on $oid", WARN );
                 $dep_val   = undef;
                 $dep_error = 1;
                 $dep_color = 'yellow';
@@ -1917,7 +1918,7 @@ sub trans_regsub {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids ) ) {
-        do_log( "DEBUG TEST: Regsub transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "Regsub transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
         return;
     }
 
@@ -1953,7 +1954,7 @@ sub trans_regsub {
             my $result;
             $result = eval "\$exp_val =~ s$expr";
             if ($@) {
-                do_log( "ERROR TEST: Failed eval for REGSUB transform on leaf $leaf of " . "$oid on $device ($@)", 1 );
+                do_log( "Failed eval for REGSUB transform on leaf $leaf of $oid on $device ($@)", ERROR );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{color}{$leaf} = 'clear';
 
@@ -1970,7 +1971,7 @@ sub trans_regsub {
         my $result  = eval "\$exp_val =~ s$expr";
 
         if ($@) {
-            do_log( "Failed eval for REGSUB transform on $oid on $device ($@)", 0 );
+            do_log( "Failed eval for REGSUB transform on $oid on $device ($@)", WARN );
             $oid_h->{val}   = 'Failed eval';
             $oid_h->{color} = 'clear';
 
@@ -2015,7 +2016,7 @@ sub trans_chain {
 
     # Our target MUST be a repeater type oid
     if ( !$trg_h->{repeat} ) {
-        do_log( "Trying to chain a non-repeater target on $device ($@)", 0 );
+        do_log( "Trying to chain a non-repeater target on $device ($@)", WARN );
         $oid_h->{repeat} = 0;
         $oid_h->{val}    = 'Failed chain';
         $oid_h->{time}   = time;
@@ -2142,7 +2143,7 @@ sub trans_coltre {
 
     # Our source MUST be a repeater type oid
     if ( !$trg_h->{repeat} ) {
-        do_log( "Trying to COLTRE a non-repeater 1rst oid on $device ($@)", 0 );
+        do_log( "Trying to COLTRE a non-repeater 1rst oid on $device ($@)", WARN );
         $oid_h->{repeat} = 0;
         $oid_h->{val}    = 'Failed coltre';
         $oid_h->{time}   = time;
@@ -2150,7 +2151,7 @@ sub trans_coltre {
 
         # Our target MUST be a repeater type oid
     } elsif ( !$trg_h->{repeat} ) {
-        do_log( "Trying to COLTRE a non-repeater 2nd oid on $device ($@)", 0 );
+        do_log( "Trying to COLTRE a non-repeater 2nd oid on $device ($@)", WARN );
         $oid_h->{repeat} = 0;
         $oid_h->{val}    = 'Failed coltre';
         $oid_h->{time}   = time;
@@ -2209,12 +2210,12 @@ sub trans_sort {
     #validate_deps( $device, $oids, $oid, [$src_oid] )
     #    or return;
 
-    do_log( "DEBUG TEST: Transforming $src_oid to $oid via 'sort' transform", 5 ) if $g{debug};
+    do_log( "Transforming $src_oid to $oid via 'sort' transform", DEBUG ) if $g{debug};
 
     # This transform should probably only work for repeater sources
     my $src_h = \%{ $oids->{$src_oid} };
     if ( !$src_h->{repeat} ) {
-        do_log( "Trying to SORT a non-repeater source on $device ($@)", 0 );
+        do_log( "Trying to SORT a non-repeater source on $device ($@)", WARN );
         return;
     } else {
 
@@ -2316,11 +2317,11 @@ sub trans_index {
 
     # we do not validate our dependencies as we are  working ony on index
     if ( not validate_deps( $device, $oids, $oid, [$src_oid] ) ) {
-        do_log( "DEBUG TEST: Index transform on $device/$oid do not have valid dependencies: skipping", 4 ) if $g{debug};
+        do_log( "Index transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
 
         # We can use old keys of val stored in current oid, if they existi (inormally should)
         if ( defined $old_oid_h->{val} ) {
-            do_log( "INFOR TEST: Recover index transform as it was previously defined", 3 );
+            do_log( "Recover index transform as it was previously defined", INFO );
             $src_h = $old_oid_h;           # use iteself as it has save its key and we dont have them from the dependent oid
             $oids->{$oid} = $old_oid_h;    # copy back the saved hash
         } else {
@@ -2331,7 +2332,7 @@ sub trans_index {
 
     # This transform should probably only work for repeater sources
     if ( !$src_h->{repeat} ) {
-        do_log( "ERROR TEST: Trying to index a non-repeater source on $device ($@)", 0 );
+        do_log( "Trying to index a non-repeater source on $device ($@)", ERROR );
         return;
     } else {
 
@@ -2404,7 +2405,7 @@ sub trans_match {
 
     # This transform should probably only work for repeater sources
     if ( !$src_h->{repeat} ) {
-        do_log( "Trying to index a non-repeater source on $device ($@)", 0 );
+        do_log( "Trying to index a non-repeater source on $device ($@)", WARN );
         return;
     } elsif ( defined $src_h->{error} and ( ref $src_h->{error} ne ref {} ) and $src_h->{error} == 1 ) {
         $oid_h->{color}  = $src_h->{color};
@@ -2443,13 +2444,13 @@ sub trans_match {
 
             my $result = eval "\$res = \$val =~ m$expr";
             if ($@) {
-                do_log( "Failed eval for MATCH transform on leaf $leaf of " . "$oid on $device ($@)", 0 );
+                do_log( "Failed eval for MATCH transform on leaf $leaf of $oid on $device ($@)", WARN );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{time}{$leaf}  = time;
                 $oid_h->{color}{$leaf} = 'clear';
                 next;
             }
-            do_log( "DEBUG TEST: $val matched $expr, assigning new row $idx from old row $leaf", 0 )
+            do_log( "$val matched $expr, assigning new row $idx from old row $leaf", DEBUG )
                 if $g{debug} and $res;
             next unless $res;
 
@@ -2503,7 +2504,7 @@ sub render_msg {
     my $hostname     = $device;
     $hostname =~ s/\./,/g;
 
-    do_log( "DEBUG TEST: Rendering $test message for $device", 4 ) if $g{debug};
+    do_log( "Rendering $test message for $device", DEBUG ) if $g{debug};
 
     # Build readable timestamp
     my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
@@ -2551,7 +2552,7 @@ ALARM_OID: foreach my $alarm_oid ( keys %alarm_oids ) {
 
                 # Mark this oid has not having to participate in the
                 # worst color computation
-                do_log( "DEBUG TEST: $alarm_oid of $test on $device do not compute worst color ", 5 ) if $g{debug};
+                do_log( "$alarm_oid of $test on $device do not compute worst color ", TRACE ) if $g{debug};
 
                 $no_global_wcolor{$alarm_oid} = 1;
                 next ALARM_OID;
@@ -2672,7 +2673,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             # Make the first oid (from left to right) the primary one
             my $pri = $1 if $line =~ /\{(.+?)\}/;
             if ( !defined $pri ) {
-                do_log( "No primary OID found for $test test for $device", 0 );
+                do_log( "No primary OID found for $test test for $device", WARN );
                 $msg .= "&yellow No primary OID found.\n";
                 $worst_color = 'yellow';
                 next;
@@ -2691,7 +2692,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Make sure our primary OID is a repeater
             if ( !$oids->{$pri}{repeat} ) {
-                do_log( "ERROR TEST: Primary OID $pri in $test table is a non-repeater", 1 );
+                do_log( "Primary OID $pri in $test table is a non-repeater", ERROR );
                 $msg .= "&yellow primary OID $pri in table is a non-repeater\n";
                 $worst_color = 'yellow';
                 next;
@@ -2778,7 +2779,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
 
                     if ( !defined $val ) {
-                        do_log( "INFOR TEST: Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", 3 ) if $g{trace};
+                        do_log( "Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", TRACE ) if $g{trace};
                         $val = 'NoOID';
 
                         #next T_LEAF;
@@ -2871,7 +2872,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # If this test has a worse color, use it for the global color
                             # but verify first that this test should compute the worst color
                             if ( $no_global_wcolor{$oid} ) {
-                                do_log( "RENDER WARNING: $oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", 0 );
+                                do_log( "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", DEBUG );
 
                                 # Get oid msg and replace any inline oid dependencies
                             } else {
@@ -2982,7 +2983,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 my $pri       = $rrd{$name}{pri};
                 my $do_max    = $rrd{$name}{do_max};
 
-                do_log("WARNI TEST: Couldn't fetch primary oid for rrd set $name")
+                do_log("Couldn't fetch primary oid for rrd set $name",WARN)
                     and next
                     if $pri eq 'pri';
 
@@ -3006,7 +3007,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
                     if ( $temp_data =~ /^(U:)+/ ) {
 
-                        do_log( "WARNI TEST: Text values in data for rrd repeater, dropping rrd for $pri_val", 4 )
+                        do_log( "Text values in data for rrd repeater, dropping rrd for $pri_val", WARN )
                             if $g{debug};
                         next;
                     }
@@ -3085,7 +3086,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         # If this test has a worse color, use it for the global color
                         # but verify first that this test should compute the worst color
                         if ( $no_global_wcolor{$oid} ) {
-                            do_log( "RENDER WARNING: $oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", 0 );
+                            do_log( "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", INFO );
 
                             # Get oid msg and replace any inline oid dependencies
                         } else {
@@ -3127,7 +3128,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Unknown flag
                     } else {
-                        do_log("Unknown flag ($flag) for $oid on $device\n");
+                        do_log("Unknown flag ($flag) for $oid on $device\n",ERROR);
                     }
 
                 } else {
@@ -3275,7 +3276,7 @@ sub parse_deps {
             }
 
             if ( !defined $val ) {
-                do_log( "Missing msg data for $dep_oid on leaf $leaf", 1 );
+                do_log( "Missing msg data for $dep_oid on leaf $leaf", WARN );
                 $val = 'Undef';
             }
 
@@ -3292,7 +3293,7 @@ sub parse_deps {
                 $val = $oid_h->{val};
             }
             if ( !defined $val ) {
-                do_log( "Missing msg data for $dep_oid", 1 );
+                do_log( "Missing msg data for $dep_oid", WARN );
                 $val = 'Undef';
             }
         }
@@ -3307,9 +3308,9 @@ sub parse_deps {
 sub apply_threshold {
     my ( $oids, $thr, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
-    if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and $oid_h->{color} eq "clear" ) ) {
+    #if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and $oid_h->{color} eq "clear" ) ) {
+    if ( $oid_h->{repeat} and defined $oid_h->{val} and not (defined $oid_h->{color} and (ref $oid_h->{color} ne 'HASH'))) {
 
-        #if ( $oid_h->{repeat} and defined $oid_h->{val}) {
 
     APTHRLEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
             my %oid_r;
@@ -3318,31 +3319,35 @@ sub apply_threshold {
             $oid_r{msg}    = \$oid_h->{msg}{$leaf};
             $oid_r{error}  = \$oid_h->{error}{$leaf};
             $oid_r{thresh} = \$oid_h->{thresh}{$leaf};
+            if ( !defined ${ $oid_r{color} } ) {
+              ${ $oid_r{color} } = 'green';
+            }
 
             # Skip to next if there is an error as color is already defined
             if ( defined ${ $oid_r{val} } ) {
 
-                #my $oid_val                 = $oid_h->{val}{$leaf};
                 my $oid_val                 = ${ $oid_r{val} };
                 my $thresh_confidence_level = 0;                  # 7 Exact match, 6 Interval match, 5 smart-match,
                                                                   # 4 Negative smart-match, 3 Negative match, 2 Colored_Automatch
                                                                   # 1 Automatch
 
-                if ( !defined ${ $oid_r{color} } ) {
-                    ${ $oid_r{color} } = 'green';
-                }
-                my $oid_color = ${ $oid_r{color} };
+                #if ( !defined ${ $oid_r{color} } ) {
+                #    ${ $oid_r{color} } = 'green';
+                #}
+                #my $oid_color = ${ $oid_r{color} };
 
                 #Apply custom thresholds (from xymon hosts.cfg)
                 if ( exists $thr->{$oid} ) {
                     my $thresh_h = \%{ $thr->{$oid} };
-                    apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
+                    #apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
+                    apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
                 }
 
                 # Apply template thresholds (from file)
                 if ( exists $oid_h->{threshold} ) {
                     my $thresh_h = \%{ $oid_h->{threshold} };
-                    apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
+                    #apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
+                    apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
                 }
             }
             my $color = ${ $oid_r{color} };
@@ -3353,7 +3358,7 @@ sub apply_threshold {
             } elsif ( $color eq 'yellow' ) {
             } elsif ( $color eq 'red' ) {
             } else {
-                do_log("ERROR TEST: Invalid color '${$oid_r{color}}' of '$oid'.'$leaf' ");
+                do_log("Invalid color '${$oid_r{color}}' of '$oid'.'$leaf' ",ERROR);
             }
             delete $oid_h->{thresh}{$leaf} unless ( defined ${ $oid_r{thresh} } );
             delete $oid_h->{msg}{$leaf}    unless ( defined ${ $oid_r{msg} } );
@@ -3418,7 +3423,7 @@ sub apply_threshold {
         } elsif ( $oid_h->{color} eq 'red' ) {
             return;
         }
-        do_log("ERROR TEST: Invalid color '$oid_h->{color}' of '$oid'");
+        do_log("Invalid color '$oid_h->{color}' of '$oid'",ERROR);
     }
 }
 
@@ -3720,7 +3725,7 @@ sub validate_deps {
 
                 } elsif ( defined $regex and $dep_val !~ /$regex/ ) {
 
-                    do_log("ERROR TEST: $dep_val mismatch $regex for dependent oid $dep_oid, leaf $leaf}");
+                    do_log("$dep_val mismatch $regex for dependent oid $dep_oid, leaf $leaf}",ERROR);
                     $oid_h->{val}{$leaf}   = "$dep_val mismatch $regex";
                     $oid_h->{color}{$leaf} = 'yellow';
                     $oid_h->{error}{$leaf} = 1;
@@ -3736,7 +3741,7 @@ sub validate_deps {
             } else {
 
                 #Throw one error message per leaf, to prevent log bloat
-                do_log( "DEBUG TEST: 'No valid dep for leaf '$leaf' on '$device'", 4 );
+                do_log( "'No valid dep for leaf '$leaf' on '$device'", DEBUG );
             }
         }
 
@@ -3815,7 +3820,7 @@ sub validate_deps {
             unless ($deps_valid) {
 
                 # Throw one error message
-                do_log( "TRACE TEST: Dependency '$dep_oid' error for $oid on $device", 5 );
+                do_log( "Dependency '$dep_oid' error for $oid on $device", TRACE );
 
                 last;
             }
