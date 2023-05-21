@@ -23,12 +23,12 @@ require Exporter;
 # The global option hash. Be afraid!
 use vars qw(%g);
 use constant {
-    FATAL  => 0,
-    ERROR  => 1,
-    WARN   => 2,
-    INFO   => 3,
-    DEBUG  => 4,
-    TRACE  => 5,
+    FATAL => 0,
+    ERROR => 1,
+    WARN  => 2,
+    INFO  => 3,
+    DEBUG => 4,
+    TRACE => 5,
 };
 
 # Modules
@@ -47,8 +47,6 @@ use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;    # Sort the keys in the output
 $Data::Dumper::Deepcopy = 1;    # Enable deep copies of structures
 $Data::Dumper::Indent   = 1;    # Output in a reasonable style (but no array indexes)
-
-
 
 # Load initial program values; only called once at program init
 sub initialize {
@@ -139,18 +137,18 @@ sub initialize {
         'xymon_color'  => {},
         'test_results' => [],
 
-
         # User-definable variable controls
         'globals' => {},
         'locals'  => {}
     );
-    # Logging 
-$g{log_level}[FATAL]="FATAL";
-$g{log_level}[ERROR]="ERROR";
-$g{log_level}[WARN]="WARN";
-$g{log_level}[INFO]="INFO";
-$g{log_level}[DEBUG]="DEBUG";
-$g{log_level}[TRACE]="TRACE";
+
+    # Logging
+    $g{log_level}[FATAL] = "FATAL";
+    $g{log_level}[ERROR] = "ERROR";
+    $g{log_level}[WARN]  = "WARN";
+    $g{log_level}[INFO]  = "INFO";
+    $g{log_level}[DEBUG] = "DEBUG";
+    $g{log_level}[TRACE] = "TRACE";
 
     # Our local options
     # 'set' indicates that the option is a local or a glocal option, first initialize all value to 0
@@ -485,7 +483,7 @@ $g{log_level}[TRACE]="TRACE";
 
     # hostonly mode (deprecated by poll)
     if ($hostonly) {
-        do_log( "hostonly is deprecated use '-p[oll]' instead",ERROR);
+        do_log( "hostonly is deprecated use '-p[oll]' instead", ERROR );
         if ( defined $poll or %match ) {
             usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only");
         } else {
@@ -585,7 +583,7 @@ $g{log_level}[TRACE]="TRACE";
             if ( $g{oneshot} ) {
                 $cmd_line .= " -1";
             }
-            do_log("$cmd_line",DEBUG);
+            do_log( "$cmd_line", DEBUG );
         }
     }
 
@@ -629,10 +627,11 @@ $g{log_level}[TRACE]="TRACE";
         $pid_handle->print( $g{mypid} );
         $pid_handle->close;
     }
+
     # Throw out a little info to the log
-    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---",$g{verbose});
-    do_log( "Logging to $g{logfile}",WARN) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
-    do_log( "Node#$g{my_nodenum}",INFO );
+    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---", $g{verbose} );
+    do_log( "Logging to $g{logfile}",                                                       WARN ) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
+    do_log( "Node#$g{my_nodenum}",                                                          INFO );
 
     # Dump some configs in debug mode
     if ( $g{debug} ) {
@@ -918,7 +917,7 @@ sub sync_servers {
                 if ( $active_nodes[ $this_node++ ] == $g{my_nodenum} ) {
 
                     # Make it ours, baby!
-                    my $result = db_do( "update devices set owner=$g{my_nodenum} where name='$device' and owner=0" );
+                    my $result = db_do("update devices set owner=$g{my_nodenum} where name='$device' and owner=0");
 
                     # Make sure out DB update went through
                     next if !$result;
@@ -950,7 +949,7 @@ sub sync_servers {
                     last if $my_num_tests > $avg_tests_node;
 
                     # Lets try and take this test
-                    my $result = db_do( "update devices set owner=$g{my_nodenum} where name='$device'" );
+                    my $result = db_do("update devices set owner=$g{my_nodenum} where name='$device'");
                     next if !$result;
 
                     # We got it!  Lets add it to our test_data hash
@@ -1377,51 +1376,49 @@ sub reopen_log {
 sub do_log {
     my ( $msg, $verbosity, $fork_num ) = @_;
     $verbosity = 2 if !defined $verbosity;
-    if ($g{verbose} >= $verbosity) {
-       my ($package, $filename, $line ) = caller;
-       if ($package ne 'main'){
+    if ( $g{verbose} >= $verbosity ) {
+        my ( $package, $filename, $line ) = caller;
+        if ( $package ne 'main' ) {
 
-       $package=substr $package, 3;
-        $package= $package ."($fork_num)" if defined $fork_num; 
-       } 
-         my ($sec, $frac) = gettimeofday;
-         $frac = sprintf("%03d", $frac/1000);
-         my $dateISO8601 = strftime ('%Y-%m-%dT%H:%M:%S.'.$frac.'%z', localtime($sec));
-         
-    
-         $msg = $dateISO8601 ."|". (sprintf "%-5s" ,$g{log_level}[$verbosity]) .'|'. (sprintf "%-9s" ,$package) .'|'. (sprintf "%5s",$$) .'|'. (sprintf "%4s" ,$line) ."|". $msg;
-      my $matched = 1;
-      #if ($g{debug} and not (@{ $g{debug_context_ref} } == 1 and $g{debug_context_ref}->[0] eq '')) {   
-      if ($g{log_match_ref} and not (@{ $g{log_match_ref} } == 1 and $g{log_match_ref}->[0] eq '')) {
-           $matched=0;
-           for my $match (@{$g{log_match_ref}}) { 
-              if (index($msg, $match) != -1) {
-                 $matched = 1;
-                 last;
-              }
-            }
-       }
-       if ($g{log_filter_ref} and not (@{ $g{log_filter_ref} } == 1 and $g{log_filter_ref}->[0] eq '')) {
-          for my $match (@{$g{log_filter_ref}}) {
-              if (index($msg, $match) != -1) {
-                 $matched = 0;
-                 last;
-               }
-            }
-      }
-               
-    if ($matched) { 
-    
-      
-
-      
-        if ( defined $g{log} and $g{log} ne '' ) {
-           $g{log}->print("$msg\n") if $g{verbose} >= $verbosity;
-         } else {
-           print "$msg\n" if $g{verbose} >= $verbosity;
-        #return 1;
+            $package = substr $package, 3;
+            $package = $package . "($fork_num)" if defined $fork_num;
         }
-      }
+        my ( $sec, $frac ) = gettimeofday;
+        $frac = sprintf( "%03d", $frac / 1000 );
+        my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . $frac . '%z', localtime($sec) );
+
+        $msg = $dateISO8601 . "|" . ( sprintf "%-5s", $g{log_level}[$verbosity] ) . '|' . ( sprintf "%-9s", $package ) . '|' . ( sprintf "%5s", $$ ) . '|' . ( sprintf "%4s", $line ) . "|" . $msg;
+        my $matched = 1;
+
+        #if ($g{debug} and not (@{ $g{debug_context_ref} } == 1 and $g{debug_context_ref}->[0] eq '')) {
+        if ( $g{log_match_ref} and not( @{ $g{log_match_ref} } == 1 and $g{log_match_ref}->[0] eq '' ) ) {
+            $matched = 0;
+            for my $match ( @{ $g{log_match_ref} } ) {
+                if ( index( $msg, $match ) != -1 ) {
+                    $matched = 1;
+                    last;
+                }
+            }
+        }
+        if ( $g{log_filter_ref} and not( @{ $g{log_filter_ref} } == 1 and $g{log_filter_ref}->[0] eq '' ) ) {
+            for my $match ( @{ $g{log_filter_ref} } ) {
+                if ( index( $msg, $match ) != -1 ) {
+                    $matched = 0;
+                    last;
+                }
+            }
+        }
+
+        if ($matched) {
+
+            if ( defined $g{log} and $g{log} ne '' ) {
+                $g{log}->print("$msg\n") if $g{verbose} >= $verbosity;
+            } else {
+                print "$msg\n" if $g{verbose} >= $verbosity;
+
+                #return 1;
+            }
+        }
     }
 
     #print "$ts $msg\n" if $g{verbose} > $verbosity;
@@ -1457,7 +1454,7 @@ sub db_connect {
     }
 
     do_log( "Connecting to DB", INFO ) if !defined $silent;
-    $g{dbh}->disconnect()                          if defined $g{dbh} and $g{dbh} ne '';
+    $g{dbh}->disconnect()              if defined $g{dbh} and $g{dbh} ne '';
 
     # 5 connect attempts
     my $try;
@@ -2182,9 +2179,9 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                             # If they are an old host, the host is updated
                             if ( defined $old_hosts{$host} ) {
-                                do_log( "$host updated with new settings",INFO );
+                                do_log( "$host updated with new settings",                               INFO );
                                 do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
-                                do_log( "NEW: $vendor, $model, ...",INFO );
+                                do_log( "NEW: $vendor, $model, ...",                                     INFO );
 
                             } else {
                                 do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
@@ -2330,11 +2327,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                                 # If they are an old host, the host is updated
                                                 if ( defined $old_hosts{$host} ) {
-                                                    do_log( "$host updated with new settings",INFO );
+                                                    do_log( "$host updated with new settings",                               INFO );
                                                     do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
-                                                    do_log( "NEW: $vendor, $model, ...", INFO );
+                                                    do_log( "NEW: $vendor, $model, ...",                                     INFO );
                                                 } else {
-                                                    do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc",INFO );
+                                                    do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
                                                 }
                                                 last CUSTOMVENDOR;
                                             }
@@ -2883,9 +2880,9 @@ sub quit {
     # Only run this if we are the parent process
     if ( $g{parent} ) {
         do_log( "Shutting down", INFO ) if $g{initialized};
-        unlink $g{pidfile}                       if $g{initialized} and -e $g{pidfile};
-        $g{log}->close                           if defined $g{log} and $g{log} ne '';
-        $g{dbh}->disconnect()                    if defined $g{dbh} and $g{dbh} ne '';
+        unlink $g{pidfile}              if $g{initialized} and -e $g{pidfile};
+        $g{log}->close                  if defined $g{log} and $g{log} ne '';
+        $g{dbh}->disconnect()           if defined $g{dbh} and $g{dbh} ne '';
 
         # Clean up our forks if we left any behind, first by killing them nicely
         for my $fork ( keys %{ $g{forks} } ) {

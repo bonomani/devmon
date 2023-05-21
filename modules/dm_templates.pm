@@ -546,7 +546,7 @@ sub read_oids_file {
         do_log( "$oids_file successfully parsed", INFO );
     } else {
         do_log( "$oids_file is empty", WARN );    # Only
-                                                           #$tmpl->{file}{$oids_file}{non_empty} = 0;
+                                                  #$tmpl->{file}{$oids_file}{non_empty} = 0;
     }
     $tmpl->{file}{$oids_file}{changed} = 1;
 
@@ -985,7 +985,7 @@ sub calc_template_test_deps {
     # load oid from trans_file
     foreach my $oid ( keys %{ $tmpl->{file}{$trans_file}{oids} } ) {
         if ( exists $tmpl->{new_oids}{$oid} ) {
-            do_log("Attenpt to redefined $oid", ERROR );
+            do_log( "Attenpt to redefined $oid", ERROR );
             next;
         }
         $tmpl->{new_oids}{$oid} = dclone $tmpl->{file}{$trans_file}{oids}{$oid};
