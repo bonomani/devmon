@@ -1384,13 +1384,11 @@ sub do_log {
             $package = $package . "($fork_num)" if defined $fork_num;
         }
         my ( $sec, $frac ) = gettimeofday;
-        $frac = sprintf( "%03d", $frac / 1000 );
-        my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . $frac . '%z', localtime($sec) );
 
+        #$frac = sprintf( "%03d", $frac / 1000 );
+        my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . ( sprintf "%03d", $frac / 1000 ) . '%z', localtime($sec) );
         $msg = $dateISO8601 . "|" . ( sprintf "%-5s", $g{log_level}[$verbosity] ) . '|' . ( sprintf "%-9s", $package ) . '|' . ( sprintf "%5s", $$ ) . '|' . ( sprintf "%4s", $line ) . "|" . $msg;
         my $matched = 1;
-
-        #if ($g{debug} and not (@{ $g{debug_context_ref} } == 1 and $g{debug_context_ref}->[0] eq '')) {
         if ( $g{log_match_ref} and not( @{ $g{log_match_ref} } == 1 and $g{log_match_ref}->[0] eq '' ) ) {
             $matched = 0;
             for my $match ( @{ $g{log_match_ref} } ) {
@@ -1408,21 +1406,14 @@ sub do_log {
                 }
             }
         }
-
         if ($matched) {
-
             if ( defined $g{log} and $g{log} ne '' ) {
                 $g{log}->print("$msg\n") if $g{verbose} >= $verbosity;
             } else {
                 print "$msg\n" if $g{verbose} >= $verbosity;
-
-                #return 1;
             }
         }
     }
-
-    #print "$ts $msg\n" if $g{verbose} > $verbosity;
-
     return 1;
 }
 

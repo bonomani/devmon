@@ -1111,7 +1111,7 @@ EOF
                                     }
                                 }
 
-                                # case1: no answe but alive and should answer
+                                # case1: no answer but alive and should answer
                                 #
                             } elsif ( $session->{ErrorNum} == -58 ) {
                                 do_log( "End of mib on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", ERROR, $fork_num );
@@ -1120,120 +1120,131 @@ EOF
                             } else {
                                 do_log( "Cannot do bulkwalk on device $dev: $session->{ErrorStr} ($session->{ErrorNum})", ERROR, $fork_num );
                             }
-                            undef $session;
-
-                        } elsif ( ( scalar @nrresp ) == 0 ) {
+                        } elsif ( ( ( scalar @nrresp ) == 0 ) or ( ( scalar @nrresp ) == 1 and ( !scalar @{ $nrresp[1] // [] } ) ) ) {
                             do_log( "Empty answer from device $dev without an error message", ERROR, $fork_num );
                             undef $session;
-
                         }
-
-                        # Now that the polling is done and we have some the answers, first calc the time
-                        ${$polling_time_cur} = time() - $begin_time;
-                        if ( !defined ${$polling_time_avg} ) {
-                            ${$polling_time_avg} = ${$polling_time_cur};
-                            ${$polling_time_max} = ${$polling_time_cur};
-                            ${$polling_time_min} = ${$polling_time_cur};
-                        } else {
-                            ${$polling_time_avg} = ( ( ${$polling_time_avg} * ( ${$run_count} - 1 ) ) + ${$polling_time_cur} ) / ${$run_count};
-                            ${$polling_time_max} = ${$polling_time_cur} if ${$polling_time_max} < ${$polling_time_cur};
-                            ${$polling_time_min} = ${$polling_time_cur} if ${$polling_time_min} > ${$polling_time_cur};
+                        if ( ( defined $session ) and ( ( ( scalar @nrresp ) == 0 ) or ( ( scalar @nrresp ) == 1 and ( !scalar @{ $nrresp[1] // [] } ) ) ) ) {
+                            do_log( "Empty answer from device $dev", WARN, $fork_num );
+                            undef $session;
                         }
+                        if ( defined $session ) {
 
-                        # Now that the polling is done we have to process the answers
-                        my @oids = ( keys %{ $data_in{'reps'} }, keys %{ $data_in{'nonreps'} } );
-                        ${$oid_count} = scalar @oids;
-
-                        # Check first that we have some answer
-                        $vbarr_counter = 0;
-                        foreach my $vbarr (@nrresp) {
-                            my $snmp_poll_oid = $$nrvars[$vbarr_counter]->tag();
-                            if ( !scalar @{ $vbarr // [] } ) {    # there is no response (vbarr) or an undefined one #BUG74. TODO: Make it more explicit + Change error to warn if we can handle it properly
-                                do_log( "Empty polled oid $snmp_poll_oid on device $dev", ERROR, $fork_num );
-                            }
-                            $vbarr_counter++;
-                        }
-
-                    OID: foreach my $oid_wo_dot (@oids) {         # INVERSING OID AND VBARR loop should increase perf)
-                            my $found = 0;
-                            my $oid   = "." . $oid_wo_dot;
                             $vbarr_counter = 0;
-                        VBARR: foreach my $vbarr (@nrresp) {
-
-                                # Same test as one above, can probably be optimzed
-                                if ( !scalar @{ $vbarr // [] } ) {
-                                    $vbarr_counter++;
-                                    next;
-                                }
-
-                                # Determine which OID this request queried.  This is kept in the VarList
-                                # reference passed to bulkwalk().
-                                my $polled_oid          = ${ $poll_oid->{$oid}{oid} };    # Always the same as the SNMP POLLED OID: poid=spoid
-                                my $stripped_oid        = substr $oid,        1;
-                                my $stripped_polled_oid = substr $polled_oid, 1;
-                                my $snmp_poll_oid       = $$nrvars[$vbarr_counter]->tag();
-                                my $leaf_table_found    = 0;
-
-                                if ( not defined $snmp_poll_oid ) {
-                                    do_log( "$snmp_poll_oid not defined for device $dev, oid $oid", WARN, $fork_num );
-                                    @remain_oids = push( @remain_oids, $oid );
-                                    ${$path_is_slow} = 1;
-                                    $vbarr_counter++;
-                                    next;
-                                }
-
-                                foreach my $nrv (@$vbarr) {
-                                    my $snmp_oid  = $nrv->name;
-                                    my $snmp_val  = $nrv->val;
-                                    my $snmp_type = $nrv->type;
-
-                                    #do_log( "_DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
-                                    if ( $snmp_poll_oid eq $oid ) {
-
-                                        do_log( "oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", DEBUG, $fork_num ) if $g{debug};
-                                        my $leaf = substr( $snmp_oid, length($oid) + 1 );
-                                        $data_out{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
-                                        $data_out{$stripped_oid}{'time'}{$leaf} = time;
-                                        $leaf_table_found++;
-
-                                    } elsif ( $snmp_oid eq $oid ) {
-                                        $found = 1;
-                                        do_log( "oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", TRACE, $fork_num ) if $g{debug};
-                                        $data_out{$stripped_oid}{val}  = $snmp_val;
-                                        $data_out{$stripped_oid}{time} = time;
-                                        $oid_found++;
-                                        next OID;
-                                    }
-                                }
-                                if ( $leaf_table_found > 0 ) {
-                                    $found = 1;
-                                    $oid_found++;
-                                    next OID;
+                            foreach my $vbarr (@nrresp) {
+                                my $snmp_poll_oid = $$nrvars[$vbarr_counter]->tag();
+                                if ( !scalar @{ $vbarr // [] } ) {    # there is no response (vbarr) or an undefined one #BUG74. TODO: Make it more explicit + Change error to warn if we can handle it properly
+                                    do_log( "Empty polled oid $snmp_poll_oid on device $dev", ERROR, $fork_num );
                                 }
                                 $vbarr_counter++;
                             }
-                            if ( !$found ) {
-                                do_log( "No polled oid for $oid on device $dev", ERROR, $fork_num );
 
+                            # Now that the polling is done and we have some the answers, first calc the time
+                            ${$polling_time_cur} = time() - $begin_time;
+                            if ( !defined ${$polling_time_avg} ) {
+                                ${$polling_time_avg} = ${$polling_time_cur};
+                                ${$polling_time_max} = ${$polling_time_cur};
+                                ${$polling_time_min} = ${$polling_time_cur};
+                            } else {
+                                ${$polling_time_avg} = ( ( ${$polling_time_avg} * ( ${$run_count} - 1 ) ) + ${$polling_time_cur} ) / ${$run_count};
+                                ${$polling_time_max} = ${$polling_time_cur} if ${$polling_time_max} < ${$polling_time_cur};
+                                ${$polling_time_min} = ${$polling_time_cur} if ${$polling_time_min} > ${$polling_time_cur};
+                            }
+
+                            # Now that the polling is done we have to process the answers
+                            my @oids = ( keys %{ $data_in{'reps'} }, keys %{ $data_in{'nonreps'} } );
+                            ${$oid_count} = scalar @oids;
+
+                            # Check first that we have some answer
+                            $vbarr_counter = 0;
+                            foreach my $vbarr (@nrresp) {
+                                my $snmp_poll_oid = $$nrvars[$vbarr_counter]->tag();
+                                if ( !scalar @{ $vbarr // [] } ) {    # there is no response (vbarr) or an undefined one #BUG74. TODO: Make it more explicit + Change error to warn if we can handle it properly
+                                    do_log( "Empty polled oid $snmp_poll_oid on device $dev", ERROR, $fork_num );
+                                }
+                                $vbarr_counter++;
+                            }
+
+                        OID: foreach my $oid_wo_dot (@oids) {         # INVERSING OID AND VBARR loop should increase perf)
+                                my $found = 0;
+                                my $oid   = "." . $oid_wo_dot;
+                                $vbarr_counter = 0;
+                            VBARR: foreach my $vbarr (@nrresp) {
+
+                                    # Same test as one above, can probably be optimzed
+                                    if ( !scalar @{ $vbarr // [] } ) {
+                                        $vbarr_counter++;
+                                        next;
+                                    }
+
+                                    # Determine which OID this request queried.  This is kept in the VarList
+                                    # reference passed to bulkwalk().
+                                    my $polled_oid          = ${ $poll_oid->{$oid}{oid} };    # Always the same as the SNMP POLLED OID: poid=spoid
+                                    my $stripped_oid        = substr $oid,        1;
+                                    my $stripped_polled_oid = substr $polled_oid, 1;
+                                    my $snmp_poll_oid       = $$nrvars[$vbarr_counter]->tag();
+                                    my $leaf_table_found    = 0;
+
+                                    if ( not defined $snmp_poll_oid ) {
+                                        do_log( "$snmp_poll_oid not defined for device $dev, oid $oid", WARN, $fork_num );
+                                        @remain_oids = push( @remain_oids, $oid );
+                                        ${$path_is_slow} = 1;
+                                        $vbarr_counter++;
+                                        next;
+                                    }
+
+                                    foreach my $nrv (@$vbarr) {
+                                        my $snmp_oid  = $nrv->name;
+                                        my $snmp_val  = $nrv->val;
+                                        my $snmp_type = $nrv->type;
+
+                                        #do_log( "_DEBUG SNMP($fork_num): oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", 5 ) if $g{debug};
+                                        if ( $snmp_poll_oid eq $oid ) {
+
+                                            do_log( "oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", DEBUG, $fork_num ) if $g{debug};
+                                            my $leaf = substr( $snmp_oid, length($oid) + 1 );
+                                            $data_out{$stripped_oid}{'val'}{$leaf}  = $snmp_val;
+                                            $data_out{$stripped_oid}{'time'}{$leaf} = time;
+                                            $leaf_table_found++;
+
+                                        } elsif ( $snmp_oid eq $oid ) {
+                                            $found = 1;
+                                            do_log( "oid:$oid poid:$polled_oid soid:$snmp_oid spoid:$snmp_poll_oid svoid:$snmp_val stoid:$snmp_type", TRACE, $fork_num ) if $g{debug};
+                                            $data_out{$stripped_oid}{val}  = $snmp_val;
+                                            $data_out{$stripped_oid}{time} = time;
+                                            $oid_found++;
+                                            next OID;
+                                        }
+                                    }
+                                    if ( $leaf_table_found > 0 ) {
+                                        $found = 1;
+                                        $oid_found++;
+                                        next OID;
+                                    }
+                                    $vbarr_counter++;
+                                }
+                                if ( !$found ) {
+                                    do_log( "No polled oid for $oid on device $dev", ERROR, $fork_num );
+
+                                }
+                            }
+
+                            if ( $oid_found == ${$oid_count} ) {
+                                do_log( "Found $oid_found/${$oid_count} oids for device $dev", DEBUG, $fork_num ) if $g{debug};
+
+                            } else {
+
+                                # houston we have a problem
+                                do_log( "Found $oid_found/${$oid_count} oids for device $dev", ERROR, $fork_num );
+                                ${$path_is_slow} = 1;
+
+                                ############### do something to recover ##############START
+                                foreach my $oid (@remain_oids) {
+                                    do_log( "Unable to poll $oid on device $dev", ERROR, $fork_num );
+                                }
+                                ############### do something to recover ##############END
                             }
                         }
-
-                        if ( $oid_found == ${$oid_count} ) {
-                            do_log( "Found $oid_found/${$oid_count} oids for device $dev", DEBUG, $fork_num ) if $g{debug};
-
-                        } else {
-
-                            # houston we have a problem
-                            do_log( "Found $oid_found/${$oid_count} oids for device $dev", ERROR, $fork_num );
-                            ${$path_is_slow} = 1;
-
-                            ############### do something to recover ##############START
-                            foreach my $oid (@remain_oids) {
-                                do_log( "Unable to poll $oid on device $dev", ERROR, $fork_num );
-                            }
-                            ############### do something to recover ##############END
-                        }
-
                     }
                     send_data( $sock, \%data_out );
                     next DEVICE;
