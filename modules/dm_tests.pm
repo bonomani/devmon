@@ -266,7 +266,7 @@ sub oid_hash {
 
                 }
             } else {
-                do_log("No SNMP answer for '$oid' on '$device' (see notests) ", WARN);
+                do_log( "No SNMP answer for '$oid' on '$device' (see notests) ", WARN );
                 $oids->{$oid}{val}   = undef;
                 $oids->{$oid}{color} = "clear";
                 $oids->{$oid}{msg}   = "No SNMP answer for $oid";
@@ -477,7 +477,7 @@ sub trans_delta {
                 $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{val}{$leaf}  = $this_data;
                 $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{time}{$leaf} = $this_time;
                 push( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} }, $g{current_cycle} );
-                if ( (defined $hist->{oid}{$dep_oid}{keep_hist_count}) and ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
+                if ( ( defined $hist->{oid}{$dep_oid}{keep_hist_count} ) and ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
                     my $expired_hist_cycle = shift( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } );
                     delete( $hist->{oid}{$dep_oid}{hist}{$expired_hist_cycle} );
                 }
@@ -1081,7 +1081,7 @@ sub trans_eval {
             if ( $@ =~ /^Undefined subroutine/ ) {
                 $result = 0;
             } elsif ($@) {
-                do_log("Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)", WARN);
+                do_log( "Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)", WARN );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{color}{$leaf} = 'clear';
                 $oid_h->{error}{$leaf} = 1;
@@ -1101,7 +1101,7 @@ sub trans_eval {
         if ( $@ =~ /^Undefined subroutine/ ) {
             $result = 0;
         } elsif ($@) {
-            do_log("Failed eval for TRANS_STR on $oid: $expr ($@)", WARN);
+            do_log( "Failed eval for TRANS_STR on $oid: $expr ($@)", WARN );
             $oid_h->{val}   = 'Failed eval';
             $oid_h->{color} = 'clear';
             $oid_h->{error} = 1;
@@ -2983,7 +2983,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 my $pri       = $rrd{$name}{pri};
                 my $do_max    = $rrd{$name}{do_max};
 
-                do_log("Couldn't fetch primary oid for rrd set $name",WARN)
+                do_log( "Couldn't fetch primary oid for rrd set $name", WARN )
                     and next
                     if $pri eq 'pri';
 
@@ -3128,7 +3128,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Unknown flag
                     } else {
-                        do_log("Unknown flag ($flag) for $oid on $device\n",ERROR);
+                        do_log( "Unknown flag ($flag) for $oid on $device\n", ERROR );
                     }
 
                 } else {
@@ -3308,9 +3308,9 @@ sub parse_deps {
 sub apply_threshold {
     my ( $oids, $thr, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
-    #if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and $oid_h->{color} eq "clear" ) ) {
-    if ( $oid_h->{repeat} and defined $oid_h->{val} and not (defined $oid_h->{color} and (ref $oid_h->{color} ne 'HASH'))) {
 
+    #if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and $oid_h->{color} eq "clear" ) ) {
+    if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and ( ref $oid_h->{color} ne 'HASH' ) ) ) {
 
     APTHRLEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
             my %oid_r;
@@ -3320,7 +3320,7 @@ sub apply_threshold {
             $oid_r{error}  = \$oid_h->{error}{$leaf};
             $oid_r{thresh} = \$oid_h->{thresh}{$leaf};
             if ( !defined ${ $oid_r{color} } ) {
-              ${ $oid_r{color} } = 'green';
+                ${ $oid_r{color} } = 'green';
             }
 
             # Skip to next if there is an error as color is already defined
@@ -3339,6 +3339,7 @@ sub apply_threshold {
                 #Apply custom thresholds (from xymon hosts.cfg)
                 if ( exists $thr->{$oid} ) {
                     my $thresh_h = \%{ $thr->{$oid} };
+
                     #apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
                     apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
                 }
@@ -3346,6 +3347,7 @@ sub apply_threshold {
                 # Apply template thresholds (from file)
                 if ( exists $oid_h->{threshold} ) {
                     my $thresh_h = \%{ $oid_h->{threshold} };
+
                     #apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
                     apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
                 }
@@ -3358,7 +3360,7 @@ sub apply_threshold {
             } elsif ( $color eq 'yellow' ) {
             } elsif ( $color eq 'red' ) {
             } else {
-                do_log("Invalid color '${$oid_r{color}}' of '$oid'.'$leaf' ",ERROR);
+                do_log( "Invalid color '${$oid_r{color}}' of '$oid'.'$leaf' ", ERROR );
             }
             delete $oid_h->{thresh}{$leaf} unless ( defined ${ $oid_r{thresh} } );
             delete $oid_h->{msg}{$leaf}    unless ( defined ${ $oid_r{msg} } );
@@ -3423,7 +3425,7 @@ sub apply_threshold {
         } elsif ( $oid_h->{color} eq 'red' ) {
             return;
         }
-        do_log("Invalid color '$oid_h->{color}' of '$oid'",ERROR);
+        do_log( "Invalid color '$oid_h->{color}' of '$oid'", ERROR );
     }
 }
 
@@ -3725,7 +3727,7 @@ sub validate_deps {
 
                 } elsif ( defined $regex and $dep_val !~ /$regex/ ) {
 
-                    do_log("$dep_val mismatch $regex for dependent oid $dep_oid, leaf $leaf}",ERROR);
+                    do_log( "$dep_val mismatch $regex for dependent oid $dep_oid, leaf $leaf}", ERROR );
                     $oid_h->{val}{$leaf}   = "$dep_val mismatch $regex";
                     $oid_h->{color}{$leaf} = 'yellow';
                     $oid_h->{error}{$leaf} = 1;

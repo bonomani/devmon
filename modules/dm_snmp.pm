@@ -466,9 +466,9 @@ sub snmp_query {
                         }
 
                     } else {
-                        do_log("Fork $fork seems not to have replied to our ping, killing it", ERROR );
+                        do_log( "Fork $fork seems not to have replied to our ping, killing it", ERROR );
                         kill 15, $g{forks}{$fork}{pid} or do_log( "Sending $fork TERM signal failed: $!", ERROR );
-                        close $g{forks}{$fork}{CS} or do_log("Closing socket to fork $fork failed: $!", ERROR);
+                        close $g{forks}{$fork}{CS} or do_log( "Closing socket to fork $fork failed: $!", ERROR );
                         delete $g{forks}{$fork};
                         next;
                     }
@@ -516,7 +516,7 @@ sub fork_queries {
             ++$num and next if defined $g{forks}{$num};
             last;
         }
-        do_log("Starting fork number $num",DEBUG) if $g{debug};
+        do_log( "Starting fork number $num", DEBUG ) if $g{debug};
 
         # Open up our communication sockets
         socketpair(
@@ -526,7 +526,7 @@ sub fork_queries {
             SOCK_STREAM,
             PF_UNSPEC
             )
-            or do_log( "Unable to open forked socket pair ($!)", ERROR)
+            or do_log( "Unable to open forked socket pair ($!)", ERROR )
             and exit;
 
         $g{forks}{$num}{CS}->autoflush(1);
@@ -544,7 +544,7 @@ sub fork_queries {
         } elsif ( defined $pid ) {
 
             # Child code here
-            $g{parent} = 0;                                                              # We aren't the parent any more...
+            $g{parent} = 0;                                                      # We aren't the parent any more...
             do_log( "Fork $num using sockets $g{forks}{$num}{PS} <-> $g{forks}{$num}{CS} for IPC", DEBUG, $num )
                 if $g{debug};
             foreach ( sort { $a <=> $b } keys %{ $g{forks} } ) {
@@ -552,9 +552,9 @@ sub fork_queries {
                 $g{forks}{$_}{CS}->close
                     or do_log( "Closing socket for fork $_ failed: $!", ERROR );    # Same as above
             }
-            $0 = "devmon-$num";                                                             # Remove our 'master' tag
-            fork_sub($num);                                                                 # Enter our neverending query loop
-            exit;                                                                           # We should never get here, but just in case
+            $0 = "devmon-$num";                                                     # Remove our 'master' tag
+            fork_sub($num);                                                         # Enter our neverending query loop
+            exit;                                                                   # We should never get here, but just in case
         } else {
             do_log( "Spawning snmp worker fork ($!)", ERROR );
         }
@@ -615,7 +615,7 @@ DEVICE: while (1) {    # We should never leave this loop
         eval { %data_in = %{ thaw($serialized) }; };
         if ($@) {
             do_log( "Thaw failed attempting to thaw $serialized: $@", DEBUG, $fork_num ) if $g{debug};
-            do_log( "Replying to corrupt message with a pong", DEBUG, $fork_num ) if $g{debug};
+            do_log( "Replying to corrupt message with a pong",        DEBUG, $fork_num ) if $g{debug};
             $data_out{ping} = '0';
             $data_out{pong} = time;
             send_data( $sock, \%data_out );
@@ -707,7 +707,7 @@ DEVICE: while (1) {    # We should never leave this loop
             for ( my $index = 0; $index < $oids_num; $index++ ) {
                 ++$nrep_oids_temp_cpt;
                 push @nrep_oids_temp, $nrep_oids[$index];
-                do_log( "Adding ID => $nrep_oids_temp_cpt OID =>$nrep_oids_my[$index]", DEBUG, $fork_num)
+                do_log( "Adding ID => $nrep_oids_temp_cpt OID =>$nrep_oids_my[$index]", DEBUG, $fork_num )
                     if $g{debug};
 
                 #if ($nrep_oids_temp_cpt == 10) {
@@ -911,7 +911,7 @@ EOF
                 my $session = new SNMP::Session(%snmpvars);
 
                 if ( ( not defined $session ) or ( not $session ) ) {
-                    do_log("Undefined/existing Session on device $dev", INFO, $fork_num);
+                    do_log( "Undefined/existing Session on device $dev", INFO, $fork_num );
                     my $err;
                     unless ($!) {
 
@@ -944,7 +944,7 @@ EOF
                     }
 
                     my $error_str = "SNMP session did not start for device $dev: ${SNMP::ErrorStr} : $err";
-                    do_log("${SNMP::ErrorStr} : $err", WARN, $fork_num);
+                    do_log( "${SNMP::ErrorStr} : $err", WARN, $fork_num );
                     $data_out{error}{$error_str} = 1;
                     send_data( $sock, \%data_out );
                     undef $session;

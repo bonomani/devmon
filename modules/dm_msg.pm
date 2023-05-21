@@ -284,10 +284,10 @@ sub prepare_xymon_stat_msg {
     # but only if the runtime is long enough to show a meaningfull fraction.
     #
     my ( $snmp_poll_time, $test_time, $msg_xfr_time );
-        $snmp_poll_time = sprintf( "%6.2f s %5.2f", $g{snmppolltime}, $g{snmppolltime} / $this_poll_time * 100 ).' %';
-        $test_time      = sprintf( "%6.2f s %5.2f", $g{testtime},     $g{testtime} / $this_poll_time * 100 ).' %';
-        $msg_xfr_time   = sprintf( "%6.2f s %5.2f", $g{msgxfrtime},   $g{msgxfrtime} / $this_poll_time * 100 ).' %';
-    $this_poll_time = sprintf( "%6.2f s", $this_poll_time );
+    $snmp_poll_time = sprintf( "%6.2f s %5.2f", $g{snmppolltime}, $g{snmppolltime} / $this_poll_time * 100 ) . ' %';
+    $test_time      = sprintf( "%6.2f s %5.2f", $g{testtime},     $g{testtime} / $this_poll_time * 100 ) . ' %';
+    $msg_xfr_time   = sprintf( "%6.2f s %5.2f", $g{msgxfrtime},   $g{msgxfrtime} / $this_poll_time * 100 ) . ' %';
+    $this_poll_time = sprintf( "%6.2f s",       $this_poll_time );
 
     # Determine our number of clear msgs sent
     my $num_clear_branches = 0;
@@ -306,22 +306,22 @@ sub prepare_xymon_stat_msg {
     }
 
     my $message = "Devmon, version $g{version}\n\n";
-    $message   .= "Node name:           $g{nodename}\n";
-    $message   .= "Node number:         $g{my_nodenum}\n";
-    $message   .= "Process ID:          $g{mypid}\n\n";
-    $message   .= "Polled devices:      $g{numdevs}\n";
-    $message   .= "Polled tests:        $g{numtests}\n";
-    $message   .= "Avg tests/node:      $g{avgtestsnode}\n";
-    $message   .= "Clear branches:      $num_clear_branches\n";
-    $message   .= "Clear leaves:        $num_clear_leaves\n";
-    $message   .= "Xymon msg xfer size: $g{sentmsgsize}\n\n";
-    $message   .= "Cycle time:          ".sprintf( "%6.2f s\n", $g{cycletime} ) ;
-    $message   .= "Dead time:           ".sprintf( "%6.2f s\n\n", $g{deadtime} );
-    $message   .= "SNMP test time:      $snmp_poll_time\n";
-    $message   .= "Test logic time:     $test_time\n";
-    $message   .= "Xymon msg xfer time: $msg_xfr_time\n";
-    $message   .= "This poll period:    $this_poll_time\n";
-    $message   .= "Avg poll time:       ";
+    $message .= "Node name:           $g{nodename}\n";
+    $message .= "Node number:         $g{my_nodenum}\n";
+    $message .= "Process ID:          $g{mypid}\n\n";
+    $message .= "Polled devices:      $g{numdevs}\n";
+    $message .= "Polled tests:        $g{numtests}\n";
+    $message .= "Avg tests/node:      $g{avgtestsnode}\n";
+    $message .= "Clear branches:      $num_clear_branches\n";
+    $message .= "Clear leaves:        $num_clear_leaves\n";
+    $message .= "Xymon msg xfer size: $g{sentmsgsize}\n\n";
+    $message .= "Cycle time:          " . sprintf( "%6.2f s\n",   $g{cycletime} );
+    $message .= "Dead time:           " . sprintf( "%6.2f s\n\n", $g{deadtime} );
+    $message .= "SNMP test time:      $snmp_poll_time\n";
+    $message .= "Test logic time:     $test_time\n";
+    $message .= "Xymon msg xfer time: $msg_xfr_time\n";
+    $message .= "This poll period:    $this_poll_time\n";
+    $message .= "Avg poll time:       ";
 
     # Calculate avg poll time over the last 5 poll cycles
     my $num_polls = scalar @{ $g{avgpolltime} };
@@ -349,7 +349,7 @@ sub prepare_xymon_stat_msg {
             $color = 'yellow';
             $activity .= " for more than cycletime \&yellow";
         }
-        $ftime   = sprintf("%.2f", $ftime) . ' s ago';
+        $ftime = sprintf( "%.2f", $ftime ) . ' s ago';
         $message .= sprintf( "%8d %7d %16s %6s %25s\n", $fork, $g{forks}{$fork}{pid}, ${ftime}, $polled, $activity );
     }
     if ( $stalledforks gt $g{numforks} ) {
