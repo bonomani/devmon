@@ -3,7 +3,7 @@ require Exporter;
 @ISA    = qw(Exporter);
 @EXPORT = qw(initialize sync_servers time_test do_log db_connect
     na nd db_get db_get_array db_do log_fatal oid_sort);
-@EXPORT_OK = qw(%c);
+@EXPORT_OK = qw(%c FATAL ERROR WARN INFO DEBUG TRACE);
 
 #    Devmon: An SNMP data collector & page generator for the
 #    Xymon network monitoring systems
@@ -22,6 +22,14 @@ require Exporter;
 
 # The global option hash. Be afraid!
 use vars qw(%g);
+use constant {
+    FATAL  => 0,
+    ERROR  => 1,
+    WARN   => 2,
+    INFO   => 3,
+    DEBUG  => 4,
+    TRACE  => 5,
+};
 
 # Modules
 use strict;
@@ -32,12 +40,15 @@ use IO::File;
 use FindBin;
 use Getopt::Long;
 use Sys::Hostname;
-use Time::HiRes qw(time);
+use Time::HiRes qw(time gettimeofday);
+use POSIX qw(strftime);
 
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;    # Sort the keys in the output
 $Data::Dumper::Deepcopy = 1;    # Enable deep copies of structures
 $Data::Dumper::Indent   = 1;    # Output in a reasonable style (but no array indexes)
+
+
 
 # Load initial program values; only called once at program init
 sub initialize {
@@ -128,10 +139,18 @@ sub initialize {
         'xymon_color'  => {},
         'test_results' => [],
 
+
         # User-definable variable controls
         'globals' => {},
         'locals'  => {}
     );
+    # Logging 
+$g{log_level}[FATAL]="FATAL";
+$g{log_level}[ERROR]="ERROR";
+$g{log_level}[WARN]="WARN";
+$g{log_level}[INFO]="INFO";
+$g{log_level}[DEBUG]="DEBUG";
+$g{log_level}[TRACE]="TRACE";
 
     # Our local options
     # 'set' indicates that the option is a local or a glocal option, first initialize all value to 0
@@ -338,7 +357,7 @@ sub initialize {
     # Parse command line options
     my ( $syncconfig, $synctemps, $resetowner, $readhosts, );
     $syncconfig = $synctemps = $resetowner = $readhosts = 0;
-    my ( %match, $hostonly, $poll, $outputs_ref );
+    my ( %match, $hostonly, $poll, $outputs_ref, $logger_ref );
 
     GetOptions(
         "help|?"                   => \&help,
@@ -357,6 +376,8 @@ sub initialize {
         "hostonly=s"               => \$hostonly,
         "poll=s"                   => \$poll,
         "debug"                    => \$g{debug},
+        "log_match:s@"             => \$g{log_match_ref},
+        "log_filter:s@"            => \$g{log_filter_ref},
         "trace"                    => \$g{trace},
         "syncconfig"               => \$syncconfig,
         "synctemplates"            => \$synctemps,
@@ -405,7 +426,7 @@ sub initialize {
         # we assume they have set NODENAME correctly in devmon.cfg
         # $hostname =~ s/\..*//;
         $g{nodename} = $hostname;
-        do_log( "INFOR CONF: Nodename autodetected as $hostname", 3 );
+        do_log( "Nodename autodetected as $hostname", INFO );
     }
 
     # Make sure we have a nodename
@@ -464,7 +485,7 @@ sub initialize {
 
     # hostonly mode (deprecated by poll)
     if ($hostonly) {
-        do_log( "WARNI CONF: hostonly is deprecated use '-p[oll]' instead", 2 );
+        do_log( "hostonly is deprecated use '-p[oll]' instead",ERROR);
         if ( defined $poll or %match ) {
             usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only");
         } else {
@@ -564,7 +585,7 @@ sub initialize {
             if ( $g{oneshot} ) {
                 $cmd_line .= " -1";
             }
-            do_log("$cmd_line");
+            do_log("$cmd_line",DEBUG);
         }
     }
 
@@ -608,19 +629,18 @@ sub initialize {
         $pid_handle->print( $g{mypid} );
         $pid_handle->close;
     }
-
     # Throw out a little info to the log
-    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---", 0 );
-    do_log( "WARNI CONF: Logging to $g{logfile}",                                           2 ) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
-    do_log( "INFO  CONF: Node#$g{my_nodenum}                                  ",            3 );
+    do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---",$g{verbose});
+    do_log( "Logging to $g{logfile}",WARN) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
+    do_log( "Node#$g{my_nodenum}",INFO );
 
     # Dump some configs in debug mode
     if ( $g{debug} ) {
         foreach ( keys %{ $g{globals} } ) {
-            do_log( sprintf( "DEBUG CONF: global %s: %s", $_, $g{$_} ), 4 );
+            do_log( sprintf( "Global %s: %s", $_, $g{$_} ), DEBUG );
         }
         foreach ( keys %{ $g{locals} } ) {
-            do_log( sprintf( "DEBUG CONF: local %s: %s", $_, $g{$_} ), 4 );
+            do_log( sprintf( "Local %s: %s", $_, $g{$_} ), DEBUG );
         }
     }
 
@@ -633,30 +653,30 @@ sub check_snmp_config {
     # Check consistency
     # snmptimeout * snmptries <  maxpolltime
     if ( $g{snmptimeout} * $g{snmptries} >= $g{maxpolltime} ) {
-        do_log( "ERROR CONF: Consistency check failed: snmptimeout($g{snmptimeout}) * snmptries($g{snmptries}) <  maxpolltime($g{maxpolltime}) ", 1 );
+        do_log( "Consistency check failed: snmptimeout($g{snmptimeout}) * snmptries($g{snmptries}) <  maxpolltime($g{maxpolltime}) ", ERROR );
     }
 
     # Check SNMP Engine: auto, snmp(first), session(fallback)
     if ( $g{snmpeng} eq 'auto' ) {
         eval { require SNMP; };
         if ($@) {
-            do_log( "WARNI CONF: Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, trying to fallback to SNMP_Session", 2 );
+            do_log( "Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, trying to fallback to SNMP_Session", WARN );
             eval { require SNMP_Session; };
             if ($@) {
                 log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
             } else {
                 $g{snmpeng} = 'session';
-                do_log( "INFOR CONF: SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 SNMPv2c ", 3 );
+                do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 SNMPv2c ", INFO );
             }
 
         } else {
-            do_log( "INFOR CONF: Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", 3 );
+            do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
             eval { require SNMP_Session; };
             if ($@) {
-                do_log( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
+                do_log( "SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", ERROR );
                 $g{snmpeng} = 'snmp';
             } else {
-                do_log( "INFOR CONF: SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1", 3 );
+                do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1", INFO );
             }
         }
     } elsif ( $g{snmpeng} eq 'snmp' ) {
@@ -664,17 +684,17 @@ sub check_snmp_config {
         if ($@) {
             log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, exiting...", 1 );
         } else {
-            do_log( "INFOR CONF: Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", 3 );
+            do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
         }
     } elsif ( $g{snmpeng} eq 'session' ) {
         eval { require SNMP_Session; };
         if ($@) {
             log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
         } else {
-            do_log( "INFOR CONF: SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 and SNMPv2c", 3 );
+            do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 and SNMPv2c", INFO );
         }
     } else {
-        do_log( "ERROR CONF: Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...", 1 );
+        do_log( "Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...", ERROR );
     }
 }
 
@@ -683,13 +703,13 @@ sub check_global_config {
     # Check consistency
     # maxpolltime < cycletime
     if ( $g{maxpolltime} >= $g{cycletime} ) {
-        do_log( "ERROR CONF: Consistency check failed: maxpolltime($g{maxpolltime}) < cycletime($g{cycletime}) ", 1 );
+        do_log( "Consistency check failed: maxpolltime($g{maxpolltime}) < cycletime($g{cycletime}) ", ERROR );
     }
 }
 
 # Determine the amount of time we spent doing tests
 sub time_test {
-    do_log( "DEBUG CONF: running time_test()", 4 ) if $g{debug};
+    do_log( "Running time_test()", DEBUG ) if $g{debug};
 
     my $poll_time = $g{snmppolltime} + $g{testtime} + $g{msgxfrtime};
 
@@ -702,7 +722,7 @@ sub time_test {
     # Squak if we went over our poll time
     my $exceeded = $poll_time - $g{cycletime};
     if ( $exceeded > 1 ) {
-        do_log( "WARNI CONF: Exceeded cycle time ($poll_time seconds).", 2 );
+        do_log( "Exceeded cycle time ($poll_time seconds).", WARN );
         $g{sleep_time} = 0;
         quit(0) if $g{oneshot};
 
@@ -711,7 +731,7 @@ sub time_test {
         quit(0) if $g{oneshot};
         $g{sleep_time} = -$exceeded;
         $g{sleep_time} = 0 if $g{sleep_time} < 0;    # just in case!
-        do_log( "INFOR CONF: Sleeping for $g{sleep_time} seconds.", 3 );
+        do_log( "Sleeping for $g{sleep_time} seconds.", INFO );
         sleep $g{sleep_time} if $g{sleep_time};
     }
 }
@@ -759,7 +779,7 @@ sub sync_servers {
 
     # If someone has set our flag to inactive, quietly die
     if ( $g{node_status}{nodes}{ $g{my_nodenum} }{active} ne 'y' ) {
-        do_log( "INFOR CONF: Active flag has been set to a non-true value.  Exiting.", 3 );
+        do_log( "Active flag has been set to a non-true value.  Exiting.", INFO );
         exit 0;
     }
 
@@ -852,10 +872,10 @@ sub sync_servers {
 
         # Lets see if we need to init, along with the other nodes
         if ($need_init) {
-            do_log( "INFOR CONF: Initializing test database", 3 );
+            do_log( "Initializing test database", INFO );
 
             # Now we need all other nodes waiting for init before we can proceed
-            do_log( "INFOR CONF: Waiting for all nodes to synchronize", 3 );
+            do_log( "Waiting for all nodes to synchronize", INFO );
         INIT_WAIT: while (1) {
 
                 # Make sure our heart beats while we wait
@@ -867,7 +887,7 @@ sub sync_servers {
                         my $name = $g{node_status}{nodes}{$node}{name};
 
                         # This node isn't ready for init; sleep then try again
-                        do_log( "INFOR CONF: Waiting for node $node($name)", 3 );
+                        do_log( "Waiting for node $node($name)", INFO );
                         sleep 2;
                         update_nodes();
                         next INIT_WAIT;
@@ -878,7 +898,7 @@ sub sync_servers {
                 sleep 2;
                 last;
             }
-            do_log( "INFOR CONF: Done waiting", 3 );
+            do_log( "Done waiting", INFO );
 
             # Now assign all tests using a round-robin technique;  this should
             # synchronize the tests between all servers
@@ -898,7 +918,7 @@ sub sync_servers {
                 if ( $active_nodes[ $this_node++ ] == $g{my_nodenum} ) {
 
                     # Make it ours, baby!
-                    my $result = db_do( "update devices set " . "owner=$g{my_nodenum} where name='$device' and owner=0" );
+                    my $result = db_do( "update devices set owner=$g{my_nodenum} where name='$device' and owner=0" );
 
                     # Make sure out DB update went through
                     next if !$result;
@@ -916,7 +936,7 @@ sub sync_servers {
                 $this_node = 0 if $this_node > $#active_nodes;
             }
 
-            do_log( "INFOR CONF: Init complete: $my_num_tests tests loaded, " . "avg $avg_tests_node tests per node", 3 );
+            do_log( "Init complete: $my_num_tests tests loaded, avg $avg_tests_node tests per node", INFO );
 
             # Okay, we're not at init, so lets see if we can find any available tests
         } else {
@@ -930,7 +950,7 @@ sub sync_servers {
                     last if $my_num_tests > $avg_tests_node;
 
                     # Lets try and take this test
-                    my $result = db_do( "update devices set " . "owner=$g{my_nodenum} where name='$device'" );
+                    my $result = db_do( "update devices set owner=$g{my_nodenum} where name='$device'" );
                     next if !$result;
 
                     # We got it!  Lets add it to our test_data hash
@@ -946,11 +966,11 @@ sub sync_servers {
 
                     # Log where this device came from
                     if ( $old_owner == 0 ) {
-                        do_log( "INFOR CONF: Got $device ($my_num_tests/$avg_tests_node tests)", 3 );
+                        do_log( "Got $device ($my_num_tests/$avg_tests_node tests)", INFO );
                     } else {
                         my $old_name = $g{node_status}{nodes}{$old_owner}{name};
                         $old_name = "unknown" if !defined $old_name;
-                        do_log( "INFOR CONF: Recovered $device from node $old_owner($old_name) " . "($my_num_tests/$avg_tests_node tests)", 3 );
+                        do_log( "Recovered $device from node $old_owner($old_name) " . "($my_num_tests/$avg_tests_node tests)", INFO );
                     }
 
                     # Now lets try and get the history for it, if it exists
@@ -1002,7 +1022,7 @@ sub sync_servers {
             # We really shouldn't fail this, but just in case
             next if !$result;
             $my_num_tests -= $test_count{$device};
-            do_log( "INFOR CONF: Dropped $device ($my_num_tests/$avg_tests_node tests)", 3 );
+            do_log( "Dropped $device ($my_num_tests/$avg_tests_node tests)", INFO );
 
             # Now stick the history for the device in the DB for the recipient
             #        for my $ifc (keys %{$g{dev_hist}{$device}}) {
@@ -1055,7 +1075,7 @@ NODE: for my $node (@nodes) {
 
             # Check to see if this host has died (i.e. exceeded deadtime)
         } elsif ( $heartbeat + $g{deadtime} < time ) {
-            do_log( "INFOR CONF: Node $node_num($name) has died!", 3 )
+            do_log( "Node $node_num($name) has died!", INFO )
                 if !defined $old_status{dead}{$node_num};
             $g{node_status}{dead}{$node_num} = time;
 
@@ -1064,7 +1084,7 @@ NODE: for my $node (@nodes) {
             my $up_duration = time - $old_status{dead}{$node_num};
             if ( $up_duration > ( $g{deadtime} * 2 ) ) {
                 $g{node_status}{active}{$node_num} = 1;
-                do_log( "WARNI CONF: Node $node_num($name) has returned! " . "Up $up_duration secs", 2 );
+                do_log( "Node $node_num($name) has returned! " . "Up $up_duration secs", WARN );
             } else {
                 $g{node_status}{dead}{$node_num}
                     = $old_status{dead}{$node_num};
@@ -1144,7 +1164,7 @@ sub read_local_config {
     log_fatal( "Can't find config file $file ($!)", 0 ) if !-e $file;
     open FILE, $file or log_fatal( "Can't read config file $file ($!)", 0 );
 
-    do_log( "DEBUG CONF: Reading local options from '$file'", 4 ) if $g{debug};
+    do_log( "Reading local options from '$file'", DEBUG ) if $g{debug};
 
     # Parse file text
     for my $line (<FILE>) {
@@ -1184,10 +1204,10 @@ sub read_local_config {
     # Log any options not set
     for my $opt ( sort keys %{ $g{locals} } ) {
         if ( $g{locals}{$opt}{set} == 1 ) {
-            do_log( "DEBUG CONF: Option '$opt' locally set to: $g{$opt}", 5 ) if $g{debug};
+            do_log( "Option '$opt' locally set to: $g{$opt}", DEBUG ) if $g{debug};
             next;
         } else {
-            do_log( "DEBUG CONF: Option '$opt' defaulting to: $g{locals}{$opt}{default}", 5 ) if $g{debug};
+            do_log( "Option '$opt' defaulting to: $g{locals}{$opt}{default}", DEBUG ) if $g{debug};
             $g{$opt} = $g{locals}{$opt}{default};
             $g{locals}{$opt}{set} = 1;
         }
@@ -1206,7 +1226,7 @@ sub read_global_config_file {
 
     open FILE, $file or log_fatal( "Can't read config file $file ($!)", 0 );
 
-    do_log( "DEBUG CONF: Reading global options from '$file'", 4 ) if $g{debug};
+    do_log( "Reading global options from '$file'", DEBUG ) if $g{debug};
 
     # Parse file text
     for my $line (<FILE>) {
@@ -1246,7 +1266,7 @@ sub read_global_config_file {
     # Log any options not set
     for my $opt ( sort keys %{ $g{globals} } ) {
         next if $g{globals}{$opt}{set};
-        do_log( "DEBUG CONF: Option '$opt' defaulting to: $g{globals}{$opt}{default}", 5 );
+        do_log( "Option '$opt' defaulting to: $g{globals}{$opt}{default}", DEBUG );
         $g{$opt} = $g{globals}{$opt}{default};
         $g{globals}{$opt}{set} = 1;
     }
@@ -1267,9 +1287,9 @@ sub read_global_config_db {
     my @variable_arr = db_get_array('name,val from global_config');
     for my $variable (@variable_arr) {
         my ( $opt, $val ) = @$variable;
-        do_log( "WARNI CONF: Unknown option '$opt' read from global DB", 2 ) and next
+        do_log( "Unknown option '$opt' read from global DB", WARN ) and next
             if !defined $g{globals}{$opt};
-        do_log( "ERROR CONF: Invalid value '$val' for '$opt' in global DB", 1 ) and next
+        do_log( "Invalid value '$val' for '$opt' in global DB", ERROR ) and next
             if $val !~ /$g{globals}{$opt}{regex}/;
 
         $g{globals}{$opt}{set} = 1;
@@ -1288,7 +1308,7 @@ sub read_global_config_db {
     # Make sure nothing was missed
     for my $opt ( keys %{ $g{globals} } ) {
         next if $g{globals}{$opt}{set};
-        do_log( "INFOR CONF: Option '$opt' defaulting to: $g{globals}{$opt}{default}.", 3 );
+        do_log( "Option '$opt' defaulting to: $g{globals}{$opt}{default}.", INFO );
         $g{$opt} = $g{globals}{$opt}{default};
         $g{globals}{$opt}{set} = 1;
     }
@@ -1337,36 +1357,74 @@ sub open_log {
 sub reopen_log {
     my ($signal) = @_;
     if ( $g{parent} ) {
-        do_log( "DEBUG CONF: Sending signal $signal to forks", 4 ) if $g{debug};
+        do_log( "Sending signal $signal to forks", DEBUG ) if $g{debug};
         for my $fork ( keys %{ $g{forks} } ) {
             my $pid = $g{forks}{$fork}{pid};
             kill $signal, $pid if defined $pid;
         }
     }
 
-    do_log( "DEBUG CONF: Received signal $signal, closing and re-opening log file", 4 ) if $g{debug};
+    do_log( "Received signal $signal, closing and re-opening log file", DEBUG ) if $g{debug};
     if ( defined $g{log} ) {
         undef $g{log};
         &open_log;
     }
-    do_log( "DEBUG CONF: Re-opened log file $g{logfile}", 4 ) if $g{debug};
+    do_log( "Re-opened log file $g{logfile}", DEBUG ) if $g{debug};
     return 1;
 }
 
 # Sub to log data to a logfile and print to screen if verbose
 sub do_log {
-    my ( $msg, $verbosity ) = @_;
-
+    my ( $msg, $verbosity, $fork_num ) = @_;
     $verbosity = 2 if !defined $verbosity;
-    my $ts = ts();
-    if ( defined $g{log} and $g{log} ne '' ) {
-        $g{log}->print("$ts $msg\n") if $g{verbose} >= $verbosity;
-    } else {
-        print "$ts $msg\n" if $g{verbose} >= $verbosity;
-        return 1;
+    if ($g{verbose} >= $verbosity) {
+       my ($package, $filename, $line ) = caller;
+       if ($package ne 'main'){
+
+       $package=substr $package, 3;
+        $package= $package ."($fork_num)" if defined $fork_num; 
+       } 
+         my ($sec, $frac) = gettimeofday;
+         $frac = sprintf("%03d", $frac/1000);
+         my $dateISO8601 = strftime ('%Y-%m-%dT%H:%M:%S.'.$frac.'%z', localtime($sec));
+         
+    
+         $msg = $dateISO8601 ."|". (sprintf "%-5s" ,$g{log_level}[$verbosity]) .'|'. (sprintf "%-9s" ,$package) .'|'. (sprintf "%5s",$$) .'|'. (sprintf "%4s" ,$line) ."|". $msg;
+      my $matched = 1;
+      #if ($g{debug} and not (@{ $g{debug_context_ref} } == 1 and $g{debug_context_ref}->[0] eq '')) {   
+      if ($g{log_match_ref} and not (@{ $g{log_match_ref} } == 1 and $g{log_match_ref}->[0] eq '')) {
+           $matched=0;
+           for my $match (@{$g{log_match_ref}}) { 
+              if (index($msg, $match) != -1) {
+                 $matched = 1;
+                 last;
+              }
+            }
+       }
+       if ($g{log_filter_ref} and not (@{ $g{log_filter_ref} } == 1 and $g{log_filter_ref}->[0] eq '')) {
+          for my $match (@{$g{log_filter_ref}}) {
+              if (index($msg, $match) != -1) {
+                 $matched = 0;
+                 last;
+               }
+            }
+      }
+               
+    if ($matched) { 
+    
+      
+
+      
+        if ( defined $g{log} and $g{log} ne '' ) {
+           $g{log}->print("$msg\n") if $g{verbose} >= $verbosity;
+         } else {
+           print "$msg\n" if $g{verbose} >= $verbosity;
+        #return 1;
+        }
+      }
     }
 
-    print "$ts $msg\n" if $g{verbose} > $verbosity;
+    #print "$ts $msg\n" if $g{verbose} > $verbosity;
 
     return 1;
 }
@@ -1398,7 +1456,7 @@ sub db_connect {
         DBI->import();
     }
 
-    do_log( "INFOR CONF DB: Connecting to DB", 3 ) if !defined $silent;
+    do_log( "Connecting to DB", INFO ) if !defined $silent;
     $g{dbh}->disconnect()                          if defined $g{dbh} and $g{dbh} ne '';
 
     # 5 connect attempts
@@ -1410,10 +1468,10 @@ sub db_connect {
         # Sleep 12 seconds
         sleep 12;
 
-        do_log( "WARNI CONF: Failed to connect to DB, attempt " . ++$try . " of 5", 2 );
+        do_log( "Failed to connect to DB, attempt " . ++$try . " of 5", WARN );
     }
     print "Verbose: ", $g{verbose}, "\n";
-    do_log( "ERROR CONF DB: Unable to connect to DB ($!)", 1 );
+    do_log( "Unable to connect to DB ($!)", ERROR );
 }
 
 # Sub to query DB, return results, die if error
@@ -1422,7 +1480,7 @@ sub db_get {
     do_log( "DEBUG CONF DB: select $query", 4 ) if $g{debug};
     my @results;
     my $a = $g{dbh}->selectall_arrayref("select $query")
-        or do_log( "ERROR CONF DB: DB query '$query' failed; reconnecting", 1 )
+        or do_log( "DB query '$query' failed; reconnecting", ERROR )
         and db_connect()
         and return db_get($query);
 
@@ -1438,9 +1496,9 @@ sub db_get {
 # Sub to query DB, return resulting array, die if error
 sub db_get_array {
     my ($query) = @_;
-    do_log( "DEBUG DB: select $query", 4 ) if $g{debug};
+    do_log( "Select $query", DEBUG ) if $g{debug};
     my $results = $g{dbh}->selectall_arrayref("select $query")
-        or do_log( "WARNI CONF DB query '$query' failed; reconnecting", 2 )
+        or do_log( "DB query '$query' failed; reconnecting", WARN )
         and db_connect()
         and return db_get_array($query);
 
@@ -1454,9 +1512,9 @@ sub db_do {
     # Make special characters mysql safe
     $cmd =~ s/\\/\\\\/g;
 
-    do_log( "DEBUG CONF DB: $cmd", 4 ) if $g{debug};
+    do_log( "DB $cmd", DEBUG ) if $g{debug};
     my $result = $g{dbh}->do("$cmd")
-        or do_log( "ERROR CONF DB: DB write '$cmd' failed; reconnecting", 1 )
+        or do_log( "DB write '$cmd' failed; reconnecting", ERROR )
         and db_connect()
         and return db_do($cmd);
 
@@ -1489,7 +1547,7 @@ sub sync_global_config {
     # Read in our config file
     read_global_config_file();
 
-    do_log( "Updating global config", 3 );
+    do_log( "Updating global config", INFO );
 
     # Clear our global config
     db_do("delete from global_config");
@@ -1500,7 +1558,7 @@ sub sync_global_config {
         db_do("insert into global_config values ('$opt','$val')");
     }
 
-    do_log( "Done", 3 );
+    do_log( "Done", INFO );
 
     # Now quit
     &quit(0);
@@ -1540,10 +1598,10 @@ sub read_hosts_cfg {
             }
         }
 
-        do_log( "DEBUG CONF: Saw $num_vendor vendors, $num_model models, " . "$num_descs sysdescs & $num_temps templates", 4 );
+        do_log( "Saw $num_vendor vendors, $num_model models, $num_descs sysdescs & $num_temps templates", DEBUG );
     }
 
-    do_log( "INFOR CONF: Reading hosts.cfg ", 3 );
+    do_log( "Reading hosts.cfg ", INFO );
 
     # Now open the hosts.cfg file and read it in
     # Also read in any other host files that are included in the hosts.cfg
@@ -1595,7 +1653,7 @@ FILEREAD: while (@hostscfg) {
                 require File::Find;
                 import File::Find;
                 my $dir = $1;
-                do_log( "Looking for hosts.cfg files in $dir", 4 ) if $g{debug};
+                do_log( "Looking for hosts.cfg files in $dir", DEBUG ) if $g{debug};
                 find( sub { push @hostscfg, $File::Find::name }, $dir );
 
                 # Else see if this line matches the ip/host hosts.cfg format
@@ -1603,10 +1661,10 @@ FILEREAD: while (@hostscfg) {
                 my ( $ip, $host, $xymonopts ) = ( $1, $2, $3 );
 
                 # Skip if the NET tag does not match this site
-                do_log( "DEBUG CONF: Checking if $xymonopts matches NET:" . $g{XYMONNETWORK} . ".", 5 ) if $g{debug};
+                do_log( "Checking if $xymonopts matches NET:" . $g{XYMONNETWORK} . ".", DEBUG ) if $g{debug};
                 if ( $g{XYMONNETWORK} ne '' ) {
                     if ( $xymonopts !~ / NET:$g{XYMONNETWORK}/ ) {
-                        do_log( "The NET for $host is not $g{XYMONNETWORK}. Skipping.", 5 );
+                        do_log( "The NET for $host is not $g{XYMONNETWORK}. Skipping.", DEBUG );
                         next;
                     }
                 }
@@ -1619,14 +1677,14 @@ FILEREAD: while (@hostscfg) {
                     $options =~ s/^://;
 
                     # Skip the .default. host, defined
-                    do_log( "Can't use Devmon on the .default. host, sorry.", 2 )
+                    do_log( "Can't use Devmon on the .default. host, sorry.", WARN )
                         and next
                         if $host eq '.default.';
 
                     # Make sure we don't have duplicates
                     if ( defined $hosts_cfg{$host} ) {
                         my $old = $hosts_cfg{$host}{ip};
-                        do_log( "Refusing to redefine $host from '$old' to '$ip'", 2 );
+                        do_log( "Refusing to redefine $host from '$old' to '$ip'", WARN );
                         next;
                     }
 
@@ -1643,7 +1701,7 @@ FILEREAD: while (@hostscfg) {
                             # and we will look in hosts.db (old_host) if there is an ip for this
                             # hostname. But log it as there is a problem (may be a dns outage only)
                             $ip = undef;
-                            do_log( "INFOR CONF: Unable to resolve DNS name for host '$host'", 3 );
+                            do_log( "Unable to resolve DNS name for host '$host'", INFO );
                         }
                     } else {
                         $hosts_cfg{$host}{resolution} = 'xymon_host';
@@ -1674,11 +1732,11 @@ FILEREAD: while (@hostscfg) {
                     # Look for vendor/model override
                     if ( $options =~ s/(?:,|^)model\((\S+?)\),?// ) {
                         my ( $vendor, $model ) = split /;/, $1, 2;
-                        do_log( "Syntax error in model() option for $host", 2 ) and next
+                        do_log( "Syntax error in model() option for $host", ERROR ) and next
                             if !defined $vendor or !defined $model;
-                        do_log( "Unknown vendor in model() option for $host", 2 ) and next
+                        do_log( "Unknown vendor in model() option for $host", WARN ) and next
                             if !defined $g{templates}{$vendor};
-                        do_log( "Unknown model in model() option for $host", 2 ) and next
+                        do_log( "Unknown model in model() option for $host", INFO ) and next
                             if !defined $g{templates}{$vendor}{$model};
                         $hosts_cfg{$host}{vendor} = $vendor;
                         $hosts_cfg{$host}{model}  = $model;
@@ -1688,14 +1746,14 @@ FILEREAD: while (@hostscfg) {
                     if ( $options =~ s/(?:,|^)except\((\S+?)\)// ) {
                         for my $except ( split /,/, $1 ) {
                             my @args = split /;/, $except;
-                            do_log( "Invalid exception clause for $host", 1 ) and next
+                            do_log( "Invalid exception clause for $host", ERROR ) and next
                                 if scalar @args < 3;
                             my $test = shift @args;
                             my $oid  = shift @args;
                             for my $valpair (@args) {
                                 my ( $sc, $val ) = split /:/, $valpair, 2;
                                 my $type = $exc_sc{$sc};    # Process shortcut text
-                                do_log( "Unknown exception shortcut '$sc' for $host", 1 ) and next
+                                do_log( "Unknown exception shortcut '$sc' for $host", ERROR ) and next
                                     if !defined $type;
                                 $hosts_cfg{$host}{except}{$test}{$oid}{$type} = $val;
                             }
@@ -1706,14 +1764,14 @@ FILEREAD: while (@hostscfg) {
                     if ( $options =~ s/(?:,|^)thresh\((\S+?)\)// ) {
                         for my $thresholds ( split /,/, $1 ) {
                             my @args = split /;/, $thresholds;
-                            do_log( "Invalid threshold clause for $host", 1 ) and next
+                            do_log( "Invalid threshold clause for $host", ERROR ) and next
                                 if scalar @args < 3;
                             my $test = shift @args;
                             my $oid  = shift @args;
                             for my $valpair (@args) {
                                 my ( $sc, $thresh_list, $thresh_msg ) = split /:/, $valpair, 3;
                                 my $color = $thr_sc{$sc};    # Process shortcut text
-                                do_log( "Unknown exception shortcut '$sc' for $host", 1 ) and next if !defined $color;
+                                do_log( "Unknown exception shortcut '$sc' for $host", ERROR ) and next if !defined $color;
                                 $hosts_cfg{$host}{thresh}{$test}{$oid}{$color}{$thresh_list} = undef;
                                 $hosts_cfg{$host}{thresh}{$test}{$oid}{$color}{$thresh_list} = $thresh_msg
                                     if defined $thresh_msg;
@@ -1729,7 +1787,7 @@ FILEREAD: while (@hostscfg) {
                     } else {
                         $hosts_cfg{$host}{tests} = 'all';
                     }
-                    do_log( "Unknown devmon option ($options) on line $. of $hostscfg", 1 ) and next
+                    do_log( "Unknown devmon option ($options) on line $. of $hostscfg", ERROR ) and next
                         if $options ne '';
 
                     $hosts_cfg{$host}{ip} = $ip;
@@ -1756,7 +1814,7 @@ FILEREAD: while (@hostscfg) {
     read_global_config();
 
     # First go through our existing hosts and see if they answer snmp
-    do_log( "INFOR CONF: Querying pre-existing hosts", 3 ) if %old_hosts;
+    do_log( "Querying pre-existing hosts", INFO ) if %old_hosts;
 
     for my $host ( keys %old_hosts ) {
 
@@ -1845,7 +1903,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
         if ( not defined $sysdesc ) {
             $sysdesc = 'UNDEFINED';
-            do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+            do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
             next OLDHOST;
         }
 
@@ -1864,7 +1922,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
             $new_hosts{$host}{privproto} = $snmp_input{$host}{privproto};
             $new_hosts{$host}{privpass}  = $snmp_input{$host}{privpass};
             --$hosts_left;
-            do_log( "INFOR CONF: Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model} with sysdesc=$sysdesc", 3 );
+            do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
             next OLDHOST;
         }
 
@@ -1874,13 +1932,13 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 my $regex = $g{templates}{$vendor}{$model}{sysdesc};
 
                 # Careful /w those empty regexs
-                do_log( "Regex for $vendor/$model appears to be empty.", 2 )
+                do_log( "Regex for $vendor/$model appears to be empty.", WARN )
                     and next
                     if !defined $regex;
 
                 # Skip if this host doesn't match the regex
                 if ( $sysdesc !~ /$regex/ ) {
-                    do_log( "DEBUG CONF: $host did not match $vendor / $model : $regex", 5 ) if $g{debug};
+                    do_log( "$host did not match $vendor / $model : $regex", DEBUG ) if $g{debug};
                     next OLDMODEL;
                 }
 
@@ -1898,7 +1956,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 $new_hosts{$host}{privproto} = $snmp_input{$host}{privproto};
                 $new_hosts{$host}{privpass}  = $snmp_input{$host}{privpass};
                 --$hosts_left;
-                do_log( "INFOR CONF: Discovered $host as a $vendor $model with sysdesc=$sysdesc", 3 );
+                do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
                 last OLDVENDOR;
             }
         }
@@ -1918,7 +1976,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         # First query hosts with custom cids
         if ( $custom_cids and $snmpver < 3 ) {
 
-            do_log( "INFOR CONF: $hosts_left host(s) left and $custom_cids custom cid(s) trying using snmp v$snmpver", 3 );
+            do_log( "$hosts_left host(s) left and $custom_cids custom cid(s) trying using snmp v$snmpver", INFO );
 
             # Zero out our data in and data out hashes
             %{ $g{snmp_data} } = ();
@@ -1934,7 +1992,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                 # Skip if they don't have a custom cid
                 next if !defined $hosts_cfg{$host}{cid};
-                do_log( "INFOR CONF: Trying valid host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", 3 );
+                do_log( "Trying valid host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", INFO );
 
                 # Skip if version > 2
                 #next if $snmpver > 2;
@@ -1965,7 +2023,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
                 if ( not defined $sysdesc ) {
                     $sysdesc = 'UNDEFINED';
-                    do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+                    do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                     next NEWHOST;
                 }
 
@@ -1977,7 +2035,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                     --$hosts_left;
 
-                    do_log( "INFOR CONF: Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}", 3 );
+                    do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}", INFO );
 
                     #   last NEWHOST;
                     next NEWHOST;
@@ -1990,7 +2048,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                         # Skip if this host doesn't match the regex
                         my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                         if ( $sysdesc !~ /$regex/ ) {
-                            do_log( "DEBUG CONF:$host did not match $vendor / $model : $regex", 4 ) if $g{debug};
+                            do_log( "$host did not match $vendor / $model : $regex", DEBUG ) if $g{debug};
                             next NEWMODEL;
                         }
 
@@ -2006,10 +2064,10 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                             my $old_vendor = $old_hosts{$host}{vendor};
                             my $old_model  = $old_hosts{$host}{model};
                             if ( $vendor ne $old_vendor or $model ne $old_model ) {
-                                do_log( "INFOR CONF: $host changed from a $old_vendor / $old_model to a $vendor / $model", 3 );
+                                do_log( "$host changed from a $old_vendor / $old_model to a $vendor / $model", INFO );
                             }
                         } else {
-                            do_log( "INFOR CONF: Discovered $host as a $vendor $model with sysdesc=$sysdesc", 3 );
+                            do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
                         }
                         last NEWVENDOR;
                     }
@@ -2017,7 +2075,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                 # Make sure we were able to get a match
                 if ( !defined $new_hosts{$host} ) {
-                    do_log( "No matching templates for device: $host", 2 );
+                    do_log( "No matching templates for device: $host", WARN );
 
                     # Delete the hostscfg key so we don't throw another error later
                     delete $hosts_cfg{$host};
@@ -2032,7 +2090,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 # Don't bother if we don't have any hosts left to query
                 next if $hosts_left < 1;
 
-                do_log( "INFOR CONF: $hosts_left host(s) left, trying cid:'$cid' and snmp v$snmpver", 3 );
+                do_log( "$hosts_left host(s) left, trying cid:'$cid' and snmp v$snmpver", INFO );
 
                 # Zero out our data in and data out hashes
                 %{ $g{snmp_data} } = ();
@@ -2052,7 +2110,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                     # Skip if ip is not defined (name resolution)
                     next if !defined $hosts_cfg{$host}{ip};
 
-                    do_log( "INFOR CONF: Trying valid host:$host with cid:'$cid' using snmp v$snmpver", 3 );
+                    do_log( "Trying valid host:$host with cid:'$cid' using snmp v$snmpver", INFO );
 
                     %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -2071,7 +2129,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                 # If there is some valid hosts, query them
                 if ( keys %snmp_input ) {
-                    do_log( "DEBUG CONF: Sending data to SNMP", 4 ) if $g{debug};
+                    do_log( "Sending data to SNMP", DEBUG ) if $g{debug};
                     dm_snmp::snmp_query( \%snmp_input );
                 }
 
@@ -2080,7 +2138,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                     my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
                     if ( not defined $sysdesc ) {
                         $sysdesc = 'UNDEFINED';
-                        do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+                        do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                         next CUSTOMHOST;
                     }
 
@@ -2091,7 +2149,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                         $new_hosts{$host}{ver} = $snmpver;
                         --$hosts_left;
 
-                        do_log( "INFOR CONF: Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", 3 );
+                        do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
                         next CUSTOMHOST;
                     }
 
@@ -2102,7 +2160,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                             # Skip if this host doesn't match the regex
                             my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                             if ( $sysdesc !~ /$regex/ ) {
-                                do_log( "$host did not match $vendor / $model : $regex", 4 )
+                                do_log( "$host did not match $vendor / $model : $regex", INFO )
                                     if $g{debug};
                                 next CUSTOMMODEL;
                             }
@@ -2124,12 +2182,12 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                             # If they are an old host, the host is updated
                             if ( defined $old_hosts{$host} ) {
-                                do_log( "INFOR CONF: $host updated with new settings",                               3 );
-                                do_log( "INFOR CONF: OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", 3 );
-                                do_log( "INFOR CONF: NEW: $vendor, $model, ...",                                     3 );
+                                do_log( "$host updated with new settings",INFO );
+                                do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
+                                do_log( "NEW: $vendor, $model, ...",INFO );
 
                             } else {
-                                do_log( "INFOR CONF: Discovered $host as a $vendor $model with sysdesc=$sysdesc", 3 );
+                                do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
                             }
                             last CUSTOMVENDOR;
                         }
@@ -2137,7 +2195,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                     # Make sure we were able to get a match
                     if ( !defined $new_hosts{$host} ) {
-                        do_log( "No matching templates for device: $host", 2 );
+                        do_log( "No matching templates for device: $host", WARN );
 
                         # Delete the hostscfg key so we don't throw another error later
                         delete $hosts_cfg{$host};
@@ -2173,7 +2231,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                     # Don't bother if we don't have any hosts left to query
                                     next if $hosts_left < 1;
 
-                                    do_log( "INFOR CONF: $hosts_left host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 3 );
+                                    do_log( "$hosts_left host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
 
                                     # Zero out our data in and data out hashes
                                     %{ $g{snmp_data} } = ();
@@ -2189,7 +2247,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                         # Skip if ip is not defined (name resolution)
                                         next if !defined $hosts_cfg{$host}{ip};
 
-                                        do_log( "INFOR CONF: Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", 3 );
+                                        do_log( "Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
 
                                         %{ $snmp_input{$host} } = %{ $hosts_cfg{$host} };
 
@@ -2214,7 +2272,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                     # If there is some valid hosts, query them
                                     if ( keys %snmp_input ) {
-                                        do_log( "DEBUG CONF: Sending data to SNMP", 4 ) if $g{debug};
+                                        do_log( "Sending data to SNMP", DEBUG ) if $g{debug};
                                         dm_snmp::snmp_query( \%snmp_input );
                                     }
 
@@ -2223,7 +2281,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                         my $sysdesc = $g{snmp_data}{$host}{$sysdesc_oid}{val};
                                         if ( not defined $sysdesc ) {
                                             $sysdesc = 'UNDEFINED';
-                                            do_log( "DEBUG CONF: $host sysdesc = UNDEFINED", 4 ) if $g{debug};
+                                            do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                                             next CUSTOMHOST;
                                         }
 
@@ -2240,7 +2298,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                             $new_hosts{$host}{privpass}  = $privpass;
                                             --$hosts_left;
 
-                                            do_log( "INFOR CONF: Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", 3 );
+                                            do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
                                             next CUSTOMHOST;
                                         }
 
@@ -2251,7 +2309,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                                                 # Skip if this host doesn't match the regex
                                                 my $regex = $g{templates}{$vendor}{$model}{sysdesc};
                                                 if ( $sysdesc !~ /$regex/ ) {
-                                                    do_log( "DEBUG CONF: $host did not match $vendor / $model : $regex", 4 )
+                                                    do_log( "$host did not match $vendor / $model : $regex", DEBUG )
                                                         if $g{debug};
                                                     next CUSTOMMODEL;
                                                 }
@@ -2272,11 +2330,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                                 # If they are an old host, the host is updated
                                                 if ( defined $old_hosts{$host} ) {
-                                                    do_log( "INFOR CONF: $host updated with new settings",                               3 );
-                                                    do_log( "INFOR CONF: OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", 3 );
-                                                    do_log( "INFOR CONF: NEW: $vendor, $model, ...",                                     3 );
+                                                    do_log( "$host updated with new settings",INFO );
+                                                    do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
+                                                    do_log( "NEW: $vendor, $model, ...", INFO );
                                                 } else {
-                                                    do_log( "INFOR CONF: Discovered $host as a $vendor $model with sysdesc=$sysdesc",, 3 );
+                                                    do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc",INFO );
                                                 }
                                                 last CUSTOMVENDOR;
                                             }
@@ -2284,7 +2342,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                                         # Make sure we were able to get a match
                                         if ( !defined $new_hosts{$host} ) {
-                                            do_log( "WARNI CONF: No matching templates for device: $host", 2 );
+                                            do_log( "No matching templates for device: $host", WARN );
 
                                             # Delete the hostscfg key so we don't throw another error later
                                             delete $hosts_cfg{$host};
@@ -2317,14 +2375,14 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         } else {
 
             # Throw a log message complaining
-            do_log( "WARNI CONF: Could not query device: $host", 2 );
+            do_log( "Could not query device: $host", WARN );
         }
     }
 
     # All done, now we just need to write our hosts to the DB
     if ( $g{multinode} eq 'yes' ) {
 
-        do_log( "INFOR CONF: Updating database", 3 );
+        do_log( "Updating database", INFO );
 
         # Update database
         for my $host ( keys %new_hosts ) {
@@ -2393,7 +2451,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 
                         # Clean up exception types that may have been present in the past
                         foreach ( keys %{ $old_hosts{$host}{except}{$test}{$oid} } ) {
-                            do_log( "DEBUG CONF: Checking for stale exception types $_ on host $host test $test oid $oid", 4 )
+                            do_log( "Checking for stale exception types $_ on host $host test $test oid $oid", DEBUG )
                                 if $g{debug};
                             if ( not defined $new_hosts{$host}{except}{$test}{$oid}{$_} ) {
                                 db_do("delete from custom_excepts where host='$host' and test='$test' and type='$_' and oid='$oid'");
@@ -2432,7 +2490,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         # Delete any hosts not in the xymon hosts.cfg file
         for my $host ( keys %old_hosts ) {
             next if defined $new_hosts{$host};
-            do_log( "INFOR CONF: Removing stale host '$host' from DB", 3 );
+            do_log( "Removing stale host '$host' from DB", INFO );
             db_do("delete from devices where name='$host'");
             db_do("delete from custom_threshs where host='$host'");
             db_do("delete from custom_excepts where host='$host'");
@@ -2444,7 +2502,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
         # Textual abbreviations
         my %thr_sc = ( 'red'    => 'r', 'yellow' => 'y', 'green' => 'g',  'clear'   => 'c', 'purple' => 'p', 'blue' => 'b' );
         my %exc_sc = ( 'ignore' => 'i', 'only'   => 'o', 'alarm' => 'ao', 'noalarm' => 'na' );
-        do_log( "INFOR CONF: DBFILE: $g{dbfile}", 3 );
+        do_log( "DBFILE: $g{dbfile}", INFO );
         open HOSTFILE, ">$g{dbfile}"
             or log_fatal( "Unable to write to dbfile '$g{dbfile}' ($!)", 1 );
 
@@ -2502,7 +2560,7 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
                 $excepts .= ',' if ( $excepts !~ /,$/ );
             }
             $excepts =~ s/,$//;
-            do_log( "DEBUG CONF: $host $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", 5 ) if $g{debug};
+            do_log( "$host $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", DEBUG ) if $g{debug};
             print HOSTFILE "$host\e$ip\e$port\e$resolution\e$vendor\e$model\e$ver\e$cid\e$secname\e$seclevel\e$authproto\e$authpass\e$privproto\e$privpass\e$tests\e$thresholds\e$excepts\n";
         }
 
@@ -2517,11 +2575,11 @@ OLDHOST: for my $host ( keys %{ $g{snmp_data} } ) {
 sub read_hosts {
     my %hosts = ();
 
-    do_log( "DEBUG CONF READHOSTSDB: running read_hosts", 4 ) if $g{debug};
+    do_log( "DB running read_hosts", DEBUG ) if $g{debug};
 
     # Multinode
     if ( $g{multinode} eq 'yes' ) {
-        do_log( "DEBUG CONF READHOSTSDB: Multimode server", 5 ) if $g{debug};
+        do_log( "DB Multimode server", DEBUG ) if $g{debug};
         my @arr = db_get_array("name,ip,vendor,model,tests,cid from devices");
         for my $host (@arr) {
             my ( $name, $ip, $vendor, $model, $tests, $cid ) = @$host;
@@ -2551,7 +2609,7 @@ sub read_hosts {
             $hosts{$name}{tests}  = $tests;
             $hosts{$name}{cid}    = $cid;
             $hosts{$name}{port}   = $port;
-            do_log( "DEBUG CONF READHOSTSDB: Host in DB $ip $vendor $model $tests $cid $port", 5 ) if $g{debug};
+            do_log( "Host in DB $ip $vendor $model $tests $cid $port", DEBUG ) if $g{debug};
         }
 
         @arr = db_get_array("host,test,oid,type,data from custom_excepts");
@@ -2570,7 +2628,7 @@ sub read_hosts {
 
         # Singlenode
     } else {
-        do_log( "DEBUG CONF READHOSTSDB: Single mode server", 4 ) if $g{debug};
+        do_log( "DB Single mode server", DEBUG ) if $g{debug};
 
         # Check if the hosts file even exists
         return %hosts if !-e $g{dbfile};
@@ -2591,7 +2649,7 @@ sub read_hosts {
     FILELINE: for my $line (<DBFILE>) {
             chomp $line;
             my ( $name, $ip, $port, $resolution, $vendor, $model, $ver, $cid, $secname, $seclevel, $authproto, $authpass, $privproto, $privpass, $tests, $thresholds, $excepts ) = split /\e/, $line;
-            do_log( "DEBUG CONF READHOSTSDB: $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", 4 ) if $g{debug};
+            do_log( "DB $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", DEBUG ) if $g{debug};
 
             ++$linenumber;
 
@@ -2660,7 +2718,7 @@ sub read_hosts {
             $numtests += ( $tests =~ tr/,/,/ ) + 1;
         }
         close DBFILE;
-        do_log( "DEBUG CONF READHOSTSDB: $numdevs devices in DB", 4 ) if $g{debug};
+        do_log( "$numdevs devices in DB", DEBUG ) if $g{debug};
 
         $g{numdevs}      = $numdevs;
         $g{numtests}     = $numtests;
@@ -2681,7 +2739,7 @@ sub daemonize {
     if ( my $pid = do_fork() ) {
 
         # Parent process, we should die
-        do_log( "INFOR CONF: Forking to background process $pid", 3 );
+        do_log( "Forking to background process $pid", INFO );
         exit 0;
     }
 
@@ -2792,6 +2850,10 @@ Template building facility options:
                                       : -m rrd=xymon://localhost  (default: rrd=xymon://stdout), if set overides default)  
                     Imply: -1 -o
                     Warning: if ip(s) and host(s) are used together, both should match (different that iphost)
+-log_m[atch]       Log only if keywords match
+                    Format            : -log_m="|snmp" -log_m="|test" -log_m=ERROR -log_m=WARN
+-log_f[ilter]      Filter keywords from log (after log_match)
+                    Format            : -log_m="| 123" -log_m="|msg"
 
 Mutually exclusive options:  
  -rea[dhostscfg]   Read in data from the Xymon hosts.cfg file  
@@ -2809,9 +2871,9 @@ sub quit {
     $retcode = 0 if ( !defined $retcode );
     if ( $retcode !~ /^\d*$/ ) {
         if ( $g{parent} ) {
-            do_log( "INFOR CONF: Master received signal $retcode, shutting down with return code 0", 3 );
+            do_log( "Master received signal $retcode, shutting down with return code 0", INFO );
         } else {
-            do_log( "INFOR CONF: Fork with pid $$ received signal $retcode, shutting down with return code 0", 3 );
+            do_log( "Fork with pid $$ received signal $retcode, shutting down with return code 0", INFO );
         }
         $retcode = 0;
     }
@@ -2820,7 +2882,7 @@ sub quit {
 
     # Only run this if we are the parent process
     if ( $g{parent} ) {
-        do_log( "INFOR CONF: Shutting down", 3 ) if $g{initialized};
+        do_log( "Shutting down", INFO ) if $g{initialized};
         unlink $g{pidfile}                       if $g{initialized} and -e $g{pidfile};
         $g{log}->close                           if defined $g{log} and $g{log} ne '';
         $g{dbh}->disconnect()                    if defined $g{dbh} and $g{dbh} ne '';

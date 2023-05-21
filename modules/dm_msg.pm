@@ -21,6 +21,7 @@ require Exporter;
 use strict;
 use Socket;
 use POSIX qw/ strftime /;
+use dm_config qw(FATAL ERROR WARN INFO DEBUG TRACE);
 use dm_config;
 use Time::HiRes qw(time);
 use Data::Dumper;
@@ -31,7 +32,7 @@ use vars qw(%g);
 
 # Send our test results to the Xymon server
 sub send_msgs {
-    do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
+    do_log( 'Running send_msgs()', DEBUG ) if $g{debug};
     for my $output ( keys %{ $g{output} } ) {
         if ( $g{output}{$output}{protocol} eq 'xymon' ) {
 
@@ -50,7 +51,7 @@ sub send_msgs {
 sub send_xymon_msgs_to_stdout {
     $g{msgxfrtime} = time;
     my $nummsg = scalar @{ $g{test_results} };
-    do_log( "INFOR MESG: Sending $nummsg messages to 'xymon://stdout'", 3 );
+    do_log( "Sending $nummsg messages to 'xymon://stdout'", INFO );
     if ( defined $g{test_results} ) {
         my $msg = join "\n", @{ $g{test_results} };
         $g{sentmsgsize} = length($msg);
@@ -78,12 +79,12 @@ sub send_xymon_msgs_to_host {
 
     #do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
     my $nummsg = scalar @{ $g{test_results} };
-    do_log( "INFOR MESG: Sending $nummsg messages to 'xymon://$host'", 3 );
+    do_log( "Sending $nummsg messages to 'xymon://$host'", INFO );
 
     # Determine the address we are connecting to
     #my $host = $g{dispserv};
     my $addr = inet_aton($host)
-        or do_log( "ERROR MESG: Can't resolve display server $host ($!)", 1 )
+        or do_log( "Can't resolve display server $host ($!)", ERROR )
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
 
@@ -99,7 +100,7 @@ sub send_xymon_msgs_to_host {
     #}
 
     my $msg_sent = 0;
-    do_log( "DEBUG MESG: Looping through messages for this socket", 4 ) if $g{debug};
+    do_log( "Looping through messages for this socket", DEBUG ) if $g{debug};
     my $msg = join "\n", @{ $g{test_results} };
     if ( not $g{output}{ 'xymon://' . $host }{rrd} ) {
         $msg =~ s/<!--.*?-->//sg;
@@ -112,19 +113,19 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
         select undef, undef, undef, $g{msgsleep} / 1000;
 
         # Open our socket to the host
-        do_log( "DEBUG MESG: Opening socket to $host:$g{dispport}", 4 ) if $g{debug};
+        do_log( "Opening socket to $host:$g{dispport}", DEBUG ) if $g{debug};
         eval {
             local $SIG{ALRM} = sub { die "Socket timed out\n" };
             alarm 10;
             socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp') )
-                or do_log( "ERROR MESG: Failed to create socket ($!)", 1 )
+                or do_log( "Failed to create socket ($!)", ERROR )
                 and $g{msgxfrtime} = time - $g{msgxfrtime}
                 and return;
             alarm 0;
             local $SIG{ALRM} = sub { die "Connect timed out\n" };
             alarm 10;
             if ( !connect( SOCK, $p_addr ) ) {
-                do_log( "ERROR MESG: Can't connect to display server $host ($!)", 1 );
+                do_log( "Can't connect to display server $host ($!)", ERROR );
                 $g{msgxfrtime} = time - $g{msgxfrtime};
                 close SOCK;
                 return;
@@ -132,7 +133,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             alarm 0;
         };
         if ($@) {
-            do_log( "ERROR MESG: Timed out connecting to display server: $!", 1 );
+            do_log( "Timed out connecting to display server: $!", ERROR );
             return;
         }
 
@@ -144,13 +145,13 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             alarm 0;
         };
         if ($@) {
-            do_log( "ERROR MESG: Timed out printing to display server: $!", 1 );
+            do_log( "Timed out printing to display server: $!", ERROR );
             close SOCK;
             return;
         }
 
         # Now print to this socket until we hit the max msg size
-        do_log( "DEBUG MESG: Looping through messages to build a combo", 4 ) if $g{debug};
+        do_log( "Looping through messages to build a combo", DEBUG ) if $g{debug};
         my $msg_size = 0;
     MSGLOOP: while ( $msg_size < $g{msgsize}
             and @{ $g{test_results} } )
@@ -160,7 +161,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
             # Make sure this is a valid message
             if ( !defined $msg or $msg eq '' ) {
-                do_log( "ERROR MESG: trying to send a blank message!", 1 );
+                do_log( "Trying to send a blank message!", INFO );
                 next MSGLOOP;
             }
 
@@ -176,14 +177,14 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                     eval {
                         local $SIG{ALRM} = sub { die "Printing message timed out\n" };
                         alarm 10;
-                        do_log( "DEBUG MESG: Printing single combo message ($msg_sent of $nummsg), size $msg_size", 4 )
+                        do_log( "Printing single combo message ($msg_sent of $nummsg), size $msg_size", DEBUG )
                             if $g{debug};
                         print SOCK "$msg\n";
-                        do_log( "DEBUG MESG: Finished printing single combo message", 4 ) if $g{debug};
+                        do_log( "Finished printing single combo message", DEBUG ) if $g{debug};
                         alarm 0;
                     };
                     if ($@) {
-                        do_log( "ERROR MESG: Timed out printing to display server: $@ - $!", 1 );
+                        do_log( "Timed out printing to display server: $@ - $!", ERROR );
                         close SOCK;
                         return;
                     }
@@ -196,7 +197,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
                 # Either way, open a new socket
                 $g{sentmsgsize} += $msg_size;
-                do_log( "DEBUG MESG: Closing socket, $msg_size sent", 4 ) if $g{debug};
+                do_log( "Closing socket, $msg_size sent", DEBUG ) if $g{debug};
                 close SOCK;
                 next SOCKLOOP;
 
@@ -208,14 +209,14 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                 unshift @{ $g{test_results} }, $msg;
                 $msg_sent--;
                 $g{sentmsgsize} += $msg_size;
-                do_log( "DEBUG MESG: Closing socket, $msg_size sent", 4 ) if $g{debug};
+                do_log( "Closing socket, $msg_size sent", DEBUG ) if $g{debug};
                 close SOCK;
                 next SOCKLOOP;
 
                 # Looks good, print the msg
             } else {
                 my $thismsgsize = length $msg;
-                do_log( "DEBUG MESG: Printing message ($msg_sent of $nummsg), size $thismsgsize to existing combo", 4 )
+                do_log( "Printing message ($msg_sent of $nummsg), size $thismsgsize to existing combo", DEBUG )
                     if $g{debug};
                 eval {
                     local $SIG{ALRM} = sub { die "Printing message timed out\n" };
@@ -224,19 +225,19 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                     alarm 0;
                 };
                 if ($@) {
-                    do_log( "ERROR MESG: Timed out printing to display server: $!", 1 );
+                    do_log( "Timed out printing to display server: $!", ERROR );
                     close SOCK;
                     return;
                 }
                 $msg_size += length $msg;
-                do_log( "DEBUG MESG: Finished printing message to existing combo ($msg_size so far)", 4 )
+                do_log( "Finished printing message to existing combo ($msg_size so far)", DEBUG )
                     if $g{debug};
             }
 
         }    # End MSGLOOP
 
         $g{sentmsgsize} += $msg_size;
-        do_log( "DEBUG MESG: Closing socket, $msg_size sent", 4 ) if $g{debug};
+        do_log( "Closing socket, $msg_size sent", DEBUG ) if $g{debug};
         close SOCK;
     }    # END SOCKLOOP
 
@@ -246,15 +247,15 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
     if ( $g{output}{"xymon://$host"}{stat} ) {
         my $dm_msg  = prepare_xymon_stat_msg($host);
         my $msgsize = length $dm_msg;
-        do_log( "DEBUG MESG: Connecting and sending dm message ($msgsize)", 4 ) if $g{debug};
+        do_log( "Connecting and sending dm message ($msgsize)", DEBUG ) if $g{debug};
         eval {
             local $SIG{ALRM} = sub { die "Connecting and sending dm message timed out\n" };
             alarm 10;
             socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp') )
-                or do_log( "ERROR MESG: Failed to create socket ($!)", 1 )
+                or do_log( "Failed to create socket ($!)", ERROR )
                 and return;
             connect( SOCK, $p_addr )
-                or do_log( "ERROR MESG: Can't connect to display server ($!)", 1 )
+                or do_log( "Can't connect to display server ($!)", ERROR )
                 and return;
 
             print SOCK "$dm_msg\n";
@@ -262,13 +263,13 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             alarm 0;
         };
         if ($@) {
-            do_log( "ERROR MESG: Timed out connecting and sending dm: $!", 1 );
+            do_log( "Timed out connecting and sending dm: $!", ERROR );
             close SOCK;
             return;
         }
     }
 
-    do_log( "INFOR MESG: Done sending messages", 3 );
+    do_log( "Done sending messages", INFO );
 }
 
 # Spit out various data about our devmon process
@@ -283,16 +284,10 @@ sub prepare_xymon_stat_msg {
     # but only if the runtime is long enough to show a meaningfull fraction.
     #
     my ( $snmp_poll_time, $test_time, $msg_xfr_time );
-    if ( $this_poll_time > 10 ) {
-        $snmp_poll_time = sprintf( "%3d   [s] (%5.3f)", $g{snmppolltime}, $g{snmppolltime} / $this_poll_time );
-        $test_time      = sprintf( "%3d   [s] (%5.3f)", $g{testtime},     $g{testtime} / $this_poll_time );
-        $msg_xfr_time   = sprintf( "%3d   [s] (%5.3f)", $g{msgxfrtime},   $g{msgxfrtime} / $this_poll_time );
-    } else {
-        $snmp_poll_time = sprintf( "%3d   [s]", $g{snmppolltime} );
-        $test_time      = sprintf( "%3d   [s]", $g{testtime} );
-        $msg_xfr_time   = sprintf( "%3d   [s]", $g{msgxfrtime} );
-    }    # of else
-    $this_poll_time = sprintf( "%3d   [s]", $this_poll_time );
+        $snmp_poll_time = sprintf( "%6.2f s %5.2f", $g{snmppolltime}, $g{snmppolltime} / $this_poll_time * 100 ).' %';
+        $test_time      = sprintf( "%6.2f s %5.2f", $g{testtime},     $g{testtime} / $this_poll_time * 100 ).' %';
+        $msg_xfr_time   = sprintf( "%6.2f s %5.2f", $g{msgxfrtime},   $g{msgxfrtime} / $this_poll_time * 100 ).' %';
+    $this_poll_time = sprintf( "%6.2f s", $this_poll_time );
 
     # Determine our number of clear msgs sent
     my $num_clear_branches = 0;
@@ -310,21 +305,37 @@ sub prepare_xymon_stat_msg {
         }
     }
 
-    my $message = "devmon, version $g{version}\n\nNode name:           $g{nodename}\nNode number:         $g{my_nodenum}\nProcess ID:          $g{mypid}\n\nCycle time:          $g{cycletime} [s]\nDead time:           $g{deadtime} [s]\n\nPolled devices:      $g{numdevs}\nPolled tests:        $g{numtests}\nAvg tests/node:      $g{avgtestsnode}\nClear branches:      $num_clear_branches\nClear leaves:        $num_clear_leaves\nXymon msg xfer size: $g{sentmsgsize}\n\nSNMP test time:      $snmp_poll_time\nTest logic time:     $test_time\nXymon msg xfer time: $msg_xfr_time\nThis poll period:    $this_poll_time\nAvg poll time:      ";
+    my $message = "Devmon, version $g{version}\n\n";
+    $message   .= "Node name:           $g{nodename}\n";
+    $message   .= "Node number:         $g{my_nodenum}\n";
+    $message   .= "Process ID:          $g{mypid}\n\n";
+    $message   .= "Polled devices:      $g{numdevs}\n";
+    $message   .= "Polled tests:        $g{numtests}\n";
+    $message   .= "Avg tests/node:      $g{avgtestsnode}\n";
+    $message   .= "Clear branches:      $num_clear_branches\n";
+    $message   .= "Clear leaves:        $num_clear_leaves\n";
+    $message   .= "Xymon msg xfer size: $g{sentmsgsize}\n\n";
+    $message   .= "Cycle time:          ".sprintf( "%6.2f s\n", $g{cycletime} ) ;
+    $message   .= "Dead time:           ".sprintf( "%6.2f s\n\n", $g{deadtime} );
+    $message   .= "SNMP test time:      $snmp_poll_time\n";
+    $message   .= "Test logic time:     $test_time\n";
+    $message   .= "Xymon msg xfer time: $msg_xfr_time\n";
+    $message   .= "This poll period:    $this_poll_time\n";
+    $message   .= "Avg poll time:       ";
 
     # Calculate avg poll time over the last 5 poll cycles
     my $num_polls = scalar @{ $g{avgpolltime} };
     if ( $num_polls < 5 ) {
-        $message .= "wait\n";
+        $message .= "  wait\n";
     } else {
         my $avg_time;
         for my $time ( @{ $g{avgpolltime} } ) { $avg_time += $time }
         $avg_time /= $num_polls;
-        $message .= sprintf( "%6.1f [s]\n\n", $avg_time ) . "Poll time averaged over 5 poll cycles.";
+        $message .= sprintf( "%6.2f s\n\n", $avg_time ) . "Poll time averaged over 5 poll cycles.";
     }
 
     $message .= "\n\nFork summary\n";
-    $message .= sprintf( "%8s %-7s %18s %6s %25s\n", 'Number', 'PID', 'Last checked in', 'Polled', 'Current Activity' );
+    $message .= sprintf( "%8s %7s %16s %6s %25s\n", 'Number', 'PID', 'Last checked in', 'Polled', 'Current Activity' );
     my $stalledforks = 0;
     foreach my $fork ( sort { $a <=> $b } keys %{ $g{forks} } ) {
         my $activity
@@ -338,8 +349,8 @@ sub prepare_xymon_stat_msg {
             $color = 'yellow';
             $activity .= " for more than cycletime \&yellow";
         }
-        $ftime   .= 's ago';
-        $message .= sprintf( "%8d %7d %18s %6s %25s\n", $fork, $g{forks}{$fork}{pid}, ${ftime}, $polled, $activity );
+        $ftime   = sprintf("%.2f", $ftime) . ' s ago';
+        $message .= sprintf( "%8d %7d %16s %6s %25s\n", $fork, $g{forks}{$fork}{pid}, ${ftime}, $polled, $activity );
     }
     if ( $stalledforks gt $g{numforks} ) {
         $color = 'red';
