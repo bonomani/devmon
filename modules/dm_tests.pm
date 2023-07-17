@@ -174,11 +174,13 @@ sub oid_hash {
     my ( $oids, $device, $tmpl, $thr ) = @_;
 
     # Hash shortcuts
-    my $snmp = \%{ $g{snmp_data}{$device} };
+    #my $snmp = \%{ $g{oid}{poll_by_snmp}{$device} };
+    #my $snmp = \%{ $g{devices}{$device}{oids}{poll_by_snmp} };
+    my $snmp = \%{ $oids->{snmp_polled} };
 
-    if ( !%{$snmp} ) {
-        do_log( "No SNMP data found on $device", WARN ) if ( $g{xymon_color}{$device} eq 'green' );
-    }
+    #    if ( !%{$snmp} ) {
+    #        do_log( "No SNMP data found on $device", WARN ) if ( $g{xymon_color}{$device} eq 'green' );
+    #    }
 
     #First clean the hash: delete all but keep the val struct of repeater
     my %rep_val_keys;
@@ -266,7 +268,7 @@ sub oid_hash {
 
                 }
             } else {
-                do_log( "No SNMP answer for '$oid' on '$device' (see notests) ", WARN );
+                do_log( "No SNMP answer for '$oid' on '$device' (see notests) ", INFO );
                 $oids->{$oid}{val}   = undef;
                 $oids->{$oid}{color} = "clear";
                 $oids->{$oid}{msg}   = "No SNMP answer for $oid";
@@ -380,7 +382,7 @@ sub trans_delta {
     }
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
-        # We should always ave a primary oid with this transform, so make a fatal error
+        # We should always have a primary oid with this transform, so make a fatal error
         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
     }
 
@@ -419,48 +421,58 @@ sub trans_delta {
                 }
 
                 my $last_data = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{val}{$leaf};
-                my $last_time = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{time}{$leaf};
-                my $delta;
+                if ( defined $last_data ) {
 
-                # Check for counter wrap
-                if ( $last_data > $this_data ) {
+                    my $last_time = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{time}{$leaf};
+                    my $delta;
 
-                    # Check for custom limit, first
-                    if ($limit) {
-                        $delta = ( $this_data + ( $limit - $last_data ) ) / ( $this_time - $last_time );
+                    # Check for counter wrap
+                    if ( $last_data > $this_data ) {
 
-                        # If the last value was less than 2^32, assume the counter was 32bit
-                    } elsif ( $last_data < 4294967296 ) {
-                        $delta = ( $this_data + ( 4294967296 - $last_data ) ) / ( $this_time - $last_time );
+                        # Check for custom limit, first
+                        if ($limit) {
+                            $delta = ( $this_data + ( $limit - $last_data ) ) / ( $this_time - $last_time );
 
-                        # Otherwise the counter was 64bit...
-                        # In this case, a counter wrap is highly unlikely. A reset of the
-                        # counters is a much more likely reason for this (apparent) wrap.
-                    } elsif ( $last_data < 18446744073709551616 ) {
-                        $delta = $this_data / ( $this_time - $last_time );
+                            # If the last value was less than 2^32, assume the counter was 32bit
+                        } elsif ( $last_data < 4294967296 ) {
+                            $delta = ( $this_data + ( 4294967296 - $last_data ) ) / ( $this_time - $last_time );
 
-                        # Otherwise something is seriously wrong
+                            # Otherwise the counter was 64bit...
+                            # In this case, a counter wrap is highly unlikely. A reset of the
+                            # counters is a much more likely reason for this (apparent) wrap.
+                        } elsif ( $last_data < 18446744073709551616 ) {
+                            $delta = $this_data / ( $this_time - $last_time );
+
+                            # Otherwise something is seriously wrong
+                        } else {
+                            do_log( "Data type too large for leaf $leaf of $dep_oid on $device.", WARN );
+                            $oid_h->{val}{$leaf}   = 'Too large';
+                            $oid_h->{time}{$leaf}  = time;
+                            $oid_h->{color}{$leaf} = 'yellow';
+                            $oid_h->{error}{$leaf} = 1;
+                            next LEAF;
+                        }
+
+                        do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG ) if $g{debug};
+
+                        # Otherwise do normal delta calc
                     } else {
-                        do_log( "Data type too large for leaf $leaf of $dep_oid on $device.", WARN );
-                        $oid_h->{val}{$leaf}   = 'Too large';
-                        $oid_h->{time}{$leaf}  = time;
-                        $oid_h->{color}{$leaf} = 'yellow';
-                        $oid_h->{error}{$leaf} = 1;
-                        next LEAF;
+                        use bignum;
+                        $delta = ( $this_data - $last_data ) / ( $this_time - $last_time );
                     }
 
-                    do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG ) if $g{debug};
-
-                    # Otherwise do normal delta calc
+                    # Round delta to two decimal places
+                    $delta                = sprintf "%.2f", $delta;
+                    $oid_h->{val}{$leaf}  = $delta;
+                    $oid_h->{time}{$leaf} = time;
                 } else {
-                    use bignum;
-                    $delta = ( $this_data - $last_data ) / ( $this_time - $last_time );
-                }
 
-                # Round delta to two decimal places
-                $delta                = sprintf "%.2f", $delta;
-                $oid_h->{val}{$leaf}  = $delta;
-                $oid_h->{time}{$leaf} = time;
+                    # No history; throw wait message
+                    $oid_h->{val}{$leaf}   = 'wait';
+                    $oid_h->{time}{$leaf}  = time;
+                    $oid_h->{color}{$leaf} = 'clear';
+                    $oid_h->{msg}{$leaf}   = 'wait';
+                }
 
             } else {
 
@@ -1168,7 +1180,20 @@ sub trans_best {
                         # Skip if it is disable
                         #  next if ($dep_oid_h->{color}{$leaf} eq 'blue');
 
-                        if ( $dep_oid_h->{repeat} ) {
+                        if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
+
+                            #if ( $dep_oid_h->{repeat}) {
+                            #   if (exists $oid_h->{color}) {
+                            #      do_log("toto oid_h". ref $oid_h->{color});
+                            #   } else {
+                            #     do_log("toto oid_h not exists");
+                            #   }
+                            #   if (exists $dep_oid_h->{color} ) {
+
+                            #  do_log("toto dep_oid_h". ref $dep_oid_h->{color}) ;
+                            #   } else {
+                            #    do_log("toto dep_oid_h not exists");
+                            #  }
                             if ( !defined $oid_h->{color}{$leaf}
                                 or $colors{ $dep_oid_h->{color}{$leaf} } < $colors{ $oid_h->{color}{$leaf} } )
                             {
@@ -1354,7 +1379,20 @@ sub trans_worst {
                         # and ($dep_oid_h->{color}{$leaf} eq 'blue') );
                         #$oid_h->{color}{$leaf} = 'blue' and next if $dep_oid_h->{color}{$leaf} eq 'blue' ;
 
-                        if ( $dep_oid_h->{repeat} ) {
+                        if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
+
+                            #if ( $dep_oid_h->{repeat} ) {
+                            #    if (exists $oid_h->{color}) {
+                            #       do_log("toto oid_h". ref $oid_h->{color});
+                            #    } else {
+                            #      do_log("toto oid_h not exists");
+                            #    }
+                            #    if (exists $dep_oid_h->{color} ) {
+                            #
+                            #    do_log("toto dep_oid_h". ref $dep_oid_h->{color}) ;
+                            #     } else {
+                            #     do_log("toto dep_oid_h not exists");
+                            #   }
                             if ( !defined $oid_h->{color}{$leaf}
                                 or $colors{ $dep_oid_h->{color}{$leaf} } > $colors{ $oid_h->{color}{$leaf} } )
                             {
@@ -1704,8 +1742,8 @@ sub trans_switch {
     if ( $oid_h->{repeat} ) {
         for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
-            # Skip if there was a dependency error for this leaf
-            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            #Skip if there was a dependency error for this leaf
+            next if ( ( ( exists $oid_h->{error} ) and ( ref $oid_h->{error} ne 'HASH' ) ) or ( ( exists $oid_h->{error}{$leaf} ) and $oid_h->{error}{$leaf} ) );
 
             my $val = $dep_oid_h->{val}{$leaf};
             my $num;
@@ -1742,14 +1780,14 @@ sub trans_switch {
                 my $dep_error;
                 my $dep_color;
                 my $dep_msg;
-                if ( $oids->{$dep_oid}{repeat} ) {
+                if ( $oids->{$dep_oid}{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
                     $dep_val   = $dep_oid_h->{val}{$leaf};
                     $dep_color = $dep_oid_h->{color}{$leaf};
                     $dep_msg   = $dep_oid_h->{msg}{$leaf} if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) );
                 } else {
                     $dep_val   = $dep_oid_h->{val};
                     $dep_color = $dep_oid_h->{color};
-                    $dep_msg   = $dep_oid_h->{msg} if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) );
+                    $dep_msg   = $dep_oid_h->{msg} if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg} ) );
                 }
                 if ( !defined $dep_val ) {
                     if ( defined $then_default ) {
@@ -2501,8 +2539,8 @@ sub render_msg {
     # Hash shortcut
     my $msg_template = $tmpl->{msg};
     my $dev          = \%{ $g{devices}{$device} };
-    my $hostname     = $device;
-    $hostname =~ s/\./,/g;
+    my $xymonname    = $device;
+    $xymonname =~ s/\./,/g;
 
     do_log( "Rendering $test message for $device", DEBUG ) if $g{debug};
 
@@ -2511,13 +2549,13 @@ sub render_msg {
 
     # No message template?
     if ( !defined $msg_template ) {
-        return "status $hostname.$test clear $now\n\nCould not locate template for this device.\nPlease check devmon logs.\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
+        return "status $xymonname.$test clear $now\n\nCould not locate template for this device.\nPlease check devmon logs.\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
 
         # Do we have a xymon color, and if so, is it green?
     } elsif ( defined $g{xymon_color}{$device}
         and $g{xymon_color}{$device} ne 'green' )
     {
-        return "status $hostname.$test clear $now\n\nXymon reports this device is unreachable.\nSuspending this test until reachability is restored\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
+        return "status $xymonname.$test clear $now\n\nXymon reports this device is unreachable.\nSuspending this test until reachability is restored\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
     }
 
     # Our outbound message
@@ -2759,23 +2797,21 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     my $val;
                     my $color;
                     if ( $leaf eq '#' ) {
-                        $val   = 'NoOID';
-                        $color = $oid_h->{color} if defined $oid_h->{color};
+                        $val = 'NoOID';
                     } elsif ( $oid_h->{repeat} ) {
                         $val = $oid_h->{val}{$leaf} if defined $oid_h->{val}{$leaf};
-                        if ( not defined $oid_h->{color} ) {
-                            $color = "";    # there is an error
-                        } elsif ( $oid_h->{color} eq "red" or $oid_h->{color} eq "yellow" or $oid_h->{color} eq "green" or $oid_h->{color} eq "clear" or $oid_h->{color} eq "blue" ) {
-                            $color = $oid_h->{color};
-                        } elsif ( defined $oid_h->{color}{$leaf} ) {
-                            $color = $oid_h->{color}{$leaf};
-                        } else {
-                            $color = "blue";
-                        }
-
                     } else {
-                        $val   = $oid_h->{val}   if defined $oid_h->{val};
-                        $color = $oid_h->{color} if defined $oid_h->{color};
+                        $val = $oid_h->{val} if defined $oid_h->{val};
+                    }
+
+                    if ( exists $oid_h->{color} ) {
+                        if ( ref $oid_h->{color} eq 'HASH' ) {
+                            $color = defined $oid_h->{color}{$leaf} ? $oid_h->{color}{$leaf} : 'blue';
+                        } else {
+                            $color = defined $oid_h->{color} ? $oid_h->{color} : 'blue';
+                        }
+                    } else {
+                        $color = 'blue';
                     }
 
                     if ( !defined $val ) {
@@ -2816,7 +2852,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # This condition looks incorrect. We should not remove rrds if alerting
                             # is disabled for this leaf. If the user doesn't want a graph, they probably
                             # don't want this leaf in the table, they should set 'ignore' instead of 'noalarm'
-                            #if ($rrd{$name}{all} or $alarm) {
+                            #if ($rrd{$name}{all} or $arrrrlarm) {
                             # add to list, but check we're not pushing multiple times
                             push @{ $rrd{$name}{leaves} }, $leaf unless grep { $_ eq $leaf } @{ $rrd{$name}{leaves} };
                         }
@@ -2850,9 +2886,10 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # but verify first that this test should compute the worst color
                             if ( ( defined $oid_msg ) and ( not $no_global_wcolor{$oid} ) and ( $oid_msg ne '' ) ) {
 
-                                $worst_color = $color
-                                    if !defined $worst_color
-                                    or $colors{$worst_color} < $colors{$color};
+                                #do_log("toto1: $worst_color") if defined $worst_color and not ($worst_color eq 'clear' or $worst_color eq 'green' or $worst_color eq 'blue');
+                                #$color='clear' if not defined $color;
+                                #do_log("toto2: $color") if ($color ne 'clear') and ($color ne 'green') and ($color ne 'blue');
+                                $worst_color = $color if ( not defined $worst_color ) or ( $colors{$worst_color} < $colors{$color} );
                             }
 
                             # Display threshold messages if we get the msg flag
@@ -2882,9 +2919,8 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                                 # If the message is an empty string it means that we dont want to raise an error
                                 if ( ( defined $oid_msg ) and ( $oid_msg ne '' ) ) {
 
-                                    $worst_color = $color
-                                        if !defined $worst_color
-                                        or $colors{$worst_color} < $colors{$color};
+                                    #$color="clear" if not defined $color;
+                                    $worst_color = $color if ( not defined $worst_color ) or ( $colors{$worst_color} < $colors{$color} );
 
                                     # Now add it to our msg
                                     my $error_key = "&$color $oid_msg";
@@ -3071,6 +3107,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Display threshold messages if we get the msg flag
                     } elsif ( $flag eq 'msg' ) {
+                        $oid_msg = '' if not defined $oid_msg;
 
                         # Get oid msg and replace any inline oid dependencies
                         $line =~ s/\{$root\}/$oid_msg/;
@@ -3169,7 +3206,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
     $msg = join "\n", ( sort keys %errors, '', $msg ) if %errors;
 
     # Now add our header so xymon can determine the page color
-    $msg = "status $hostname.$test $worst_color $now" . "$extrastatus\n\n$msg";
+    $msg = "status $xymonname.$test $worst_color $now" . "$extrastatus\n\n$msg";
 
     # Add our oh-so-stylish devmon footer
     $msg .= "\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> " . "running on $g{nodename}\n";

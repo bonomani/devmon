@@ -73,18 +73,18 @@ sub send_xymon_msgs_to_stdout {
 }
 
 sub send_xymon_msgs_to_host {
-    my $host = shift;
+    my $xymon = shift;
     $g{msgxfrtime}  = time;
     $g{sentmsgsize} = 0;
 
     #do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
     my $nummsg = scalar @{ $g{test_results} };
-    do_log( "Sending $nummsg messages to 'xymon://$host'", INFO );
+    do_log( "Sending $nummsg messages to 'xymon://$xymon'", INFO );
 
     # Determine the address we are connecting to
-    #my $host = $g{dispserv};
-    my $addr = inet_aton($host)
-        or do_log( "Can't resolve display server $host ($!)", ERROR )
+    #my $xymon = $g{dispserv};
+    my $addr = inet_aton($xymon)
+        or do_log( "Can't resolve display server $xymon ($!)", ERROR )
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
 
@@ -102,7 +102,7 @@ sub send_xymon_msgs_to_host {
     my $msg_sent = 0;
     do_log( "Looping through messages for this socket", DEBUG ) if $g{debug};
     my $msg = join "\n", @{ $g{test_results} };
-    if ( not $g{output}{ 'xymon://' . $host }{rrd} ) {
+    if ( not $g{output}{ 'xymon://' . $xymon }{rrd} ) {
         $msg =~ s/<!--.*?-->//sg;
     }
 
@@ -113,7 +113,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
         select undef, undef, undef, $g{msgsleep} / 1000;
 
         # Open our socket to the host
-        do_log( "Opening socket to $host:$g{dispport}", DEBUG ) if $g{debug};
+        do_log( "Opening socket to $xymon:$g{dispport}", DEBUG ) if $g{debug};
         eval {
             local $SIG{ALRM} = sub { die "Socket timed out\n" };
             alarm 10;
@@ -125,7 +125,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             local $SIG{ALRM} = sub { die "Connect timed out\n" };
             alarm 10;
             if ( !connect( SOCK, $p_addr ) ) {
-                do_log( "Can't connect to display server $host ($!)", ERROR );
+                do_log( "Can't connect to display server $xymon ($!)", ERROR );
                 $g{msgxfrtime} = time - $g{msgxfrtime};
                 close SOCK;
                 return;
@@ -244,8 +244,8 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
     # Now send our dm status message !
-    if ( $g{output}{"xymon://$host"}{stat} ) {
-        my $dm_msg  = prepare_xymon_stat_msg($host);
+    if ( $g{output}{"xymon://$xymon"}{stat} ) {
+        my $dm_msg  = prepare_xymon_stat_msg($xymon);
         my $msgsize = length $dm_msg;
         do_log( "Connecting and sending dm message ($msgsize)", DEBUG ) if $g{debug};
         eval {
@@ -274,7 +274,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
 # Spit out various data about our devmon process
 sub prepare_xymon_stat_msg {
-    my $host           = shift;
+    my $xymon          = shift;
     my $color          = 'green';
     my $this_poll_time = $g{snmppolltime} + $g{testtime} + $g{msgxfrtime};
 
@@ -293,10 +293,10 @@ sub prepare_xymon_stat_msg {
     my $num_clear_branches = 0;
     my $num_clear_leaves   = 0;
 
-    for my $dev ( keys %{ $g{devices} } ) {
-        for my $oid ( keys %{ $g{devices}{$dev}{oids} } ) {
-            if ( ( defined $g{devices}{$dev}{oids}{$oid}{color} ) and ( ref $g{devices}{$dev}{oids}{$oid}{color} ne 'HASH' ) and ( $g{devices}{$dev}{oids}{$oid}{color} eq "clear" ) ) {
-                if ( $g{devices}{$dev}{oids}{$oid}{repeat} == 0 ) {
+    for my $device ( keys %{ $g{devices} } ) {
+        for my $oid ( keys %{ $g{devices}{$device}{oids} } ) {
+            if ( ( defined $g{devices}{$device}{oids}{$oid}{color} ) and ( ref $g{devices}{$device}{oids}{$oid}{color} ne 'HASH' ) and ( $g{devices}{$device}{oids}{$oid}{color} eq "clear" ) ) {
+                if ( $g{devices}{$device}{oids}{$oid}{repeat} == 0 ) {
                     ++$num_clear_leaves;
                 } else {
                     ++$num_clear_branches;
