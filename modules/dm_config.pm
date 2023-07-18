@@ -263,7 +263,7 @@ sub initialize {
             'case'    => 1
         },
         'snmpeng' => {
-            'default' => 'session',    # new: 'snmp' , old: 'session', auto: 'snmp' if available, fallback to 'session'
+            'default' => 'auto',    # new: 'snmp' , old: 'session', auto: 'snmp' if available, fallback to 'session'
             'regex'   => '\S+',
             'set'     => 0,
             'case'    => 1
@@ -1880,8 +1880,10 @@ FILEREAD: while (@hostscfg) {
         $snmp_input{$host}{seclevel}   = $seclevel;
         $snmp_input{$host}{secname}    = $secname;
         $snmp_max_tries{$host}         = 1;
-        $snmp_input{$host}{timeout}    = $g{snmptimeout};
-        $snmp_input{$host}{ver}        = $ver;
+
+        #$snmp_input{$host}{snmptimeout}= $g{snmptimeout};
+        $snmp_input{$host}{snmptimeout} = 3;
+        $snmp_input{$host}{ver}         = $ver;
 
         # Add our sysdesc oid
         $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
@@ -1995,9 +1997,11 @@ OLDHOST: for my $host ( keys $g{devices} ) {
                 $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
 
                 #$snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
-                $snmp_max_tries{$host}      = 1;
-                $snmp_input{$host}{timeout} = $g{snmptimeout};
-                $snmp_input{$host}{ver}     = $snmpver;
+                $snmp_max_tries{$host} = 1;
+
+                #$snmp_input{$host}{snmptimeout} = $g{snmptimeout};
+                $snmp_input{$host}{snmptimeout} = 3;
+                $snmp_input{$host}{ver}         = $snmpver;
 
                 # Add our sysdesc oid
                 $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
@@ -2113,9 +2117,11 @@ OLDHOST: for my $host ( keys $g{devices} ) {
                     $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
 
                     #$snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
-                    $snmp_max_tries{$host}      = 1;
-                    $snmp_input{$host}{timeout} = $g{snmptimeout};
-                    $snmp_input{$host}{ver}     = $snmpver;
+                    $snmp_max_tries{$host} = 1;
+
+                    #$snmp_input{$host}{snmptimeout} = $g{snmptimeout};
+                    $snmp_input{$host}{snmptimeout} = 3;
+                    $snmp_input{$host}{ver}         = $snmpver;
 
                     # Add our sysdesc oid
                     $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
@@ -2257,8 +2263,10 @@ OLDHOST: for my $host ( keys $g{devices} ) {
                                         $snmp_input{$host}{seclevel}  = $seclevel;
                                         $snmp_input{$host}{secname}   = $secname;
                                         $snmp_max_tries{$host}        = 1;
-                                        $snmp_input{$host}{timeout}   = $g{snmptimeout};
-                                        $snmp_input{$host}{ver}       = $snmpver;
+
+                                        #$snmp_input{$host}{snmptimeout}   = $g{snmptimeout};
+                                        $snmp_input{$host}{snmptimeout} = 3;
+                                        $snmp_input{$host}{ver}         = $snmpver;
 
                                         # Add our sysdesc oid
                                         $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
