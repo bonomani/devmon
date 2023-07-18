@@ -7,12 +7,19 @@
 
 [More screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots)
 
-## What is new!
-- This is the first SNMPv3 release! (8.2021)
-  - Backup your server before upgrade
-  - Install Net-SNMP lib
-  - Expect bugs!
-  - Enjoy new speed...
+## What is new! Tackling the memory leaks
+- A new distributed SNMPwalk engine! (7.2023)
+  - Retries reengineered: under the devmon control
+    - Identified as the main source of memory leaks, especially when timeouts are exceeded.  
+    - Dynamic nb of retries
+  - SNMPwalk reengineered with primitive function: "snmpbulkwalk"
+     - Partial retries (so sometimes partial responses)
+  - Bonus
+    - Optimisation engine: Better speed for slow devices !
+  - Info 
+    - Defaut SNMP engine changed: SNMP_Session (Pure Perl)
+    - Snmpv3 still with external "C" dependency: no partial retries implemented
+  -  Highly recommended upgrade!
 
 ## What are we working on? (In order):
   - Current roadmap
