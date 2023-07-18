@@ -325,6 +325,8 @@ sub snmp_query {
 
     #my ( $snmp_input, $snmp_max_tries ) = @_;
     my ($snmp_input) = @_;
+
+    #print Dumper(\$snmp_input); exit;
     my $active_forks = 0;
 
     # Check the status of any currently running forks
@@ -348,13 +350,24 @@ sub snmp_query {
         delete $g{devices}{$device}{oids}{snmp_polled};
         delete $g{devices}{$device}{oids}{snmp_temp};
         $snmp_input->{$device}{snmptry_min_duration} //= 10;    # if does not exist put it to 10 sec
+                                                                #Initialize max tries for read host discovery!
+        if ( not exists $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries} ) {
+            $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} = 1;
+
+            #           $snmp_input->{$device}{snmptimeout} = 5;
+            $g{maxpolltime} = 7;                                #(timeout is 3 so 2 retries + 1 sec
+        }    #                                                                                     }
     }
+
+    # $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} = 1            if not exists $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val};
 
     #Order the polling to start with device that take takes longer
     for my $device ( reverse sort { $snmp_input->{$a}{snmptry_min_duration} <=> $snmp_input->{$b}{snmptry_min_duration} } keys %{$snmp_input} ) {
         push @devices, $device;
     }
     my $polltime = time();
+
+    #print Dumper(\$snmp_input);
     while ( @devices or $active_forks ) {
         my $testerror = 0;
         do_log("Error") if $testerror;
@@ -368,6 +381,8 @@ sub snmp_query {
             # First lets see if our fork is working on a device
             if ( defined $g{forks}{$fork}{dev} ) {
                 my $device = $g{forks}{$fork}{dev};
+
+                #$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} = 1            if not exists $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val};
 
                 # It is, lets see if its ready to give us some data
                 my $select = IO::Select->new( $g{forks}{$fork}{CS} );
@@ -485,7 +500,7 @@ sub snmp_query {
                             # snmp_errornum == -24 -> Timeout
                             do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Err:" . $returned{snmp_errorstr} . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), INFO );
                         } else {
-                            do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Err:" . $returned{snmp_errorstr} . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), ERROR );
+                            do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Err:" . ( defined $returned{snmp_errorstr} ? $returned{snmp_errorstr} : '' ) . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), ERROR );
                         }
 
                         # Store partial result if any and reduce next request
@@ -519,8 +534,13 @@ sub snmp_query {
                         }
                         if ( $expected > $received ) {
 
-                            if (   ( ( time() - $polltime + $g{devices}{$device}{snmp_input}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) )
-                                or ( time() - $polltime + $g{devices}{$device}{snmp_input}{snmptimeout} < $g{maxpolltime} / 2 ) )
+                            #if (   ( ( time() - $polltime + $g{devices}{$device}{snmp_input}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) )
+                            if (( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) )
+
+                                or ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} / 2 )
+                                )
+
+                                #or ( time() - $polltime + $g{devices}{$device}{snmp_input}{snmptimeout} < $g{maxpolltime} / 2 ) )
                             {
 
                                 #if ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) {
@@ -612,6 +632,8 @@ sub snmp_query {
             # If our forks are idle, give them something to do
             if ( !defined $g{forks}{$fork}{dev} and @devices ) {
                 my $device = shift @devices;
+
+                #$snmp_input->{$device}{snmptimeout} //= 15; #for readhost
                 if ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) {
                     $g{forks}{$fork}{dev} = $device;
 
@@ -902,7 +924,7 @@ DEVICE: while (1) {    # We should never leave this loop
             send_data( $sock, \%data_out );
             next DEVICE;
 
-        } elsif ( ( ( $g{snmpeng} eq 'session' ) and ( $snmp_ver eq '2' or $snmp_ver eq '2c' ) ) or ( $snmp_ver eq '1' ) ) {
+        } elsif ( ( ( $g{snmpeng} eq 'session' or $g{snmpeng} eq 'auto' ) and ( $snmp_ver eq '2' or $snmp_ver eq '2c' ) ) or ( $snmp_ver eq '1' ) ) {
 
             # Formule: GLOBAL.SNMP.MAXPDUPACKETSIZE = (MAX-REPETITION * (OID_Length + )) + 80
             use BER;
@@ -914,7 +936,7 @@ DEVICE: while (1) {    # We should never leave this loop
 
             # Get SNMP variables
             my $snmp_cid       = $data_in{cid};
-            my $snmp_port      = $data_in{port};
+            my $snmp_port      = $data_in{port} // 161;
             my $ip             = $data_in{ip};
             my $device         = $data_in{dev};
             my $snmp_max_tries = 1;
@@ -940,6 +962,8 @@ DEVICE: while (1) {    # We should never leave this loop
             $data_out{oids}{snmp_input}{stats} = $data_in{stats};
 
             my $nb_of_snmpwalk_mode = 6;
+            $current_cycle //= 0;
+            print "tutu" if not defined $current_cycle;
 
             # we get stat 2 times for each mode at start and 1 time randomly each 100 cycle
             my $is_optim_cycle = ( ( $current_try == 1 ) and ( ( ( $current_cycle - 1 ) <= ( $nb_of_snmpwalk_mode * 2 ) ) or ( not int( rand(100) ) ) ) );
@@ -948,8 +972,12 @@ DEVICE: while (1) {    # We should never leave this loop
             my $discover_stage    = exists $data_in{discover_stage} ? $data_in{discover_stage} : 0;
             my $is_discover_cycle = ( $discover_stage < 10 );
 
+            # Spécial case for read host
+            if ( not exists $data_in{reps} and ( scalar keys %{ $data_in{nonreps} } ) == 1 and $current_cycle == 0 ) {
+                $is_discover_cycle = 0;
+            }
+
             #print Dumper( \%{ $data_in{oids} } ) if $current_try ==2;
-            #      print Dumper( \%data_in ) if $current_try ==2;
 
             # Prepare our session paramater that have to stay open if possible
             my $host;    # = "$snmp_cid\@$hostip:$snmp_port:$timeout:$snmp_max_tries:$backoff:$snmp_ver";
@@ -963,7 +991,9 @@ DEVICE: while (1) {    # We should never leave this loop
             our $session_return_hash_refs  = 0;
 
             #my %rep_oids;
-            my %rep  = %{ $data_in{reps} };
+            #$data_in{reps} = undef if not exists $data_in{reps};
+            my %rep;
+            %rep = %{ $data_in{reps} } if exists $data_in{reps};
             my %nrep = %{ $data_in{nonreps} };
             for my $oid ( keys %{ $data_in{oids} } ) {
                 if ( exists $data_in{oids}{$oid}{nosuchobject} ) {
@@ -1545,12 +1575,12 @@ DEVICE: while (1) {    # We should never leave this loop
                         for my $coid ( keys $poll_rep_oid{$oid}{oids} ) {
                             if ( $oid eq $poll_rep_oid{$oid}{start} ) {
                                 $data_out{oids}{snmp_input}{oids}{$coid}{nosuchobject} = undef;
-                                $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = 1No Such Object available on this agent at this OID";
+                                $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID";
                             }
                         }
                         if ( !$branch_cnt and $is_try1 ) {    # $branch_cnt =0 and $poll_rep_oid{$oid}{cnt} = 0
                             $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
-                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = 2No Such Object available on this agent at this OID";
+                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
 
                         }
                     }
@@ -1620,12 +1650,12 @@ DEVICE: while (1) {    # We should never leave this loop
                         for my $coid ( keys $poll_rep_oid{$oid}{oids} ) {
                             if ( $oid eq $poll_rep_oid{$oid}{start} ) {
                                 $data_out{oids}{snmp_input}{oids}{$coid}{nosuchobject} = undef;
-                                $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = 3No Such Object available on this agent at this OID";
+                                $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID";
                             }
                         }
                         if ( !$branch_cnt and $is_try1 ) {    # $branch_cnt =0 and $poll_rep_oid{$oid}{cnt} = 0
                             $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
-                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = 4No Such Object available on this agent at this OID";
+                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
                         }
                     }
                 }
@@ -1867,7 +1897,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 $data_out{snmp_errornum} = 0;
             }
 
-            # current cnt = max repeition if we car in successfiff complete run in 1 try
+            # current cnt = max repetition if we car in successfully complete run in 1 try
             # 1. 1 first try
             # 2. There is no retry
             for my $oid (@allrep_oids) {
@@ -1905,7 +1935,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 # Get SNMP variables
                 my %snmpvars;
                 $snmpvars{Device}     = $device;
-                $snmpvars{RemotePort} = $data_in{port} || 161;                                                      # Default to 161 if not specified
+                $snmpvars{RemotePort} = $data_in{port} // 161;                                                      # Default to 161 if not specified
                 $snmpvars{DestHost}   = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $device;
                 my $snmptimeout = $data_in{snmptimeout};
                 $snmpvars{Timeout}       = $snmptimeout * 1000000;
