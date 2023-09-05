@@ -39,7 +39,7 @@ require dm_templates;
 use IO::File;
 use FindBin;
 use Getopt::Long;
-use Sys::Hostname;
+use Net::Domain qw(hostfqdn);
 use Time::HiRes qw(time gettimeofday);
 use POSIX qw(strftime);
 
@@ -422,7 +422,7 @@ sub initialize {
         # Xymon best practice is to use fqdn, if the user doesn't want it
         # we assume they have set NODENAME correctly in devmon.cfg
         # $hostname =~ s/\..*//;
-        $g{nodename} = hostname();
+        $g{nodename} = hostfqdn();
         do_log( "Nodename autodetected as $g{nodename}", INFO );
     }
 
