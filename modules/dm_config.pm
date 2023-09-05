@@ -1894,7 +1894,7 @@ FILEREAD: while (@hostscfg) {
 
     # Now go through our resulting snmp-data
     #OLDHOST: for my $host ( keys %{ $g{oid}{snmp_polled} } ) {
-OLDHOST: for my $host ( keys $g{devices} ) {
+OLDHOST: for my $host ( keys %{ $g{devices} } ) {
         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
 
         if ( not defined $sysdesc ) {

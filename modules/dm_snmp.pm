@@ -1461,7 +1461,8 @@ DEVICE: while (1) {    # We should never leave this loop
                         $rep_def_mr_in_query{$oid} = undef;
                     }
                 }
-                @rep_in_query = oid_sort( keys { %rep_undef_mr_in_query, %rep_def_mr_in_query } );
+                #@rep_in_query = oid_sort( keys { %rep_undef_mr_in_query, %rep_def_mr_in_query } ); eksf
+                @rep_in_query = oid_sort( keys  %rep_undef_mr_in_query , keys %rep_def_mr_in_query  );
 
                 my @start_oid;
                 for my $oid (@rep_in_query) {
@@ -1572,7 +1573,7 @@ DEVICE: while (1) {    # We should never leave this loop
                     } else {
 
                         # No anser, we reach the end of the oid mib: check now that all children oid did have an answer or notify
-                        for my $coid ( keys $poll_rep_oid{$oid}{oids} ) {
+                        for my $coid ( keys %{ $poll_rep_oid{$oid}{oids} } ) { #eksf
                             if ( $oid eq $poll_rep_oid{$oid}{start} ) {
                                 $data_out{oids}{snmp_input}{oids}{$coid}{nosuchobject} = undef;
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID";
@@ -1647,7 +1648,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         delete $poll_rep_defined_mr{$oid};
 
                         # Check if some oid did not have an answer, as we have to remove them
-                        for my $coid ( keys $poll_rep_oid{$oid}{oids} ) {
+                        for my $coid ( keys %{ $poll_rep_oid{$oid}{oids} }) { #eksf
                             if ( $oid eq $poll_rep_oid{$oid}{start} ) {
                                 $data_out{oids}{snmp_input}{oids}{$coid}{nosuchobject} = undef;
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID";
@@ -1863,7 +1864,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         my $i = 0;
                         for my $best_snmpwalk_mode ( sort { $data_out{oids}{snmp_input}{stats}{snmptry_min_duration}{$a} <=> $data_out{oids}{snmp_input}{stats}{snmptry_min_duration}{$b} } keys %{ $data_out{oids}{snmp_input}{stats}{snmptry_min_duration} } ) {
                             ++$i;
-                            push $data_out{oids}{snmp_input}{stats}{best_3_snmpwalk_modes}, $best_snmpwalk_mode;
+                            push @{ $data_out{oids}{snmp_input}{stats}{best_3_snmpwalk_modes} }, $best_snmpwalk_mode; # epsf
                             $data_out{snmp_msg}{ ++$snmp_msg_count } = "Optim snmpwalk_mode:$best_snmpwalk_mode snmptry_min_duration: $data_out{oids}{snmp_input}{stats}{snmptry_min_duration}{$best_snmpwalk_mode}" if $g{debug};
                             last                                                                                                                                                                                     if $i == 3;
 
@@ -2512,7 +2513,7 @@ sub deeph_flatten_href {
     my %flat;
     my $delim = '.';
     my ( $deep_href, $prefix ) = @_;
-    for my $key ( keys $deep_href ) {
+    for my $key ( keys %{ $deep_href }  ) { #eksf
 
         #print $key."\n";
         if ( ref $deep_href->{$key} ne 'HASH' ) {
