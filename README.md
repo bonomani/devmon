@@ -12,7 +12,7 @@
   - Retries reengineered: under the devmon control
     - Identified as the main source of memory leaks, especially when timeouts are exceeded.  
     - Dynamic nb of retries
-  - SNMPwalk reengineered with primitive function: "snmpbulkwalk"
+  - SNMPwalk reengineered with primitive function: "snmpgetbulk"
      - Partial retries (so sometimes partial responses)
   - Bonus
     - Optimisation engine: Better speed for slow devices !
