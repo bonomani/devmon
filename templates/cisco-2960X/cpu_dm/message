@@ -1,12 +1,16 @@
 <table border="0" cellspacing="0" cellpadding="0">
-<tbody  style="vertical-align:baseline;" > 
+<tbody  style="vertical-align:baseline;" >
   <tr>
     <td>{UpTime.color}<b>Uptime</b></td>
     <td>: {UpTime.msg}</td>
   </tr>
   <tr>
-    <td>  {UpTimeModStateNoAlarm.color}<b>Accuracy</b></td>
-    <td>: {UpTimeModState.msg}</td>
+    <td>   sysUpTime</td>
+    <td>: {sysUpTime100txt}</td>
+  </tr>
+  <tr>
+    <td>   snmpEngineTime</td>
+    <td>: {snmpEngineTimetxt}</td>
   </tr>
   <tr>
     <td>{sysBootReason.color}<b>Reboot reason</b></td>
