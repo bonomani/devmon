@@ -462,7 +462,7 @@ sub trans_delta {
                     }
 
                     # Round delta to two decimal places
-                    $delta                = sprintf "%.2f", $delta;
+                    $delta = sprintf "%.2f", $delta;
                     $oid_h->{val}{$leaf}  = $delta;
                     $oid_h->{time}{$leaf} = time;
                 } else {
@@ -554,7 +554,7 @@ sub trans_delta {
                 $delta = ( $this_data - $last_data ) / ( $this_time - $last_time );
             }
 
-            $delta         = sprintf "%.2f", $delta;
+            $delta = sprintf "%.2f", $delta;
             $oid_h->{val}  = $delta;
             $oid_h->{time} = time;
 
@@ -700,7 +700,7 @@ sub trans_math {
                 $oid_h->{msg}   = $@;
             }
         } else {
-            $result       = sprintf $print_mask, $result;
+            $result = sprintf $print_mask, $result;
             $oid_h->{val} = $result;
         }
     }
@@ -2071,7 +2071,7 @@ sub trans_chain {
         if ( !defined $trg_val ) {
             $oid_h->{val}   = undef;
             $oid_h->{time}  = time;
-            $oid_h->{color} = defined $trg_h->{color}         ? $trg_h->{color}         : "clear";
+            $oid_h->{color} = defined $trg_h->{color} ? $trg_h->{color} : "clear";
             $oid_h->{msg}   = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "Parent value n/a";
         }
 
@@ -2274,9 +2274,9 @@ sub trans_sort {
 
                 # The list is empty, treat it as a non repeater
                 $oid_h->{val}   = undef;
-                $oid_h->{time}  = $src_h->{time}  if defined $src_h->{time};
+                $oid_h->{time}  = $src_h->{time} if defined $src_h->{time};
                 $oid_h->{color} = $src_h->{color} if defined $src_h->{color};
-                $oid_h->{msg}   = $src_h->{msg}   if defined $src_h->{msg};
+                $oid_h->{msg}   = $src_h->{msg} if defined $src_h->{msg};
             }
         } elsif ( $sort eq 'num' ) {
             my $pad = 1;
@@ -2393,7 +2393,7 @@ sub trans_index {
                 }
 
                 $oid_h->{val}{$leaf}   = $leaf;
-                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf};                                      # should always be defined, just to be sure
+                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf};                                          # should always be defined, just to be sure
                 $oid_h->{color}{$leaf} = defined $src_h->{color}{$leaf} ? $src_h->{color}{$leaf} : 'green';
                 $oid_h->{msg}{$leaf}   = $src_h->{msg}{$leaf} if ( ( exists $src_h->{msg} ) and ( defined $src_h->{msg}{$leaf} ) );
             }
@@ -2646,7 +2646,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         }
                     }
 
-                    $name               = $test if !defined $name;
+                    $name = $test if !defined $name;
                     $rrd{$name}{pri}    = $pri    || 'pri';
                     $rrd{$name}{dir}    = $dir    || 0;
                     $rrd{$name}{all}    = $all    || 0;
@@ -2657,7 +2657,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     for (@datasets) {
                         my ( $ds, $oid, $type, $time, $min, $max ) = split /:/;
 
-                        $ds   = $oid    if !defined $ds;
+                        $ds = $oid if !defined $ds;
                         $type = 'GAUGE' if !defined $type or $type eq '';
                         $time = 600     if !defined $time or $time eq '';
                         $min  = 0       if !defined $min  or $min eq '';
@@ -3282,7 +3282,7 @@ sub parse_deps {
     my $flags = 'color|msg';
 
     # Try to guard against recursion loops
-    $depth = 1                         if !defined $depth;
+    $depth = 1 if !defined $depth;
     return "Recursion limit exceeded." if ++$depth > 10;
 
     # Make sure we have a message to parse!
@@ -3490,7 +3490,7 @@ COLOR: for my $color (@color_order) {
                     if ( $thresh_confidence_level < 6 and looks_like_number($thresh) ) {
                         if ( ${ $oid_r{val} } >= $thresh ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 6;
                             next TRH_LIST;
@@ -3507,19 +3507,19 @@ COLOR: for my $color (@color_order) {
                             )
                         {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 6;
                             next TRH_LIST;
                         } elsif ( $thresh_confidence_level < 7 and $op eq '=' and ${ $oid_r{val} } == $limit ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 7;
                             last COLOR;
                         } elsif ( $thresh_confidence_level < 3 and $op eq '!' and ${ $oid_r{val} } != $limit ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 3;
                             next TRH_LIST;
@@ -3527,13 +3527,13 @@ COLOR: for my $color (@color_order) {
                     } elsif ( $thresh eq '_AUTOMATCH_' ) {
                         if ( $thresh_confidence_level < 2 and $oid_color eq $color ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 2;
                             next TRH_LIST;
                         } elsif ( $thresh_confidence_level < 1 ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 1;
                             next TRH_LIST;
@@ -3545,13 +3545,13 @@ COLOR: for my $color (@color_order) {
                     my $neg_thresh = $1;
                     if ( $thresh_confidence_level < 4 and ${ $oid_r{val} } !~ /$neg_thresh/ ) {
                         ${ $oid_r{color} }  = $color;
-                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{thresh} } = $thresh if defined $thresh;
                         ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 4;
                         next TRH_LIST;
                     } elsif ( $thresh_confidence_level < 3 and ${ $oid_r{val} } ne $neg_thresh ) {
                         ${ $oid_r{color} }  = $color;
-                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{thresh} } = $thresh if defined $thresh;
                         ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 3;
                         next TRH_LIST;
@@ -3564,26 +3564,26 @@ COLOR: for my $color (@color_order) {
                     if ( $thresh eq '_AUTOMATCH_' ) {
                         if ( $thresh_confidence_level < 2 and $oid_color eq $color ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 2;
                             next TRH_LIST;
                         } elsif ( $thresh_confidence_level < 1 ) {
                             ${ $oid_r{color} }  = $color;
-                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{thresh} } = $thresh if defined $thresh;
                             ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 1;
                             next TRH_LIST;
                         }
                     } elsif ( $thresh_confidence_level < 7 and ${ $oid_r{val} } eq $thresh ) {
                         ${ $oid_r{color} }  = $color;
-                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{thresh} } = $thresh if defined $thresh;
                         ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 7;
                         next COLOR;
                     } elsif ( $thresh_confidence_level < 5 and ${ $oid_r{val} } =~ /$thresh/ ) {
                         ${ $oid_r{color} }  = $color;
-                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{thresh} } = $thresh if defined $thresh;
                         ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 5;
                         next TRH_LIST;
@@ -3671,7 +3671,7 @@ sub validate_deps {
     for my $dep_oid (@$dep_arr) {
         if ( ( ref $oids->{$dep_oid}{error} ne 'HASH' ) and ( defined $oids->{$dep_oid}{error} ) and $oids->{$dep_oid}{error} ) {
             $oid_h->{color} = 'clear';
-            $oid_h->{msg}   = $oids->{$dep_oid}{msg}  if defined $oids->{$dep_oid}{msg};
+            $oid_h->{msg}   = $oids->{$dep_oid}{msg} if defined $oids->{$dep_oid}{msg};
             $oid_h->{time}  = $oids->{$dep_oid}{time} if defined $oids->{$dep_oid}{time};
             $oid_h->{error} = 1;
             return 0;

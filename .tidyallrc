@@ -7,7 +7,7 @@ select = modules/dm_config.pm
 select = modules/dm_templates.pm
 select = modules/dm_msg.pm
 select = devmon
-argv = -l=0 -i=4 -ci=4 -ce -cbl='else elsif continue' -cblx -se -vt=2 -cti=0 -xci -pt=1 -bt=1 -sbt=1 -bbt=1 -nsfs -nolq -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+argv = -l=0 -i=4 -ci=4 -ce -cbl='else elsif continue' -cblx -se -vt=2 -cti=0 -pt=1 -bt=1 -sbt=1 -bbt=1 -nsfs -nolq -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
  
 ;[PerlCritic]
 ;select = modules/dm*.pm
