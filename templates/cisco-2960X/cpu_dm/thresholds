@@ -1,5 +1,5 @@
 cpmCPUTotal5minRev              : red           : >70                           : CPU utilization is very high: {cpmCPUTotal5minRev}%
-cpmCPUTotal5minRev              : yellow        : >30                           : CPU utilization is high: {cpmCPUTotal5minRev}%
+cpmCPUTotal5minRev              : yellow        : >50                           : CPU utilization is high: {cpmCPUTotal5minRev}%
 cpmCPUTotal5minRev              : green         :                               :
 
 UpTime                          : red           : <600                          : <b>{UpTimeTxt}, device rebooted recently</b>
