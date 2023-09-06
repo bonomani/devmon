@@ -1063,7 +1063,7 @@
 
 
  -<begin file------------------------------
-
+      TABLE:
       Ifc name|Ifc speed|Ifc status
       {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
 
@@ -1078,7 +1078,11 @@
  Devmon basically just builds an HTML table out of the repeater data. It can
  have an optional header, which should be specified on the line immediately
  after the 'TABLE:' tag. If no table header is desired, the line after the
- table tag should be the row data identifier.
+ table tag should be the row data identifier. The column separator in the
+ header line is a '|'. By default the content of a column will be left
+ aligned. If the content should be aligned on the right side, use '|>' rather
+ than '|' as the separator. Note that the leftmost column cannot be right
+ aligned in this way.
 
  The row data identifier is the one that contains one or more data aliases.
  The first of these aliases is referred to as the 'primary' alias, and must be

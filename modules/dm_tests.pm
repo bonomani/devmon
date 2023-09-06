@@ -2718,11 +2718,14 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Replace our separaters with html
             if ( defined $t_opts{nonhtml} ) {
+                $line =~ s/\|>/|/g;    # Remove right-align indicator
                 $line =~ s/\|/:/g;
             } elsif ( defined $t_opts{plain} ) {
+                $line =~ s/\|>/|/g;    # Remove right-align indicator
                 $line =~ s/\|/ /g;
             } else {
                 $line =~ s/\|/<\/td><td>/g;
+                $line =~ s/td>>/td align='right'>/g;
             }
 
             # Make the first oid (from left to right) the primary one
