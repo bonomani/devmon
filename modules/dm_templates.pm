@@ -1621,11 +1621,11 @@ sub read_message_file {
                                     and $max ne ''
                                     and $max !~ /^([-+]?(\d+)|U$)/;
                                 do_log( "Rrd max value > min value at $msg_file line $.", ERROR ) and return
-                                    if (    defined $min
-                                        and $min ne ''
-                                        and defined $max
-                                        and $max ne ''
-                                        and $max <= $min )
+                                    if (defined $min
+                                    and $min ne ''
+                                    and defined $max
+                                    and $max ne ''
+                                    and $max <= $min )
                                     or ( defined $max and $max ne '' and $max < 0 );
                                 $got_ds = 1;
                             } else {

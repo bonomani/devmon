@@ -1705,7 +1705,7 @@ FILEREAD: while (@hostscfg) {
                     # See if we have a custom version
                     if ( $options =~ s/(?:,|^)v([1,3]|(?:2c?)),?// ) {
                         $hosts_cfg{$host}{ver} = substr $1, 0, 1;
-                        $custom_ver            = 1;
+                        $custom_ver = 1;
                     }
 
                     # See if we have a custom IP
@@ -1848,11 +1848,11 @@ FILEREAD: while (@hostscfg) {
                 next if ( $secname eq '' or $authproto eq '' or $authpass eq '' );
             } elsif ( $seclevel eq 'authPriv' ) {
                 next
-                    if (   $secname eq ''
-                        or $authproto eq ''
-                        or $authpass eq ''
-                        or $privproto eq ''
-                        or length($privpass) < 8 );
+                    if ( $secname eq ''
+                    or $authproto eq ''
+                    or $authpass eq ''
+                    or $privproto eq ''
+                    or length($privpass) < 8 );
             }
         }
 
@@ -2521,14 +2521,14 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             my $vendor     = $new_hosts{$host}{vendor};
             my $model      = $new_hosts{$host}{model};
             my $tests      = $new_hosts{$host}{tests};
-            my $ver        = exists $new_hosts{$host}{ver}       ? $new_hosts{$host}{ver}       : '';
-            my $cid        = exists $new_hosts{$host}{cid}       ? $new_hosts{$host}{cid}       : '';
-            my $secname    = exists $new_hosts{$host}{secname}   ? $new_hosts{$host}{secname}   : '';
-            my $seclevel   = exists $new_hosts{$host}{seclevel}  ? $new_hosts{$host}{seclevel}  : '';
+            my $ver        = exists $new_hosts{$host}{ver} ? $new_hosts{$host}{ver} : '';
+            my $cid        = exists $new_hosts{$host}{cid} ? $new_hosts{$host}{cid} : '';
+            my $secname    = exists $new_hosts{$host}{secname} ? $new_hosts{$host}{secname} : '';
+            my $seclevel   = exists $new_hosts{$host}{seclevel} ? $new_hosts{$host}{seclevel} : '';
             my $authproto  = exists $new_hosts{$host}{authproto} ? $new_hosts{$host}{authproto} : '';
-            my $authpass   = exists $new_hosts{$host}{authpass}  ? $new_hosts{$host}{authpass}  : '';
+            my $authpass   = exists $new_hosts{$host}{authpass} ? $new_hosts{$host}{authpass} : '';
             my $privproto  = exists $new_hosts{$host}{privproto} ? $new_hosts{$host}{privproto} : '';
-            my $privpass   = exists $new_hosts{$host}{privpass}  ? $new_hosts{$host}{privpass}  : '';
+            my $privpass   = exists $new_hosts{$host}{privpass} ? $new_hosts{$host}{privpass} : '';
 
             #default port from config?
             #my $port = 161;
@@ -2891,9 +2891,9 @@ sub quit {
     # Only run this if we are the parent process
     if ( $g{parent} ) {
         do_log( "Shutting down", INFO ) if $g{initialized};
-        unlink $g{pidfile}              if $g{initialized} and -e $g{pidfile};
-        $g{log}->close                  if defined $g{log} and $g{log} ne '';
-        $g{dbh}->disconnect()           if defined $g{dbh} and $g{dbh} ne '';
+        unlink $g{pidfile}    if $g{initialized} and -e $g{pidfile};
+        $g{log}->close        if defined $g{log} and $g{log} ne '';
+        $g{dbh}->disconnect() if defined $g{dbh} and $g{dbh} ne '';
 
         # Clean up our forks if we left any behind, first by killing them nicely
         for my $fork ( keys %{ $g{forks} } ) {

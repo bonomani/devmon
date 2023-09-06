@@ -315,7 +315,7 @@ sub prepare_xymon_stat_msg {
     $message .= "Clear branches:      $num_clear_branches\n";
     $message .= "Clear leaves:        $num_clear_leaves\n";
     $message .= "Xymon msg xfer size: $g{sentmsgsize}\n\n";
-    $message .= "Cycle time:          " . sprintf( "%6.2f s\n",   $g{cycletime} );
+    $message .= "Cycle time:          " . sprintf( "%6.2f s\n", $g{cycletime} );
     $message .= "Dead time:           " . sprintf( "%6.2f s\n\n", $g{deadtime} );
     $message .= "SNMP test time:      $snmp_poll_time\n";
     $message .= "Test logic time:     $test_time\n";
