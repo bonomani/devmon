@@ -1,10 +1,9 @@
 sysUpTime100                 : MATH            : {sysUpTime}  / 100 : 0
 UpTimeMod                    : MATH            : {sysUpTime100} - ({snmpEngineTime} % 42949672.96 ) : 0
-UpTimeModStateClone          : SWITCH          : {UpTimeMod} 0 - 300 =1,-300 - 0=2,default=0
+UpTimeModState               : SWITCH          : {UpTimeMod} 0 - 300 =1,-300 - 0=2,default=0
 
 # Create a clone (no threshold apply on clone)
-UpTimeModState               : MATH            : {UpTimeModStateClone}
-snmpEngineTimeAdjusted       : MATH            : {snmpEngineTime} + (({UpTimeModStateClone} % 2) x {UpTimeMod})
+snmpEngineTimeAdjusted       : MATH            : {snmpEngineTime} + (({UpTimeModState} % 2) x {UpTimeMod})
 UpTimeDiff                   : MATH            : {snmpEngineTimeAdjusted} - {sysUpTime100}
 UpTimeClone                  : SWITCH          : {UpTimeDiff} >=0={snmpEngineTimeAdjusted},default={sysUpTime100}
 
@@ -24,5 +23,5 @@ sysBootReasonDelayTimerTxt   : ELAPSED         : {sysBootReasonDelayTimer}
 sysBootReasonDelayTimerEnable: SWITCH          : {sysReloadReason} 'Reload_Commmand'=disable,default={sysBootReasonDelayTimer}
 sysBootReason                : BEST            : {sysBootReasonDelayTimerEnable} , {sysReloadReasonClone}
 
-# Create a duplicate oid to be able to override the message alarm
-UpTimeModStateNoAlarm        : BEST            : {UpTimeModState}
+sysUpTime100txt              : ELAPSED         : {sysUpTime100}
+snmpEngineTimetxt            : ELAPSED         : {snmpEngineTime}
