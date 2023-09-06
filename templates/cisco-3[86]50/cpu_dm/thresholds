@@ -6,11 +6,6 @@ UpTime                          : red           : <600                          
 UpTime                          : yellow        : <7200                         : <b>{UpTimeTxt}, device rebooted recently</b>
 UpTime                          : green         :                               : <b>{UpTimeTxt}</b>
 
-UpTimeModState                  : yellow        : =0                            : <b>Not OK</b>, diff(snmp;system)={UpTimeMod}[sec] is not in range [-300..300] [sec]
-UpTimeModState                  : green         : >=1                           : <b>OK</b>, diff(snmp;system)={UpTimeMod}[sec] is in range [-300..300] [sec]
-UpTimeModStateNoAlarm           : yellow        :                               : 
-UpTimeModStateNoAlarm           : green         :                               :
-
 sysBootReason                   : yellow        : power-on                      : <b>Ambiguous</b>
 sysBootReason                   : yellow        :                               : <b>Critical</b>, but lower alarm level to warning
 sysBootReason                   : green         :                               : <b>OK</b>
