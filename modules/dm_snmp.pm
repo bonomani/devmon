@@ -994,7 +994,7 @@ DEVICE: while (1) {    # We should never leave this loop
             #$data_in{reps} = undef if not exists $data_in{reps};
             my %rep;
             %rep = %{ $data_in{reps} } if exists $data_in{reps};
-            my %nrep = %{ $data_in{nonreps} };
+            my %nrep = %{ $data_in{nonreps} } if exists $data_in{nonreps};
             for my $oid ( keys %{ $data_in{oids} } ) {
                 if ( exists $data_in{oids}{$oid}{nosuchobject} ) {
                     delete $rep{$oid};
