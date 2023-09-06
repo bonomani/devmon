@@ -231,7 +231,7 @@ MODEL: for my $dir (@dirs) {
             }
 
             # Honor 'probe' and 'match' command line: Filter unmatch template
-            if ( defined $g{match_test} and $test !~ /$g{match_test}/ and $g{match_test} ne '') {
+            if ( defined $g{match_test} and $test !~ /$g{match_test}/ and $g{match_test} ne '' ) {
                 next;
             }
 
