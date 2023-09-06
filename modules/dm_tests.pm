@@ -90,6 +90,23 @@ sub tests {
                 delete( $valid_tests{$notest} );
             }
             $tests = join ',', keys %valid_tests;
+        } else {
+            my $valid_tests = '';
+            for my $dev_test ( split ',', $tests ) {
+                my $dev_test_found = 0;
+                for my $tmpl_test ( keys %{ $g{templates}{$vendor}{$model}{tests} } ) {
+                    if ( $tmpl_test eq $dev_test ) {
+                        $dev_test_found = 1;
+                        if ( $valid_tests eq '' ) {
+                            $valid_tests = $tmpl_test;
+                        } else {
+                            $valid_tests .= ',' . $tmpl_test;
+                        }
+                    }
+                }
+                do_log( "Device $device test: '$dev_test' not found", ERROR ) if !$dev_test_found;
+            }
+            $tests = $valid_tests;
         }
 
         # Separate tests, perform individual test logic
