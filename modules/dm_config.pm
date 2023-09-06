@@ -518,7 +518,7 @@ sub initialize {
             } elsif ( $match_key eq 'iphost' ) {
                 $g{match_iphost} = join( '|', map {"(?:$_)"} @{ $match{iphost} } );
             } elsif ( $match_key eq 'test' ) {
-                $g{match_test} = join( '|', map {"(?:$_)"} @{ $match{test} } );
+		$g{match_test} = join( '|', map {"(?:^$_".'$)'} @{ $match{test} } );
             } elsif ( $match_key eq 'rrd' ) {
                 for my $output ( @{ $match{rrd} } ) {
                     if ( exists $g{output}{$output} ) {
