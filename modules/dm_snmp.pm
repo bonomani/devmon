@@ -1555,11 +1555,10 @@ DEVICE: while (1) {    # We should never leave this loop
                 for my $poid (@nrep_in_query) {
                     my $oid       = $poid . ".0";
                     my $nonrepval = deeph_find_leaf( $oid, \%deep_h );
-                    if ( defined $nonrepval ) {
-                        delete $poll_nrep{$poid};
-                    } else {
-                        $data_out{snmp_msg}{ ++$snmp_msg_count } = "Error SNMP not respond to nrep";
+                    if ( not defined $nonrepval ) {
+                        $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
                     }
+                    delete $poll_nrep{$poid};
                 }
                 for my $oid (@rep_as_nrepu_in_query) {
                     my %branch_hml = deeph_find_branch_h( $oid, \%deep_h );
