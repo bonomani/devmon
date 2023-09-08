@@ -7,6 +7,10 @@
 
 [More screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots)
 
+## Small updates (9.2023)
+- Table align feature: Thanks. W.Nelis
+- Some bugs
+
 ## What is new! Tackling the memory leaks
 - A new distributed SNMPwalk engine! (7.2023)
   - Retries reengineered: under the devmon control
@@ -18,7 +22,7 @@
     - Optimisation engine: Better speed for slow devices !
   - Info 
     - Defaut SNMP engine changed: SNMP_Session (Pure Perl)
-    - Snmpv3 still with external "C" dependency: no partial retries implemented
+    - Snmpv3 still with external "C" dependency: partial retries not implemented
   -  Highly recommended upgrade!
 
 ## What are we working on? (In order):
