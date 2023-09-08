@@ -1333,12 +1333,16 @@ DEVICE: while (1) {    # We should never leave this loop
 
                 if ( scalar keys %poll_rep_undefined_mr ) {
 
-                    # Start to discover oid that dont have the max-repetition set yet (in discovery phase)
+                    # Start to discover oid that dont have the max-repetition set yet (discovery phase)
                     if ( $left_repeater_to_query < $max_getbulk_repeaters ) {
                         $free_repeater_in_query   = $left_repeater_to_query;
                         $max_repetitions_in_query = ( $free_repeater_in_query == 0 ) ? 0 : int( $max_getbulk_responses / $free_repeater_in_query );
-                        $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
-                        $free_repeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                        if ( $nreapeter_at_end ) {
+                            $free_nrepeater_in_query  = 0;
+                        } else { 
+                           $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                           $free_nrepeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                        }
                     } else {
                         $free_repeater_in_query   = $max_getbulk_repeaters;
                         $free_nrepeater_in_query  = 0;
@@ -1357,8 +1361,12 @@ DEVICE: while (1) {    # We should never leave this loop
                         if ( $left_repeater_to_query < $max_getbulk_repeaters ) {
                             $free_repeater_in_query   = $left_repeater_to_query;
                             $max_repetitions_in_query = ( $free_repeater_in_query == 0 ) ? 0 : int( $max_getbulk_responses / $free_repeater_in_query );
-                            $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
-                            $free_repeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                            if ( $nreapeter_at_end ) {
+                               $free_nrepeater_in_query  = 0;
+                            } else {
+                               $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                               $free_nrepeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                            }
                         } else {
                             $free_repeater_in_query   = $max_getbulk_repeaters;
                             $free_nrepeater_in_query  = 0;
@@ -1368,14 +1376,24 @@ DEVICE: while (1) {    # We should never leave this loop
                         $max_repetitions_in_query = $max_max_repetitions < $max_getbulk_responses ? $max_max_repetitions : $max_getbulk_responses;
                         $free_repeater_in_query   = int( $max_getbulk_responses / $max_repetitions_in_query );
                         $free_repeater_in_query   = $free_repeater_in_query > $max_getbulk_repeaters ? $max_getbulk_repeaters : $free_repeater_in_query;
-                        $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                        if ( $nreapeter_at_end ) {
+                             $free_nrepeater_in_query  = 0;
+                        } else {
+                           $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                           $free_nrepeater_in_query  = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                        }
                     } else {    # group_by_max_repetitions_by_row
                         $free_repeater_in_query   = $max_max_repetitions_nb_of_query > $max_getbulk_repeaters ? $max_getbulk_repeaters : $max_max_repetitions_nb_of_query;
                         $max_repetitions_in_query = int( $max_getbulk_responses / $free_repeater_in_query );
+                        if ( $nreapeter_at_end ) {
+                              $free_nrepeater_in_query  = 0;
+                         } else {
                         $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                        $free_nrepeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                        }
                     }
                     $max_repetitions_in_query = $max_max_repetitions if $max_max_repetitions < $max_repetitions_in_query;
-                    $free_nrepeater_in_query  = 0                    if $nreapeter_at_end;
+                    #$free_nrepeater_in_query  = 0                    if $nreapeter_at_end;
                 } else {
                     $free_repeater_in_query   = 0;
                     $free_nrepeater_in_query  = $max_getbulk_repeaters;
