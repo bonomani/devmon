@@ -1,29 +1,8 @@
-<table border="0" cellspacing="0" cellpadding="0">
-<tbody  style="vertical-align:baseline;" > 
-  <tr>
-    <td>{UpTime.color}<b>Uptime</b></td>
-    <td>: {UpTime.msg}</td>
-  </tr>
-  <tr>
-    <td>  {UpTimeModStateNoAlarm.color}<b>Accuracy</b></td>
-    <td>: {UpTimeModState.msg}</td>
-  </tr>
-  <tr>
-    <td>{sysBootReason.color}<b>Reboot reason</b></td>
-    <td>: {sysBootReason.msg}</td>
-  </tr>
-  <tr>
-    <td>  {sysReloadReasonClone.color}<b>Message</b></td>
-    <td>: {sysReloadReasonClone.msg}</td>
-  </tr>
-  <tr>
-    <td>  <span style="vertical-align:bottom; line-height: 1.5;">&#9201;&#65039;</span> <b>Timer</b></td>
-    <td>: {sysBootReasonDelayTimerEnable.msg}</td>
-  </tr>
-</tbody>
-</table>
-{sysDescr}
+{sysUpTimeSecs.color}: Up for {UpTimeTxt}
+{cie1000SysutilStatusCpuLoadAverage10sec.color}: CPU 10 sec average: {cie1000SysutilStatusCpuLoadAverage10sec}%
 
-TABLE:rrd(DS:ds0:cpmCPUTotal5minRev:GAUGE; )
-CPU|Load
-{CPUIndex}|{cpmCPUTotal5minRev.color}{cpmCPUTotal5minRev}%{cpmCPUTotal5minRev.errors}
+System description:
+{sysDescr}
+<!--
+<br>CPU 5 min average: {cie1000SysutilStatusCpuLoadAverage10sec}
+-->
