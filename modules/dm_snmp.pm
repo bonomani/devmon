@@ -902,15 +902,12 @@ DEVICE: while (1) {    # We should never leave this loop
         }
 
         # Get SNMP variables
-        #my $snmp_cid = $data_in{cid};
         my $snmp_ver      = $data_in{ver};
         my $timeout_count = exists $data_in{timeout_count} ? $data_in{timeout_count} : 0;
         my $discover      = exists $data_in{discover} ? $data_in{discover} : 0;
 
         # Establish SNMP session
         my $session;
-
-        #my $sess_err = 0;
 
         if ( !defined $data_in{nonreps} and !defined $data_in{reps} ) {
             my $error_str = "No oids to query for $data_in{dev}, skipping";
@@ -977,8 +974,6 @@ DEVICE: while (1) {    # We should never leave this loop
                 $is_discover_cycle = 0;
             }
 
-            #print Dumper( \%{ $data_in{oids} } ) if $current_try ==2;
-
             # Prepare our session paramater that have to stay open if possible
             my $host;    # = "$snmp_cid\@$hostip:$snmp_port:$timeout:$snmp_max_tries:$backoff:$snmp_ver";
 
@@ -1012,8 +1007,6 @@ DEVICE: while (1) {    # We should never leave this loop
             my %poll_rep_mr_defined;    #  The reverse mapping
             my %poll_rep_undefined_mr;
             my %poll_nrep;
-
-            #$data_in{reps}{'1.3.6.1.4.1.9.9.48.1.1.1.7'}=undef;
 
             # Create the oids list of repeters
             #for my $oid ( oid_sort keys %{ $data_in{reps} } ) {
@@ -1266,8 +1259,7 @@ DEVICE: while (1) {    # We should never leave this loop
             my $snmpwalk_start_time         = time();
 
             # Optimize mode
-            #my $nb_of_snmpwalk_mode = 6;
-            my $group_by_max_repetitions_by_col;    # by repetear cnt (not really by col)
+            my $group_by_max_repetitions_by_col;                       # by repetear cnt (not really by col)
             my $group_by_max_repetitions_by_row;
             my $nreapeter_at_end;
 
@@ -1279,9 +1271,6 @@ DEVICE: while (1) {    # We should never leave this loop
                 $snmpwalk_mode                           = ( $current_cycle - 1 ) % $nb_of_snmpwalk_mode;
                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "optim snmpwalk_mode:$snmpwalk_mode" if $g{debug};
             }
-
-            #$snmpwalk_mode = 0 if $current_cycle>1;
-            #$snmptimeout_instant -=10 if $current_cycle>1;
 
             if ( $snmpwalk_mode == 5 ) {
                 $group_by_max_repetitions_by_col = 1;
@@ -1337,11 +1326,11 @@ DEVICE: while (1) {    # We should never leave this loop
                     if ( $left_repeater_to_query < $max_getbulk_repeaters ) {
                         $free_repeater_in_query   = $left_repeater_to_query;
                         $max_repetitions_in_query = ( $free_repeater_in_query == 0 ) ? 0 : int( $max_getbulk_responses / $free_repeater_in_query );
-                        if ( $nreapeter_at_end ) {
-                            $free_nrepeater_in_query  = 0;
-                        } else { 
-                           $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
-                           $free_nrepeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                        if ($nreapeter_at_end) {
+                            $free_nrepeater_in_query = 0;
+                        } else {
+                            $free_nrepeater_in_query = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                            $free_nrepeater_in_query = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
                         }
                     } else {
                         $free_repeater_in_query   = $max_getbulk_repeaters;
@@ -1361,11 +1350,11 @@ DEVICE: while (1) {    # We should never leave this loop
                         if ( $left_repeater_to_query < $max_getbulk_repeaters ) {
                             $free_repeater_in_query   = $left_repeater_to_query;
                             $max_repetitions_in_query = ( $free_repeater_in_query == 0 ) ? 0 : int( $max_getbulk_responses / $free_repeater_in_query );
-                            if ( $nreapeter_at_end ) {
-                               $free_nrepeater_in_query  = 0;
+                            if ($nreapeter_at_end) {
+                                $free_nrepeater_in_query = 0;
                             } else {
-                               $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
-                               $free_nrepeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                                $free_nrepeater_in_query = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                                $free_nrepeater_in_query = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
                             }
                         } else {
                             $free_repeater_in_query   = $max_getbulk_repeaters;
@@ -1376,24 +1365,23 @@ DEVICE: while (1) {    # We should never leave this loop
                         $max_repetitions_in_query = $max_max_repetitions < $max_getbulk_responses ? $max_max_repetitions : $max_getbulk_responses;
                         $free_repeater_in_query   = int( $max_getbulk_responses / $max_repetitions_in_query );
                         $free_repeater_in_query   = $free_repeater_in_query > $max_getbulk_repeaters ? $max_getbulk_repeaters : $free_repeater_in_query;
-                        if ( $nreapeter_at_end ) {
-                             $free_nrepeater_in_query  = 0;
+                        if ($nreapeter_at_end) {
+                            $free_nrepeater_in_query = 0;
                         } else {
-                           $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
-                           $free_nrepeater_in_query  = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                            $free_nrepeater_in_query = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                            $free_nrepeater_in_query = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
                         }
                     } else {    # group_by_max_repetitions_by_row
                         $free_repeater_in_query   = $max_max_repetitions_nb_of_query > $max_getbulk_repeaters ? $max_getbulk_repeaters : $max_max_repetitions_nb_of_query;
                         $max_repetitions_in_query = int( $max_getbulk_responses / $free_repeater_in_query );
-                        if ( $nreapeter_at_end ) {
-                              $free_nrepeater_in_query  = 0;
-                         } else {
-                        $free_nrepeater_in_query  = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
-                        $free_nrepeater_in_query   = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
+                        if ($nreapeter_at_end) {
+                            $free_nrepeater_in_query = 0;
+                        } else {
+                            $free_nrepeater_in_query = $max_getbulk_responses - $max_repetitions_in_query * $free_repeater_in_query;
+                            $free_nrepeater_in_query = $max_getbulk_repeaters - $free_repeater_in_query if ( $free_repeater_in_query + $free_nrepeater_in_query ) > $max_getbulk_repeaters;
                         }
                     }
                     $max_repetitions_in_query = $max_max_repetitions if $max_max_repetitions < $max_repetitions_in_query;
-                    #$free_nrepeater_in_query  = 0                    if $nreapeter_at_end;
                 } else {
                     $free_repeater_in_query   = 0;
                     $free_nrepeater_in_query  = $max_getbulk_repeaters;
@@ -1480,7 +1468,6 @@ DEVICE: while (1) {    # We should never leave this loop
                     }
                 }
 
-                #@rep_in_query = oid_sort( keys { %rep_undef_mr_in_query, %rep_def_mr_in_query } ); eksf
                 @rep_in_query = oid_sort( keys %rep_undef_mr_in_query, keys %rep_def_mr_in_query );
 
                 my @start_oid;
@@ -1489,7 +1476,6 @@ DEVICE: while (1) {    # We should never leave this loop
                 }
                 push @oid_in_query, @start_oid;
 
-                #print( "Used riq:$used_repeater_in_query nriq:" . ( scalar @nrep_in_query ) . " rnriq:" . ( $used_nrepeater_in_query - @nrep_in_query ) . "\n" );
                 if ( $g{debug} ) {
                     $data_out{snmp_msg}{ ++$snmp_msg_count } = "Used rep:$used_repeater_in_query nrep:$used_nrepeater_in_query [rnrep:" . ( $used_nrepeater_in_query - @nrep_in_query ) . "|nrep:" . ( scalar @nrep_in_query ) . "]";
                 }
@@ -1521,7 +1507,6 @@ DEVICE: while (1) {    # We should never leave this loop
 
                 }
 
-                #else {
                 if ( $snmp_ver == 1 ) {
                     $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:$snmp_max_tries:$backoff:$snmp_ver";
                     @ret  = snmpgetnext( $host, @oid_in_query );
@@ -1530,7 +1515,6 @@ DEVICE: while (1) {    # We should never leave this loop
                     @ret  = snmpgetbulk( $host, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
                 }
 
-                #}
                 my $snmpquery_timestamp = time();
                 if ( defined $BER::errmsg and $BER::errmsg ne '' ) {
                     print $BER::errmsg;
@@ -1607,14 +1591,6 @@ DEVICE: while (1) {    # We should never leave this loop
 
                     # As it was rebalance to normal oid or it was the end of its polling, we have delete this oid
                     delete $poll_rep_as_nrepu{$oid};
-                }
-                my $dump = 0;
-                if ( $current_try == 2 ) {
-
-                    #  print Dumper(\%poll_rep_oid);
-                    #  print Dumper(\%poll_rep_defined_mr);
-                    $dump++;
-                    exit if $dump == 3;
                 }
 
                 for my $oid (@rep_as_nrepd_in_query) {
@@ -1754,7 +1730,6 @@ DEVICE: while (1) {    # We should never leave this loop
                     }
                     my $current_query_branch_cnt = $branch_cnt - $poll_rep_oid{$oid}{cnt};
 
-                    #                print "toto1 $oid $branch_cnt $poll_rep_defined_mr_initial{$oid} ";# if not $is_try1;
                     if ( $branch_cnt >= $poll_rep_defined_mr_initial{$oid} ) {
                         delete $poll_rep_mr_defined{ $poll_rep_defined_mr{$oid} }{$oid};
                         delete $poll_rep_mr_defined{ $poll_rep_defined_mr{$oid} } if not %{ $poll_rep_mr_defined{ $poll_rep_defined_mr{$oid} } };
@@ -1770,8 +1745,6 @@ DEVICE: while (1) {    # We should never leave this loop
                             delete $poll_rep_mr_defined{ $poll_rep_defined_mr{$oid} }{$oid};
                             delete $poll_rep_mr_defined{ $poll_rep_defined_mr{$oid} } if not %{ $poll_rep_mr_defined{ $poll_rep_defined_mr{$oid} } };
                             my $new_poll_rep_defined_mr = $poll_rep_defined_mr_initial{$oid} - $branch_cnt;
-
-                            #    print "toto2: $new_poll_rep_defined_mr" if $new_poll_rep_defined_mr < 0;
                             $poll_rep_defined_mr{$oid} = $new_poll_rep_defined_mr;
                             $poll_rep_mr_defined{$new_poll_rep_defined_mr}{$oid} = undef;
                         } else {
@@ -1829,8 +1802,6 @@ DEVICE: while (1) {    # We should never leave this loop
 
                 if ( defined $poll_rep_undefined_mr{$oid} or defined $poll_rep_defined_mr{$oid} or defined $poll_rep_as_nrepd{$oid} ) {
 
-                    #   print "toto1";# : $oid-" . ( defined $poll_rep_undefined_mr{$oid} ) . '-' . ( defined $poll_rep_defined_mr{$oid} ) . '-' . ( defined $poll_rep_as_nrepd{$oid} ) . "-\n";
-
                     if ( scalar %branch_h and ( scalar keys %branch_h ) < $poll_rep_defined_mr_initial{$oid} ) {
                         my @branch_key_sorted = oid_sort( keys %branch_h );
                         $data_out{oids}{snmp_retry}{$oid}{start} = $branch_key_sorted[-1];
@@ -1851,8 +1822,6 @@ DEVICE: while (1) {    # We should never leave this loop
 
                 }
             }
-
-            # print Dumper( \%{ $data_out{oids}{snmp_retry} } );
 
             # Walking is finished
             # But it has timed out, so it will probably retry
@@ -2836,8 +2805,6 @@ sub snmpget ($@) {
     return wantarray ? @retvals : undef;
 }
 
-#sub merge_h (@);
-#sub merge_h (@) { #Stolen from Mash Merge Simple, Thanks!
 sub merge_h {    #Stolen from Mash Merge Simple, Thanks!
                  #shift unless ref $_[0]; # Take care of the case we're called like Hash::Merge::Simple->merge(...)
     my ( $left, @right ) = @_;
