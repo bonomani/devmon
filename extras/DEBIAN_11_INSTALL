@@ -1,0 +1,141 @@
+pt-get update
+apt-get upgrade
+apt-get install apache2 rrdtool librrd-dev libpcre3-dev libssl-dev ldap-utils libldap2-dev fping
+
+Xymon as root url
+vi /etc/apache2/sites-available
+---------------------------
+#       DocumentRoot /var/www/html
+---------------------------
+vi /etc/apache2/sites-available
+---------------------------
+ NB: The "Alias" line below must NOT be used if you have
+#     the Xymon webfiles as the root URL. In that case,
+#     you should instead set this:
+#
+          DocumentRoot /var/lib/xymon/www
+
+#Alias /xymon  "/var/lib/xymon/www"
+<Directory "/var/lib/xymon/www">
+    Options Indexes FollowSymLinks Includes MultiViews
+    <IfModule mod_authz_core.c>
+        # Apache 2.4+
+        Allow From All
+        Satisfy Any
+        #Require local
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        #Order deny,allow
+        Allow from All
+        Satisfy Any
+    </IfModule>
+</Directory>
+
+ScriptAlias /xymon-cgi/ "/usr/lib/xymon/cgi-bin/"
+<Directory "/usr/lib/xymon/cgi-bin">
+    AllowOverride None
+    Options ExecCGI Includes
+    <IfModule mod_authz_core.c>
+        # Apache 2.4+
+        Allow From All
+        Satisfy Any
+        #Require local
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        #Order deny,allow
+        Allow from All
+        Satisfy Any
+    </IfModule>
+</Directory>
+
+ScriptAlias /xymon-seccgi/ "/usr/lib/xymon/cgi-secure/"
+<Directory "/usr/lib/xymon/cgi-secure">
+    AllowOverride None
+    Options ExecCGI Includes
+    <IfModule mod_authz_core.c>
+        # Apache 2.4+
+        Allow From All
+        Satisfy Any
+        #Require local
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        #Order deny,allow
+        Allow from All
+        Satisfy Any
+    </IfModule>
+---------------------------
+vi /etc/xymon/xymonserver.cfg
+---------------------------
+#XYMONSERVERWWWURL="/xymon"             # The top URL for the Xymon webpages
+XYMONSERVERWWWURL=""
+---------------------------
+systemctl restart apache2.service
+
+devmon
+apt-get install libsnmp-session-perl
+apt-get install git
+git config core.editor "vim"
+git config advice.addIgnoredFile false
+
+cd /usr/lib/xymon/server/ext
+git clone https://github.com/bonomani/devmon.git
+cd devmon
+git update-index --assume-unchanged devmon.cfg
+vi /usr/lib/xymon/server/ext/devmon/devmon.cfg
+----------------------
+HOSTSCFG=/usr/lib/xymon/server/etc/hosts.cfg
+SNMPCIDS=YOURSNMPSTR<Plug>PeepOpenublic<Plug>PeepOpenrivate
+LOGFILE=/var/log/xymon/devmon.log
+----------------------------
+cp /usr/lib/xymon/server/ext/devmon/extras/devmon-graphs.cfg /usr/lib/xymon/server/etc/graphs.d/.
+vi /etc/systemd/system/devmon.service
+---------------
+# systemd file for Fedora 18 and up, or RHEL 7 and up
+
+[Unit]
+Description=Devmon
+After=xymon.target network.target
+
+[Install]
+WantedBy=multi-user.target
+
+
+[Service]
+PIDFile=/var/run/devmon/devmon.pid
+User=xymon
+Group=xymon
+# Run ExecStartPre with root-permissions
+PermissionsStartOnly=true
+ExecStartPre=-/usr/bin/mkdir -p /var/run/devmon
+ExecStartPre=/usr/bin/chown xymon:xymon /var/run/devmon/
+
+#RuntimeDirectory=devmon
+# Change the devmon folder according to you settings !
+#ExecStartPre=/var/xymon/server/ext/devmon/devmon --readbbhosts
+
+ExecStart=/usr/lib/xymon/server/ext/devmon/devmon
+ExecReload=/usr/lib/xymon/server/ext/devmon/devmon --readbbhosts
+#Type=forking
+Type=simple
+# timeout as ExecStartPre can take some time if some devices are unreachable
+#TimeoutSec=900
+----------------------------
+systemctl daemon-reload
+systemctl enable devmon 
+systemctl start devmon 
+
+
+# Update XYMON
+vi /usr/lib/xymon/server/etc/cgioptions.cfg
+CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
+
+
+vi /usr/lib/xymon/server/etc/xymonserver.cfg
+# Modify those line (comment previous and re-add):
+TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files<Plug>PeepOpenrocs=processes<Plug>PeepOpenorts,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
+
+GRAPHS="la,disk,inode,qtree,files<Plug>PeepOpenrocesses,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1<Plug>PeepOpenorts,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
+
+# Add this line: (I think you can put it in any place, but below TEST2RRD seems fine)
+NCV_dm="*:GAUGE"
+
