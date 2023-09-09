@@ -54,12 +54,10 @@ sub initialize {
     %g = (
 
         # General variables
-        'version'    => $_[0],                        # set in main script now
-        'homedir'    => $FindBin::Bin,
-        'configfile' => "$FindBin::Bin/devmon.cfg",
-        'dbfile'     => "$FindBin::Bin/hosts.db",
-
-        #        'daemonize'     => 1,
+        'version'       => $_[0],                        # set in main script now
+        'homedir'       => $FindBin::Bin,
+        'configfile'    => "$FindBin::Bin/devmon.cfg",
+        'dbfile'        => "$FindBin::Bin/hosts.db",
         'foreground'    => 0,
         'initialized'   => 0,
         'mypid'         => 0,
@@ -421,7 +419,6 @@ sub initialize {
         # Remove domain info, if any: NO
         # Xymon best practice is to use fqdn, if the user doesn't want it
         # we assume they have set NODENAME correctly in devmon.cfg
-        # $hostname =~ s/\..*//;
         $g{nodename} = hostfqdn();
         do_log( "Nodename autodetected as $g{nodename}", INFO );
     }
@@ -648,14 +645,6 @@ sub initialize {
 
 sub check_snmp_config {
 
-    #$g{maxpolltime} = $g{cycletime} - 10;    # try to optimize (remove completly if it works
-
-    # Check consistency
-    # snmptimeout * snmp_max_tries <  maxpolltime
-    #if ( $g{snmptimeout} * $g{snmp_max_tries} >= $g{maxpolltime} ) {
-    #    do_log( "Consistency check failed: snmptimeout($g{snmptimeout}) * snmp_max_tries($g{snmp_max_tries}) <  maxpolltime($g{maxpolltime}) ", ERROR );
-    #}
-
     # Check SNMP Engine: auto, snmp(first), session(fallback)
     if ( $g{snmpeng} eq 'auto' ) {
         eval { require SNMP; };
@@ -701,7 +690,6 @@ sub check_snmp_config {
 sub check_global_config {
 
     # Check consistency
-    # maxpolltime < cycletime
     if ( $g{maxpolltime} >= $g{cycletime} ) {
         do_log( "Consistency check failed: maxpolltime($g{maxpolltime}) < cycletime($g{cycletime}) ", ERROR );
     }
@@ -710,7 +698,6 @@ sub check_global_config {
 # Determine the amount of time we spent doing tests
 sub time_test {
     do_log( "Running time_test()", DEBUG ) if $g{debug};
-
     my $poll_time = $g{snmppolltime} + $g{testtime} + $g{msgxfrtime};
 
     # Add our current poll time to our history array
@@ -747,7 +734,6 @@ sub sync_servers {
 
     # If we are multinode='no', just load our tests and return
     if ( $g{multinode} ne 'yes' ) {
-
         my %devices = read_hosts();
         if (%devices) {
             for my $device ( keys %devices ) {
@@ -758,13 +744,6 @@ sub sync_servers {
         } else {
             usage("Cannot find any machting host in local db '$g{dbfile}'");
         }
-
-        #%{ $g{devices} } = read_hosts();
-
-        # test if there are some hosts
-        #if ( not %{ $g{devices} } ) {
-        #    usage("Cannot find any machting host in local db '$g{dbfile}'");
-        #}
         return;
     }
 
@@ -791,7 +770,6 @@ sub sync_servers {
 
     # We need an init by default, but if anybody has any tests, set to 0
     $need_init = 1;
-
     %{ $g{devices} } = ();
 
     # Assume we have 0 tests to begin with
@@ -836,7 +814,6 @@ sub sync_servers {
         } else {
             $dev_tests = ( $tests =~ tr/,/,/ ) + 1;
         }
-
         $total_tests += $dev_tests;
         $test_count{$device} = $dev_tests;
 
@@ -994,7 +971,6 @@ sub sync_servers {
 
         # If we don't need any tests, lets see if we can donate any tests
     } elsif ( $my_num_tests > $avg_tests_node ) {
-
         my $tests_they_need;
         my $biggest_test_needed = 0;
 
@@ -1024,20 +1000,6 @@ sub sync_servers {
             $my_num_tests -= $test_count{$device};
             do_log( "Dropped $device ($my_num_tests/$avg_tests_node tests)", INFO );
 
-            # Now stick the history for the device in the DB for the recipient
-            #        for my $ifc (keys %{$g{dev_hist}{$device}}) {
-            #          for my $test (keys %{$g{dev_hist}{$device}{$ifc}}) {
-            #            my $val  = $g{dev_hist}{$device}{$ifc}{$test}{val};
-            #            my $time = 0;
-            #            if(defined $g{dev_hist}{$device}{$ifc}{$test}{time}) {
-            #              $time = $g{dev_hist}{$device}{$ifc}{$test}{time};
-            #            }
-            #
-            #            db_do("insert into test_data (host,ifc,test,time,val) " .
-            #              "values ('$device','$ifc','$test',$time,'$val')");
-            #          }
-            #        }
-
             # Now delete the test from our hash
             delete $g{devices}{$device};
         }
@@ -1054,7 +1016,6 @@ sub update_nodes {
 
     # Make a copy of our node status
     my %old_status = %{ $g{node_status} };
-
     %{ $g{node_status} } = ();
     my @nodes = db_get_array( 'name,node_num,active,heartbeat,need_tests,' . 'read_temps from nodes' );
 
@@ -1345,9 +1306,7 @@ sub rewrite_config {
 sub open_log {
 
     # Don't open the log if we are not in daemon mode
-    #    return if $g{logfile} =~ /^\s*$/ or !$g{daemonize};
     return if $g{logfile} =~ /^\s*$/ or $g{foreground};
-
     $g{log} = new IO::File $g{logfile}, 'a'
         or log_fatal( "ERROR: Unable to open logfile $g{logfile} ($!)", 1 );
     $g{log}->autoflush(1);
@@ -1380,13 +1339,10 @@ sub do_log {
     if ( $g{verbose} >= $verbosity ) {
         my ( $package, $filename, $line ) = caller;
         if ( $package ne 'main' ) {
-
             $package = substr $package, 3;
             $package = $package . "($fork_num)" if defined $fork_num;
         }
         my ( $sec, $frac ) = gettimeofday;
-
-        #$frac = sprintf( "%03d", $frac / 1000 );
         my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . ( sprintf "%03d", $frac / 1000 ) . '%z', localtime($sec) );
         $msg = $dateISO8601 . "|" . ( sprintf "%-5s", $g{log_level}[$verbosity] ) . '|' . ( sprintf "%-9s", $package ) . '|' . ( sprintf "%5s", $$ ) . '|' . ( sprintf "%4s", $line ) . "|" . $msg;
         my $matched = 1;
@@ -1456,7 +1412,6 @@ sub db_connect {
 
         # Sleep 12 seconds
         sleep 12;
-
         do_log( "Failed to connect to DB, attempt " . ++$try . " of 5", WARN );
     }
     print "Verbose: ", $g{verbose}, "\n";
@@ -1478,7 +1433,6 @@ sub db_get {
             push @results, $c;
         }
     }
-
     return @results;
 }
 
@@ -1586,10 +1540,8 @@ sub read_hosts_cfg {
                 $num_temps += scalar keys %{ $g{templates}{$vendor}{$model} };
             }
         }
-
         do_log( "Saw $num_vendor vendors, $num_model models, $num_descs sysdescs & $num_temps templates", DEBUG );
     }
-
     do_log( "Reading hosts.cfg ", INFO );
 
     # Now open the hosts.cfg file and read it in
@@ -1778,10 +1730,7 @@ FILEREAD: while (@hostscfg) {
                     }
                     do_log( "Unknown devmon option ($options) on line $. of $hostscfg", ERROR ) and next
                         if $options ne '';
-
                     $hosts_cfg{$host}{ip} = $ip;
-
-                    #$hosts_cfg{$host}{tests} = $tests;
 
                     # Incremement our host counter, used to tell if we should bother
                     # trying to query for new hosts...
@@ -1791,7 +1740,7 @@ FILEREAD: while (@hostscfg) {
         }
         close HOSTSCFG;
 
-    }    # End of while loop
+    }
 
     # Gather our existing hosts
     my %old_hosts = read_hosts();
@@ -1810,7 +1759,6 @@ FILEREAD: while (@hostscfg) {
 
         # If they don't exist in the new hostscfg, skip 'em
         next if !defined $hosts_cfg{$host};
-
         my $vendor = $old_hosts{$host}{vendor};
         my $model  = $old_hosts{$host}{model};
 
@@ -1818,7 +1766,6 @@ FILEREAD: while (@hostscfg) {
         next if !defined $g{templates}{$vendor}{$model};
 
         # Now set snmp security variable and check if consistent
-        #     my $ver       = $g{templates}{$vendor}{$model}{snmpver};
         my $ver = exists $hosts_cfg{$host}{ver} ? $hosts_cfg{$host}{ver} : undef;
         $ver = $old_hosts{$host}{ver} if !defined $ver;
         my $cid = exists $hosts_cfg{$host}{cid} ? $hosts_cfg{$host}{cid} : undef;
@@ -1863,25 +1810,23 @@ FILEREAD: while (@hostscfg) {
             if ( ( exists $old_hosts{$host}{ip} ) and ( defined $old_hosts{$host}{ip} ) and ( $old_hosts{$host}{ip} ne '0.0.0.0' ) ) {
                 $snmp_input{$host}{ip} = $old_hosts{$host}{ip};
             } else {
-                next;    #skip this host has we dont have an ip
+                next;    # Skip this host has we dont have an ip
             }
         } else {
             $snmp_input{$host}{ip} = $hosts_cfg{$host}{ip};
         }
 
-        $snmp_input{$host}{authpass}   = $authpass;
-        $snmp_input{$host}{authproto}  = $authproto;
-        $snmp_input{$host}{cid}        = $cid;
-        $snmp_input{$host}{dev}        = $host;
-        $snmp_input{$host}{port}       = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
-        $snmp_input{$host}{privpass}   = $privpass;
-        $snmp_input{$host}{privproto}  = $privproto;
-        $snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
-        $snmp_input{$host}{seclevel}   = $seclevel;
-        $snmp_input{$host}{secname}    = $secname;
-        $snmp_max_tries{$host}         = 1;
-
-        #$snmp_input{$host}{snmptimeout}= $g{snmptimeout};
+        $snmp_input{$host}{authpass}    = $authpass;
+        $snmp_input{$host}{authproto}   = $authproto;
+        $snmp_input{$host}{cid}         = $cid;
+        $snmp_input{$host}{dev}         = $host;
+        $snmp_input{$host}{port}        = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
+        $snmp_input{$host}{privpass}    = $privpass;
+        $snmp_input{$host}{privproto}   = $privproto;
+        $snmp_input{$host}{resolution}  = $hosts_cfg{$host}{resolution};
+        $snmp_input{$host}{seclevel}    = $seclevel;
+        $snmp_input{$host}{secname}     = $secname;
+        $snmp_max_tries{$host}          = 1;
         $snmp_input{$host}{snmptimeout} = 3;
         $snmp_input{$host}{ver}         = $ver;
 
@@ -1893,7 +1838,6 @@ FILEREAD: while (@hostscfg) {
     dm_snmp::snmp_query( \%snmp_input, \%snmp_max_tries );
 
     # Now go through our resulting snmp-data
-    #OLDHOST: for my $host ( keys %{ $g{oid}{snmp_polled} } ) {
 OLDHOST: for my $host ( keys %{ $g{devices} } ) {
         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
 
@@ -1971,8 +1915,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             do_log( "$hosts_left host(s) left and $custom_cids custom cid(s) trying using snmp v$snmpver", INFO );
 
             # Zero out our data in and data out hashes
-            #%{ $g{oid}{snmp_polled} } = (); # to be removed
-
             %snmp_input = ();
 
             for my $host ( sort keys %hosts_cfg ) {
@@ -1991,15 +1933,11 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 do_log( "Trying valid host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", INFO );
 
                 # Throw together our query data
-                $snmp_input{$host}{cid}  = $hosts_cfg{$host}{cid};
-                $snmp_input{$host}{dev}  = $host;
-                $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-                $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-
-                #$snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
-                $snmp_max_tries{$host} = 1;
-
-                #$snmp_input{$host}{snmptimeout} = $g{snmptimeout};
+                $snmp_input{$host}{cid}         = $hosts_cfg{$host}{cid};
+                $snmp_input{$host}{dev}         = $host;
+                $snmp_input{$host}{ip}          = $hosts_cfg{$host}{ip};
+                $snmp_input{$host}{port}        = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
+                $snmp_max_tries{$host}          = 1;
                 $snmp_input{$host}{snmptimeout} = 3;
                 $snmp_input{$host}{ver}         = $snmpver;
 
@@ -2014,7 +1952,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             dm_snmp::snmp_query( \%snmp_input, \%snmp_max_tries );
 
             # Now go through our resulting snmp-data
-            #NEWHOST: for my $host ( keys %{ $g{oid}{snmp_polled} } ) {
         NEWHOST: for my $host ( keys %{ $g{devices} } ) {
                 my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                 if ( not defined $sysdesc ) {
@@ -2028,12 +1965,8 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                     %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
                     $new_hosts{$host}{cid} = $snmp_input{$host}{cid};
                     $new_hosts{$host}{ver} = $snmpver;
-
                     --$hosts_left;
-
                     do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model}", INFO );
-
-                    #   last NEWHOST;
                     next NEWHOST;
                 }
 
@@ -2089,7 +2022,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 do_log( "$hosts_left host(s) left, trying cid:'$cid' and snmp v$snmpver", INFO );
 
                 # Zero out our data in and data out hashes
-                #%{ $g{oid}{snmp_polled} } = (); #to be removed!
                 %snmp_input = ();
 
                 # And query the devices that haven't yet responded to previous cids
@@ -2111,15 +2043,11 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
 
                     do_log( "Trying valid host:$host with cid:'$cid' using snmp v$snmpver", INFO );
 
-                    $snmp_input{$host}{cid}  = $cid;
-                    $snmp_input{$host}{dev}  = $host;
-                    $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-                    $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-
-                    #$snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
-                    $snmp_max_tries{$host} = 1;
-
-                    #$snmp_input{$host}{snmptimeout} = $g{snmptimeout};
+                    $snmp_input{$host}{cid}         = $cid;
+                    $snmp_input{$host}{dev}         = $host;
+                    $snmp_input{$host}{ip}          = $hosts_cfg{$host}{ip};
+                    $snmp_input{$host}{port}        = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
+                    $snmp_max_tries{$host}          = 1;
                     $snmp_input{$host}{snmptimeout} = 3;
                     $snmp_input{$host}{ver}         = $snmpver;
 
@@ -2137,10 +2065,8 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 }
 
                 # Now go through our resulting snmp-data
-                #CUSTOMHOST: for my $host ( keys %{ $g{oid}{snmp_polled} } ) {
             CUSTOMHOST: for my $host ( keys %{ $g{devices} } ) {
 
-                    #my $sysdesc = $g{oid}{snmp_polled}{$host}{$sysdesc_oid}{val};
                     my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                     if ( not defined $sysdesc ) {
                         $sysdesc = 'UNDEFINED';
@@ -2154,7 +2080,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                         $new_hosts{$host}{cid} = $cid;
                         $new_hosts{$host}{ver} = $snmpver;
                         --$hosts_left;
-
                         do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
                         next CUSTOMHOST;
                     }
@@ -2177,7 +2102,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                             $new_hosts{$host}{vendor} = $vendor;
                             $new_hosts{$host}{model}  = $model;
                             $new_hosts{$host}{ver}    = $snmpver;
-
                             --$hosts_left;
 
                             # If they are an old host, the host is updated
@@ -2185,7 +2109,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                 do_log( "$host updated with new settings",                               INFO );
                                 do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
                                 do_log( "NEW: $vendor, $model, ...",                                     INFO );
-
                             } else {
                                 do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
                             }
@@ -2205,7 +2128,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
         } elsif ( $g{snmpeng} eq 'auto' or $g{snmpeng} eq 'snmp' ) {
 
             # Now query hosts with snmpv3
-            #for my $secname ( split /,/, $g{secnames} ) {
             for my $seclevel ( split /,/, $g{seclevels} ) {
             SECNAME: for my $secname ( split /,/, $g{secnames} ) {
                 AUTHPROTO: for my $authproto ( split /,/, $g{authprotos} ) {
@@ -2216,8 +2138,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                     #Discard impossible combination
                                     next SECNAME if ( $secname eq '' );
 
-                                    #if ( $seclevel eq 'noAuthNoPriv' or  ) {
-                                    #    next SECNAME if ( $secname eq '' );
                                     if ( ( $seclevel eq 'authNoPriv' ) or ( $seclevel eq 'authPriv' ) ) {
                                         next AUTHPROTO if $authproto eq '';
                                         next AUTHPASS  if $authpass eq '';
@@ -2234,7 +2154,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                     do_log( "$hosts_left host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
 
                                     # Zero out our data in and data out hashes
-                                    #%{ $g{oid}{snmp_polled} } = ();
                                     %snmp_input = ();
 
                                     # And query the devices that haven't yet responded
@@ -2254,7 +2173,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
 
                                         $snmp_input{$host}{authpass}  = $authpass;
                                         $snmp_input{$host}{authproto} = $authproto;
-                                        $snmp_input{$host}{cid}       = '';                        ##############
+                                        $snmp_input{$host}{cid}       = '';
                                         $snmp_input{$host}{dev}       = $host;
                                         $snmp_input{$host}{ip}        = $hosts_cfg{$host}{ip};
                                         $snmp_input{$host}{port}      = $hosts_cfg{$host}{port};
@@ -2285,7 +2204,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                     #CUSTOMHOST: for my $host ( keys %{ $g{oid}{snmp_polled} } ) {
                                 CUSTOMHOST: for my $host ( keys %{ $g{devices} } ) {
 
-                                        #my $sysdesc = $g{oid}{snmp_polled}{$host}{$sysdesc_oid}{val};
                                         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                                         if ( not defined $sysdesc ) {
                                             $sysdesc = 'UNDEFINED';
@@ -2297,7 +2215,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                         if ( defined $hosts_cfg{$host}{vendor} ) {
                                             %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
                                             $new_hosts{$host}{ver}       = $snmpver;
-                                            $new_hosts{$host}{cid}       = '';           #################
+                                            $new_hosts{$host}{cid}       = '';
                                             $new_hosts{$host}{secname}   = $secname;
                                             $new_hosts{$host}{seclevel}  = $seclevel;
                                             $new_hosts{$host}{authproto} = $authproto;
@@ -2325,7 +2243,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                                 # We got a match, assign the pertinent data
                                                 %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
                                                 $new_hosts{$host}{ver}       = $snmpver;
-                                                $new_hosts{$host}{cid}       = '';           ################
+                                                $new_hosts{$host}{cid}       = '';
                                                 $new_hosts{$host}{secname}   = $secname;
                                                 $new_hosts{$host}{seclevel}  = $seclevel;
                                                 $new_hosts{$host}{authproto} = $authproto;
@@ -2375,7 +2293,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
     # at let them go clear.  If they are new, drop a log message
     for my $host ( keys %hosts_cfg ) {
         $new_hosts{$host}{tests} = $hosts_cfg{$host}{tests} and next if defined $new_hosts{$host};
-
         if ( defined $old_hosts{$host} ) {
 
             # Couldn't query pre-existing host, maybe temporarily unresponsive?
@@ -2389,7 +2306,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
 
     # All done, now we just need to write our hosts to the DB
     if ( $g{multinode} eq 'yes' ) {
-
         do_log( "Updating database", INFO );
 
         # Update database
@@ -2400,7 +2316,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             my $tests  = $new_hosts{$host}{tests};
             my $cid    = $new_hosts{$host}{cid};
             my $port   = $new_hosts{$host}{port};
-
             $cid .= "::$port" if defined $port;
 
             # Update any pre-existing hosts
@@ -2530,10 +2445,6 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             my $privproto  = exists $new_hosts{$host}{privproto} ? $new_hosts{$host}{privproto} : '';
             my $privpass   = exists $new_hosts{$host}{privpass} ? $new_hosts{$host}{privpass} : '';
 
-            #default port from config?
-            #my $port = 161;
-            #$port = $new_hosts{$host}{port} if ( exists $new_hosts{$host}{port} );
-
             # Custom thresholds
             my $thresholds = '';
             for my $test ( keys %{ $new_hosts{$host}{thresh} } ) {
@@ -2610,7 +2521,6 @@ sub read_hosts {
                 }
             }
             my $port = $1 if $cid =~ s/::(\d+)$//;
-
             $hosts{$name}{ip}     = $ip;
             $hosts{$name}{vendor} = $vendor;
             $hosts{$name}{model}  = $model;
@@ -2658,7 +2568,6 @@ sub read_hosts {
             chomp $line;
             my ( $name, $ip, $port, $resolution, $vendor, $model, $ver, $cid, $secname, $seclevel, $authproto, $authpass, $privproto, $privpass, $tests, $thresholds, $excepts ) = split /\e/, $line;
             do_log( "DB $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", DEBUG ) if $g{debug};
-
             ++$linenumber;
 
             # Filter if requested
@@ -2678,7 +2587,6 @@ sub read_hosts {
                     next;
                 }
             }
-
             $hosts{$name}{ip}         = $ip;
             $hosts{$name}{port}       = $port;
             $hosts{$name}{resolution} = $resolution;
@@ -2771,8 +2679,8 @@ sub daemonize {
     open( STDOUT, "+>&STDIN" );
     open( STDERR, "+>&STDIN" );
 
-    # Define ourselves as the master
-    $0 = 'devmon[master]';
+    # Define ourselves as the main
+    $0 = 'devmon[main]';
 
     # Set up our signal handlers again, just to be sure
     $SIG{INT} = $SIG{QUIT} = $SIG{TERM} = \&quit;
