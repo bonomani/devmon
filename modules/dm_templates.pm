@@ -60,27 +60,16 @@ sub read_template_db {
     my $num_templates = scalar( keys %{ $g{templates} } );
     return if ( $num_templates != 0
         and $g{node_status}{nodes}{ $g{my_nodenum} }{read_temps} eq 'n' );
-
     do_log( 'Reading template data from DB', INFO );
 
-    # Reset templates
-    #%{ $g{templates} } = ();
-
     # Read in our model index
-    #my @models = db_get_array('id,vendor,model,snmpver,sysdesc ' .
-    #   'from template_models');
     my @models = db_get_array('id,vendor,model,sysdesc from template_models');
     for my $row (@models) {
-
-        #my ($id, $vendor, $model, $snmpver, $sysdesc) = @$row;
         my ( $id, $vendor, $model, $sysdesc ) = @$row;
-
         $model_index{$id} = {
             'vendor' => $vendor,
             'model'  => $model
         };
-
-        #$g{templates}{$vendor}{$model}{snmpver} = $snmpver;
         $g{templates}{$vendor}{$model}{sysdesc} = $sysdesc;
     }
 
@@ -88,7 +77,6 @@ sub read_template_db {
     my @tests = db_get_array('id,mod_id,test from template_tests');
     for my $row (@tests) {
         my ( $id, $mod_id, $test ) = @$row;
-
         $test_index{$id} = {
             'vendor' => $model_index{$mod_id}{vendor},
             'model'  => $model_index{$mod_id}{model},
@@ -101,13 +89,10 @@ sub read_template_db {
 
     for my $oid_row (@results) {
         my ( $id, $name, $num, $repeat, $trans_type, $trans_data ) = @$oid_row;
-
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
         my $test   = $test_index{$id}{test};
-
-        my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
-
+        my $tmpl   = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
         $tmpl->{oids}{$name}{number}     = $num        if defined $num;
         $tmpl->{oids}{$name}{repeat}     = $repeat     if defined $repeat;
         $tmpl->{oids}{$name}{trans_type} = $trans_type if defined $trans_type;
@@ -119,13 +104,10 @@ sub read_template_db {
 
     for my $oid_row (@results) {
         my ( $id, $oid, $color, $threshes, $msg ) = @$oid_row;
-
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
         my $test   = $test_index{$id}{test};
-
-        my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
-
+        my $tmpl   = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
         $tmpl->{oids}{$oid}{threshold}{$color}{$threshes} = undef;
         $tmpl->{oids}{$oid}{threshold}{$color}{$threshes}{msg} = $msg if defined $msg;
     }
@@ -135,13 +117,10 @@ sub read_template_db {
 
     for my $oid_row (@results) {
         my ( $id, $oid, $type, $data ) = @$oid_row;
-
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
         my $test   = $test_index{$id}{test};
-
-        my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
-
+        my $tmpl   = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
         $tmpl->{oids}{$oid}{except}{$type} = $data;
     }
 
@@ -150,17 +129,14 @@ sub read_template_db {
 
     for my $oid_row (@results) {
         my ( $id, $msg ) = @$oid_row;
-
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
         my $test   = $test_index{$id}{test};
-
-        my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
+        my $tmpl   = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
 
         # Convert newline placeholders
         $msg =~ s/\\n/\n/;
         $msg =~ s/~~n/\\n/;
-
         $tmpl->{msg} = $msg;
     }
 
@@ -171,9 +147,6 @@ sub read_template_db {
 # Read in user-definable templates from disk
 sub read_template_files {
 
-    # Reset templates
-    # %{ $g{templates} } = ();
-
     # Get all dirs in templates subdir
     my $template_dir = $g{homedir} . "/templates";
     opendir TEMPLATES, $template_dir
@@ -181,7 +154,6 @@ sub read_template_files {
 
     my @dirs;
     for my $entry ( readdir TEMPLATES ) {
-
         my $dir = "$template_dir/$entry";
         do_log( "Folder $dir is not readable, skipping this template", ERROR )
             and next
@@ -194,22 +166,18 @@ MODEL: for my $dir (@dirs) {
         my $tmpl = {};
 
         # Read in our specs file
-        #my ($vendor, $model, $snmpver, $sysdesc) = read_specs_file($dir);
         my ( $vendor, $model, $sysdesc ) = read_specs_file($dir);
 
         # No info? Go to the next one
-        #next MODEL if !defined $vendor  or !defined $model or !defined $snmpver or !defined $sysdesc;
         next MODEL if !defined $vendor or !defined $model or !defined $sysdesc;
 
         # Our model specific snmp info
-        #$g{templates}{$vendor}{$model}{snmpver} = $snmpver;
         $g{templates}{$vendor}{$model}{sysdesc} = $sysdesc;
         $g{templates}{$vendor}{$model}{dir}     = $dir;
 
         # Now go though our subdirs which contain our tests
         opendir MODELDIR, $dir or
 
-            #  log_fatal("Unable to open template directory ($!)",0);
             do_log( "Unable to open template directory ($!), skipping this template", ERROR )
             and next MODEL;
 
@@ -243,7 +211,6 @@ MODEL: for my $dir (@dirs) {
             my $critic_tmpl_valid;
 
             # Create template shortcut
-            #$g{templates}{$vendor}{$model}{tests}{$test} = {};
             $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
 
             # Read the template file: at least a oids or transform file is needed
@@ -313,7 +280,6 @@ sub post_template_load {
                         my $cases      = \%{ $trans_data->{cases} };
                         my $case_num   = 0;
                         my $default;
-
                         $trans_data->{dep_oid} = $dep_oid;
 
                         for my $val_pair ( split /\s*,\s*/, $switch_data ) {
@@ -380,21 +346,16 @@ sub post_template_load {
 # Read in 'type' file
 sub read_specs_file {
     my ($dir) = @_;
-
     no strict 'refs';
 
     # Define the file; make sure it exists and is readable
     my $specs_file = "$dir/specs";
-
-    #do_log ("Missing 'specs' file in $dir, skipping this test.", 0)
-    #   and return 0 if !-e $specs_file;
 
     open FILE, "$specs_file"
         or do_log( "Failed to open $specs_file ($!), skipping this test.", ERROR )
         and return 0;
 
     # Define our applicable variables
-    #my %vars = ('vendor' => '', 'model' => '', snmpver => '', sysdesc => '');
     my %vars = ( 'vendor' => '', 'model' => '', sysdesc => '' );
 
     # Read in file
@@ -419,15 +380,6 @@ sub read_specs_file {
             if ( $val eq '' ) {
                 do_log( "Missing spec value in $specs_file at line $.", ERROR );
                 next;
-
-                # Check our snmp version
-                #} elsif($var eq 'snmpver') {
-                #   $val = '2' if $val eq '2c';
-                #   if ($val !~ /^1|2|3$/) {
-                #      do_log("Syntax error: Bad snmp version ($val) in $specs_file, line $." .
-                #         "(only ver. 1/2c supported).  Skipping this test", 0);
-                #      return;
-                #   }
             }
         }
 
@@ -445,13 +397,9 @@ sub read_specs_file {
     }
 
     # Now return out anon hash ref
-    my $vendor = $vars{vendor};
-    my $model  = $vars{model};
-
-    #my $snmpver = $vars{snmpver};
+    my $vendor  = $vars{vendor};
+    my $model   = $vars{model};
     my $sysdesc = $vars{sysdesc};
-
-    #return ($vendor, $model, $snmpver, $sysdesc);
     return ( $vendor, $model, $sysdesc );
 }
 
@@ -528,25 +476,18 @@ sub read_oids_file {
         $number =~ s/^\.//;
 
         # Assign variables to global hash
-        #$tmpl->{new_oids}{$oid}{number} = $number;
-        #$tmpl->{new_oids}{$oid}{repeat} = $repeat;
         $tmpl->{file}{$oids_file}{oids}{$oid}{number} = $number;
         $tmpl->{file}{$oids_file}{oids}{$oid}{repeat} = $repeat;
 
         # Mark template as non-empty
         $tmpl->{file}{$oids_file}{non_empty} = 1;
-
-        # Reverse oid map
-        #$tmpl->{map}{$number} = $oid;
     }
 
-    #$tmpl->{new_oids} = dclone $tmpl->{file}{$oids_file}{oids};
     if ( exists $tmpl->{file}{$oids_file}{oids} ) {
         $tmpl->{new_oids} = dclone $tmpl->{file}{$oids_file}{oids};
         do_log( "$oids_file successfully parsed", INFO );
     } else {
-        do_log( "$oids_file is empty", WARN );    # Only
-                                                  #$tmpl->{file}{$oids_file}{non_empty} = 0;
+        do_log( "$oids_file is empty", WARN );
     }
     $tmpl->{file}{$oids_file}{changed} = 1;
 
@@ -578,14 +519,6 @@ sub read_transforms_file {
 
         # File did not change so we do not need to reparse it but check that if the 'oids file' was changed there are not redefined oids
         $tmpl->{file}{$trans_file}{changed} = 0;
-
-        #    for my $oid (keys %{ $tmpl->{file}{$trans_file}{oids} } ) {
-        #       if (exists $tmpl->{new_oids}{$oid}) {
-        #           do_log( "ERROR TMPL: Cant redefine $oid in $trans_file", 1);
-        #           return; # Fatal
-        #       }
-        #    }
-        #}
         return 1;
     }
     open FILE, "$trans_file"
@@ -673,8 +606,6 @@ LINE: while ( my $line = shift @text ) {
         $func_type = lc $func_type;
     CASE: {
             $func_type eq 'best' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/\{\S+\}|\s*,\s*//g;
                 do_log( "BEST transform uses only comma-delimited oids at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -683,8 +614,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'chain' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*//g;
                 $temp =~ s/^\{\S+\}\s*\{\S+\}//;
                 do_log( "CHAIN uses exactly two dependent oids at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -693,9 +622,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'coltre' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*\{\s*\S+?\s*\}\s*($|:\s*\S+?\s*$|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}]\s*$)//g;
-                #          $temp =~ s/^\{\S+?\}\s*\{\S+?\}\s*(|:\s*\S+?|:\s*\S*?\s*(|,)\s*[rl]\d*[({].[)}])//;
                 $temp =~ s/^\{\S+\}\s*\{\S+?\}($|\s*:\s*\S+?$|\s*:\s*\S*?(|\s*,)\s*[rl]\d*[({].[)}])//;
                 do_log( "COLTRE uses two dependent oids and optional arguments at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -704,8 +630,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'convert' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(hex|oct)(\s*\d*)\s*//i;
                 $temp =~ s/^\{\S+\}\s+(hex|oct)(?:\s*\d*)//i;
                 my ($type) = ($1);    #??
                 do_log( "CONVERT transform uses only a single oid, a valid conversion type & an option pad length at $trans_file, line $l_num", ERROR )
@@ -715,8 +639,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'date' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/^\{\S+\}//;
                 do_log( "DATE transform uses only a single oid at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -725,8 +647,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'delta' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\}(\s*\d*)\s*//;
                 $temp =~ s/^\{\S+\}(?:$|\s+\d+$)//;
                 do_log( "DELTA transform  only a single oid (plus an optional limit) at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -735,8 +655,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'elapsed' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}\s*//g;
                 $temp =~ s/^\{\S+\}//;
                 do_log( "ELAPSED transform uses only a single oid at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -753,8 +671,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'index' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/^\{\S+\}//;
                 do_log( "INDEX transform uses only a single oid at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -763,8 +679,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'match' and do {
-
-                #	  $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/\s*$//g;
                 $temp =~ s/^\{\S+\}\s+\/.+\///;
                 do_log( "MATCH transform should be a perl regex match at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -774,8 +688,6 @@ LINE: while ( my $line = shift @text ) {
 
             $func_type eq 'math' and do {
                 $temp =~ s/:\s*\d+\s*$//;
-
-                #          $temp =~ s/\{\s*\S+?\s*\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(\.\d*)?|\(|\)|abs\(//g;
                 $temp =~ s/\{\S+\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(?:\.\d+)?|\(|\)//g;
                 $temp =~ s/\s*//;
                 do_log( "MATH transform uses only math/numeric symbols and an optional precision number, $temp did not pass, at $trans_file, line $l_num", ERROR )
@@ -784,18 +696,7 @@ LINE: while ( my $line = shift @text ) {
                 last CASE;
             };
 
-            $func_type eq 'eval' and do {
-
-                #          $temp =~ s/^.+\s*$//g;
-                #          do_log("EVAL transform should be a perl regex match at " .
-                #                 "$trans_file, line $l_num", 0)
-                #            and next LINE if $temp ne '';
-                last CASE;
-            };
-
             $func_type eq 'pack' and do {
-
-                #          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+.+)?//;
                 $temp =~ s/^\{\S+\}\s+(\S+)(\s+.+)?//;
                 my $type       = $1;
                 my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
@@ -819,8 +720,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'regsub' and do {
-
-                #          $temp =~ s/^\{\s*\S+?\s*\}\s*\/.+\/.*\/[eg]*\s*$//;
                 $temp =~ s/^\{\S+\}\s*\/.+\/.*\/[eg]*//;
                 do_log( "REGSUB transform should be a perl regex substitution at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -838,8 +737,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'speed' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/^\{\S+}//;
                 do_log( "SPEED transform uses only a single oid at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -856,8 +753,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'substr' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}\s+(\d+)\s*(\d*)\s*//;
                 $temp =~ s/^\{\S+\}\s+\d+(?:$|\s+\d+)//;
                 do_log( "SUBSTR transform uses only a single oid, a numeric offset and an optional shift value at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -866,9 +761,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             ( $func_type eq 'switch' or $func_type eq 'tswitch' ) and do {
-
-                #$func_type eq 'switch' and do {
-                #          $temp =~ s/^\s*\{\s*\S+?\s*\}\s*//g;
                 if ( $func_type eq 'tswitch' ) {
                     do_log( "'TSWITCH' is deprecated and should be replaced by 'SWITCH' transform in $trans_file at line $l_num", ERROR );
                     $func_type = 'switch';
@@ -890,8 +782,6 @@ LINE: while ( my $line = shift @text ) {
                     } elsif ( $if =~ /^>\s*\d+(\.\d+)?$/ ) {
                         $type = 'gt';
                     } elsif ( $if =~ /^>=\s*\d+(\.\d+)?$/ ) {
-
-                        #} elsif($if =~ /^>=\s*(\d+(\.\d+)?|{\S+})$/) {
                         $type = 'gte';
                     } elsif ( $if =~ /^<\s*\d+(\.\d+)?$/ ) {
                         $type = 'lt';
@@ -919,8 +809,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'unpack' and do {
-
-                #          $temp =~ s/^\s*\{\s*\S+?\s*\}\s+(\S+)(\s+".+")?//;
                 $temp =~ s/^\{\S+\}\s+(\S+)(?:\s+.+)?//;
                 my $type       = $1;
                 my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
@@ -944,8 +832,6 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'worst' and do {
-
-                #          $temp =~ s/\s*\{\s*\S+?\s*\}|\s*,\s*//g;
                 $temp =~ s/\{\S+\}|\s*,\s*//g;
                 do_log( "WORST transform uses only comma-delimited oids at $trans_file, line $l_num", ERROR )
                     and next LINE
@@ -1070,9 +956,6 @@ sub calc_template_test_deps {
         return 0;
     }
 
-    # call the topological sort function to have ordered dependecies WIP
-    # my @sorted_oids = sort_oids2 (\@oids, \$deps, \$infls);
-
     # Add the results as a ref (the supported scalar type) so we can have an
     # array into the template hash of hash
     $tmpl->{sorted_oids} = $sorted_oids;
@@ -1139,7 +1022,6 @@ sub sort_oids($) {
     #   do_log(" entry created for $oid");
     #}  # of for
 
-    #
     # Build table %Cnt. It specifies for each OID the number of other OIDs which
     # are needed to compute the OID.
     #
@@ -1203,9 +1085,6 @@ sub sort_oids2 {
 
 NODE: foreach my $node (@list) {
         do_log("stage1 Start with $node and list: @sorted_list");
-
-        #my @toemp2_sorted_list = ();
-
         if ( !exists $treated{$node} ) {
 
             do_log("stage2 $node is not treated");
@@ -1268,7 +1147,6 @@ sub read_thresholds_file {
         do_log( "Missing 'thresholds' file in $dir, skipping this test.", ERROR );
         return 0;
 
-        #} elsif ( defined $tmpl->{tresh_file_mtime} and (stat($thresh_file))[9] == $tmpl->{thresh_file_mtime}) {
     } elsif ( ( defined $tmpl->{file}{$thresh_file}{mtime} ) and ( stat($thresh_file) )[9] == $tmpl->{file}{$thresh_file}{mtime} ) {
 
         # File did not change so we do not need to reparse it
@@ -1352,7 +1230,6 @@ sub read_thresholds_file {
         $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold}{$color}{$threshes} = ( ( defined $msg ) and ( $msg ne '' ) ) ? $msg : undef;
         $tmpl->{new_oids}{$oid}{threshold} = dclone $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold};
 
-        #do_log("totoitmpl".Dumper(\$tmpl));
     }
     close FILE;
 
@@ -1413,9 +1290,6 @@ sub read_exceptions_file {
         # Render variables
         my ( $oid, $type, $data ) = split /\s*:\s*/, $line, 3;
 
-        #     # Trim right (left done by split)
-        #      $data =~ s/\s+$//;
-
         # Make sure we got all our variables and they are non-blank
         if ( !defined $type ) {
             do_log( "Missing colon separator near exception type in $except_file at line $.", ERROR );
@@ -1443,10 +1317,6 @@ sub read_exceptions_file {
                 next;
             }
         }
-
-        # Make sure we don't have an except defined twice
-        #do_log( "ERROR TMPL: Exception for $oid redefined in $except_file at " . "line $.", 1 ) and next
-        #    if defined $tmpl->{oids}{$oid}{except}{$type};
 
         # Validate oid
         do_log( "Undefined oid '$oid' in $except_file at line $.", ERROR )
@@ -1643,7 +1513,6 @@ sub read_message_file {
                     return;
                 }
             }
-
             $table_at = $.;
         }
     }
@@ -1706,12 +1575,9 @@ sub sync_templates {
             ++$model_id;
 
             # Add our test index info
-            #my $snmpver = $g{templates}{$vendor}{$model}{snmpver};
             my $sysdesc = $g{templates}{$vendor}{$model}{sysdesc};
 
             # Make the sysdesc mysql-safe
-            #db_do("insert into template_models values " .
-            #   "($model_id, '$vendor','$model',$snmpver,'$sysdesc')");
             db_do("insert into template_models values ($model_id, '$vendor','$model','$sysdesc')");
 
             # Now go through all our tests and add them
@@ -1775,11 +1641,8 @@ sub sync_templates {
                 $msg =~ s/\n/\\n/;
 
                 db_do("insert into template_messages values ($test_id, '$msg')");
-
             }
-
         }
-
     }
 
     # Update our nodes DB to let all nodes know to reload template data
