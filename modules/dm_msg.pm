@@ -35,14 +35,12 @@ sub send_msgs {
     do_log( 'Running send_msgs()', DEBUG ) if $g{debug};
     for my $output ( keys %{ $g{output} } ) {
         if ( $g{output}{$output}{protocol} eq 'xymon' ) {
-
             if ( $g{output}{$output}{target} eq 'stdout' ) {
                 send_xymon_msgs_to_stdout();
             } else {
                 send_xymon_msgs_to_host( $g{output}{$output}{target} );
             }
         } else {
-
             print $output. "\n";
         }
     }
@@ -76,28 +74,16 @@ sub send_xymon_msgs_to_host {
     my $xymon = shift;
     $g{msgxfrtime}  = time;
     $g{sentmsgsize} = 0;
-
-    #do_log( 'DEBUG MESG: running send_msgs()', 4 ) if $g{debug};
     my $nummsg = scalar @{ $g{test_results} };
     do_log( "Sending $nummsg messages to 'xymon://$xymon'", INFO );
 
     # Determine the address we are connecting to
-    #my $xymon = $g{dispserv};
     my $addr = inet_aton($xymon)
         or do_log( "Can't resolve display server $xymon ($!)", ERROR )
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
 
     # Print messages to output if requested
-    #if ( $g{output} eq 'STDOUT' and defined $g{test_results} ) {
-    #    print join "\n", @{ $g{test_results} };
-
-    #TO BE ADDED: PRINT STAT ONLY IF REQUESTED
-    #$g{msgxfrtime} = time - $g{msgxfrtime};
-
-    #print dm_stat_msg();
-    #   return;
-    #}
 
     my $msg_sent = 0;
     do_log( "Looping through messages for this socket", DEBUG ) if $g{debug};
@@ -234,13 +220,11 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                     if $g{debug};
             }
 
-        }    # End MSGLOOP
-
+        }
         $g{sentmsgsize} += $msg_size;
         do_log( "Closing socket, $msg_size sent", DEBUG ) if $g{debug};
         close SOCK;
-    }    # END SOCKLOOP
-
+    }
     $g{msgxfrtime} = time - $g{msgxfrtime};
 
     # Now send our dm status message !
@@ -257,7 +241,6 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             connect( SOCK, $p_addr )
                 or do_log( "Can't connect to display server ($!)", ERROR )
                 and return;
-
             print SOCK "$dm_msg\n";
             close SOCK;
             alarm 0;
@@ -268,7 +251,6 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             return;
         }
     }
-
     do_log( "Done sending messages", INFO );
 }
 
@@ -278,11 +260,8 @@ sub prepare_xymon_stat_msg {
     my $color          = 'green';
     my $this_poll_time = $g{snmppolltime} + $g{testtime} + $g{msgxfrtime};
 
-    #    $this_poll_time = 1 if ($this_poll_time == 0);
-
     # Show the fraction of the time spent in the various stages of this script,
     # but only if the runtime is long enough to show a meaningfull fraction.
-    #
     my ( $snmp_poll_time, $test_time, $msg_xfr_time );
     $snmp_poll_time = sprintf( "%6.2f s %5.2f", $g{snmppolltime}, $g{snmppolltime} / $this_poll_time * 100 ) . ' %';
     $test_time      = sprintf( "%6.2f s %5.2f", $g{testtime},     $g{testtime} / $this_poll_time * 100 ) . ' %';
@@ -292,7 +271,6 @@ sub prepare_xymon_stat_msg {
     # Determine our number of clear msgs sent
     my $num_clear_branches = 0;
     my $num_clear_leaves   = 0;
-
     for my $device ( keys %{ $g{devices} } ) {
         for my $oid ( keys %{ $g{devices}{$device}{oids} } ) {
             if ( ( defined $g{devices}{$device}{oids}{$oid}{color} ) and ( ref $g{devices}{$device}{oids}{$oid}{color} ne 'HASH' ) and ( $g{devices}{$device}{oids}{$oid}{color} eq "clear" ) ) {
@@ -304,7 +282,6 @@ sub prepare_xymon_stat_msg {
             }
         }
     }
-
     my $message = "Devmon, version $g{version}\n\n";
     $message .= "Node name:           $g{nodename}\n";
     $message .= "Node number:         $g{my_nodenum}\n";
@@ -333,7 +310,6 @@ sub prepare_xymon_stat_msg {
         $avg_time /= $num_polls;
         $message .= sprintf( "%6.2f s\n\n", $avg_time ) . "Poll time averaged over 5 poll cycles.";
     }
-
     $message .= "\n\nFork summary\n";
     $message .= sprintf( "%8s %7s %16s %6s %25s\n", 'Number', 'PID', 'Last checked in', 'Polled', 'Current Activity' );
     my $stalledforks = 0;
