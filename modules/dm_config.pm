@@ -649,7 +649,7 @@ sub check_snmp_config {
     if ( $g{snmpeng} eq 'auto' ) {
         eval { require SNMP; };
         if ($@) {
-            do_log( "Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, trying to fallback to SNMP_Session", WARN );
+            do_log( "Net-SNMP is not installed: $@ yum install net-snmp-perl or apt install libsnmp-perl, trying to fallback to SNMP_Session", WARN );
             eval { require SNMP_Session; };
             if ($@) {
                 log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
@@ -671,7 +671,7 @@ sub check_snmp_config {
     } elsif ( $g{snmpeng} eq 'snmp' ) {
         eval { require SNMP; };
         if ($@) {
-            log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp or apt install snmp, exiting...", 1 );
+            log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp-perl or apt install libsnmp-perl, exiting...", 1 );
         } else {
             do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
         }
@@ -1611,7 +1611,8 @@ FILEREAD: while (@hostscfg) {
                 }
 
                 # See if we can find our xymontag to let us know this is a devmon host
-                if ( $xymonopts =~ /$g{xymontag}(:\S+|\s+|$)/ ) {
+                if ( $xymonopts =~ /$g{xymontag}(:\S+(?:\(.*)\)\S+|)/ ) {
+
                     my $options = $1;
                     $options = '' if !defined $options or $options =~ /^\s+$/;
                     $options =~ s/,\s+/,/;    # Remove spaces in a comma-delimited list
@@ -1649,29 +1650,29 @@ FILEREAD: while (@hostscfg) {
                     }
 
                     # See if we have a custom cid
-                    if ( $options =~ s/(?:,|^)cid\((\S+?)\),?// ) {
+                    if ( $options =~ s/(?:,|^)cid\((\S+?)\)// ) {
                         $hosts_cfg{$host}{cid} = $1;
                         $custom_cids = 1;
                     }
 
                     # See if we have a custom version
-                    if ( $options =~ s/(?:,|^)v([1,3]|(?:2c?)),?// ) {
+                    if ( $options =~ s/(?:,|^)v([1,3]|(?:2c?))// ) {
                         $hosts_cfg{$host}{ver} = substr $1, 0, 1;
                         $custom_ver = 1;
                     }
 
                     # See if we have a custom IP
-                    if ( $options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\),?// ) {
+                    if ( $options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\)// ) {
                         $ip = $1;
                     }
 
                     # See if we have a custom port
-                    if ( $options =~ s/(?:,|^)port\((\d+?)\),?// ) {
+                    if ( $options =~ s/(?:,|^)port\((\d+?)\)// ) {
                         $hosts_cfg{$host}{port} = $1;
                     }
 
                     # Look for vendor/model override
-                    if ( $options =~ s/(?:,|^)model\((\S+?)\),?// ) {
+                    if ( $options =~ s/(?:,|^)model\((.+?)\)// ) {
                         my ( $vendor, $model ) = split /;/, $1, 2;
                         do_log( "Syntax error in model() option for $host", ERROR ) and next
                             if !defined $vendor or !defined $model;
