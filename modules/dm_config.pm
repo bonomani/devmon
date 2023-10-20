@@ -1611,7 +1611,7 @@ FILEREAD: while (@hostscfg) {
                 }
 
                 # See if we can find our xymontag to let us know this is a devmon host
-                if ( $xymonopts =~ /$g{xymontag}(:\S+(?:\(.*)\)\S+|)/ ) {
+                if ( $xymonopts =~ /$g{xymontag}((?:(?::\S+(?:\(.*?\))(?:,\S+(?:\(.*?\)))*))|)/ ) {
 
                     my $options = $1;
                     $options = '' if !defined $options or $options =~ /^\s+$/;
@@ -1628,6 +1628,11 @@ FILEREAD: while (@hostscfg) {
                         my $old = $hosts_cfg{$host}{ip};
                         do_log( "Refusing to redefine $host from '$old' to '$ip'", WARN );
                         next;
+                    }
+
+                    # See if we have a custom IP
+                    if ( $options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\)// ) {
+                        $ip = $1;
                     }
 
                     # If this IP is 0.0.0.0, try and get IP from DNS
@@ -1659,11 +1664,6 @@ FILEREAD: while (@hostscfg) {
                     if ( $options =~ s/(?:,|^)v([1,3]|(?:2c?))// ) {
                         $hosts_cfg{$host}{ver} = substr $1, 0, 1;
                         $custom_ver = 1;
-                    }
-
-                    # See if we have a custom IP
-                    if ( $options =~ s/(?:,|^)ip\((\d+\.\d+\.\d+\.\d+)\)// ) {
-                        $ip = $1;
                     }
 
                     # See if we have a custom port
@@ -1703,7 +1703,7 @@ FILEREAD: while (@hostscfg) {
                     }
 
                     # Read custom thresholds
-                    if ( $options =~ s/(?:,|^)thresh\((\S+?)\)// ) {
+                    if ( $options =~ s/(?:,|^)thresh\((.+?)\)// ) {
                         for my $thresholds ( split /,/, $1 ) {
                             my @args = split /;/, $thresholds;
                             do_log( "Invalid threshold clause for $host", ERROR ) and next
