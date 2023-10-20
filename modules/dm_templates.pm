@@ -877,7 +877,7 @@ sub calc_template_test_deps {
         $tmpl->{new_oids}{$oid} = dclone $tmpl->{file}{$trans_file}{oids}{$oid};
     }
 
-    #load dep_oid from trans_file
+    # load dep_oid from trans_file
     foreach my $oid ( keys %{ $tmpl->{new_oids} } ) {
         if ( ( exists $tmpl->{new_oids}{$oid}{trans_data} ) and ( $tmpl->{new_oids}{$oid}{trans_data} =~ /\{.+?\}/ ) ) {
             my $data = $tmpl->{new_oids}{$oid}{trans_data};
@@ -903,7 +903,7 @@ sub calc_template_test_deps {
         }
     }
 
-    #load oid from thresh_file
+    # load oid from thresh_file
     foreach my $oid ( keys %{ $tmpl->{file}{$thresh_file}{oids} } ) {
         if ( exists $tmpl->{new_oids}{$oid} ) {
 
@@ -962,22 +962,6 @@ sub calc_template_test_deps {
     $tmpl->{oids}        = dclone $tmpl->{new_oids};
     delete $tmpl->{new_oids};
 
-    # For thresholds calculation
-    #
-    # For each oids in a test find all oids depencies on and have it in an
-    # and have it in a sorted list
-    # This is not used now but it can be used later !!!
-    #my %all_deps_thresh;
-    #for my $oid ( @{$$tmpl{sorted_oids}} ) {
-    #   for my $oid_dep (keys %{$deps_thresh->{$oid}}) {
-    #      if (exists $all_deps_thresh{$oid_dep}) {
-    #         push @{$all_deps_thresh{$oid}}, @{$all_deps_thresh{$oid_dep}};
-    #      } else {
-    #         push @{$all_deps_thresh{$oid}}, $oid_dep;
-    #      }
-    #   $tmpl->{oids}{$oid}{sorted_tresh_list} = $all_deps_thresh{$oid};
-    #   }
-
     # For each oids in a test find all oids that depend on it and have it in
     # in a sorted liste (this is used for the worst_color calc in render_msg
     my %all_infls_thresh;
@@ -1014,13 +998,6 @@ sub sort_oids($) {
     # Complete the list of OIDs to include those OIDs which do not depend
     # on another OID, like the SET transform. They have to be added for the
     # this algo to work : Commented as it seems not needed (but to be tested) !
-
-    #foreach $oid ( keys %trans_data ) {
-    #   next                      if $trans_data{$oid} =~ m/\{.+?\}/ ;
-    #   next                      if exists $infls->{$oid} ;
-    #   $infls->{$oid}= {} ;               # Create entry
-    #   do_log(" entry created for $oid");
-    #}  # of for
 
     # Build table %Cnt. It specifies for each OID the number of other OIDs which
     # are needed to compute the OID.
@@ -1211,20 +1188,6 @@ sub read_thresholds_file {
             # Trim right (left done by split)
             do_log( "Trailing space(s) in $thresh_file at line $.", WARN ) if $msg =~ s/\s$//;
         }
-
-        # Validate oid
-        #do_log( "ERROR TMPL: Undefined oid '$oid' referenced in $thresh_file at line $.", 1 )
-        #    and next
-        #    if !defined $tmpl->{new_oids}{$oid};
-
-        # Validate any oids in the message/
-        #my $tmp = $msg;
-        #while ( defined $tmp and $tmp =~ s/\{(.+?)}// ) {
-        #    my $oid = $1;
-        #    $oid =~ s/\..+$//;    # Remove flag, if any
-        #    do_log( "ERROR TMPL: Undefined oid '$1' referenced in " . "$thresh_file at line $.", 1 )
-        #        if !defined $tmpl->{new_oids}{$oid};
-        #}
 
         # Add the threshold to the global hash
         $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold}{$color}{$threshes} = ( ( defined $msg ) and ( $msg ne '' ) ) ? $msg : undef;

@@ -212,6 +212,9 @@ sub oid_hash {
 
         if ( defined $tmpl->{oids}{$oid}{threshold} ) {
             $oids->{$oid}{threshold} = $tmpl->{oids}{$oid}{threshold};
+            for my $cust_thresh_color ( keys %{ $thr->{$oid} } ) {
+                $oids->{$oid}{threshold}{$cust_thresh_color} = $thr->{$oid}{$cust_thresh_color};
+            }
         } elsif ( defined $oids->{$oid}{threshold} ) {
             delete $oids->{$oid}{threshold};    # Remove old definition
         }
@@ -1447,7 +1450,7 @@ sub trans_date {
 
 # Set a repeater OID to a constant (vector) value ###########################
 # Define a repeater OID filled with constant values. The leaf values  start
-# at 1, and incremetn by 1.
+# at 1, and increment by 1.
 sub trans_set {
     my ( $device, $oids, $oid, $thr ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
@@ -2103,7 +2106,7 @@ sub trans_sort {
 sub trans_index {
     my ( $device, $oids, $oid, $thr ) = @_;
 
-    # As this transform onely work on hash keys (and has keys are keep between runs: save the current structure, before validation and recover it it validation fail: should be better to do this in the validation sub
+    # As this transform only work on hash keys (and as keys are keep between runs: save the current structure, before validation and recover it if validation fail: should be better to do this in the validation sub
     # my $oid_h = \%{ $oids->{$oid} };
     my $old_oid_h = dclone $oids->{$oid};    # we have to make a real copy (deep)
 
@@ -2114,15 +2117,15 @@ sub trans_index {
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
-        # We should always ave a primary oid with this transform, so make a fatal error
+        # We should always have a primary oid with this transform, so make a fatal error
         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
     }
 
-    # we do not validate our dependencies as we are  working ony on index
+    # we do not validate our dependencies as we are working on index
     if ( not validate_deps( $device, $oids, $oid, [$src_oid] ) ) {
         do_log( "Index transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
 
-        # We can use old keys of val stored in current oid, if they existi (inormally should)
+        # We can use old keys of val stored in current oid, if they exist (normally should)
         if ( defined $old_oid_h->{val} ) {
             do_log( "Recover index transform as it was previously defined", INFO );
             $src_h = $old_oid_h;           # use iteself as it has save its key and we dont have them from the dependent oid
@@ -2188,12 +2191,12 @@ sub trans_match {
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
-        # We should always ave a primary oid with this transform, so make a fatal error
+        # We should always have a primary oid with this transform, so make a fatal error
         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
     }
 
     # Validate our dependencies
-    # Cannot validate dependencies as it has not the same hash keys as our result dont have the same key
+    # Cannot validate dependencies as it has not the same hash keys as our result
     my $src_h = \%{ $oids->{$src_oid} };
 
     # This transform should probably only work for repeater sources
@@ -2560,7 +2563,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # This condition looks incorrect. We should not remove rrds if alerting
                             # is disabled for this leaf. If the user doesn't want a graph, they probably
                             # don't want this leaf in the table, they should set 'ignore' instead of 'noalarm'
-                            #if ($rrd{$name}{all} or $arrrrlarm) {
                             # add to list, but check we're not pushing multiple times
                             push @{ $rrd{$name}{leaves} }, $leaf unless grep { $_ eq $leaf } @{ $rrd{$name}{leaves} };
                         }
@@ -2592,10 +2594,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # If this test has a worse color, use it for the global color
                             # but verify first that this test should compute the worst color
                             if ( ( defined $oid_msg ) and ( not $no_global_wcolor{$oid} ) and ( $oid_msg ne '' ) ) {
-
-                                #do_log("toto1: $worst_color") if defined $worst_color and not ($worst_color eq 'clear' or $worst_color eq 'green' or $worst_color eq 'blue');
-                                #$color='clear' if not defined $color;
-                                #do_log("toto2: $color") if ($color ne 'clear') and ($color ne 'green') and ($color ne 'blue');
                                 $worst_color = $color if ( not defined $worst_color ) or ( $colors{$worst_color} < $colors{$color} );
                             }
 
@@ -2872,30 +2870,6 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
     # Add our oh-so-stylish devmon footer
     $msg .= "\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> " . "running on $g{nodename}\n";
 
-    # Now add a bit of logic to allow a 'cleartime' window, where a test on
-    # a device can be clear for an interval without being reported as such
-    #if ( $worst_color eq 'clear' ) {
-    #    $g{numclears}{$device}{$test} = time
-    #        if !defined $g{numclears}{$device}{$test};
-    #} else {
-
-    # Clear our clear counter if this message wasnt clear
-    #    delete $g{numclears}{$device}{$test}
-    #        if defined $g{numclears}{$device}
-    #        and defined $g{numclears}{$device}{$test};
-    #}
-
-    # Now return null if we are in our 'cleartime' window
-    #if (    defined $g{numclears}{$device}
-    #    and defined $g{numclears}{$device}{$test} )
-    #{
-    #    my $start_clear = $g{numclears}{$device}{$test};
-    #    if ( time - $start_clear < $g{cleartime} ) {
-    #        do_log( "DEBUG TEST: $device had some clear errors " . "during test $test", 4 ) if $g{debug};
-    #        return;
-    #    }
-    #}
-
     # Looks like we are good to return our completed message
     return $msg;
 }
@@ -3011,10 +2985,10 @@ sub apply_threshold {
             $oid_r{error}  = \$oid_h->{error}{$leaf};
             $oid_r{thresh} = \$oid_h->{thresh}{$leaf};
             if ( !defined ${ $oid_r{color} } ) {
+
                 ${ $oid_r{color} } = 'green';
             }
 
-            # Skip to next if there is an error as color is already defined
             if ( defined ${ $oid_r{val} } ) {
 
                 my $oid_val                 = ${ $oid_r{val} };
@@ -3022,13 +2996,7 @@ sub apply_threshold {
                                                                   # 4 Negative smart-match, 3 Negative match, 2 Colored_Automatch
                                                                   # 1 Automatch
 
-                #Apply custom thresholds (from xymon hosts.cfg)
-                if ( exists $thr->{$oid} ) {
-                    my $thresh_h = \%{ $thr->{$oid} };
-                    apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
-                }
-
-                # Apply template thresholds (from file)
+                # Apply template thresholds
                 if ( exists $oid_h->{threshold} ) {
                     my $thresh_h = \%{ $oid_h->{threshold} };
                     apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
@@ -3053,7 +3021,6 @@ sub apply_threshold {
         delete $oid_h->{error}  unless ( %{ $oid_h->{error} } );
     } else {
 
-        # Skip to next if there is an error as color is already defined
         my %oid_r;
         my $oid_val;
         $oid_r{val}    = \$oid_h->{val};
@@ -3069,18 +3036,13 @@ sub apply_threshold {
                                                 # 4 Negative smart match, 3 Negative match, 2 Colored_Automatch
                                                 # 1 Automatch
                                                 # default values
+
             if ( !defined ${ $oid_r{color} } ) {
                 ${ $oid_r{color} } = 'green';
             }
             my $oid_color = ${ $oid_r{color} };
 
-            # Apply custom thresholds (from xymon hosts.cfg)
-            if ( exists $thr->{$oid} ) {
-                my $thresh_h = \%{ $thr->{$oid} };
-                apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
-            }
-
-            # Apply template thresholds (from file)
+            # Apply template thresholds
             if ( exists $oid_h->{threshold} ) {
                 my $thresh_h = \%{ $oid_h->{threshold} };
                 apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
