@@ -1387,7 +1387,6 @@ DEVICE: while (1) {    # We should never leave this loop
                 for my $oidval (@ret) {
                     deeph_insert_oidval_h( $oidval, \%deep_h );
                 }
-
                 for my $poid (@nrep_in_query) {
                     my $oid       = $poid . ".0";
                     my $nonrepval = deeph_find_leaf( $oid, \%deep_h );
@@ -2153,14 +2152,15 @@ sub deeph_insert_oidval_h {
     my $oid  = substr( $oidval, 0, $i );
     my $val  = substr( $oidval, $i + 1 );
     my @keys = split /\./, $oid;
-    ${ DiveRef( $deep_href //= {}, map \$_, @keys ) } = $val;
+    push @keys, '';    # add a key (empty) that will store the value
+    dive_val( $deep_href //= {}, @keys ) = $val;
 }
 
 sub deeph_insert_oidkey_h {
     my ( $oidkey, $deep_href ) = @_;
     $oidkey = substr( $oidkey, 1 ) if substr( $oidkey, 0, 1 ) eq '.';
     my @keys = split /\./, $oidkey;
-    ${ DiveRef( $deep_href //= {}, map \$_, @keys ) } = undef;
+    dive_val( $deep_href //= {}, @keys ) = undef;
 }
 
 sub deeph_delete_oidkey_h {
@@ -2184,7 +2184,7 @@ sub deeph_find_leaf {
     $oid = substr( $oid, 1 ) if substr( $oid, 0, 1 ) eq '.';
     my @keys = split /\./, $oid;
     $deep_href = $deep_href->{$_} for @keys;
-    return ( ( defined $deep_href ) and ( ref $deep_href ne 'HASH' ) ) ? $deep_href : undef;
+    return exists $deep_href->{''} ? $deep_href->{''} : undef;
 }
 
 sub deeph_find_parent {
@@ -2220,8 +2220,22 @@ sub deeph_find_branch_h {
     return ( defined $deep_href ) ? %$deep_href : \();
 }
 
+#sub deeph_flatten_h {
+#    return %{ deeph_flatten_href(@_) };
+#}
+
 sub deeph_flatten_h {
-    return %{ deeph_flatten_href(@_) };
+    my %flat;
+    my %flatwdot = %{ deeph_flatten_href(@_) };
+    for my $key ( keys %flatwdot ) {
+
+        # Test if we have a '.' and strip it : we have a leaf value
+        if ( ( substr $key, -1 ) eq '.' ) {
+            my $keybutdot = substr( $key, 0, -1 );
+            $flat{$keybutdot} = $flatwdot{$key};
+        }
+    }
+    return %flat;
 }
 
 sub deeph_flatten_href {
@@ -2238,39 +2252,10 @@ sub deeph_flatten_href {
     return \%flat;
 }
 
-sub DiveVal : lvalue {
-    ${ DiveRef(@_) };
-}
-
-sub DiveRef {
-    return if !@_;
-    my $sv = \shift @_;
-    return $$sv if !$$sv;
-    while (@_) {
-        my $key = shift @_;
-        if ( !defined $key ) {
-            $sv = \$$$sv;
-        } elsif ( eval { my $x = $key->[0]; 1 }
-            && isa( $$sv, 'CODE' ) )
-        {
-            if ( @_ && !defined $_[0] ) {
-                $sv = \$$sv->(@$key);
-            } else {
-                $sv = \[ $$sv->(@$key) ];
-            }
-        } elsif ( eval { my $x = $$key; 1 }
-            and !defined($$sv) || eval { my $x = $$sv->{0}; 1 } )
-        {
-            $sv = \$$sv->{$$key};
-        } elsif ( $key =~ /^-?\d+$/
-            and !defined($$sv) || eval { my $x = $$sv->[0]; 1 } )
-        {
-            $sv = \$$sv->[$key];
-        } else {
-            $sv = \$$sv->{$key};
-        }
-    }
-    return $sv;
+sub dive_val : lvalue {
+    my $p = \shift;
+    $p = \( ($$p)->{$_} ) for @_;
+    $$p;
 }
 
 sub snmpgetbulk ($$$@) {

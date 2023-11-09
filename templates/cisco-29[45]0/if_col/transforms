@@ -3,7 +3,8 @@
 # Compute the sum of paquets 
 ifHCOutNUcastPkts : MATH    : {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
 ifOutNuPkts       : SWITCH  : {ifOutNUcastPkts} ".*"={ifHCOutNUcastPkts}, default={ifOutNUcastPkts}
-ifOutPkts         : MATH    : {ifHCOutUcastPkts} + {ifOutNuPkts}
+ifOutUPkts        : SWITCH  : {ifOutUcastPkts} ".*"={ifHCOutUcastPkts}, default={ifOutUcastPkts}
+ifOutPkts         : MATH    : {ifOutUPkts} + {ifOutNuPkts}
 
 # Do delta transform on all counters
 ifOutPps       	: DELTA         : {ifOutPkts}

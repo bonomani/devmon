@@ -1,0 +1,4 @@
+vendor	: huawei
+model	: S57XX-S63XX
+snmpver	: 2
+sysdesc : S5720|S6324
