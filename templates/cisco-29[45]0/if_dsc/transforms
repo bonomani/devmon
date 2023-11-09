@@ -3,8 +3,10 @@ ifHCInNUcastPkts  : MATH    : {ifHCInMulticastPkts} + {ifHCInBroadcastPkts}
 ifHCOutNUcastPkts : MATH    : {ifHCOutMulticastPkts} + {ifHCOutBroadcastPkts}
 ifInNuPkts        : SWITCH  : {ifInNUcastPkts} ".*"={ifHCInNUcastPkts}, default={ifInNUcastPkts}
 ifOutNuPkts       : SWITCH  : {ifOutNUcastPkts} ".*"={ifHCOutNUcastPkts}, default={ifOutNUcastPkts}
-ifInPkts          : MATH    : {ifHCInUcastPkts} + {ifInNuPkts}
-ifOutPkts         : MATH    : {ifHCOutUcastPkts} + {ifOutNuPkts}
+ifInUPkts         : SWITCH  : {ifInUcastPkts} ".*"={ifHCInUcastPkts}, default={ifInUcastPkts}
+ifOutUPkts        : SWITCH  : {ifOutUcastPkts} ".*"={ifHCOutUcastPkts}, default={ifOutUcastPkts}
+ifInPkts          : MATH    : {ifInUPkts} + {ifInNuPkts}
+ifOutPkts         : MATH    : {ifOutUPkts} + {ifOutNuPkts}
 # Do delta transform on all counters and clone delta result to have result without threshold/message/error 
 # as ifInDscPct depends on ifInDscPpsi(Tmp) but dont want to have its specific threshold/message/error propagation 
 ifInPps         : DELTA         : {ifInPkts}
