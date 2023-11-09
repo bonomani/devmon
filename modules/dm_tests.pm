@@ -126,7 +126,7 @@ sub tests {
             # Perform the transform
             for my $oid ( @{ $tmpl->{sorted_oids} } ) {
                 next if !$oids->{$oid}{transform};
-                transform( $device, $oids, $oid, $thr );
+                transform( $device, $oids, $oid );
 
                 # Do some debug if requested
                 if ( $g{debug} ) {
@@ -310,14 +310,14 @@ sub oid_hash {
                 delete $oids->{$oid}{error};
             }
         }
-        apply_threshold( $oids, $thr, $oid );
+        apply_threshold( $oids, $oid );
     }
     return $oids;
 }
 
 # Transform data values
 sub transform {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
 
     # Shortcut to our snmp data
     my $trans_type = $oids->{$oid}{trans_type};
@@ -331,7 +331,7 @@ sub transform {
         eval {
             local $SIG{ALRM} = sub { die "Timeout\n" };
             alarm 5;
-            &$trans_sub( $device, $oids, $oid, $thr );
+            &$trans_sub( $device, $oids, $oid );
             alarm 0;
         };
         if ($@) {
@@ -352,7 +352,7 @@ sub transform {
 
 # Do data over time delta transformations ####################################
 sub trans_delta {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
 
     # Hash shortcuts
     my $hist  = \%{ $g{hist}{$device} };
@@ -565,12 +565,12 @@ sub trans_delta {
             }
         }
     }
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Do mathmatical translations ###############################################
 sub trans_math {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h     = \%{ $oids->{$oid} };
     my $expr      = $oid_h->{trans_data};
     my $precision = 2;
@@ -671,7 +671,7 @@ sub trans_math {
     }
 
     # Now apply our threshold to this data
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Extract a statistic from a repeater OID ###################################
@@ -679,7 +679,7 @@ sub trans_math {
 # The statistic is one of 'min', 'avg', 'max', 'cnt' or 'sum'.
 #
 sub trans_statistic {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid,   $dep_oid_h, @leaf,   $leaf );
     my ( $statistic, $val,       $result, $count );
@@ -790,12 +790,12 @@ sub trans_statistic {
             $oid_h->{msg}  = $dep_oid_h->{msg};
         }
     }
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Get substring of dependent oid ############################################
 sub trans_substr {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid, $offset, $length ) = ( $1, $2, $3 )
         if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\d+)\s*(\d*)$/;
@@ -838,11 +838,11 @@ sub trans_substr {
     }
 
     # Now apply our threshold to this data
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 sub trans_pack {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid, $type, $seperator ) = ( $1, $2, $3 || '' )
         if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
@@ -882,12 +882,12 @@ sub trans_pack {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Translate hex or octal data into decimal ##################################
 sub trans_unpack {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid, $type, $seperator ) = ( $1, $2, $3 || '' )
         if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
@@ -925,12 +925,12 @@ sub trans_unpack {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Translate hex or octal data into decimal ##################################
 sub trans_convert {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our translation options
@@ -979,13 +979,13 @@ sub trans_convert {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Do String translations ###############################################
 # WiP: Not used at alli, not working
 sub trans_eval {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     my $expr  = $oid_h->{trans_data};
 
@@ -1052,12 +1052,12 @@ sub trans_eval {
     }
 
     # Now apply our threshold to this data
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Get the best color of one or more oids ################################
 sub trans_best {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract all our our parent oids from the expression, first
@@ -1198,12 +1198,12 @@ sub trans_best {
         $oid_h->{color} = "clear";
         $oid_h->{msg}   = "Primary OID not defined";
     }
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Get the worst color of one or more oids ##################################
 sub trans_worst {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract all our our parent oids from the expression, first
@@ -1342,12 +1342,12 @@ sub trans_worst {
     }
 
     # Now apply our threshold to this data
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Return an (x days,)? hh:mm:ss date timestamp ##############################
 sub trans_elapsed {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our transform options
@@ -1395,13 +1395,13 @@ sub trans_elapsed {
         my $elapsed = sprintf "%s%-2.2d:%-2.2d:%-2.2d", ( $d ? ( $d == 1 ? '1 day, ' : "$d days, " ) : '' ), $h, $m, $s;
         $oid_h->{val} = $elapsed;
     }
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Return an yy-mm, hh:mm:ss date timestamp ###############################
 # WIP Not Used at all, not working
 sub trans_date {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our transform options
@@ -1452,7 +1452,7 @@ sub trans_date {
 # Define a repeater OID filled with constant values. The leaf values  start
 # at 1, and increment by 1.
 sub trans_set {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     my ( @Fields, $leaf );
@@ -1469,12 +1469,12 @@ sub trans_set {
         $oid_h->{val}{$leaf}  = $Fields[ $leaf - 1 ];
         $oid_h->{time}{$leaf} = time;
     }                         # of for
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Convert value to its appropriate bps-speed ################################
 sub trans_speed {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our single dependant oid
@@ -1523,12 +1523,12 @@ sub trans_speed {
         my $new_speed = sprintf '%.2f %s', $bps / $speed, $unit;
         $oid_h->{val} = $new_speed;
     }
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # C-style 'case', with ranges ##############################################
 sub trans_switch {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h      = \%{ $oids->{$oid} };
     my $trans_data = \%{ $oid_h->{trans_edata} };
     my $dep_oid    = $trans_data->{dep_oid};
@@ -1718,12 +1718,12 @@ sub trans_switch {
         }
         $oid_h->{val} = $then;
     }
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Regular expression substitutions #########################################
 sub trans_regsub {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h      = \%{ $oids->{$oid} };
     my $trans_data = $oid_h->{trans_data};
     my ( $main_oid, $expr ) = ( $1, $2, )
@@ -1802,7 +1802,7 @@ sub trans_regsub {
     }
 
     # Now apply our threshold to this data
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Do oid chaining ###########################################################
@@ -1810,7 +1810,7 @@ sub trans_regsub {
 # new index for the target oid. The mapping between bot OID is done with
 # the source OID values that should be a subset of the indexes of the target OID
 sub trans_chain {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract all our our parent oids from the expression, first
@@ -1889,7 +1889,7 @@ sub trans_chain {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Do coltre #########################################################
@@ -1901,7 +1901,7 @@ sub trans_chain {
 #       r5( )  : pad from left with space to length of 5.
 #       l{+}   : pad from right with + . Length is detected automatically
 sub trans_coltre {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h          = \%{ $oids->{$oid} };
     my $expr           = $oid_h->{trans_data};
     my $separator      = '';
@@ -1996,14 +1996,14 @@ sub trans_coltre {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Do Sort Transform ######################################################
 # Sort
 # This operator schould be combined with the chain operator
 sub trans_sort {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     my $expr  = $oid_h->{trans_data};
     my $sort  = 'txt';
@@ -2093,7 +2093,7 @@ sub trans_sort {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Return index values ######################################################
@@ -2104,7 +2104,7 @@ sub trans_sort {
 # detail only in the index
 # This is more or less the inverse of the chain operator
 sub trans_index {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
 
     # As this transform only work on hash keys (and as keys are keep between runs: save the current structure, before validation and recover it if validation fail: should be better to do this in the validation sub
     # my $oid_h = \%{ $oids->{$oid} };
@@ -2171,7 +2171,7 @@ sub trans_index {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Extract names and values from simple tables #############################
@@ -2180,7 +2180,7 @@ sub trans_index {
 # This operator allows the creation of new columns for rows where the name
 # column matches the provided regex
 sub trans_match {
-    my ( $device, $oids, $oid, $thr ) = @_;
+    my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our parent oids from the expression, first
@@ -2266,7 +2266,7 @@ sub trans_match {
     }
 
     # Apply thresholds
-    apply_threshold( $oids, $thr, $oid );
+    apply_threshold( $oids, $oid );
 }
 
 # Create our outbound message ##############################################
@@ -2974,7 +2974,7 @@ sub parse_deps {
 
 # Apply thresholds to a supplied repeater oid, save in the oids hash
 sub apply_threshold {
-    my ( $oids, $thr, $oid ) = @_;
+    my ( $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and ( ref $oid_h->{color} ne 'HASH' ) ) ) {
     APTHRLEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
