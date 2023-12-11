@@ -376,7 +376,7 @@ sub snmp_query {
                         delete $returned{snmp_msg};
                     }
 
-                    # Reformat our polled oids and instert them as result
+                    # Reformat our polled oids results and insert them to the global hash
                     while ( my ( $k1, $v1 ) = each( %{ $returned{oids}{snmp_polled} } ) ) {
                         while ( my ( $k2, $v2 ) = each( %{$v1} ) ) {
                             if ( ref $v2 eq 'HASH' ) {    #this is a rep
@@ -435,11 +435,10 @@ sub snmp_query {
                             }
                         }
                         if ( $expected > $received ) {
-                            if (( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) )
 
-                                or ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} / 2 )
-                                )
-                            {
+                            #if (( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) )
+                            #    or ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} / 2 )
+                            if ( ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) ) {
                                 push @devices, $device;
                                 $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} += 1;
                                 do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp polling enqueue", INFO );
@@ -976,7 +975,6 @@ DEVICE: while (1) {    # We should never leave this loop
             my @allrep_oids;
             @allrep_oids = keys %poll_rep_oid;
 
-            #print Dumper(\%poll_rep_oid) if $current_try>1;
             $session->{use_getbulk}    = 1;
             $SNMP_Session::use_getbulk = 1;
             $SNMP_Session::pdu_buffer  = 16384;
@@ -1344,10 +1342,11 @@ DEVICE: while (1) {    # We should never leave this loop
                 }
 
                 if ( $snmp_ver == 1 ) {
-                    $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:$snmp_max_tries:$backoff:$snmp_ver";
+                    $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret  = snmpgetnext( $host, @oid_in_query );
                 } else {
-                    $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:$snmp_max_tries:$backoff:$snmp_ver";
+
+                    $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret  = snmpgetbulk( $host, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
                 }
 
@@ -1434,12 +1433,12 @@ DEVICE: while (1) {    # We should never leave this loop
                     if ( defined $data_in{snmp_retry}{$oid}{start} ) {
                         @branch_keys_sorted        = oid_sort( keys %branch_h );
                         $branch_keys_is_not_sorted = 0;
-                        my $idx = array_search( \@branch_keys_sorted, $data_in{snmp_retry}{$oid}{start} );
+                        my $idx = bigger_elem_idx( \@branch_keys_sorted, $data_in{snmp_retry}{$oid}{start} );
                         if ( not defined $idx ) {    # The start oid is not found, so there are some leaf, but not the one we are looking for
                                                      #$branch_cnt = 0;
                             $branch_cnt = scalar keys %branch_h;
                         } else {
-                            $branch_cnt = ( scalar keys %branch_h ) - $idx - 1;
+                            $branch_cnt = ( scalar keys %branch_h ) - $idx;
                         }
                     } else {
                         $branch_cnt = scalar keys %branch_h;
@@ -1501,9 +1500,10 @@ DEVICE: while (1) {    # We should never leave this loop
                     my @branch_keys_sorted = oid_sort( keys %branch_h );
                     my $idx;
                     if ( defined $data_in{snmp_retry}{$oid}{start} ) {
-                        $idx = array_search( \@branch_keys_sorted, $data_in{snmp_retry}{$oid}{start} );
+
+                        $idx = bigger_elem_idx( \@branch_keys_sorted, $data_in{snmp_retry}{$oid}{start} );
                         next if not defined $idx;    # The start oid is not found, so there are some leaf, but not the one we are looking for
-                        ++$idx;
+                                                     #++$idx;
                     } else {
                         $idx = 0;
                     }
@@ -1543,11 +1543,12 @@ DEVICE: while (1) {    # We should never leave this loop
                     if ( defined $data_in{snmp_retry}{$oid}{start} ) {
                         @branch_keys_sorted        = oid_sort( keys %branch_h );
                         $branch_keys_is_not_sorted = 0;
-                        my $idx = array_search( \@branch_keys_sorted, $data_in{snmp_retry}{$oid}{start} );
+                        my $idx = bigger_elem_idx( \@branch_keys_sorted, $data_in{snmp_retry}{$oid}{start} );
                         if ( not defined $idx ) {    # The start oid is not found, so there are some leaf, but not the one we are looking for
+                                                     # $branch_cnt = 0;
                             $branch_cnt = scalar keys %branch_h;
                         } else {
-                            $branch_cnt = ( scalar keys %branch_h ) - $idx - 1;
+                            $branch_cnt = ( scalar keys %branch_h ) - $idx;
                         }
                     } else {
                         $branch_cnt = scalar keys %branch_h;
@@ -1619,13 +1620,15 @@ DEVICE: while (1) {    # We should never leave this loop
 
                 if ( defined $poll_rep_undefined_mr{$oid} or defined $poll_rep_defined_mr{$oid} or defined $poll_rep_as_nrepd{$oid} ) {
 
-                    if ( scalar %branch_h and ( scalar keys %branch_h ) < $poll_rep_defined_mr_initial{$oid} ) {
+                    if ( scalar %branch_h and ( scalar keys %branch_h < $poll_rep_defined_mr_initial{$oid} ) ) {
+
                         my @branch_key_sorted = oid_sort( keys %branch_h );
                         $data_out{oids}{snmp_retry}{$oid}{start} = $branch_key_sorted[-1];
                         if ( defined $data_in{snmp_retry}{$oid}{left_repetitions} ) {
-                            my $idx = array_search( \@branch_key_sorted, $data_in{snmp_retry}{$oid}{start} );
+
+                            my $idx = bigger_elem_idx( \@branch_key_sorted, $data_in{snmp_retry}{$oid}{start} );
                             if ( defined $idx ) {
-                                $data_out{oids}{snmp_retry}{$oid}{left_repetitions} = $data_in{snmp_retry}{$oid}{left_repetitions} - ( scalar keys %branch_h ) + $idx + 1;
+                                $data_out{oids}{snmp_retry}{$oid}{left_repetitions} = $data_in{snmp_retry}{$oid}{left_repetitions} - ( scalar keys %branch_h ) + $idx;
                             } else {
                                 $data_out{oids}{snmp_retry}{$oid}{left_repetitions} = $data_in{snmp_retry}{$oid}{left_repetitions};
                             }
@@ -2517,14 +2520,15 @@ sub merge_h {    # Stolen from Mash Merge Simple, Thanks!
     return \%merge;
 }
 
-sub array_search {
+sub bigger_elem_idx {
     my ( $arr, $elem ) = @_;
     my $idx;
     for my $i ( 0 .. $#$arr ) {
-        if ( $arr->[$i] eq $elem ) {
+        if ( $arr->[$i] > $elem ) {
             $idx = $i;
             last;
         }
     }
     return $idx;
 }
+
