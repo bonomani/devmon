@@ -619,7 +619,9 @@ sub trans_math {
         for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) ) {
+                next;
+            }
 
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
@@ -2977,6 +2979,7 @@ sub apply_threshold {
     my ( $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
     if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and ( ref $oid_h->{color} ne 'HASH' ) ) ) {
+
     APTHRLEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
             my %oid_r;
             $oid_r{val}    = \$oid_h->{val}{$leaf};
@@ -3051,6 +3054,7 @@ sub apply_threshold {
         delete $oid_h->{thresh} unless ( defined ${ $oid_r{thresh} } );
         delete $oid_h->{msg}    unless ( defined ${ $oid_r{msg} } );
         delete $oid_h->{error}  unless ( defined ${ $oid_r{error} } );
+
         if ( $oid_h->{color} eq 'green' ) {
             return;
         } elsif ( $oid_h->{color} eq 'clear' ) {
