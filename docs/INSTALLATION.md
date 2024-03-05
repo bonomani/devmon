@@ -22,40 +22,38 @@ apt install snmp
   - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ### 2. Unpack Devmon
-- Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory:
+Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory
 ```bash
 mkdir /var/xymon/server/ext/devmon
 mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon
 ```
-- Update ownership and group if necessary (e.g., for Xymon user):
+Update ownership and group if necessary (e.g., for Xymon user):
 ```bash
 chown xymon /var/xymon/server/ext/devmon
 chgrp xymon /var/xymon/server/ext/devmon
 ```
+
 ### 3. Prepare Xymon (xymon/etc folder)
-
-   - Modify `cgioptions.cfg`:
-     ```
-     CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
-     ```
-
-   - Modify `xymonserver.cfg`:
-     ```
-     TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
-     GRAPHS="la,disk,inode,qtree,files<Plug>PeepOpenrocesses,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1<Plug>PeepOpenorts,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
-     NCV_dm="*:GAUGE"
-     ```
-
-   - Modify `graph.cfg`:
-     ```
-     directory /var/xymon/server/etc/graphs.d
-     ```
-
-   - Create folder and copy configuration file:
-     ```
-     mkdir /var/xymon/server/etc/graphs.d
-     cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
-     ```
+(Files are located in the xymon server etc folder)
+Modify `cgioptions.cfg`:
+```
+CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
+```
+Modify `xymonserver.cfg`:
+```
+TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
+GRAPHS="la,disk,inode,qtree,files<Plug>PeepOpenrocesses,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1<Plug>PeepOpenorts,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
+NCV_dm="*:GAUGE"
+```
+Modify `graph.cfg`:
+```
+directory /var/xymon/server/etc/graphs.d
+```
+Create folder and copy configuration file:
+```
+mkdir /var/xymon/server/etc/graphs.d
+cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
+```
 
 ### Single-node Installation
 
