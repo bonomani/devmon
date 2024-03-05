@@ -21,11 +21,11 @@
 
 3. **Edit Configuration**:
    - Modify the `devmon.cfg` file according to your preferences.
-   - Pay attention to options like `SNMPCIDS`, `SECNAMES`,...
+   - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, ...
    - Adjust the `CYCLETIME` variable if needed (default is 60 sec).
 
-4. **Configure bb-hosts File**:
-   - Add the Devmon tag (specified by `XYMONTAG` variable, defaults to 'DEVMON') to hosts you want to monitor in the `bb-hosts` file.
+4. **Configure Xymon Hosts File**:
+   - Add the Devmon tag (specified by `XYMONTAG` variable, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
    - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
 5. **Run a discovery or/and Set up Cron Job**: (Cron Job have side effect: NOT REALLY RECOMMENDED)
