@@ -12,7 +12,7 @@
    - Install Net-SNMP (C lib) using:
      - `yum install net-snmp net-snmp-devel net-snmp-utils` (Rhel)
      - `apt install snmp` (Debian)
-    - Provides SNMPv2c an SNMPv3
+     - Provides SNMPv2c an SNMPv3
    - We recommend installing both for compatibility with all SNMP versions.
 
 2. **Unpack Devmon**:
