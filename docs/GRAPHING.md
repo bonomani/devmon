@@ -99,36 +99,28 @@ cisco-asa/memory/message
 Where `mem_used_per` is a percentage.
 Wait for 2 passes, and you will get a graph.
 
-  ----------------------------------
-  -- Using ncv (e.g. the 'connects' test)
-  ----------------------------------
-  -------------------------------------------------------------------
+## Using NCV (e.g. the 'connects' Test)
 
-  If you have a test where the value you want to graph is not a repeater
-  (so Devmon's RRD collector isn't useful), and it isn't for a test
-  that Hobbit already understands a specific format, then Hobbit's NCV
-  collector is probably the last remaining option. Add a Name-colon-value
-  line to your message, surrounded by HTML tags (if you want to hide the
-  line on the normal Hobbit display.
+If you have a test where the value you want to graph is not a repeater (so Devmon's RRD collector isn't useful), and it isn't for a test that Hobbit already understands a specific format, then Hobbit's NCV collector is probably the last remaining option. Add a Name-colon-value line to your message, surrounded by HTML tags (if you want to hide the line on the normal Hobbit display).
 
-  For example, to graph the numbers of connections you should add the
-  following lines to the message file in the connects directory in your
-  template:
+For example, to graph the numbers of connections you should add the following lines to the message file in the `connects` directory in your template:
 
-	Connections: {cur_conn}
+```plaintext
+Connections: {cur_conn}
+```
 
-  For example in:
-	
-	cisco-asa/connects/message
+For example in:
 
-  Where cur_conn is your number of connections you want to graph.
+```
+cisco-asa/connects/message
+```
 
-  Then, add "connects=ncv" to TEST2RRD in hobbitserver.cfg, as well as the
-  RRD options for connects, via:
-  NCV_connects="*:GAUGE"
+Where `cur_conn` is your number of connections you want to graph.
 
-  Finally, you need a graph definition for connects, such as the one shipped in 
-  extras/devmon-graph.cfg
-  ----------------------------------
+Then, add "connects=ncv" to TEST2RRD in `hobbitserver.cfg`, as well as the RRD options for connects, via:
 
-$Id: GRAPHING 132 2009-04-02 07:26:21Z buchanmilne $
+```plaintext
+NCV_connects="*:GAUGE"
+```
+
+Finally, you need a graph definition for connects, such as the one shipped in `extras/devmon-graph.cfg`.
