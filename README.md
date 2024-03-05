@@ -9,8 +9,7 @@ Discover more through [screenshots](https://wiki.ubiquitous-network.ch/doku.php?
 
 ## Recent Enhancements (September 2023)
 - **New Table Alignment Feature**: With appreciation to W. Nelis for their contribution.
-- **Resolved Issues**: Continuous efforts to improve stability and performance.
-
+- **Resolved Issues**: Various bug fixes.
 
 ## Enhancing SNMPwalk Engine
 
