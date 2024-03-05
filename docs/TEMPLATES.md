@@ -25,44 +25,34 @@ device.
 
  Rolling your own
  -------------------------------------------------------------------------------
+Rolling your own Devmon template is a straightforward task that doesn't require 
+programming experience but may benefit from some familiarity with regular 
+expressions. If you're new to regular expressions, it's recommended to spend a
+few minutes understanding them using resources like
+http://www.regular-expressions.info/.
 
- Creating a Devmon template is (I hope) a relatively trivial task. It requires
- no programming experience; however you will most likely benefit from knowing
- a little about regular expressions.
+Let's delve into the structure of the template file. All template data resides
+in the "templates" subdirectory of your Devmon installation. In a single-node
+setup, Devmon reads this directory once per poll-cycle, while in a multi-node
+setup, it reads from the Devmon database as needed.
 
- If you aren't familiar with regular expressions (or 'regexps') you should
- take a few minutes and look over this website: http://www.regular-
- expressions.info/
+For our examples, let's assume the template directory is 
+"/usr/local/devmon/templates," but this may vary depending on your Devmon
+installation location.
 
- Okay, first we examine the template file structure. All templates data is
- located in the "templates" subdirectory of your Devmon installation. A
- single node installation of Devmon reads this directory once per poll-cycle,
- while a multi-node installation reads it from the Devmon database on an as-
- needed basis.
+The first tier of subdirectories within the templates directory is vendor-model
+specific. Each subdirectory represents a particular model from a specific vendor
+(e.g., Cisco 2950 or Cisco 3750). Only directories are examined; any files in
+the templates directory are ignored. The actual names of these directories are 
+insignificant as vendor and model names are specified in the 'specs' file
+(explained below). However, it's helpful to make subdirectories somewhat 
+descriptive, often using a "vendor-model" style.
 
- For all our examples below, we will assume that we are working in the
- template directory "/usr/local/devmon/templates". This will probably differ
- in your installation, depending on where you have installed Devmon.
-
- The first tier of subdirectories in the templates dir are vendor-model
- specific. So, each subdirectory represents a particular model from a
- particular vendor (so, a Cisco 2950 would have one directory, while a Cisco
- 3750 would have another). Any files in the templates directory will be
- ignored; only directories are examined. The actual name of these directories
- is irrelevant, as the actual vendor and model names are specified in the
- 'specs' file (described below). However, it doesn't hurt to make the
- subdirectories somewhat descriptive; I usually use a "vendor-model" style.
-
- Note:
-
- In Multinode, I would recommend that you only keep a single copy of your
- templates directory, preferably the one on your display server. All others
- templates directories (i.e. the ones on your Devmon nodes) are extraneous and
- should be removed. This way, when you sync your templates on disk to your
- database, there's no confusion as to which set of templates on disk match the
- ones that a multinode Devmon installation is using (which are the ones in the
- database).
-
+Note: In a multi-node setup, it's recommended to maintain only one copy of your
+templates directory, preferably on your display server. Any additional templates
+directories on your Devmon nodes should be removed. This ensures clarity when
+syncing templates on disk to your database, avoiding confusion about which set
+of templates matches the ones used in the database.
 
  The 'specs' file
  ------------------------------------------------------------------------------
