@@ -1,107 +1,55 @@
 <!DOCTYPE markdown>
-# Devmon
->   Devmon is an open-source SNMP monitoring tool that can graph and alert
-  several hundreds of devices per minutes
+# Devmon Introduction
 
-![devmon_current_status](devmon_current_status.png)
+Devmon is an SNMP monitoring tool developed as an open-source project. It's designed to efficiently monitor a significant number of devices, providing both graphing and alerting functionalities.
 
-[More screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots)
+![Devmon's Current Overview](devmon_current_status.png)
 
-## Small updates (9.2023)
-- Table align feature: Thanks. W.Nelis
-- Some bugs
+Discover more through [screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots).
 
-## What is new! Tackling the memory leaks
-- A new distributed SNMPwalk engine! (7.2023)
-  - Retries reengineered: under the devmon control
-    - Identified as the main source of memory leaks, especially when timeouts are exceeded.  
-    - Dynamic nb of retries
-  - SNMPwalk reengineered with primitive function: "snmpgetbulk"
-     - Partial retries (so sometimes partial responses)
-  - Bonus
-    - Optimisation engine: Better speed for slow devices !
-  - Info 
-    - Defaut SNMP engine changed: SNMP_Session (Pure Perl)
-    - Snmpv3 still with external "C" dependency: partial retries not implemented
-  -  Highly recommended upgrade!
-
-## What are we working on? (In order):
-  - Current roadmap
-    - GitHub [discussions](https://github.com/bonomani/devmon/discussions)
-    - GitHub [issues](https://github.com/bonomani/devmon/issues)
-  - Organization of the code and best practice (Modern standard)
-  - Documentation
-  - Compatibility with IPv6
-  - Compatibility with and all forms of clustering
-  - Own discovery/ping test?
-    - Improve stability
-    - Improve perf
-
-## General Information
-- Devmon is a Perl daemon designed to enhance the SNMP monitoring capabilities
-  of a server running Xymon monitoring software
-- Devmon takes the data that it obtains via SNMP and applies user- defined
-  logic against it and compares the results to user-customizable thresholds.
-  It uses the final data to determine if the remote device is in an abnormal
-  or critical state, and reports accordingly to the Xymon display server.
-- Devmon provides a solution that is very efficient, fault-tolerant, scalable
-  and maintainable.
-- Devmon supports a flexible, user-customizable template system, which allows
-  an end user with little or no programming knowledge to easily create test
-  logic for any number of different types of devices.
+## Recent Enhancements (September 2023)
+- **New Table Alignment Feature**: With appreciation to W. Nelis for their contribution.
+- **Resolved Issues**: Continuous efforts to improve stability and performance.
 
 
-## Technologies Used
-- Xymon
-- SNMP
-- Perl5
-- MySQL (for multi-node configuration)
+## Enhancing SNMPwalk Engine
 
-## Features
-- Multithread polling engine
-  - Devmon is able to spawn a user-configurable number of child processes to
-    offload the SNMP v1,v2c,v3 query workload to. This allows for the rapid
-    query of a large number of remote devices.
-- Device discovery process
-  - Scan each device for any SNMP security authentication combination and
-    store it in a persistent storage until a re-scan is performed
-- A scalable tool
-  - For smaller networks (<200 devices), Devmon can be run in a "single
-    node" configuration, and can be run from the same server as the Xymon
-    display server.
-  - For larger, enterprise networks, Devmon can run in a 'multi node
-    (cluster)' configuration (WIP), with all nodes using a MySQL back- end
-    server (which can also be a cluster, for maximum fault tolerance) for data
-    storage, load balancing, and fault tolerance or simply in "single node" in
-    its own dedicated server (recommended so far)
+- **Smarter Retry Logic and Efficient SNMPwalk** (July 2023):
+  - Addresses memory leaks: no more dying fork
+  - Utilizes "snmpgetbulk" and manages partial responses.
+- **Enhanced Performance**:
+  - Improves monitoring speed, particularly for slow devices.
+- **Upgrade**: Recommended 
+- **Notes**:
+  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) for improved operation.
+  - **SNMPv3**: Still dependent on external "C" library; partial retries not fully implemented.
 
+## Ongoing Initiatives and Future Directions
+- **Engagement and Roadmap**: Join our [GitHub discussions](https://github.com/bonomani/devmon/discussions) and view [issues](https://github.com/bonomani/devmon/issues) for the latest updates and to participate in our community.
+- **Code Quality and Practices**: Focusing on implementing modern coding standards and practices.
+- **Documentation Update**: Making information more accessible and user-friendly.
+- **IPv6 Support**: Preparing Devmon for future network technologies.
+- **Enhancing Clustering Support**: To accommodate diverse and large-scale network environments.
+- **Optimizing Discovery and Ping Tests**: Striving for better stability and performance.
 
-## Setup
-- In order for Devmon to do anything useful, you will need a machine capable
-  of running the Perl interpreter, which is used to execute the Devmon code.
-  Please consult the INSTALLATION file located in the docs directory.
-- In addition, you will need a machine (either the same machine running
-  Devmon, or a different one) running the Xymon monitoring program, which
-  displays the messages that Devmon generates.
-- Finally, you will need your to have your Xymon program set up to monitor at
-  least one host that Devmon has a template for. Only then will Devmon be able
-  to poll a remote host and display the results. For more information on
-  Devmon's template system, please consult the TEMPLATES file located in the
-  docs directory.
+## Key Features and Technologies
+Devmon utilizes technologies like Xymon, SNMP, Perl5, and MySQL to provide:
+- **Efficient Polling**: Through a multithreaded engine that allows quick querying of numerous devices.
+- **Automated Device Discovery**: For easy integration and management of network devices.
+- **Scalable Solutions**: Catering to both small and large network environments with potential for cluster configurations.
 
+## Getting Started
+Requirements for running Devmon include:
+- A Perl-compatible system for script execution. See the INSTALLATION guide in our docs.
+- Xymon for displaying monitoring results. Ensure at least one host is set up in Xymon that matches a Devmon template for effective polling.
 
 ## Project Status
-- The project is: _in progress_
-- Version is still < 1 (as we can guaranty backward compatibility with
-  previous version)
+- **Under Active Development**: We are currently working with a pre-release version, indicating that the software is still in the experimental stages
 
+## Learning More
+- [Devmon Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): A valuable resource for developers with best practices and detailed documentation.
+- [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): Get insights into what Devmon offers through our screenshot collection.
 
-
-## Wiki
-- http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon
-- Devmon developers: "must read" best practice
-- [Screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots)
-
-
-## Contact
-Created by [XXXXX/) - feel free to contact me!
+## Reach Out
+For inquiries, feedback, or further information, don't hesitate to contact us at [XXXXX/](#). We're always looking for ways to improve and welcome your input.
+```
