@@ -1,11 +1,11 @@
-**Upgrade**
+# Upgrade #
 
 These instructions complement the documentation found in `devmon/docs/INSTALLLATION.md`. Please ensure that you are operating on the same server as the Xymon Display server.
 
-**Prerequisites:** 
+## Prerequisites ##  
 - A working installation of Xymon and Devmon!
 
-**Instructions:**
+## Instructions ##
 
 1. Replace the following folders:
    - `devmon/modules/`
