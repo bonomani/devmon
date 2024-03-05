@@ -20,7 +20,7 @@
      - SNMP_Session provides SNMPv1 and SNMPv2c 
      - Net-SNMP provides SNMPv2c and SNMPv3 
 
-3. **Unpack Devmon**:
+2. **Unpack Devmon**:
    - Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory:
      ```bash
      mkdir /var/xymon/server/ext/devmon
@@ -31,19 +31,7 @@
      chown xymon /var/xymon/server/ext/devmon
      chgrp xymon /var/xymon/server/ext/devmon
      ```
-
-### Single-node Installation
-
-1. **Edit Configuration**:
-   - Modify the `devmon.cfg` file according to your preferences.
-   - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
-   - Adjust the `CYCLETIME` variable if needed (default is 60 sec).
-
-2. **Configure Xymon Hosts File**:
-   - Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
-     - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
-
-3. **Update Xymon** (xymon/etc folder):
+3. **Prepare Xymon** (xymon/etc folder):
 
    - Modify `cgioptions.cfg`:
      ```
@@ -53,6 +41,7 @@
    - Modify `xymonserver.cfg`:
      ```
      TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
+    GRAPHS="la,disk,inode,qtree,files<Plug>PeepOpenrocesses,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1<Plug>PeepOpenorts,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
      NCV_dm="*:GAUGE"
      ```
 
@@ -66,6 +55,18 @@
      mkdir /var/xymon/server/etc/graphs.d
      cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
      ```
+
+### Single-node Installation
+
+1. **Edit Configuration**:
+   - Modify the `devmon.cfg` file according to your preferences.
+   - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
+   - Adjust the `CYCLETIME` variable if needed (default is 60 sec).
+
+2. **Configure Xymon Hosts File**:
+   - Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
+     - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
+
 
 4. **Run Discovery or Set up Cron Job** (Not Recommended):
    - Schedule a cron job to run Devmon with the `--read` flag.
