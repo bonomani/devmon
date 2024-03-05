@@ -1,5 +1,4 @@
 <!DOCTYPE markdown>
-<!DOCTYPE markdown>
 ## Devmon Installation Guide
 
 ### Single-node Installation
@@ -8,7 +7,7 @@
    - Install the SNMP_Session Perl module:
      - `yum install perl-SNMP_Session.noarch` (RHEL)
      - `apt install libsnmp-session-perl` (Debian)
-     - or [Download](https://github.com/sleinen/snmp-session)
+     - or [download](https://github.com/sleinen/snmp-session) from source
      - Provides SNMPv1 and SNMPv2c
    - Install Net-SNMP (C lib):
      - `yum install net-snmp net-snmp-devel net-snmp-utils` (RHEL)
@@ -33,30 +32,29 @@
    - Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
      - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
+5. **Update Xymon** (xymon/etc folder):
 
-5. **Update Xymon**:
-   - In the `xymon/etc` folder:
-     - Modify `cgioptions.cfg`:
-       ```
-       CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
-       ```
-     - Modify `xymonserver.cfg`:
-       ```
-       TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
-       ```
-     - Add to `xymonserver.cfg`:
-       ```
-       NCV_dm="*:GAUGE"
-       ```
-     - Modify `graph.cfg`:
-       ```
-       directory /var/xymon/server/etc/graphs.d
-       ```
-     - Create folder and copy configuration file:
-       ```
-       mkdir /var/xymon/server/etc/graphs.d
-       cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
-       ```
+   - Modify `cgioptions.cfg`:
+     ```
+     CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
+     ```
+
+   - Modify `xymonserver.cfg`:
+     ```
+     TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
+     NCV_dm="*:GAUGE"
+     ```
+
+   - Modify `graph.cfg`:
+     ```
+     directory /var/xymon/server/etc/graphs.d
+     ```
+
+   - Create folder and copy configuration file:
+     ```
+     mkdir /var/xymon/server/etc/graphs.d
+     cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
+     ```
 
 
 6. **Run Discovery or Set up Cron Job** (Not Recommended):
@@ -73,7 +71,7 @@
    - For systemd (CentOS 7, Ubuntu, etc.):
      - Add the systemd file to `devmon/extras/systemd`.
 
-9. ** If xymon hosts.cfg change **
+9. **If xymon hosts.cfg change**:
   - Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
 
 10. **Devmon Purple** (Obsolete):
