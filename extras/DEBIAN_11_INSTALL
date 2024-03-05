@@ -1,4 +1,4 @@
-pt-get update
+apt-get update
 apt-get upgrade
 apt-get install apache2 rrdtool librrd-dev libpcre3-dev libssl-dev ldap-utils libldap2-dev fping
 
@@ -124,18 +124,4 @@ systemctl daemon-reload
 systemctl enable devmon 
 systemctl start devmon 
 
-
-# Update XYMON
-vi /usr/lib/xymon/server/etc/cgioptions.cfg
-CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
-
-
-vi /usr/lib/xymon/server/etc/xymonserver.cfg
-# Modify those line (comment previous and re-add):
-TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files<Plug>PeepOpenrocs=processes<Plug>PeepOpenorts,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
-
-GRAPHS="la,disk,inode,qtree,files<Plug>PeepOpenrocesses,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1<Plug>PeepOpenorts,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp<Plug>PeepOpenaging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
-
-# Add this line: (I think you can put it in any place, but below TEST2RRD seems fine)
-NCV_dm="*:GAUGE"
 
