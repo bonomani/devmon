@@ -61,55 +61,43 @@ Finally, you need a graph definition, such as the one shipped in `extras/devmon-
 
 At present, most `if_load` tests support this method, and the `compaq-server`, `cisco-6509`, and `dell-poweredge` templates support it for the 'temp' test.
 
----------------------------------------------------------------------
 
- USING HOBBIT FEATURES FROM DEVMON
-=====================================================================
- For specific tests, Hobbit already parses information supplied in
- specific formats (typically from old BigBrother extensions). You can
- (ab)use this support to have Hobbit graph values from your own templates.
+## Using Hobbit Features from Devmon
+For specific tests, Hobbit already parses information supplied in specific formats (typically from old BigBrother extensions). You can (ab)use this support to have Hobbit graph values from your own templates.
 
-  ----------------------------------
-  -- The 'CPU' test
-  ----------------------------------
-  -------------------------------------------------------------------
-  
-    On any device, you would like to graph CPU.
+### The 'CPU' Test
+On any device, you would like to graph CPU.
+If you get CPU utilization value as a percentage, you should add the following lines to the message file in the `cpu` directory in your template:
+```plaintext
+<!--
+<br>CPU 5 min average: {CPUTotal5Min}
+-->
+```
 
-  If you get CPU usilisation value as a percentage, you should add 
-  the following lines to the message file in the cpu directory in your 
-  template:
+For example in:
+```
+cisco-asa/cpu/message
+```
 
-	<!--
-        <br>CPU 5 min average: {CPUTotal5Min}
-	-->
+Where `CPUTotal5Min` is a percentage.
+Wait for 2 passes, and you will get a graph.
 
-  For example in:
+### The 'Memory' Test
+On any device, you would like to graph memory usage.
+You should add the following lines to the message file in the `memory` directory in your template.
+```plaintext
+<!-- 
+Physical {mem_used_per}%
+-->    
+```
 
-	cisco-asa/cpu/message
+For example in:
+```
+cisco-asa/memory/message
+```
 
-  Where CPUTotal5Min is a percentage.
-  Wait for 2 passes, and you will get a graph
-
-  ----------------------------------
-  -- The 'memory' test
-  ----------------------------------
-  -------------------------------------------------------------------
-
-  On any device, you would like to graph memory usage.
-  You should add the following lines to the message file in the memory 
-  directory in your template.
-
-  	<!-- 
-        Physical {mem_used_per}%
-	-->    
-
-  For example in:
-
-	cisco-asa/memory/message
-
-  Where mem_used_per is a percentage.
-  Way for 2 passes, and you will get a graph.
+Where `mem_used_per` is a percentage.
+Wait for 2 passes, and you will get a graph.
 
   ----------------------------------
   -- Using ncv (e.g. the 'connects' test)
