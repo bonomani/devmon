@@ -75,7 +75,7 @@
 
 9. **Devmon Purple** (Obsolete):
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
-```
+   - You will find the generic in devmon/extra folder 
 
 ### Multi-node Installation (NOT WORKING)
 
