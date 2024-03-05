@@ -1,58 +1,24 @@
 
- DEVMON GRAPHING IN HOBBIT
-=====================================================================
+# DEVMON GRAPHING IN HOBBIT
 
-  ----------------------------------
-  Quick start
-  ----------------------------------
-  The rest of this document covers the implementation of graphs for 
-  Devmon in Hobbit/Xymon, however with current versions of Xymon and
-  Devmon, only some configuration should be required.
+## Quick Start
 
-  For new Xymon installations of 4.2.2 or later, the only step that
-  you should need to do is the first part of (3), to have graphs
-  working for the Devmon if_load and temp tests. The other steps
-  are provided here to allow users to ensure that they have all the
-  required configuration, as well as how to enable graphs for other
-  tests.
+This document outlines the implementation of graphs for Devmon in Hobbit/Xymon. With current versions of Xymon and Devmon, only some configuration should be necessary.
 
-  1)Install Xymon 4.2.2 or later. The rrd collector for devmon was
-    merged into Xymon before the release of 4.2.2. No additional
-    patches or scripts are required.
-  2)Ensure (for each devmon test you want to graph with the devmon 
-    collector) "testname=devmon" is in TEST2RRD in Xymon's
-    hobbitserver.cfg file. E.g.:
+1. **Install Xymon 4.2.2 or later:** The rrd collector for Devmon was merged into Xymon before the release of 4.2.2. No additional patches or scripts are required.
+2. **Configure Devmon tests:** Ensure that for each Devmon test you want to graph with the Devmon collector, "testname=devmon" is in TEST2RRD in Xymon's hobbitserver.cfg file. For example:
 
-    TEST2RRD="cpu=la,disk ... ,if_load=devmon,temp=devmon"
+    ```plaintext
+    TEST2RRD="cpu=la,disk ...,if_load=devmon,temp=devmon"
+    ```
 
-    By default, Xymon 4.2.2 or later should enable the devmon
-    collector for the if_load and temp tests.
+    By default, Xymon 4.2.2 or later should enable the Devmon collector for the if_load and temp tests. Restart Xymon (or kill the hobbitd_rrd task for status messages, hobbitlaunch will restart it) so hobbitd_rrd gets the updated environment variable, if you had to make any changes.
+  
+3. **Graph Definitions:** Ensure that Xymon has graph definitions for the relevant tests. Graph definitions for many of the tests that have graphs enabled are provided in the file `extras/devmon-graph.cfg`. Either append this to Xymon's `hobbitgraph.cfg`, or create a directory to store additional graph definition files (e.g. `/etc/xymon/hobbitgraph.d`), add `directory /etc/xymon/hobbitgraph.d` to `hobbitgraph.cfg`, and place `extras/devmon-graph.cfg` in `/etc/xymon/hobbitgraph.d`.
 
-    Restart Xymon (or, kill the hobbitd_rrd task for status messages, 
-    hobbitlaunch will restart it) so hobbitd_rrd gets the updated 
-    environment variable, if you had to make any changes.
+    Ensure that Xymon knows to try and generate graphs for Devmon and the tests you have, by ensuring Devmon and the test names are included in the GRAPHS variable in `hobbitserver.cfg`. If you prefer to have a single instance on graphs for a particular test, append `::1` to the test name, e.g. "if_load::1".
 
-  At this point, you should find that Xymon is generating RRD files
-  for any test using the devmon collector for which it has received
-  status updates, e.g. $BBVAR/rrd/<hostname>/<testname>.<instancename>.rrd,
-  such as $BBVAR/rrd/router/if_load.Se0_1.rrd
-
-  3)Ensure that Xymon has graph definitions for the relevant tests.
-    Graph defintions for many of the tests that have graphs enabled
-    are provided in the file extras/devmon-graph.cfg. Either append
-    this to Xymon's hobbitgraph.cfg, or create a directory to store
-    additional graph definition files (e.g. /etc/xymon/hobbitgraph.d),
-    add "directory /etc/xymon/hobbitgraph.d" to hobbitgraph.cfg, 
-    and place extras/devmon-graph.cfg in /etc/xymon/hobbitgraph.d.
-
-    Ensure that Xymon knows to try and generate graphs for devmon and
-    the tests you have, by ensuring devmon and the test names are included
-    in the GRAPHS variable in hobbitserver.cfg. If you prefer to have
-    a single instance on graphs for a particular test, appent ::1 to the
-    test name, e.g. "if_load::1".
-
-    By default, Xymon 4.2.2 includes "devmon::1,if_load::1,temp" in the
-    GRAPHS variable.
+    By default, Xymon 4.2.2 includes "devmon::1,if_load::1,temp" in the GRAPHS variable.
 
  
   ---------------------------------------------------------
