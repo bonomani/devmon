@@ -1,7 +1,5 @@
 # A Quick Overview of How Devmon Works
 
----
-
 ## 1. Initialization:
 - Devmon starts by reading the list of hosts to monitor from its database.
 - In a single-node setup, the database is stored in `hosts.db`. In a multi-node setup, it's stored in a MySQL database.
