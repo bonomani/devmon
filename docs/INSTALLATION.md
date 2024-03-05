@@ -73,53 +73,7 @@ cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/g
 - Verify if new tests are being shown on your display server.
 
 ### 5. Install Start/Stop Script** on CentOS or RedHat using init.d
-
-    5.1. Create a directory for devmon:
-
-    ```bash
-    mkdir /var/run/devmon
-    chown xymon /var/run/devmon
-    chgrp xymon /var/run/devmon
-    ```
-
-    5.2. Copy the devmon init.d script to the appropriate directory:
-
-    ```bash
-    cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
-    ```
-
-    5.3. Edit the devmon init.d script:
-
-    ```bash
-    vi /etc/init.d/devmon
-    ```
-
-    5.4. Update the `prog` variable to point to the correct devmon location:
-
-    ```diff
-    -prog="/usr/local/devmon/devmon"
-    +prog="/var/xymon/server/ext/devmon/devmon"
-    ```
-
-    5.5. Update the `RUNASUSER` variable to the appropriate user (xymon):
-
-    ```diff
-    -#RUNASUSER=devmon
-    +RUNASUSER=xymon
-    ```
-
-    5.6. Add devmon to the system startup and start the service:
-
-    ```bash
-    chkconfig --add devmon
-    chkconfig devmon on
-    service devmon start
-    ```
-
-    This procedure assumes that you have devmon installed in `/var/xymon/server/ext/devmon/devmon` and that the user `xymon` exists. Adjust the paths and user as necessary based on your specific setup.
-
-   - For systemd (CentOS 7, Ubuntu, etc.):
-     - Add the systemd file to `devmon/extras/systemd`.
+https://github.com/bonomani/devmon/blob/main/extras/devmon.initd.redhat   
 
 ### 6. If xymon hosts.cfg change
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
@@ -127,4 +81,40 @@ Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_change
 ### 7. Devmon Purple (Obsolete):
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
    - You will find the generic in devmon/extra folder 
+
+## Additional step possibilities (NOT NEEDED, BUT KEPT FOR INFO: NEED CLEANING)
+Create a directory for devmon:
+```bash
+mkdir /var/run/devmon
+chown xymon /var/run/devmon
+chgrp xymon /var/run/devmon
+ ```
+Copy the devmon init.d script to the appropriate directory:
+```bash
+cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
+```
+Edit the devmon init.d script:
+```bash
+vi /etc/init.d/devmon
+```
+Update the `prog` variable to point to the correct devmon location:
+```diff
+-prog="/usr/local/devmon/devmon"
++prog="/var/xymon/server/ext/devmon/devmon"
+```
+Update the `RUNASUSER` variable to the appropriate user (xymon):
+```diff
+-#RUNASUSER=devmon
++RUNASUSER=xymon
+```
+Add devmon to the system startup and start the service:
+```bash
+chkconfig --add devmon
+chkconfig devmon on
+service devmon start
+```
+This procedure assumes that you have devmon installed in `/var/xymon/server/ext/devmon/devmon` and that the user `xymon` exists. Adjust the paths and user as necessary based on your specific setup.
+
+   - For systemd (CentOS 7, Ubuntu, etc.):
+     - Add the systemd file to `devmon/extras/systemd`.
 
