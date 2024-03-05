@@ -13,7 +13,7 @@ This document outlines the implementation of graphs for Devmon in Xymon. With cu
 
     By default, Xymon 4.2.2 or later should enable the Devmon collector for the if_load and temp tests. Restart Xymon (or kill the xymond_rrd task for status messages, xymonlaunch will restart it) so xymond_rrd gets the updated environment variable, if you had to make any changes.
   
-3. **Graph Definitions:** Ensure that Xymon has graph definitions for the relevant tests. Graph definitions for many of the tests that have graphs enabled are provided in the file `extras/devmon-graph.cfg`. Either append this to Xymon's `hobbitgraph.cfg`, or create a directory to store additional graph definition files (e.g. `/etc/xymon/xymongraph.d`), add `directory /etc/xymon/xymongraph.d` to `xymongraph.cfg`, and place `extras/devmon-graph.cfg` in `/etc/xymon/xymongraph.d`.
+3. **Graph Definitions:** Ensure that Xymon has graph definitions for the relevant tests. Graph definitions for many of the tests that have graphs enabled are provided in the file `extras/devmon-graph.cfg`. Either append this to Xymon's `xymongraph.cfg`, or create a directory to store additional graph definition files (e.g. `/etc/xymon/xymongraph.d`), add `directory /etc/xymon/xymongraph.d` to `xymongraph.cfg`, and place `extras/devmon-graph.cfg` in `/etc/xymon/xymongraph.d`.
 
     Ensure that Xymon knows to try and generate graphs for Devmon and the tests you have, by ensuring Devmon and the test names are included in the GRAPHS variable in `xymonserver.cfg`. If you prefer to have a single instance on graphs for a particular test, append `::1` to the test name, e.g. "if_load::1".
 
