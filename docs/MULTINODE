@@ -157,4 +157,32 @@
   on the right track.  For more information on MySQL and MySQL
   clustering, please visit the MySQL website, http://www.mysql.com.
 
-$Id: MULTINODE 95 2008-12-07 19:58:38Z buchanmilne $
+### Multi-node Installation (NOT WORKING)
+
+1. **Node Setup**:
+   - Follow steps 1 to 6 on all machines in your Devmon cluster.
+
+2. **Database Server Setup**:
+   - Download and install MySQL server and client packages from [here](http://dev.mysql.com/downloads/).
+   - Start MySQL server and ensure it boots at startup.
+   - Change the root user password using `mysqladmin -u root password 'CHANGETHIS'`.
+   -
+
+ Delete unneeded default MySQL accounts with `mysql -p -e 'delete from mysql.user where password=""'`.
+   - Create the Devmon database and import its structure.
+
+3. **Display Server Setup**:
+   - Install required modules, unpack Devmon, and edit `devmon.cfg`.
+   - Import template data into the Devmon database.
+   - Configure `bb-hosts` file and set up a cron job to run Devmon.
+  
+4. **Global Node Configuration**:
+   - Edit `devmon.cfg` on one node and adjust global variables.
+   - Synchronize global config with other nodes using `/usr/local/devmon/devmon -v --syncconfig`.
+  
+5. **Start Devmon Nodes**:
+   - Launch Devmon on all nodes and monitor logs for any anomalies.
+
+For advanced multi-node cluster setup, refer to the `docs/MULTINODE` file.
+```
+
