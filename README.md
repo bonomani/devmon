@@ -11,9 +11,9 @@ Discover more through [screenshots](https://wiki.ubiquitous-network.ch/doku.php?
 - **New Table Alignment Feature**: With appreciation to W. Nelis for their contribution.
 - **Resolved Issues**: Various bug fixes.
 
-## Enhancing SNMPwalk Engine
+## Enhancing SNMPwalk Engine (July 2023)
 
-- **Smarter Retry Logic and Efficient SNMPwalk** (July 2023):
+- **Smarter Retry Logic and Efficient SNMPwalk** :
   - Addresses memory leaks: no more dying fork
   - Utilizes "snmpgetbulk" and manages partial responses.
 - **Enhanced Performance**:
