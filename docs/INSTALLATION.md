@@ -73,7 +73,10 @@
    - For systemd (CentOS 7, Ubuntu, etc.):
      - Add the systemd file to `devmon/extras/systemd`.
 
-9. **Devmon Purple** (Obsolete):
+9. ** If xymon hosts.cfg change **
+  - Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
+
+10. **Devmon Purple** (Obsolete):
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
    - You will find the generic in devmon/extra folder 
 
