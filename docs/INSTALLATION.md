@@ -56,7 +56,6 @@
      cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
      ```
 
-
 6. **Run Discovery or Set up Cron Job** (Not Recommended):
    - Schedule a cron job to run Devmon with the `--read` flag.
      - Example: `*/5 * * * * /usr/local/devmon/devmon --read`
@@ -65,13 +64,56 @@
    - Launch Devmon and check logs for any errors.
    - Verify if new tests are being shown on your display server.
 
-8. **Install Start/Stop Script**:
-   - For init.d (CentOS or Red Hat with init.d):
-     - Follow the provided steps.
+8. **Install Start/Stop Script** on CentOS or RedHat using init.d:
+
+    8.1. Create a directory for devmon:
+
+    ```bash
+    mkdir /var/run/devmon
+    chown xymon /var/run/devmon
+    chgrp xymon /var/run/devmon
+    ```
+
+    8.2. Copy the devmon init.d script to the appropriate directory:
+
+    ```bash
+    cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
+    ```
+
+    8.3. Edit the devmon init.d script:
+
+    ```bash
+    vi /etc/init.d/devmon
+    ```
+
+    8.4. Update the `prog` variable to point to the correct devmon location:
+
+    ```diff
+    -prog="/usr/local/devmon/devmon"
+    +prog="/var/xymon/server/ext/devmon/devmon"
+    ```
+
+    8.5. Update the `RUNASUSER` variable to the appropriate user (xymon):
+
+    ```diff
+    -#RUNASUSER=devmon
+    +RUNASUSER=xymon
+    ```
+
+    8.6. Add devmon to the system startup and start the service:
+
+    ```bash
+    chkconfig --add devmon
+    chkconfig devmon on
+    service devmon start
+    ```
+
+    This procedure assumes that you have devmon installed in `/var/xymon/server/ext/devmon/devmon` and that the user `xymon` exists. Adjust the paths and user as necessary based on your specific setup.
+
    - For systemd (CentOS 7, Ubuntu, etc.):
      - Add the systemd file to `devmon/extras/systemd`.
 
-9. **If xymon hosts.cfg change**:
+8. **If xymon hosts.cfg change**:
   - Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
 
 10. **Devmon Purple** (Obsolete):
@@ -87,7 +129,9 @@
    - Download and install MySQL server and client packages from [here](http://dev.mysql.com/downloads/).
    - Start MySQL server and ensure it boots at startup.
    - Change the root user password using `mysqladmin -u root password 'CHANGETHIS'`.
-   - Delete unneeded default MySQL accounts with `mysql -p -e 'delete from mysql.user where password=""'`.
+   -
+
+ Delete unneeded default MySQL accounts with `mysql -p -e 'delete from mysql.user where password=""'`.
    - Create the Devmon database and import its structure.
 
 3. **Display Server Setup**:
@@ -103,3 +147,4 @@
    - Launch Devmon on all nodes and monitor logs for any anomalies.
 
 For advanced multi-node cluster setup, refer to the `docs/MULTINODE` file.
+```
