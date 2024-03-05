@@ -2,29 +2,23 @@
 ## Devmon Installation Guide
 
 ### Prerequisits
-1. **Install the SNMP_Session Perl module**:
+1. **Install the SNMP_Session Perl module and Net-SNMP (C lib)**:
    - **RHEL**:
      ```bash
      yum install perl-SNMP_Session.noarch
-     ```
-   - **Debian**:
-     ```bash
-     apt install libsnmp-session-perl
-     ```
-   - or [download](https://github.com/sleinen/snmp-session) from source
-   - Provides SNMPv1 and SNMPv2c
-
-2. **Install Net-SNMP (C lib)**:
-   - **RHEL**:
-     ```bash
      yum install net-snmp net-snmp-devel net-snmp-utils
      ```
    - **Debian**:
      ```bash
+     apt install libsnmp-session-perl
      apt install snmp
      ```
-   - Provides SNMPv2c and SNMPv3
-   - Both are recommended for compatibility with all SNMP versions.
+   - From Source
+     - SNMP_Session [download](https://github.com/sleinen/snmp-session) from source 
+     - Net-SNMP http://www.net-snmp.org/ 
+   - Both are recommended but not mandatory for compatibility with all SNMP versions.
+     - SNMP_Session provides SNMPv1 and SNMPv2c 
+     - Net-SNMP provides SNMPv2c and SNMPv3 
 
 3. **Unpack Devmon**:
    - Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory:
