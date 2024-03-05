@@ -39,7 +39,7 @@ Devmon utilizes technologies like Xymon, SNMP, Perl5, and MySQL to provide:
 
 ## Getting Started
 Requirements for running Devmon include:
-- A Perl-compatible system for script execution. See the INSTALLATION guide in our docs.
+- A Perl-compatible system for script execution. See the [INSTALLATION.md](https://github.com/bonomani/devmon/blob/main/docs/INSTALLATION.md) guide in our docs.
 - Xymon for displaying monitoring results. Ensure at least one host is set up in Xymon that matches a Devmon template for effective polling.
 
 ## Project Status
