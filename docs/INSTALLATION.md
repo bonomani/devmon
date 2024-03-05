@@ -1,5 +1,5 @@
 <!DOCTYPE markdown>
-# Devmon Installation Guide
+# Installation Guide
 
 ## Prerequisits
 ### 1. Install Dependant Libs
@@ -54,28 +54,27 @@ mkdir /var/xymon/server/etc/graphs.d
 cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
 ```
 
-### Single-node Installation
+## Single-node Installation
 
-1. **Edit Configuration**:
-   - Modify the `devmon.cfg` file according to your preferences.
-   - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
-   - Adjust the `CYCLETIME` variable if needed (default is 60 sec).
+### 1. Edit Configuration
+- Modify the `devmon.cfg` file according to your preferences.
+- Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
+- Adjust the `CYCLETIME` variable if needed (default is 60 sec).
 
-2. **Configure Xymon Hosts File**:
-   - Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
-     - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
+### 2. Configure Xymon Hosts File
+- Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
+- Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
+### 3. Run a Discovery
+- /usr/local/devmon/devmon --read 
 
-4. **Run a Discovery**:
-   - /usr/local/devmon/devmon --read 
+### 4. Start Devmon
+- Launch Devmon and check logs for any errors.
+- Verify if new tests are being shown on your display server.
 
-5. **Start Devmon**:
-   - Launch Devmon and check logs for any errors.
-   - Verify if new tests are being shown on your display server.
+### 5. Install Start/Stop Script** on CentOS or RedHat using init.d
 
-6. **Install Start/Stop Script** on CentOS or RedHat using init.d:
-
-    6.1. Create a directory for devmon:
+    5.1. Create a directory for devmon:
 
     ```bash
     mkdir /var/run/devmon
@@ -83,33 +82,33 @@ cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/g
     chgrp xymon /var/run/devmon
     ```
 
-    6.2. Copy the devmon init.d script to the appropriate directory:
+    5.2. Copy the devmon init.d script to the appropriate directory:
 
     ```bash
     cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
     ```
 
-    6.3. Edit the devmon init.d script:
+    5.3. Edit the devmon init.d script:
 
     ```bash
     vi /etc/init.d/devmon
     ```
 
-    6.4. Update the `prog` variable to point to the correct devmon location:
+    5.4. Update the `prog` variable to point to the correct devmon location:
 
     ```diff
     -prog="/usr/local/devmon/devmon"
     +prog="/var/xymon/server/ext/devmon/devmon"
     ```
 
-    6.5. Update the `RUNASUSER` variable to the appropriate user (xymon):
+    5.5. Update the `RUNASUSER` variable to the appropriate user (xymon):
 
     ```diff
     -#RUNASUSER=devmon
     +RUNASUSER=xymon
     ```
 
-    6.6. Add devmon to the system startup and start the service:
+    5.6. Add devmon to the system startup and start the service:
 
     ```bash
     chkconfig --add devmon
@@ -122,10 +121,10 @@ cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/g
    - For systemd (CentOS 7, Ubuntu, etc.):
      - Add the systemd file to `devmon/extras/systemd`.
 
-7. **If xymon hosts.cfg change**:
-  - Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
+### 6. If xymon hosts.cfg change
+Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
 
-8. **Devmon Purple** (Obsolete):
+### 7. Devmon Purple (Obsolete):
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
    - You will find the generic in devmon/extra folder 
 
