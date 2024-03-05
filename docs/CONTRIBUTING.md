@@ -1,32 +1,39 @@
-# How to contribute to Devmon
+# How to Contribute to Devmon
 
-## Did you find a bug?
-* Fine, open an issue! and welcome in the Devmon community
+## Encountered a Bug?
 
-## Do you want to contribute by creating templates? 
-*  Terrific, create a PR. It is usually the best way to start as it is funny!
+* Great! Open an issue and welcome to the Devmon community!
 
-## Did you write a patch that fixes a bug?
-* Perfect, create a PR and you will be listed as a developper (if you want)!
+## Interested in Creating Templates?
 
-## Did you fix whitespace, format code, or make a purely cosmetic patch?
-* Nice, create a PR, I cannot listed you as a developper as you are not really one, but many many thanks!
+* Fantastic! Start by creating a PR. It's usually the best way to get involved and it's fun!
 
-## Do you intend to add a new feature or change an existing one?
-* Impressive, create a PR and if your PR is merged you will be listed as a developper (if you want)! 
+## Developed a Patch to Fix a Bug?
 
-## Do you intend to change a existing feature?
-* Marvellous, create a PR and if your PR is merged you will be listed as a developper (if you want)! 
+* Wonderful! Create a PR and you'll be acknowledged as a developer (if you'd like)!
 
-## Do you have questions about the source code?
-* Excellent ! Contact me or open en issue!
+## Made Cosmetic Changes or Formatting Fixes?
 
-## Do you want to be a member of the lead team?
-* You are incredible! Contact me, please, there is much room ! 
+* Excellent! Create a PR. While I can't list you as a developer since it's not a substantial change, many thanks!
 
-Devmon is a volunteer effort. We encourage you to pitch in and join the team.
+## Planning to Add a New Feature or Modify an Existing One?
 
-Thanks! :heart: :heart: :heart:
+* Impressive! Create a PR, and if it's merged, you'll be recognized as a developer (if desired)!
+
+## Looking to Alter an Existing Feature?
+
+* Marvelous! Create a PR, and upon merging, you'll be acknowledged as a developer (if you'd like)!
+
+## Questions About the Source Code?
+
+* Excellent! Contact me or open an issue for assistance!
+
+## Interested in Joining the Lead Team?
+
+* You're incredible! Please contact me; there's ample room for your contributions!
+
+Devmon thrives on volunteer efforts. We invite you to contribute and become part of the team.
+
+Thanks! ❤️❤️❤️
 
 Devmon Team
- 
