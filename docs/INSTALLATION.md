@@ -1,7 +1,7 @@
 <!DOCTYPE markdown>
 ## Devmon Installation Guide
 
-### Single-node Installation
+### Prerequisits
 
 1. **Install Required Modules**:
    - Install the SNMP_Session Perl module:
@@ -22,6 +22,8 @@
    - Update ownership and group if necessary (e.g., for Xymon user):
      - `chown xymon /var/xymon/server/ext/devmon`
      - `chgrp xymon /var/xymon/server/ext/devmon`
+
+### Single-node Installation
 
 3. **Edit Configuration**:
    - Modify the `devmon.cfg` file according to your preferences.
