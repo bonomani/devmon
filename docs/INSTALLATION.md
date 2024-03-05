@@ -68,9 +68,8 @@
      - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
 
-4. **Run Discovery or Set up Cron Job** (Not Recommended):
-   - Schedule a cron job to run Devmon with the `--read` flag.
-     - Example: `*/5 * * * * /usr/local/devmon/devmon --read`
+4. **Run a Discovery**:
+   - /usr/local/devmon/devmon --read 
 
 5. **Start Devmon**:
    - Launch Devmon and check logs for any errors.
@@ -78,7 +77,7 @@
 
 6. **Install Start/Stop Script** on CentOS or RedHat using init.d:
 
-    8.1. Create a directory for devmon:
+    6.1. Create a directory for devmon:
 
     ```bash
     mkdir /var/run/devmon
@@ -86,33 +85,33 @@
     chgrp xymon /var/run/devmon
     ```
 
-    8.2. Copy the devmon init.d script to the appropriate directory:
+    6.2. Copy the devmon init.d script to the appropriate directory:
 
     ```bash
     cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
     ```
 
-    8.3. Edit the devmon init.d script:
+    6.3. Edit the devmon init.d script:
 
     ```bash
     vi /etc/init.d/devmon
     ```
 
-    8.4. Update the `prog` variable to point to the correct devmon location:
+    6.4. Update the `prog` variable to point to the correct devmon location:
 
     ```diff
     -prog="/usr/local/devmon/devmon"
     +prog="/var/xymon/server/ext/devmon/devmon"
     ```
 
-    8.5. Update the `RUNASUSER` variable to the appropriate user (xymon):
+    6.5. Update the `RUNASUSER` variable to the appropriate user (xymon):
 
     ```diff
     -#RUNASUSER=devmon
     +RUNASUSER=xymon
     ```
 
-    8.6. Add devmon to the system startup and start the service:
+    6.6. Add devmon to the system startup and start the service:
 
     ```bash
     chkconfig --add devmon
