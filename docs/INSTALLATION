@@ -1,265 +1,62 @@
-  INSTALLING DEVMON
-=====================================================================
+## Devmon Installation Guide
 
-For an QUICK UPGRADE from previous version follow the QUICK_UPGRADE
- guide in this folder (devmon/docs)
+### Single-node Installation
 
-For an overview of how Devmon works, please see the OVERVIEW file.
+1. **Install Required Modules**:
+   - Install the SNMP_Session Perl module
+     - yum install perl-SNMP_Session.noarch (Rhel)
+     - apt install libsnmp-session-perl (Debian) 
+     - or [Download](https://github.com/sleinen/snmp-session)
+     - Provides SNMPv1 an SNMPv2c
+   - Install Net-SNMP (C lib) using:
+     - `yum install net-snmp net-snmp-devel net-snmp-utils` (Rhel)
+     - `apt install snmp` (Debian)
+    - Provides SNMPv2c an SNMPv3
+   - We recommend installing both for compatibility with all SNMP versions.
 
- Single-node installation
----------------------------------------------------------------------
+2. **Unpack Devmon**:
+   - Extract the Devmon tarball into your preferred directory.
+   - Consider using `/var/xymon/server/ext/devmon` or any directory of your choice.
 
-  To install a single-node server, perform the following steps:
+3. **Edit Configuration**:
+   - Modify the `devmon.cfg` file according to your preferences.
+   - Pay attention to options like `SNMPCIDS`, `SECNAMES`,...
+   - Adjust the `CYCLETIME` variable if needed (default is 60 sec).
 
-  1. Install the SNMP_Session Perl module (v1.08 or later), which
-     you can download from: 
-        http://www.switch.ch/misc/leinen/snmp/perl/
-     and install Net-SNMP (C lib) with 
-       - yum install net-snmp
-       - apt install snmp
-     SNMP_Session provides SNMPv1 an SNMPv2c
-     Net-SNMP provides SNMPv2c and SNMPv3 
-     We recommand to install both to have all SNMP version 
+4. **Configure bb-hosts File**:
+   - Add the Devmon tag (specified by `XYMONTAG` variable, defaults to 'DEVMON') to hosts you want to monitor in the `bb-hosts` file.
+   - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
-  2. Unpack the Devmon tarball into your preferred directory.  I
-     typically use /var/xymon/server/ext/devmon, but it is totally 
-     up to you. I added also a specfic folder for systemd (centos)
-     in devmon/extra with scripts for systemd linux (can  
-     probably be usefull for ubuntu install that work with systemd 
+5. **Run a discovery or/and Set up Cron Job**: (Cron Job have side effect: NOT REALLY RECOMMENDED)
+   - Schedule a cron job to run Devmon with the `--read` flag.
+   - Example: `*/5 * * * * /usr/local/devmon/devmon --read`
 
-     Templates should be in devmon/templates
+6. **Start Devmon**:
+   - Launch Devmon and check logs for any errors.
+   - Verify if new tests are being shown on your display server.
 
-     AND follow the QUICK_INSTALLATION guide in this folder (docs)
-     AND come back later to verify that you dont miss anything!
+### Multi-node Installation (NOT WORKING)
 
-  3. Edit the devmon.cfg file.  For a single node installation, the
-     options you want to pay particular attention to are: 
-     MULTINODE, BBHOSTS, SNMPCIDS, PIDFILE, BBTYPE & DISPSERV.  If
-     you wish to modify the polling interval type (default is once
-     a minute) you should also modify the CYCLETIME variable.
+1. **Node Setup**:
+   - Follow steps 1 to 6 on all machines in your Devmon cluster.
 
-  4. Edit your bb-hosts file and add your Devmon tag (specified by
-     BBTAG variable in the config file, defaults to 'DEVMON') to
-     any of the hosts you want Devmon to monitor.  For instance:
-        10.0.0.1        myrouter # badconn:1:1:2 DEVMON
+2. **Database Server Setup**:
+   - Download and install MySQL server and client packages from [here](http://dev.mysql.com/downloads/).
+   - Start MySQL server and ensure it boots at startup.
+   - Change the root user password using `mysqladmin -u root password 'CHANGETHIS'`.
+   - Delete unneeded default MySQL accounts with `mysql -p -e 'delete from mysql.user where password=""'`.
+   - Create the Devmon database and import its structure.
 
-     For detailed information on how to tweak Devmon on a
-     per-device basis in your bb-hosts file, see the docs/USING
-     file.
-
-  5. Set up a cron job to run devmon with the --readbbhosts flag.
-     The interval is up to you, but keep in mind that Devmon
-     won't start monitoring a host until its been read from the 
-     bb-hosts file.  I prefer once every 5 minutes:
-        */5 * * * * /usr/local/devmon/devmon --readbbhosts
-
-     If you are running Devmon on a different machine from your
-     display server; this will require a little bit of trickery
-     to make sure that Devmon has a fresh copy of the bb-hosts
-     file to read from.  You could either have the bb-hosts file
-     available on a network mount (via NFS of SMB), or use
-     a passwordless SCP cronjob copy it from the display
-     server immediately before you run Devmon with the
-     --readbbhosts flag.
-
-  6. Install startup scripts that will launch Devmon when 
-     your machine boots.  A fedora-specific startup script
-     has been included in the tarball, for your convenience.
-
-  7. Start Devmon and inspect the logs for any oddities.
-     If it doesn't immediately start logging errors of one
-     sort or another, you should be done!  Check your display
-     server and see if any of your new tests are being shown.
-
-  8. For Hobbit users, if you desire, you can copy the 
-     Devmon guide page ('devmon.html', located in the docs 
-     directory) to the Hobbit help pages directory,
-        '$HOBBIT/server/www/help/' 
-     and add a link to it from the Hobbit help menu,
-        '$HOBBIT/server/www/menu/menu_items.js'
-
-     This might be a good idea if you have users that 
-     edit the host file and need to familiarize themselves
-     with the Devmon syntax and macros.
-
- Multi-node installation
----------------------------------------------------------------------
-
-  Significantly more complicated than a single node setup,
-  multi-node configuration offers you more speed & flexibility.
-
-  Steps 1 through 6 should be performed on all on the machines in
-  your Devmon cluster:
-
-  NODE SETUP:
+3. **Display Server Setup**:
+   - Install required modules, unpack Devmon, and edit `devmon.cfg`.
+   - Import template data into the Devmon database.
+   - Configure `bb-hosts` file and set up a cron job to run Devmon.
   
-  1.  Install the SNMP_Session Perl module (v1.08 or later), which
-      you can download from: 
-         http://www.switch.ch/misc/leinen/snmp/perl/
-
-  2.  Install the MySQL client and 'headers and libraries' packages, 
-      v4.12 or later (5 recommended):
-         http://dev.mysql.com/downloads/mysql 
-
-  3.  Install the DBI::MySQL Perl module:
-         mynode# perl -MCPAN -e 'install Bundle::DBD::mysql' 
-
-      If you haven't used the CPAN module (or the CPAN command line 
-      client) before, you will have to go through a few questions.  
-      Alternatively, you can download and install the module from:
-         http://www.cpan.org
-
-  4.  Unpack the Devmon tarball into your preferred directory.  I
-      typically use /usr/local/devmon, but it is totally up to you.
-
-      Since templates are now shipped in a separate tarball, download
-      the templates tarball and unpack it in the above directory,
-      and if the resulting direcotry is not named 'templates', rename 
-      it to be 'templates'.
-
-  5.  Edit the devmon.cfg file, and modify the necessary local
-      variables.  The options you want to pay particular attention 
-      to are: MULTINODE, PIDFILE, LOGFILE, DBHOST, DBNAME, DBUSER & 
-      DBPASS.  The database specific options should correspond to 
-      the values you select in the 'database setup' section, below.
-
-  6.  Install startup scripts that will launch Devmon when 
-      your machine boots.  A fedora-specific startup script
-      has been included in the tarball, for your convenience.
-
-
-  DATABASE SERVER SETUP:
-
-  Assuming that you are setting up a dedicated MySQL server for the
-  Devmon cluster:
-
-  7.  Download and install the MySQL server and client packages from: 
-         http://dev.mysql.com/downloads/
-
-      I would recommend the standard server, unless you plan on
-      running MySQL in a clustered configuration.
-
-  8.  Start the MySQL server and install any startup scripts neccesary
-      to insure that it starts when the database machine boots.
-
-  9.  Use the mysqladmin util to change the passwords for the root 
-      user on your MySQL server:
-         dbserv# mysqladmin -u root password 'CHANGETHIS'
-
-      Replace "CHANGETHIS" with whatever you want to set your
-      MySQL root password to, preserving the single quotes.
+4. **Global Node Configuration**:
+   - Edit `devmon.cfg` on one node and adjust global variables.
+   - Synchronize global config with other nodes using `/usr/local/devmon/devmon -v --syncconfig`.
   
-  10. Delete unneeded (and possibly insecure) default MySQL accounts:
-         dbserv# mysql -p -e 'delete from mysql.user where password=""'
+5. **Start Devmon Nodes**:
+   - Launch Devmon on all nodes and monitor logs for any anomalies.
 
-      This time it will ask you for the password that you provided in
-      step #8.  DO NOT PERFORM THIS STEP IF YOU USE THIS MYSQL SERVER
-      FOR SERVICES OTHER THAN DEVMON.  
-
-  11. Create your devmon database (this corresponded to the value
-      of the 'DBNAME' variable in your devmon.cfg file):
-         dbserv# mysqladmin -p create 'DBNAME'
-
-      Replace "DBNAME" with your preferred database name, preserving
-      the single quotes.  I would recommend the default, 'devmon'. 
-
-  12. Unpack the devmon tarball somewhere temporary on your database
-      server (you wont need it after step #11).
-
-  13. Import the Devmon database structure into your newly created
-      Devmon database:
-         dbserv# mysql -p devmon < /path/to/devmon/extras/devmon.db
-  
-  14. Remove the temporary directory where you unpacked the devmon
-      tarball.
-
-  15. Create the user that devmon will use to query the devmon
-      database, assign it a password, and grant it access to the
-      devmon database:
-        dbserv# mysql -p -e 'grant all on DB.* to USER identified by "PW"'
-
-      Replace "DB" with the database name that you selected in step #10.
-      Replace "USER" with the username that you chose in your devmon.cfg
-      file (default is 'devmon'). Replace "PW" with the password that
-      you chose in your devmon.cfg file (preserve the double quotes),
-      and use something other than the default 'devmon' for security.
-
-
-  DISPLAY SERVER SETUP:
-
-  On your display server: 
-
-  16. Install the SNMP_Session Perl module (v1.08 or later), which
-      you can download from: 
-         http://www.switch.ch/misc/leinen/snmp/perl/
-
-  17. Install the MySQL client and 'headers and libraries' packages, 
-      v4.12 or later (5 recommended):
-         http://dev.mysql.com/downloads/mysql 
-
-  18. Install the DBI::MySQL Perl module:
-         display# perl -MCPAN -e 'install Bundle::DBD::mysql' 
-
-      If you haven't used the CPAN module (or the CPAN command line 
-      client) before, you will have to go through a few questions.  
-      Alternatively, you can download and install the module from:
-         http://www.cpan.org
-
-  19. Unpack the Devmon tarball into your preferred directory.  I
-      typically use /usr/local/devmon, but it is totally up to you.
-
-  20. Edit the devmon.cfg file.  The options you want to pay 
-      attention to are: 
-      MULTINODE, BBTAG, SNMPCIDS, DBHOST, DBNAME, DBUSER & DBPASS.
-      The database specific options should correspond to the values 
-      you selected in the 'database setup' section, above.
-
-  21. Import your template data into your devmon database:
-        display# /usr/local/devmon/devmon -v --synctemplates
-
-  22. Edit your bb-hosts file and add your Devmon tag (specified by
-      BBTAG variable in the config file, defaults to 'DEVMON') to
-      any of the hosts you want Devmon to monitor.  For instance:
-         10.0.0.1        myrouter # badconn:1:1:2 DEVMON
-
-     For detailed information on how to tweak Devmon on a
-     per-device basis in your bb-hosts file, see the docs/USING
-     file.
-
-  23. Set up a cron job to run devmon with the --readbbhosts flag.
-      The interval is up to you, but keep in mind that Devmon
-      won't start monitoring a host until its been read from the 
-      bb-hosts file.  I prefer once every 5 minutes:
-         */5 * * * * /usr/local/devmon/devmon --readbbhosts
-
-
-  GLOBAL NODE CONFIG AND STARTUP:
-
-  24. On one of your devmon nodes (it doesn't matter which), edit
-      your devmon.cfg and change the global variables to your liking.
-      The variables that you want to pay the most attention to are:
-      BBTYPE, DISPSERV & CYCLETIME.
-
-  25. Synchronize your global config:
-         mynode# /usr/local/devmon/devmon -v --syncconfig
-
-  26. Start all devmon nodes:
-         /usr/local/devmon/devmon
-
-      Observe logs for any odd behavior.
-
-  27. For Hobbit users, if you desire, you can copy the 
-      Devmon guide page ('devmon.html', located in the docs 
-      directory) to the Hobbit help pages directory:
-         '$HOBBIT/server/www/help/' 
-      and add a link to it from the Hobbit help menu,
-         '$HOBBIT/server/www/menu/menu_items.js'
-
-      This might be a good idea if you have users that 
-      edit the host file and need to familiarize themselves
-      with the Devmon syntax and macros.
-
-  For ideas on advanced multi-node cluster set up, please
-  consult the docs/MULTINODE file.
-
-$Id: INSTALLATION 162 2009-11-23 14:13:52Z buchanmilne $
+For advanced multi-node cluster setup, refer to the `docs/MULTINODE` file.
