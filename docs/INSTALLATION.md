@@ -2,39 +2,54 @@
 ## Devmon Installation Guide
 
 ### Prerequisits
+1. **Install the SNMP_Session Perl module**:
+   - **RHEL**:
+     ```bash
+     yum install perl-SNMP_Session.noarch
+     ```
+   - **Debian**:
+     ```bash
+     apt install libsnmp-session-perl
+     ```
+   - or [download](https://github.com/sleinen/snmp-session) from source
+   - Provides SNMPv1 and SNMPv2c
 
-1. **Install Required Modules**:
-   - Install the SNMP_Session Perl module:
-     - `yum install perl-SNMP_Session.noarch` (RHEL)
-     - `apt install libsnmp-session-perl` (Debian)
-     - or [download](https://github.com/sleinen/snmp-session) from source
-     - Provides SNMPv1 and SNMPv2c
-   - Install Net-SNMP (C lib):
-     - `yum install net-snmp net-snmp-devel net-snmp-utils` (RHEL)
-     - `apt install snmp` (Debian)
-     - Provides SNMPv2c and SNMPv3
+2. **Install Net-SNMP (C lib)**:
+   - **RHEL**:
+     ```bash
+     yum install net-snmp net-snmp-devel net-snmp-utils
+     ```
+   - **Debian**:
+     ```bash
+     apt install snmp
+     ```
+   - Provides SNMPv2c and SNMPv3
    - Both are recommended for compatibility with all SNMP versions.
 
-2. **Unpack Devmon**:
-   - Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory.
-     - `mkdir /var/xymon/server/ext/devmon`
-     - `mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon`
+3. **Unpack Devmon**:
+   - Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory:
+     ```bash
+     mkdir /var/xymon/server/ext/devmon
+     mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon
+     ```
    - Update ownership and group if necessary (e.g., for Xymon user):
-     - `chown xymon /var/xymon/server/ext/devmon`
-     - `chgrp xymon /var/xymon/server/ext/devmon`
+     ```bash
+     chown xymon /var/xymon/server/ext/devmon
+     chgrp xymon /var/xymon/server/ext/devmon
+     ```
 
 ### Single-node Installation
 
-3. **Edit Configuration**:
+1. **Edit Configuration**:
    - Modify the `devmon.cfg` file according to your preferences.
    - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
    - Adjust the `CYCLETIME` variable if needed (default is 60 sec).
 
-4. **Configure Xymon Hosts File**:
+2. **Configure Xymon Hosts File**:
    - Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
      - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
-5. **Update Xymon** (xymon/etc folder):
+3. **Update Xymon** (xymon/etc folder):
 
    - Modify `cgioptions.cfg`:
      ```
@@ -58,15 +73,15 @@
      cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
      ```
 
-6. **Run Discovery or Set up Cron Job** (Not Recommended):
+4. **Run Discovery or Set up Cron Job** (Not Recommended):
    - Schedule a cron job to run Devmon with the `--read` flag.
      - Example: `*/5 * * * * /usr/local/devmon/devmon --read`
 
-7. **Start Devmon**:
+5. **Start Devmon**:
    - Launch Devmon and check logs for any errors.
    - Verify if new tests are being shown on your display server.
 
-8. **Install Start/Stop Script** on CentOS or RedHat using init.d:
+6. **Install Start/Stop Script** on CentOS or RedHat using init.d:
 
     8.1. Create a directory for devmon:
 
@@ -115,10 +130,10 @@
    - For systemd (CentOS 7, Ubuntu, etc.):
      - Add the systemd file to `devmon/extras/systemd`.
 
-8. **If xymon hosts.cfg change**:
+7. **If xymon hosts.cfg change**:
   - Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
 
-10. **Devmon Purple** (Obsolete):
+8. **Devmon Purple** (Obsolete):
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
    - You will find the generic in devmon/extra folder 
 
