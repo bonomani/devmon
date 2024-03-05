@@ -21,54 +21,45 @@ This document outlines the implementation of graphs for Devmon in Hobbit/Xymon. 
     By default, Xymon 4.2.2 includes "devmon::1,if_load::1,temp" in the GRAPHS variable.
 
  
-  ---------------------------------------------------------
-  Extending the existing Devmon/Xymon graphing to new tests
-  ---------------------------------------------------------
+## Extending Devmon/Xymon Graphing to New Tests
 
-  -- Graphing tests with rrd repeater tables
-  ----------------------------------
-  -------------------------------------------------------------------
+### Graphing tests with RRD Repeater Tables
 
-  One of the useful additions to devmon 0.3 is the rrd option to 
-  repeater tables. For example, a TABLE line such as:
+One of the useful additions to Devmon 0.3 is the RRD option to repeater tables. For example, a `TABLE` line such as:
 
-	TABLE:rrd(DS:ds0:ifInOctets:COUNTER; DS:ds1:ifOutOctets:COUNTER)
+```plaintext
+TABLE:rrd(DS:ds0:ifInOctets:COUNTER; DS:ds1:ifOutOctets:COUNTER)
+```
 
-  will result in Devmon generatingan RRD header:
-  <!--DEVMON RRD: if_load 0 0
+will result in Devmon generating an RRD header:
 
-  followed by the DS definitions:
-  DS:ds0:DERIVE:600:0:U DS:ds1:DERIVE:600:0:U
+```plaintext
+<!--DEVMON RRD: if_load 0 0
+```
 
-  followed by the values for each instance, e.g.:
-  eth0.0 3506583:637886
-   
-  Xymon 4.2.2 and later ship with an RRD collector module for devmon,
-  no patches or scripts are necessary, however Xymon needs to know
-  which tests should have their status messages sent to this module, so
-  the changes to hobbitserver.cfg should be verified.
+followed by the DS definitions:
 
-  In order for Hobbit to collect the values and update the RRD files, you 
-  need to either use a script with the --extra-script option to 
-  hobbitd_rrd (such as extras/devmon-rrd.pl) or use the supplied devmon
-  rrd collector module (extras/do_devmon.c) and the patch (
-  extras/hobbit-4.2.0-devmon.patch) which adds the collector to do_rrd.c.
+```plaintext
+DS:ds0:DERIVE:600:0:U DS:ds1:DERIVE:600:0:U
+```
 
-  The rrd collector module is the recommended approach, and has been merged
-  into Xymon 4.2.2.
+followed by the values for each instance, e.g.:
 
-  Finally, you need to map each test for which you want to collect data
-  provided in the devmon format to be collected by the devmon collector,
-  by adding testname=devmon to TEST2RRD in hobbitserver.cfg (e.g. 
-  if_load=devmon).
+```plaintext
+eth0.0 3506583:637886
+```
 
-  Finally, you need a graph definition, such as the one shipped in
-  extras/devmon-graph.cfg. If you use the "directory" feature in
-  Hobbit's hobbitgraph.cfg, you can simply copy the file to the 
-  directory specified.
+Xymon 4.2.2 and later ship with an RRD collector module for Devmon, no patches or scripts are necessary. However, Xymon needs to know which tests should have their status messages sent to this module, so the changes to `hobbitserver.cfg` should be verified.
 
-  At present, most if_load tests support this method, and the compaq-server,
-  cisco-6509, and dell-poweredge templates support it for the 'temp' test.
+In order for Hobbit to collect the values and update the RRD files, you need to either use a script with the `--extra-script` option to `hobbitd_rrd` (such as `extras/devmon-rrd.pl`) or use the supplied Devmon RRD collector module (`extras/do_devmon.c`) and the patch (`extras/hobbit-4.2.0-devmon.patch`) which adds the collector to `do_rrd.c`.
+
+The RRD collector module is the recommended approach and has been merged into Xymon 4.2.2.
+
+Finally, you need to map each test for which you want to collect data provided in the Devmon format to be collected by the Devmon collector, by adding `testname=devmon` to `TEST2RRD` in `hobbitserver.cfg` (e.g. `if_load=devmon`).
+
+Finally, you need a graph definition, such as the one shipped in `extras/devmon-graph.cfg`. If you use the "directory" feature in Hobbit's `hobbitgraph.cfg`, you can simply copy the file to the directory specified.
+
+At present, most `if_load` tests support this method, and the `compaq-server`, `cisco-6509`, and `dell-poweredge` templates support it for the 'temp' test.
 
 ---------------------------------------------------------------------
 
