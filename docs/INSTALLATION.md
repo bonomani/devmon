@@ -72,8 +72,9 @@ cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/g
 - Launch Devmon and check logs for any errors.
 - Verify if new tests are being shown on your display server.
 
-### 5. Install Start/Stop Script** on CentOS or RedHat using init.d
-https://github.com/bonomani/devmon/blob/main/extras/devmon.initd.redhat   
+### 5. Install Start/Stop Script**  
+using init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)   
+using systemd: 
 
 ### 6. If xymon hosts.cfg change
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
