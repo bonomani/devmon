@@ -1,37 +1,38 @@
 <!DOCTYPE markdown>
-## Devmon Installation Guide
+# Devmon Installation Guide
 
-### Prerequisits
-#### 1. Install the SNMP_Session Perl module and Net-SNMP (C lib) ####
-##### RHEL #####
-     ```bash
-     yum install perl-SNMP_Session.noarch
-     yum install net-snmp net-snmp-devel net-snmp-utils
-     ```
- ##### Debian #####
-     ```bash
-     apt install libsnmp-session-perl
-     apt install snmp
-     ```
- ##### From Source #####
-     - SNMP_Session [download](https://github.com/sleinen/snmp-session) from source 
-     - Net-SNMP http://www.net-snmp.org/ 
-   - Both are recommended but not mandatory for compatibility with all SNMP versions.
-     - SNMP_Session provides SNMPv1 and SNMPv2c 
-     - Net-SNMP provides SNMPv2c and SNMPv3 
+## Prerequisits
+### 1. Install Dependant Libs
+SNMP_Session (Perl module) and Net-SNMP (C lib) 
+#### RHEL 
+```bash
+yum install perl-SNMP_Session.noarch
+yum install net-snmp net-snmp-devel net-snmp-utils
+```
+#### Debian
+```bash
+apt install libsnmp-session-perl
+apt install snmp
+```
+#### From Source
+- SNMP_Session [download](https://github.com/sleinen/snmp-session) from source 
+- [Net-SNMP](http://www.net-snmp.org) 
+- Both are recommended but not mandatory for compatibility with all SNMP versions.
+  - SNMP_Session provides SNMPv1 and SNMPv2c 
+  - Net-SNMP provides SNMPv2c and SNMPv3 
 
-#### 2. Unpack Devmon ####
-   - Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory:
-     ```bash
-     mkdir /var/xymon/server/ext/devmon
-     mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon
-     ```
-   - Update ownership and group if necessary (e.g., for Xymon user):
-     ```bash
-     chown xymon /var/xymon/server/ext/devmon
-     chgrp xymon /var/xymon/server/ext/devmon
-     ```
-#### 3. Prepare Xymon (xymon/etc folder) ####
+### 2. Unpack Devmon
+- Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory:
+```bash
+mkdir /var/xymon/server/ext/devmon
+mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon
+```
+- Update ownership and group if necessary (e.g., for Xymon user):
+```bash
+chown xymon /var/xymon/server/ext/devmon
+chgrp xymon /var/xymon/server/ext/devmon
+```
+### 3. Prepare Xymon (xymon/etc folder)
 
    - Modify `cgioptions.cfg`:
      ```
