@@ -6,17 +6,17 @@
 This document outlines the implementation of graphs for Devmon in Hobbit/Xymon. With current versions of Xymon and Devmon, only some configuration should be necessary.
 
 1. **Install Xymon 4.2.2 or later:** The rrd collector for Devmon was merged into Xymon before the release of 4.2.2. No additional patches or scripts are required.
-2. **Configure Devmon tests:** Ensure that for each Devmon test you want to graph with the Devmon collector, "testname=devmon" is in TEST2RRD in Xymon's hobbitserver.cfg file. For example:
+2. **Configure Devmon tests:** Ensure that for each Devmon test you want to graph with the Devmon collector, "testname=devmon" is in TEST2RRD in Xymon's xymonserver.cfg file. For example:
 
     ```plaintext
     TEST2RRD="cpu=la,disk ...,if_load=devmon,temp=devmon"
     ```
 
-    By default, Xymon 4.2.2 or later should enable the Devmon collector for the if_load and temp tests. Restart Xymon (or kill the hobbitd_rrd task for status messages, hobbitlaunch will restart it) so hobbitd_rrd gets the updated environment variable, if you had to make any changes.
+    By default, Xymon 4.2.2 or later should enable the Devmon collector for the if_load and temp tests. Restart Xymon (or kill the xymond_rrd task for status messages, xymonlaunch will restart it) so xymond_rrd gets the updated environment variable, if you had to make any changes.
   
-3. **Graph Definitions:** Ensure that Xymon has graph definitions for the relevant tests. Graph definitions for many of the tests that have graphs enabled are provided in the file `extras/devmon-graph.cfg`. Either append this to Xymon's `hobbitgraph.cfg`, or create a directory to store additional graph definition files (e.g. `/etc/xymon/hobbitgraph.d`), add `directory /etc/xymon/hobbitgraph.d` to `hobbitgraph.cfg`, and place `extras/devmon-graph.cfg` in `/etc/xymon/hobbitgraph.d`.
+3. **Graph Definitions:** Ensure that Xymon has graph definitions for the relevant tests. Graph definitions for many of the tests that have graphs enabled are provided in the file `extras/devmon-graph.cfg`. Either append this to Xymon's `hobbitgraph.cfg`, or create a directory to store additional graph definition files (e.g. `/etc/xymon/xymongraph.d`), add `directory /etc/xymon/xymongraph.d` to `xymongraph.cfg`, and place `extras/devmon-graph.cfg` in `/etc/xymon/xymongraph.d`.
 
-    Ensure that Xymon knows to try and generate graphs for Devmon and the tests you have, by ensuring Devmon and the test names are included in the GRAPHS variable in `hobbitserver.cfg`. If you prefer to have a single instance on graphs for a particular test, append `::1` to the test name, e.g. "if_load::1".
+    Ensure that Xymon knows to try and generate graphs for Devmon and the tests you have, by ensuring Devmon and the test names are included in the GRAPHS variable in `xymonserver.cfg`. If you prefer to have a single instance on graphs for a particular test, append `::1` to the test name, e.g. "if_load::1".
 
     By default, Xymon 4.2.2 includes "devmon::1,if_load::1,temp" in the GRAPHS variable.
 
@@ -49,11 +49,8 @@ followed by the values for each instance, e.g.:
 eth0.0 3506583:637886
 ```
 
+
 Xymon 4.2.2 and later ship with an RRD collector module for Devmon, no patches or scripts are necessary. However, Xymon needs to know which tests should have their status messages sent to this module, so the changes to `hobbitserver.cfg` should be verified.
-
-In order for Hobbit to collect the values and update the RRD files, you need to either use a script with the `--extra-script` option to `hobbitd_rrd` (such as `extras/devmon-rrd.pl`) or use the supplied Devmon RRD collector module (`extras/do_devmon.c`) and the patch (`extras/hobbit-4.2.0-devmon.patch`) which adds the collector to `do_rrd.c`.
-
-The RRD collector module is the recommended approach and has been merged into Xymon 4.2.2.
 
 Finally, you need to map each test for which you want to collect data provided in the Devmon format to be collected by the Devmon collector, by adding `testname=devmon` to `TEST2RRD` in `hobbitserver.cfg` (e.g. `if_load=devmon`).
 
@@ -62,8 +59,8 @@ Finally, you need a graph definition, such as the one shipped in `extras/devmon-
 At present, most `if_load` tests support this method, and the `compaq-server`, `cisco-6509`, and `dell-poweredge` templates support it for the 'temp' test.
 
 
-## Using Hobbit Features from Devmon
-For specific tests, Hobbit already parses information supplied in specific formats (typically from old BigBrother extensions). You can (ab)use this support to have Hobbit graph values from your own templates.
+## Using Xymon Features from Devmon
+For specific tests, Xymon already parses information supplied in specific formats. You can (ab)use this support to have Xymon graph values from your own templates.
 
 ### The 'CPU' Test
 On any device, you would like to graph CPU.
@@ -101,7 +98,7 @@ Wait for 2 passes, and you will get a graph.
 
 ## Using NCV (e.g. the 'connects' Test)
 
-If you have a test where the value you want to graph is not a repeater (so Devmon's RRD collector isn't useful), and it isn't for a test that Hobbit already understands a specific format, then Hobbit's NCV collector is probably the last remaining option. Add a Name-colon-value line to your message, surrounded by HTML tags (if you want to hide the line on the normal Hobbit display).
+If you have a test where the value you want to graph is not a repeater (so Devmon's RRD collector isn't useful), and it isn't for a test that Xymon already understands a specific format, then Xymon's NCV collector is probably the last remaining option. Add a Name-colon-value line to your message, surrounded by HTML tags (if you want to hide the line on the normal Hobbit display).
 
 For example, to graph the numbers of connections you should add the following lines to the message file in the `connects` directory in your template:
 
