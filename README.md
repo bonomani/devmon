@@ -8,7 +8,7 @@ Devmon is an SNMP monitoring tool developed as an open-source project. It's desi
 Discover more through [screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots).
 
 ## Recent Enhancements (September 2023)
-- **New Table Alignment Feature**: With appreciation to W. Nelis for their contribution.
+- **New Table Alignment Feature**: Credit to W. Nelis
 - **Resolved Issues**: Various bug fixes.
 
 ## Enhancing SNMPwalk Engine (July 2023)
