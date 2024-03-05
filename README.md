@@ -50,5 +50,5 @@ Requirements for running Devmon include:
 - [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): Get insights into what Devmon offers through our screenshot collection.
 
 ## Reach Out
-For inquiries, feedback, or further information, don't hesitate to contact us at [XXXXX/](#). We're always looking for ways to improve and welcome your input.
+For inquiries, feedback, or further information, don't hesitate to [contact](https://ubiquitous-network.ch/contact/) us. We're always looking for ways to improve and welcome your input.
 ```
