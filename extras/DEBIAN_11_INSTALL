@@ -84,7 +84,7 @@ git update-index --assume-unchanged devmon.cfg
 vi /usr/lib/xymon/server/ext/devmon/devmon.cfg
 ----------------------
 HOSTSCFG=/usr/lib/xymon/server/etc/hosts.cfg
-SNMPCIDS=YOURSNMPSTR<Plug>PeepOpenublic<Plug>PeepOpenrivate
+SNMPCIDS=YOURSNMPSTRING
 LOGFILE=/var/log/xymon/devmon.log
 ----------------------------
 cp /usr/lib/xymon/server/ext/devmon/extras/devmon-graphs.cfg /usr/lib/xymon/server/etc/graphs.d/.
