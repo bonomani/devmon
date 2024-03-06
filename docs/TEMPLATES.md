@@ -727,14 +727,7 @@ of templates matches the ones used in the database.
 
  This would assign the value 'No DHCP' to the 'dhcpStatus' alias if and only
  if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
- value of the 'dhcpAvail' alias would be assigned to dhcpStatus. Note that
- threshold stats for the 'dhcpAvail' status (i.e. the 'color' and 'message'
- assigned to 'dhcpAvail' by any threshold tests) would not be inherited by the
- 'dhcpStatus' variable; if you want to inherit threshold information, use the
- TSWITCH transform instead.
-
-
- ### TSWITCH transform (DEPRECATED, replace by SWITCH)
+ value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
 
  ### UNPACK transform
 
