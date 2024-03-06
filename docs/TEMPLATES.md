@@ -229,8 +229,8 @@ of templates matches the ones used in the database.
 
  Note that in Devmon a transform can have multiple oids:
  - oidT = transform {oidS1, oidS2, ... }
- - The resulting oidT have the same indexes as the 'primary oid', the 'first' source oids : oidS1
- - The 'primary oid' has to be choosen carefully 
+ - the 'primary oid' is the 'first' source oids : oidS1 
+ - The resulting oidT have the same indexes as the carefuilyl chosen 'primary oid': oidS1 
  - 'source oid(s)' is/are what is polled or transformed
  - 'target oid' is the result after a transformation
 
