@@ -21,8 +21,8 @@ From Source
 ### 2. Unpack Devmon
 Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory
 ```bash
-mkdir /var/xymon/server/ext/devmon
-mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon
+git clone https://github.com/bonomani/devmon.git
+mv ./devmon /var/xymon/server/ext/.
 ```
 
 ### 3. Prepare Xymon (Files are located in the xymon server etc folder)
