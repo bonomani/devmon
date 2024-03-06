@@ -225,8 +225,7 @@ of templates matches the ones used in the database.
  - it's probably be more efficient (TODO: add an example like: hp- ilo/cpu_dm).
 
  The OID term is also use in Devmon to designate the result of a transform:
-
-    oidT=transform{oidS} 
+ - oidT=transform{oidS} 
 
  Note that in Devmon a transform can have multiple oids:
  - oidT = transform {oidS1, oidS2, ... }
