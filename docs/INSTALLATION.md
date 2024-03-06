@@ -1,6 +1,4 @@
 <!DOCTYPE markdown>
-# Installation Guide
-
 ## Prerequisits
 ### 1. Install Dependant Libs
 SNMP_Session (Perl module) and Net-SNMP (C lib) 
