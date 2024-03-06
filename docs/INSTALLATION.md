@@ -12,8 +12,8 @@ apt install libsnmp-session-perl
 apt install snmp
 ```
 From Source
-- SNMP_Session [download](https://github.com/sleinen/snmp-session) from source 
-- [Net-SNMP](http://www.net-snmp.org) 
+- Download [SNMP_Session](https://github.com/sleinen/snmp-session)
+- See [Net-SNMP](http://www.net-snmp.org) for perl module
 - Both are recommended but not mandatory for compatibility with all SNMP versions.
   - SNMP_Session provides SNMPv1 and SNMPv2c 
   - Net-SNMP provides SNMPv2c and SNMPv3 
