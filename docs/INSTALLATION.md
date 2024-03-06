@@ -24,11 +24,6 @@ Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred
 mkdir /var/xymon/server/ext/devmon
 mv devmon-0.3.1-beta1/* /var/xymon/server/ext/devmon
 ```
-Update ownership and group if necessary (e.g., for Xymon user):
-```bash
-chown xymon /var/xymon/server/ext/devmon
-chgrp xymon /var/xymon/server/ext/devmon
-```
 
 ### 3. Prepare Xymon (Files are located in the xymon server etc folder)
 Modify `cgioptions.cfg`:
@@ -111,6 +106,12 @@ chkconfig --add devmon
 chkconfig devmon on
 service devmon start
 ```
+Update ownership and group if necessary (e.g., for Xymon user):
+```bash
+chown xymon /var/xymon/server/ext/devmon
+chgrp xymon /var/xymon/server/ext/devmon
+```
+
 This procedure assumes that you have devmon installed in `/var/xymon/server/ext/devmon/devmon` and that the user `xymon` exists. Adjust the paths and user as necessary based on your specific setup.
 
    - For systemd (CentOS 7, Ubuntu, etc.):
