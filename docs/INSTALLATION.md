@@ -40,16 +40,15 @@ Modify `xymonserver.cfg`:
 TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem_dm=devmon,$PINGCOLUMN=tcp,http=tcp,dns=tcp,dig=tcp,time=ntpstat,vmstat,iostat,netstat,temperature,apache,bind,sendmail,mailq,nmailq=mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,files,procs=processes,ports,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,cpul=devmon,if_col=devmon,if_dsc=devmon,if_err=devmon,if_load=devmon,temp=devmon,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
 GRAPHS="la,disk,inode,qtree,files,processes,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1,ports,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
 NCV_dm="*:GAUGE"
-```
-Modify `graph.cfg`:
-```
-directory /var/xymon/server/etc/graphs.d
-```
-Create folder and copy configuration file:
+Create folder (if it do noet exist and copy devmon graphs configuration file:
 ```
 mkdir /var/xymon/server/etc/graphs.d
 cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
 ```
+Ensure `graph.cfg` include devmon.graphs.cfg by a directive like
+- directory /var/xymon/server/etc/graphs.d
+- include /var/xymon/server/etc/graphs.d/devmon-graphs.cfg
+
 
 ## Single-node Installation
 
