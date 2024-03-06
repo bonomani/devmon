@@ -53,13 +53,11 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 
 ## Single-node Installation
 
-### 1. Edit Configuration
-- Modify the `devmon.cfg` file according to your preferences.
+### 1. Edit `devmon.cfg` Configuration File 
 - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
-- Adjust the `CYCLETIME` variable if needed (default is 60 sec).
 
 ### 2. Configure Xymon Hosts File
-- Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the `HOSTSCFG` file.
+- Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the xymon `HOSTSCFG` file.
 - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
 ### 3. Run a Discovery
