@@ -19,10 +19,15 @@ From Source
   - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ### 2. Unpack Devmon
-Extract the Devmon tarball into `/var/xymon/server/ext/devmon` or your preferred directory
+Extract the Devmon tarball 
 ```bash
-git clone https://github.com/bonomani/devmon.git
-mv ./devmon /var/xymon/server/ext/.
+git clone https://github.com/bonomani/devmon.git 
+mv ./devmon /usr/lib/xymon/server/ext/.
+or
+wget/curl https://github.com/bonomani/devmon/archive/refs/heads/main.zip
+unzip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
+mv ./devmon-main  /usr/lib/xymon/server/ext/devmon
+  
 ```
 
 ### 3. Prepare Xymon (Files are located in the xymon server etc folder)
