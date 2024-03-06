@@ -68,7 +68,7 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 ### 4. Start Devmon
 - Launch Devmon and check logs for any errors, see if the PIDS of devmon processes are stable.
 - Verify if new tests are being shown on your display server.
-- Verity if dm test exist for your monitoring server and look at the stats
+- Verity if a dm test exist on your monitoring server and look at the stats
 
 ### 5. Install Start/Stop Script
 using init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)   
