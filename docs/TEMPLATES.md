@@ -230,16 +230,10 @@ of templates matches the ones used in the database.
 
  Note that in Devmon a transform can have multiple oids:
  - oidT = transform {oidS1, oidS2, ... }
- - The resulting OID have the same indexes as the 'primary oid'
-   - Indexes of oidT are the same as the source oids: oidS1
-   - The primary oid has to be choosen as the result depend on it! 
-
- Conclusion:
+ - The resulting oidT have the same indexes as the 'primary oid', the 'first' source oids : oidS1
+ - The 'primary oid' has to be choosen carefully 
  - 'source oid(s)' is/are what is polled or transformed
-   - primary oid, is the 'first' source oids 
- - 'target oid' is the result after a transformation or a polling
-   - 'target oid indexes' are the the indexes of a table returned by snmp 
-   - 'target oid values' are the results returned by snmp
+ - 'target oid' is the result after a transformation
 
 
  The 'transforms' file
