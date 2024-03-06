@@ -1,11 +1,6 @@
-
- DEVMON TEMPLATES
- ==============================================================================
-
-
- What are templates?
- ------------------------------------------------------------------------------
-
+ ## DEVMON TEMPLATES
+ 
+ ### What are templates?
 Templates are a core component of Devmon, enhancing its adaptability compared
 to other monitoring scripts. They enable tailored configurations for device 
 management, addressing specific needs per device model. With templates, users
@@ -21,10 +16,7 @@ This flexibility empowers system administrators to monitor diverse devices for
 various conditions, assuming SNMP monitoring capability is available for the
 device.
 
-
-
- Rolling your own
- -------------------------------------------------------------------------------
+### Rolling your own
 Rolling your own Devmon template is a straightforward task that doesn't require 
 programming experience but may benefit from some familiarity with regular 
 expressions. If you're new to regular expressions, it's recommended to spend a
