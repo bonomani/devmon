@@ -829,13 +829,14 @@ DEVICE: while (1) {    # We should never leave this loop
             my $host;    # = "$snmp_cid\@$hostip:$snmp_port:$timeout:$snmp_max_tries:$backoff:$snmp_ver";
 
             # 'our' not really needed but need to refactor the sub that used them (todo)
-            our $session;
-            our $session_host;
-            our $session_version;
-            our $session_lhost;
-            our $session_ipv4only;
-            our $session_return_array_refs = 0;
-            our $session_return_hash_refs  = 0;
+            #our $session;
+            #my $session;
+            #our $session_host;
+            #our $session_version;
+            #our $session_lhost;
+            #our $session_ipv4only;
+            #our $session_return_array_refs = 0;
+            #our $session_return_hash_refs  = 0;
 
             my %rep;
             %rep = %{ $data_in{reps} } if exists $data_in{reps};
@@ -975,7 +976,7 @@ DEVICE: while (1) {    # We should never leave this loop
             my @allrep_oids;
             @allrep_oids = keys %poll_rep_oid;
 
-            $session->{use_getbulk}    = 1;
+            #$session->{use_getbulk}    = 1;
             $SNMP_Session::use_getbulk = 1;
             $SNMP_Session::pdu_buffer  = 16384;
 
@@ -985,6 +986,8 @@ DEVICE: while (1) {    # We should never leave this loop
             # Discovery Stage
             if ($is_discover_cycle) {
                 $host = "$snmp_cid\@$hostip:$snmp_port:5:1:$backoff:$snmp_ver";    # Set timeout to 5 sec and tries to 1
+                my $snmp_timeout = 5;
+                my $snmp_tries = 1;
 
                 if ( not $snmp_ver == 1 ) {
 
@@ -995,6 +998,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                                                             # Discovery Stage 1: The max getbulk responses
                                                                             # Try a huge query from the top of the tree (standard = 100)
                         my @ret1 = snmpgetbulk( $host, 0, 1000, '1.3.6.1' );    # if $sgbmo > 1;
+                        #my @ret1 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver , 0, 1000, '1.3.6.1' );   # Set timeout to 5 sec and tries to 1
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Timeout at discovery stage:1, will retry until success";
@@ -1021,6 +1025,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         }
 
                         my @ret2 = snmpgetbulk( $host, 0, 1, @oids );
+                        #my @ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 1, @oids );  
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Timeout at discovery stage:2. will retry until success";
@@ -1043,6 +1048,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         # This time this is quick unlikely to timout: for now we consider that as a read failur
 
                         @ret2 = snmpgetbulk( $host, 0, 2, $oids[0], $oids[1] );
+                        #@ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 2, $oids[0], $oids[1] );
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $SNMP_Session::errmsg                    = '';
@@ -1050,6 +1056,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 $sgbmomr2                                = 0;
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Try workaround with max-repetitions set to 100";
                                 @ret2                                    = snmpgetbulk( $host, 0, 100, $oids[0], $oids[1] );
+                                #@ret2                                    = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 100, $oids[0], $oids[1] );   
                                 if ( $SNMP_Session::errmsg eq '' ) {
                                     $data_out{snmp_msg}{ ++$snmp_msg_count } = "Max-repetitions set to 100 works";
                                     $sgbmomr100 = 1;
@@ -1344,10 +1351,12 @@ DEVICE: while (1) {    # We should never leave this loop
                 if ( $snmp_ver == 1 ) {
                     $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret  = snmpgetnext( $host, @oid_in_query );
+                    #@ret  = snmpgetnext( $hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, @oid_in_query ); 
                 } else {
 
                     $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret  = snmpgetbulk( $host, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
+                    #@ret  = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
                 }
 
                 my $snmpquery_timestamp = time();
@@ -1413,7 +1422,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID";
                             }
                         }
-                        if ( !$branch_cnt and $is_try1 ) {                        #
+                        if ( !$branch_cnt and $is_try1 and not exists $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject}) {                       
                             $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
                             $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
                         }
@@ -2263,6 +2272,7 @@ sub dive_val : lvalue {
 
 sub snmpgetbulk ($$$@) {
     my ( $host, $nr, $mr, @vars ) = @_;
+    #my ($hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, $nr, $mr, @vars ) = @_;
     my ( @enoid, $var, $response, $bindings, $binding );
     my ( $value, $upoid, $oid, @retvals );
     my ($noid);
@@ -2270,6 +2280,7 @@ sub snmpgetbulk ($$$@) {
 
     @retvals = ();
     $session = &snmpopen( $host, 0, \@vars );
+    #$session = &snmpopen($hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver , 0, \@vars );
     if ( !defined($session) ) {
         carp "SNMPGETBULK Problem for $host\n"
             unless ( $SNMP_Session::suppress_warnings > 1 );
@@ -2295,7 +2306,7 @@ sub snmpgetbulk ($$$@) {
 
                 # Not sur this is the way to do it.
                 # The responding entity returns a response PDU with an error-status of genErr
-                # and a value (did not finf for now this value: TODO)
+                # and a value (did not find for now this value: TODO)
                 # in the error-index field that is the index of the problem object in the variable-bindings field.
                 if ( $BER::errmsg eq 'Exception code: endOfMibView' ) {
                     $tempv = "endOfMibView";
@@ -2388,7 +2399,7 @@ sub snmpopen ($$$) {
     my $opts;
     if ( ( $host =~ /^(\[.*\]):(.*)$/ ) or ( $host =~ /^(\[.*\])$/ ) ) {
 
-        # Numeric IPv6 address between []
+        # Numeric IPv6 address between [] (What about ipv6 not in bracket?)
         ( $host, $opts ) = ( $1, $2 );
     } else {
 
@@ -2436,6 +2447,7 @@ sub snmpopen ($$$) {
         if ( ref $vars->[0] eq 'HASH' ) {
             my $opts = shift @$vars;
             foreach $type ( keys %$opts ) {
+                do_log("type = $type");
                 if ( $type eq 'return_array_refs' ) {
                     $::session_return_array_refs = $opts->{$type};
                 } elsif ( $type eq 'return_hash_refs' ) {
@@ -2462,10 +2474,110 @@ sub snmpopen ($$$) {
             if ( defined($timeout) and ( length($timeout) > 0 ) );
         $::session->set_retries($retries)
             if ( defined($retries) and ( length($retries) > 0 ) );
-        $::session->Session->set_backoff($backoff)
+        $::session->set_backoff($backoff)
             if ( defined($backoff) and ( length($backoff) > 0 ) );
     }
     return $::session;
+}
+#
+# Adapted with minimal changes
+#
+sub snmpopen1 ($$$) {
+    my ( $session, $session_host, $session_version, $session_lhost, $session_ipv4only, $host, $type, $vars ) = @_;
+    my ( $session_return_array_refs, $session_return_hash_refs);
+    my ( $nhost, $port, $community, $lhost, $lport, $nlhost );
+    my ( $timeout, $retries, $backoff, $version );
+    my $v4onlystr;
+
+    $type      = 0 if ( !defined($type) );
+    $community = "public";
+    $nlhost    = "";
+
+    ( $community, $host ) = ( $1, $2 ) if ( $host =~ /^(.*)@([^@]+)$/ );
+
+    # We can't split on the : character because a numeric IPv6
+    # address contains a variable number of :'s
+    my $opts;
+    if ( ( $host =~ /^(\[.*\]):(.*)$/ ) or ( $host =~ /^(\[.*\])$/ ) ) {
+
+        # Numeric IPv6 address between []
+        ( $host, $opts ) = ( $1, $2 );
+    } else {
+
+        # Hostname or numeric IPv4 address
+        ( $host, $opts ) = split( ':', $host, 2 );
+    }
+    ( $port, $timeout, $retries, $backoff, $version, $v4onlystr ) = split( ':', $opts, 6 )
+        if ( defined($opts) and ( length $opts > 0 ) );
+    undef($version) if ( defined($version) and length($version) <= 0 );
+    $v4onlystr = ""  unless defined $v4onlystr;
+    $version   = '1' unless defined $version;
+    if ( defined($port) and ( $port =~ /^([^!]*)!(.*)$/ ) ) {
+        ( $port, $lhost ) = ( $1, $2 );
+        $nlhost = $lhost;
+        ( $lhost, $lport ) = ( $1, $2 ) if ( $lhost =~ /^(.*)!(.*)$/ );
+        undef($lhost) if ( defined($lhost) and ( length($lhost) <= 0 ) );
+        undef($lport) if ( defined($lport) and ( length($lport) <= 0 ) );
+    }
+    undef($port) if ( defined($port) and length($port) <= 0 );
+    $port  = 162 if ( $type == 1 and !defined($port) );
+    $nhost = "$community\@$host";
+    $nhost .= ":" . $port if ( defined($port) );
+
+    if (   ( !defined($session) )
+        or ( $session_host ne $nhost )
+        or ( $session_version ne $version )
+        or ( $session_lhost ne $nlhost )
+        or ( $session_ipv4only ne $v4onlystr ) )
+    {
+        if ( defined($session) ) {
+            $session->close();
+            undef $session;
+            undef $session_host;
+            undef $session_version;
+            undef $session_lhost;
+            undef $session_ipv4only;
+        }
+        $session
+            = ( $version =~ /^2c?$/i )
+            ? SNMPv2c_Session->open( $host, $community, $port, $SNMP_Session::max_pdu_len, $lport, undef, $lhost, ( $v4onlystr eq 'v4only' ) ? 1 : 0 )
+            : SNMP_Session->open( $host, $community, $port, $SNMP_Session::max_pdu_len, $lport, undef, $lhost, ( $v4onlystr eq 'v4only' )    ? 1 : 0 );
+        ( $session_host = $nhost, $session_version = $version, $session_lhost = $nlhost, $session_ipv4only = $v4onlystr ) if defined($session);
+    }
+    if ( defined($session) ) {
+        if ( ref $vars->[0] eq 'HASH' ) {
+            my $opts = shift @$vars;
+            foreach $type ( keys %$opts ) {
+                if ( $type eq 'return_array_refs' ) {
+                    $session_return_array_refs = $opts->{$type};
+                } elsif ( $type eq 'return_hash_refs' ) {
+                    $session_return_hash_refs = $opts->{$type};
+                } else {
+                    if ( exists $session->{$type} ) {
+                        if ( $type eq 'timeout' ) {
+                            $session->set_timeout( $opts->{$type} );
+                        } elsif ( $type eq 'retries' ) {
+                            $session->set_retries( $opts->{$type} );
+                        } elsif ( $type eq 'backoff' ) {
+                            $session->set_backoff( $opts->{$type} );
+                        } else {
+                            $session->{$type} = $opts->{$type};
+                        }
+                    } else {
+                        carp "SNMPopen Unknown SNMP Option Key '$type'\n"
+                            unless ( $SNMP_Session::suppress_warnings > 1 );
+                    }
+                }
+            }
+        }
+        $session->set_timeout($timeout)
+            if ( defined($timeout) and ( length($timeout) > 0 ) );
+        $session->set_retries($retries)
+            if ( defined($retries) and ( length($retries) > 0 ) );
+        $session->set_backoff($backoff)
+            if ( defined($backoff) and ( length($backoff) > 0 ) );
+    }
+    return $session;
 }
 #
 # A restricted snmpget.
