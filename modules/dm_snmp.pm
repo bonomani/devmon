@@ -436,14 +436,16 @@ sub snmp_query {
                         }
                         if ( $expected > $received ) {
 
-                            #if (( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) )
-                            #    or ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} / 2 )
-                            if ( ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) ) {
-                                push @devices, $device;
-                                $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} += 1;
-                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp polling enqueue", INFO );
+                            if ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) {
+                                if ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) {
+                                    push @devices, $device;
+                                    $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} += 1;
+                                    do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp polling enqueue", INFO );
+                                } else {
+                                    do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp_try_max reached, snmp polling stops", WARN );
+                                }
                             } else {
-                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:No time left or snmp_try_max reached, polling fails", WARN );
+                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:No time left snmp polling stops", WARN );
                             }
                         }
 
@@ -1799,7 +1801,9 @@ print \$sess->get(".1.3.6.1.2.1.1.1.0");
 EOF
                                 my $disco_result = `$snmp_disco`;
                                 if ( $disco_result eq '' ) {
-                                    $snmp_errorstr = "Empty or no answer from $device";
+
+                                    #$snmp_errorstr = "Empty or no answer from $device";
+                                    $snmp_errorstr = "Timeout(-24)";
                                     $data_out{snmp_errorstr} = $snmp_errorstr;
                                     send_data( $sock, \%data_out );
                                     next DEVICE;
@@ -2380,9 +2384,10 @@ sub snmpgetnext ($@) {
         }
         return wantarray ? @retvals : $retvals[0];
     } else {
-        $var = join( ' ', @vars );
-        carp "SNMPGETNEXT Problem for $var on $host\n"
-            unless ( $SNMP_Session::suppress_warnings > 1 );
+
+        #    $var = join( ' ', @vars );
+        #    carp "SNMPGETNEXT Problem for $var on $host\n"
+        #        unless ( $SNMP_Session::suppress_warnings > 1 );
         return wantarray ? @retvals : undef;
     }
 }
