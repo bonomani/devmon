@@ -17,14 +17,14 @@ This document outlines the implementation of graphs for Devmon in Xymon. With cu
 
     Ensure that Xymon knows to try and generate graphs for Devmon and the tests you have, by ensuring Devmon and the test names are included in the GRAPHS variable in `xymonserver.cfg`. If you prefer to have a single instance on graphs for a particular test, append `::1` to the test name, e.g. "if_load::1".
 
-    By default, Xymon 4.2.2 includes "devmon::1,if_load::1,temp" in the GRAPHS variable.
+    By default, Xymon includes "devmon::1,if_load::1,temp" in the GRAPHS variable.
 
  
 ## Extending Devmon/Xymon Graphing to New Tests
 
 ### Graphing tests with RRD Repeater Tables
 
-One of the useful additions to Devmon 0.3 is the RRD option to repeater tables. For example, a `TABLE` line such as:
+One of the useful additions to Devmon is the RRD option to repeater tables. For example, a `TABLE` line such as:
 
 ```plaintext
 TABLE:rrd(DS:ds0:ifInOctets:COUNTER; DS:ds1:ifOutOctets:COUNTER)
@@ -47,9 +47,6 @@ followed by the values for each instance, e.g.:
 ```plaintext
 eth0.0 3506583:637886
 ```
-
-
-Xymon 4.2.2 and later ship with an RRD collector module for Devmon, no patches or scripts are necessary. However, Xymon needs to know which tests should have their status messages sent to this module, so the changes to `xymonserver.cfg` should be verified.
 
 You need to map each test for which you want to collect data provided in the Devmon format to be collected by the Devmon collector, by adding `testname=devmon` to `TEST2RRD` in `xymonserver.cfg` (e.g. `if_load=devmon`).
 
