@@ -231,7 +231,7 @@ sub initialize {
             'case'    => 1
         },
         'logfile' => {
-            'default' => '/var/log/devmon.log',
+            'default' => '/var/log/devmon/devmon.log',
             'regex'   => '.*',
             'set'     => 0,
             'case'    => 1
