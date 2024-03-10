@@ -111,15 +111,15 @@ sub initialize {
         'avgpolltime'  => [],
 
         # SNMP variables
-        'snmptimeout'    => 0,
+        'snmptimeout'  => 0,
         'snmp_try_max' => 0,
-        'snmpcids'       => '',
-        'secnames'       => '',
-        'seclevels'      => '',
-        'authprotos'     => '',
-        'authpasss'      => '',
-        'privprotos'     => '',
-        'privpasss'      => '',
+        'snmpcids'     => '',
+        'secnames'     => '',
+        'seclevels'    => '',
+        'authprotos'   => '',
+        'authpasss'    => '',
+        'privprotos'   => '',
+        'privpasss'    => '',
 
         # Now our global data subhashes
         'templates'    => {},
@@ -338,7 +338,7 @@ sub initialize {
             'set'     => 0,
             'case'    => 0
         },
-        'snmp_try_max' => {     # 6 time should be enough
+        'snmp_try_max' => {       # 6 time should be enough
             'default' => 6,
             'regex'   => '\d+',
             'set'     => 0,
@@ -1145,20 +1145,25 @@ sub read_local_config {
         # Skip global options
         next if defined $g{globals}{$option};
 
-        # Croak if this option is unknown
-        log_fatal( "Unknown option '$option' in config file, line $.", 0 )
-            if !defined $g{locals}{$option};
+        if ( defined $g{locals}{$option} ) {
 
-        # If this option isn't case sensitive, lowercase it
-        $value = lc $value if !$g{locals}{$option}{case};
+            # If this option isn't case sensitive, lowercase it
+            $value = lc $value if !$g{locals}{$option}{case};
 
-        # Compare to regex, make sure value is valid
-        log_fatal( "Invalid value '$value' for '$option' in config file, " . "line $.", 0 )
-            if $value !~ /^$g{locals}{$option}{regex}$/;
+            # Compare to regex, make sure value is valid
+            log_fatal( "Invalid value '$value' for '$option' in config file, " . "line $.", 0 )
+                if $value !~ /^$g{locals}{$option}{regex}$/;
 
-        # Assign the value to our option
-        $g{$option} = $value;
-        $g{locals}{$option}{set} = 1;
+            # Assign the value to our option
+            $g{$option} = $value;
+            $g{locals}{$option}{set} = 1;
+
+        } else {
+
+            # Warn if this option is unknown
+            do_log( "Unknown option '$option' in config file, line $.", WARN );
+        }
+
     }
     close FILE;
 
@@ -1827,7 +1832,7 @@ FILEREAD: while (@hostscfg) {
         $snmp_input{$host}{resolution}  = $hosts_cfg{$host}{resolution};
         $snmp_input{$host}{seclevel}    = $seclevel;
         $snmp_input{$host}{secname}     = $secname;
-        $snmp_try_max{$host}          = 1;
+        $snmp_try_max{$host}            = 1;
         $snmp_input{$host}{snmptimeout} = 3;
         $snmp_input{$host}{ver}         = $ver;
 
@@ -1841,10 +1846,11 @@ FILEREAD: while (@hostscfg) {
     # Now go through our resulting snmp-data
 OLDHOST: for my $host ( keys %{ $g{devices} } ) {
         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
+        do_log( Dumper( $g{devices}{$host} ) );
 
         if ( not defined $sysdesc ) {
             $sysdesc = 'UNDEFINED';
-            do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+            do_log( "$host 1sysdesc = UNDEFINED", DEBUG ) if $g{debug};
             next OLDHOST;
         }
 
@@ -1879,7 +1885,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
 
                 # Skip if this host doesn't match the regex
                 if ( $sysdesc !~ /$regex/ ) {
-                    do_log( "$host did not match $vendor / $model : $regex", DEBUG ) if $g{debug};
+                    do_log( "$host did not match $vendor / $model : $regex", TRACE ) if $g{debug};
                     next OLDMODEL;
                 }
 
@@ -1938,7 +1944,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 $snmp_input{$host}{dev}         = $host;
                 $snmp_input{$host}{ip}          = $hosts_cfg{$host}{ip};
                 $snmp_input{$host}{port}        = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-                $snmp_try_max{$host}          = 1;
+                $snmp_try_max{$host}            = 1;
                 $snmp_input{$host}{snmptimeout} = 3;
                 $snmp_input{$host}{ver}         = $snmpver;
 
@@ -1955,9 +1961,10 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             # Now go through our resulting snmp-data
         NEWHOST: for my $host ( keys %{ $g{devices} } ) {
                 my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
+                do_log( Dumper( $g{devices} ) );
                 if ( not defined $sysdesc ) {
                     $sysdesc = 'UNDEFINED';
-                    do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+                    do_log( "$host 2sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                     next NEWHOST;
                 }
 
@@ -2048,7 +2055,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                     $snmp_input{$host}{dev}         = $host;
                     $snmp_input{$host}{ip}          = $hosts_cfg{$host}{ip};
                     $snmp_input{$host}{port}        = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-                    $snmp_try_max{$host}          = 1;
+                    $snmp_try_max{$host}            = 1;
                     $snmp_input{$host}{snmptimeout} = 3;
                     $snmp_input{$host}{ver}         = $snmpver;
 
@@ -2071,7 +2078,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                     my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                     if ( not defined $sysdesc ) {
                         $sysdesc = 'UNDEFINED';
-                        do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+                        do_log( "$host 3sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                         next CUSTOMHOST;
                     }
 
@@ -2182,7 +2189,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                         $snmp_input{$host}{privproto} = $privproto;
                                         $snmp_input{$host}{seclevel}  = $seclevel;
                                         $snmp_input{$host}{secname}   = $secname;
-                                        $snmp_try_max{$host}        = 1;
+                                        $snmp_try_max{$host}          = 1;
 
                                         #$snmp_input{$host}{snmptimeout}   = $g{snmptimeout};
                                         $snmp_input{$host}{snmptimeout} = 3;
@@ -2208,7 +2215,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                                         if ( not defined $sysdesc ) {
                                             $sysdesc = 'UNDEFINED';
-                                            do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+                                            do_log( "$host 4sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                                             next CUSTOMHOST;
                                         }
 
