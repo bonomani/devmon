@@ -88,37 +88,8 @@ SNMPCIDS=YOURSNMPSTRING
 LOGFILE=/var/log/xymon/devmon.log
 ----------------------------
 cp /usr/lib/xymon/server/ext/devmon/extras/devmon-graphs.cfg /usr/lib/xymon/server/etc/graphs.d/.
-vi /etc/systemd/system/devmon.service
 ---------------
-# systemd file for Fedora 18 and up, or RHEL 7 and up
-
-[Unit]
-Description=Devmon
-After=xymon.target network.target
-
-[Install]
-WantedBy=multi-user.target
-
-
-[Service]
-PIDFile=/var/run/devmon/devmon.pid
-User=xymon
-Group=xymon
-# Run ExecStartPre with root-permissions
-PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir -p /var/run/devmon
-ExecStartPre=/usr/bin/chown xymon:xymon /var/run/devmon/
-
-#RuntimeDirectory=devmon
-# Change the devmon folder according to you settings !
-#ExecStartPre=/var/xymon/server/ext/devmon/devmon --readbbhosts
-
-ExecStart=/usr/lib/xymon/server/ext/devmon/devmon
-ExecReload=/usr/lib/xymon/server/ext/devmon/devmon --readbbhosts
-#Type=forking
-Type=simple
-# timeout as ExecStartPre can take some time if some devices are unreachable
-#TimeoutSec=900
+cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
 ----------------------------
 systemctl daemon-reload
 systemctl enable devmon 
