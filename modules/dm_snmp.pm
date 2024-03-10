@@ -312,7 +312,7 @@ sub snmp_query {
                 # It is, lets see if its ready to give us some data
                 my $select = IO::Select->new( $g{forks}{$fork}{CS} );
                 if ( $select->can_read(0.01) ) {
-                    $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} = 1 if not exists $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val};
+                    $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} = 1 if not exists $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val};
                     do_log( "Fork:$fork has data for device:$device, reading it", DEBUG ) if $g{debug};
 
                     # Okay, we know we have something in the buffer, keep reading
@@ -343,8 +343,8 @@ sub snmp_query {
                         --$active_forks;
                         fork_queries();
                         push @devices, $device;
-                        $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} += 1;
-                        do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp polling enqueue", INFO );
+                        $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} += 1;
+                        do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Msg:snmp polling enqueue", INFO );
                         next;
                     }
                     do_log( "Fork $fork returned complete message for device $device", DEBUG ) if $g{debug};
@@ -363,12 +363,12 @@ sub snmp_query {
                         push @devices, $device;
                         next;
                     }
-                    $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} = 1 if not exists $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val};
+                    $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} = 1 if not exists $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val};
                     if ( exists $returned{snmp_msg} ) {
                         my $snmp_msg_count = keys %{ $g{devices}{$device}{oids}{snmp_temp}{snmp_msg}{val} };
                         for my $snmp_msg_idx ( sort { $a <=> $b } keys %{ $returned{snmp_msg} } ) {
                             $snmp_msg_count++;
-                            my $snmp_msg = "Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val}  Msg:$returned{snmp_msg}{$snmp_msg_idx}";
+                            my $snmp_msg = "Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Msg:$returned{snmp_msg}{$snmp_msg_idx}";
                             $g{devices}{$device}{oids}{snmp_temp}{snmp_msg}{val}{$snmp_msg_count} = $snmp_msg;
                             $snmp_msg = "Device:$device $snmp_msg";
                             do_log( "Fork:$fork $snmp_msg", WARN );
@@ -403,9 +403,9 @@ sub snmp_query {
                         $g{devices}{$device}{oids}{snmp_temp}{snmp_errorstr}{val}{ ++$snmp_error_count } = $returned{snmp_errorstr};
                         $g{devices}{$device}{oids}{snmp_temp}{snmp_errornum}{val}{ ++$snmp_error_count } = $returned{snmp_errornum} if defined $returned{snmp_errornum} // 'Undef';
                         if ( ( defined $returned{snmp_errornum} ) and ( $returned{snmp_errornum} == -24 ) ) {
-                            do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Err:" . $returned{snmp_errorstr} . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), INFO );
+                            do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Err:" . $returned{snmp_errorstr} . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), INFO );
                         } else {
-                            do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Err:" . ( defined $returned{snmp_errorstr} ? $returned{snmp_errorstr} : '' ) . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), ERROR );
+                            do_log( "Fork:$fork Device:$device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Err:" . ( defined $returned{snmp_errorstr} ? $returned{snmp_errorstr} : '' ) . ( defined $returned{snmp_errornum} ? "(" . $returned{snmp_errornum} . ")" : '' ), ERROR );
                         }
 
                         # Store partial result if any and reduce next request
@@ -437,15 +437,15 @@ sub snmp_query {
                         if ( $expected > $received ) {
 
                             if ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) {
-                                if ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) {
+                                if ( $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) {
                                     push @devices, $device;
-                                    $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} += 1;
-                                    do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp polling enqueue", INFO );
+                                    $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} += 1;
+                                    do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Msg:snmp polling enqueue", INFO );
                                 } else {
-                                    do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp_try_max reached, snmp polling stops", WARN );
+                                    do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Msg:snmp_try_max reached, snmp polling stops", WARN );
                                 }
                             } else {
-                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:No time left snmp polling stops", WARN );
+                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Msg:No time left snmp polling stops", WARN );
                             }
                         }
 
@@ -989,7 +989,7 @@ DEVICE: while (1) {    # We should never leave this loop
             if ($is_discover_cycle) {
                 $host = "$snmp_cid\@$hostip:$snmp_port:5:1:$backoff:$snmp_ver";    # Set timeout to 5 sec and tries to 1
                 my $snmp_timeout = 5;
-                my $snmp_tries   = 1;
+                my $snmp_try_cnt   = 1;
 
                 if ( not $snmp_ver == 1 ) {
 
@@ -1000,7 +1000,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                                                             # Discovery Stage 1: The max getbulk responses
                                                                             # Try a huge query from the top of the tree (standard = 100)
                         my @ret1 = snmpgetbulk( $host, 0, 1000, '1.3.6.1' );    # if $sgbmo > 1;
-                                                                                #my @ret1 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver , 0, 1000, '1.3.6.1' );   # Set timeout to 5 sec and tries to 1
+                                                                                #my @ret1 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_try_cnt, $backoff, $snmp_ver , 0, 1000, '1.3.6.1' );   # Set timeout to 5 sec and tries to 1
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Timeout at discovery stage:1, will retry until success";
@@ -1028,7 +1028,7 @@ DEVICE: while (1) {    # We should never leave this loop
 
                         my @ret2 = snmpgetbulk( $host, 0, 1, @oids );
 
-                        #my @ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 1, @oids );
+                        #my @ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_try_cnt, $backoff, $snmp_ver, 0, 1, @oids );
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Timeout at discovery stage:2. will retry until success";
@@ -1052,7 +1052,7 @@ DEVICE: while (1) {    # We should never leave this loop
 
                         @ret2 = snmpgetbulk( $host, 0, 2, $oids[0], $oids[1] );
 
-                        #@ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 2, $oids[0], $oids[1] );
+                        #@ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_try_cnt, $backoff, $snmp_ver, 0, 2, $oids[0], $oids[1] );
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $SNMP_Session::errmsg                    = '';
@@ -1061,7 +1061,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Try workaround with max-repetitions set to 100";
                                 @ret2                                    = snmpgetbulk( $host, 0, 100, $oids[0], $oids[1] );
 
-                                #@ret2                                    = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 100, $oids[0], $oids[1] );
+                                #@ret2                                    = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_try_cnt, $backoff, $snmp_ver, 0, 100, $oids[0], $oids[1] );
                                 if ( $SNMP_Session::errmsg eq '' ) {
                                     $data_out{snmp_msg}{ ++$snmp_msg_count } = "Max-repetitions set to 100 works";
                                     $sgbmomr100 = 1;
