@@ -4,7 +4,7 @@
 
 This document outlines the implementation of graphs for Devmon in Xymon. With current versions of Xymon and Devmon, only some configuration should be necessary.
 
-1. **Install Xymon 4.2.2 or later:** The rrd collector for Devmon was merged into Xymon before the release of 4.2.2. No additional patches or scripts are required.
+1. **Install Xymon**
 2. **Configure Devmon tests:** Ensure that for each Devmon test you want to graph with the Devmon collector, "testname=devmon" is in TEST2RRD in Xymon's xymonserver.cfg file. For example:
 
     ```plaintext
