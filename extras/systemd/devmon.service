@@ -1,4 +1,4 @@
-# systemd file for Fedora 18 and up, or RHEL 7 and up
+# Contents of /etc/systemd/system/devmon.service
 
 [Unit]
 Description=Devmon
@@ -12,8 +12,14 @@ WantedBy=multi-user.target
 PIDFile=/var/run/devmon/devmon.pid
 User=xymon
 Group=xymon
-RuntimeDirectory=devmon
-# Change the devmon filder according to you settings !
-ExecStart=/var/xymon/server/ext/devmon/devmon
-ExecReload=/var/xymon/server/ext/devmon/devmon --readbbhosts
-Type=forking
+# Run ExecStartPre with root-permissions
+PermissionsStartOnly=true
+ExecStartPre=-/usr/bin/mkdir -p /var/run/devmon
+ExecStartPre=-/usr/bin/mkdir -p /var/log/devmon
+ExecStartPre=/usr/bin/chown xymon:xymon /var/run/devmon/
+ExecStartPre=/usr/bin/chown xymon:xymon /var/log/devmon/
+
+# Change the devmon folder according to you settings !
+ExecStart=/usr/lib/xymon/server/ext/devmon/devmon
+
+Type=simple
