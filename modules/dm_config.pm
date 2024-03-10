@@ -1840,17 +1840,18 @@ FILEREAD: while (@hostscfg) {
         $snmp_input{$host}{nonreps}{$sysdesc_oid} = 1;
     }
 
-    # Throw data to our query forks
-    dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
+    # If there is some valid hosts, query them
+    if ( keys %snmp_input ) {
+        do_log( "Sending data to SNMP", DEBUG ) if $g{debug};
+        dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
+    }
 
     # Now go through our resulting snmp-data
-OLDHOST: for my $host ( keys %{ $g{devices} } ) {
+OLDHOST: for my $host ( keys %snmp_input ) {
         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
-        do_log( Dumper( $g{devices}{$host} ) );
-
         if ( not defined $sysdesc ) {
             $sysdesc = 'UNDEFINED';
-            do_log( "$host 1sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+            do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
             next OLDHOST;
         }
 
@@ -1870,6 +1871,8 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             $new_hosts{$host}{privpass}  = $snmp_input{$host}{privpass};
             --$hosts_left;
             do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} / $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
+
+            #delete $snmp_input{$host};
             next OLDHOST;
         }
 
@@ -1903,7 +1906,9 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 $new_hosts{$host}{privproto} = $snmp_input{$host}{privproto};
                 $new_hosts{$host}{privpass}  = $snmp_input{$host}{privpass};
                 --$hosts_left;
-                do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
+                do_log( "Discovered $host as a $vendor / $model with sysdesc=$sysdesc", INFO );
+
+                #delete $snmp_input{$host};
                 last OLDVENDOR;
             }
         }
@@ -1937,6 +1942,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
 
                 # Skip if they don't have a custom cid
                 next if !defined $hosts_cfg{$host}{cid};
+
                 do_log( "Trying valid host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", INFO );
 
                 # Throw together our query data
@@ -1955,16 +1961,18 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             # Reset our failed hosts
             $g{fail} = {};
 
-            # Throw data to our query forks
-            dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
+            # If there is some valid hosts, query them
+            if ( keys %snmp_input ) {
+                do_log( "Sending data to SNMP", DEBUG ) if $g{debug};
+                dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
+            }
 
             # Now go through our resulting snmp-data
-        NEWHOST: for my $host ( keys %{ $g{devices} } ) {
+        NEWHOST: for my $host ( keys %snmp_input ) {
                 my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
-                do_log( Dumper( $g{devices} ) );
                 if ( not defined $sysdesc ) {
                     $sysdesc = 'UNDEFINED';
-                    do_log( "$host 2sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+                    do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                     next NEWHOST;
                 }
 
@@ -2073,12 +2081,12 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 }
 
                 # Now go through our resulting snmp-data
-            CUSTOMHOST: for my $host ( keys %{ $g{devices} } ) {
+            CUSTOMHOST: for my $host ( keys %snmp_input ) {
 
                     my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                     if ( not defined $sysdesc ) {
                         $sysdesc = 'UNDEFINED';
-                        do_log( "$host 3sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+                        do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                         next CUSTOMHOST;
                     }
 
@@ -2209,13 +2217,12 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                     }
 
                                     # Now go through our resulting snmp-data
-                                    #CUSTOMHOST: for my $host ( keys %{ $g{oid}{snmp_polled} } ) {
-                                CUSTOMHOST: for my $host ( keys %{ $g{devices} } ) {
+                                CUSTOMHOST: for my $host ( keys %snmp_input ) {
 
                                         my $sysdesc = $g{devices}{$host}{oids}{snmp_polled}{$sysdesc_oid}{val};
                                         if ( not defined $sysdesc ) {
                                             $sysdesc = 'UNDEFINED';
-                                            do_log( "$host 4sysdesc = UNDEFINED", DEBUG ) if $g{debug};
+                                            do_log( "$host sysdesc = UNDEFINED", DEBUG ) if $g{debug};
                                             next CUSTOMHOST;
                                         }
 
