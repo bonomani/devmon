@@ -112,7 +112,7 @@ sub initialize {
 
         # SNMP variables
         'snmptimeout'    => 0,
-        'snmp_max_tries' => 0,
+        'snmp_try_max' => 0,
         'snmpcids'       => '',
         'secnames'       => '',
         'seclevels'      => '',
@@ -338,7 +338,7 @@ sub initialize {
             'set'     => 0,
             'case'    => 0
         },
-        'snmp_max_tries' => {     # 6 time should be enough
+        'snmp_try_max' => {     # 6 time should be enough
             'default' => 6,
             'regex'   => '\d+',
             'set'     => 0,
@@ -1748,7 +1748,7 @@ FILEREAD: while (@hostscfg) {
 
     # Put together our query hash
     my %snmp_input;
-    my %snmp_max_tries;
+    my %snmp_try_max;
 
     # Get snmp query params from global conf
     read_global_config();
@@ -1827,7 +1827,7 @@ FILEREAD: while (@hostscfg) {
         $snmp_input{$host}{resolution}  = $hosts_cfg{$host}{resolution};
         $snmp_input{$host}{seclevel}    = $seclevel;
         $snmp_input{$host}{secname}     = $secname;
-        $snmp_max_tries{$host}          = 1;
+        $snmp_try_max{$host}          = 1;
         $snmp_input{$host}{snmptimeout} = 3;
         $snmp_input{$host}{ver}         = $ver;
 
@@ -1836,7 +1836,7 @@ FILEREAD: while (@hostscfg) {
     }
 
     # Throw data to our query forks
-    dm_snmp::snmp_query( \%snmp_input, \%snmp_max_tries );
+    dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
 
     # Now go through our resulting snmp-data
 OLDHOST: for my $host ( keys %{ $g{devices} } ) {
@@ -1938,7 +1938,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 $snmp_input{$host}{dev}         = $host;
                 $snmp_input{$host}{ip}          = $hosts_cfg{$host}{ip};
                 $snmp_input{$host}{port}        = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-                $snmp_max_tries{$host}          = 1;
+                $snmp_try_max{$host}          = 1;
                 $snmp_input{$host}{snmptimeout} = 3;
                 $snmp_input{$host}{ver}         = $snmpver;
 
@@ -1950,7 +1950,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
             $g{fail} = {};
 
             # Throw data to our query forks
-            dm_snmp::snmp_query( \%snmp_input, \%snmp_max_tries );
+            dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
 
             # Now go through our resulting snmp-data
         NEWHOST: for my $host ( keys %{ $g{devices} } ) {
@@ -2048,7 +2048,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                     $snmp_input{$host}{dev}         = $host;
                     $snmp_input{$host}{ip}          = $hosts_cfg{$host}{ip};
                     $snmp_input{$host}{port}        = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-                    $snmp_max_tries{$host}          = 1;
+                    $snmp_try_max{$host}          = 1;
                     $snmp_input{$host}{snmptimeout} = 3;
                     $snmp_input{$host}{ver}         = $snmpver;
 
@@ -2062,7 +2062,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                 # If there is some valid hosts, query them
                 if ( keys %snmp_input ) {
                     do_log( "Sending data to SNMP", DEBUG ) if $g{debug};
-                    dm_snmp::snmp_query( \%snmp_input, \%snmp_max_tries );
+                    dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
                 }
 
                 # Now go through our resulting snmp-data
@@ -2182,7 +2182,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                         $snmp_input{$host}{privproto} = $privproto;
                                         $snmp_input{$host}{seclevel}  = $seclevel;
                                         $snmp_input{$host}{secname}   = $secname;
-                                        $snmp_max_tries{$host}        = 1;
+                                        $snmp_try_max{$host}        = 1;
 
                                         #$snmp_input{$host}{snmptimeout}   = $g{snmptimeout};
                                         $snmp_input{$host}{snmptimeout} = 3;
@@ -2198,7 +2198,7 @@ OLDHOST: for my $host ( keys %{ $g{devices} } ) {
                                     # If there is some valid hosts, query them
                                     if ( keys %snmp_input ) {
                                         do_log( "Sending data to SNMP", DEBUG ) if $g{debug};
-                                        dm_snmp::snmp_query( \%snmp_input, \%snmp_max_tries );
+                                        dm_snmp::snmp_query( \%snmp_input, \%snmp_try_max );
                                     }
 
                                     # Now go through our resulting snmp-data

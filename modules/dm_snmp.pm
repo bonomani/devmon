@@ -65,7 +65,7 @@ sub poll_devices {
     do_log( "Starting snmp queries", INFO );
     $g{snmppolltime} = time;
     my %snmp_input     = ();
-    my %snmp_max_tries = ();
+    my %snmp_try_max = ();
     %{ $g{oid}{snmp_polled} } = ();
 
     # Query our Xymon server for device reachability status
@@ -113,7 +113,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{devices} } ) {
         # 3. Retry are also temporary and should be removed
         my $snmp_input_device_ref = \$g{devices}{$device}{snmp_input};
 
-        $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} = $g{snmp_max_tries}         if not defined $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val};
+        $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} = $g{snmp_try_max}         if not defined $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val};
         $g{devices}{$device}{discover}                             = ( $g{current_cycle} == 1 ) if not defined $g{discover};
         ${$snmp_input_device_ref}->{is_discover_cycle} = ( $g{current_cycle} == 1 ) if not defined $g{is_discover_cycle};
         ${$snmp_input_device_ref}->{current_cycle}     = $g{current_cycle};
@@ -291,8 +291,8 @@ sub snmp_query {
         delete $g{devices}{$device}{oids}{snmp_temp};
         $snmp_input->{$device}{snmptry_min_duration} //= 10;    # if does not exist put it to 10 sec
                                                                 # Initialize max tries for read host discovery!
-        if ( not exists $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries} ) {
-            $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} = 1;
+        if ( not exists $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max} ) {
+            $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} = 1;
             $g{maxpolltime} = 7;    #(timeout is 3 so 2 retries + 1 sec
         }
     }
@@ -436,14 +436,14 @@ sub snmp_query {
                         }
                         if ( $expected > $received ) {
 
-                            #if (( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) )
+                            #if (( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) )
                             #    or ( time() - $polltime + $snmp_input->{$device}{snmptimeout} < $g{maxpolltime} / 2 )
-                            if ( ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_max_tries}{val} ) ) {
+                            if ( ( ( time() - $polltime + $snmp_input->{$device}{snmptimeout} ) < $g{maxpolltime} ) and ( $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) ) {
                                 push @devices, $device;
                                 $g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} += 1;
                                 do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:snmp polling enqueue", INFO );
                             } else {
-                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:No time left or snmp_max_tries reached, polling fails", WARN );
+                                do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_tries}{val} Msg:No time left or snmp_try_max reached, polling fails", WARN );
                             }
                         }
 
@@ -789,7 +789,7 @@ DEVICE: while (1) {    # We should never leave this loop
             my $snmp_port      = $data_in{port} // 161;
             my $ip             = $data_in{ip};
             my $device         = $data_in{dev};
-            my $snmp_max_tries = 1;
+            my $snmp_try_max = 1;
 
             # we substract 0.2 millisecond to timeout before the main process (to be ckecked if best value)
             my $snmptimeout_instant   = $data_in{snmptimeout_instant} - 0.2;
@@ -826,7 +826,7 @@ DEVICE: while (1) {    # We should never leave this loop
             }
 
             # Prepare our session paramater that have to stay open if possible
-            my $host;    # = "$snmp_cid\@$hostip:$snmp_port:$timeout:$snmp_max_tries:$backoff:$snmp_ver";
+            my $host;    # = "$snmp_cid\@$hostip:$snmp_port:$timeout:$snmp_try_max:$backoff:$snmp_ver";
 
             # 'our' not really needed but need to refactor the sub that used them (todo)
             #our $session;
