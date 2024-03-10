@@ -989,7 +989,7 @@ DEVICE: while (1) {    # We should never leave this loop
             if ($is_discover_cycle) {
                 $host = "$snmp_cid\@$hostip:$snmp_port:5:1:$backoff:$snmp_ver";    # Set timeout to 5 sec and tries to 1
                 my $snmp_timeout = 5;
-                my $snmp_try_cnt   = 1;
+                my $snmp_try_cnt = 1;
 
                 if ( not $snmp_ver == 1 ) {
 
