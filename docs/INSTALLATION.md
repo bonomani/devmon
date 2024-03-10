@@ -73,6 +73,13 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 ### 5. Install Start/Stop Script
 using init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)   
 using systemd: [extras/systemd/](/extras/systemd/)
+```bash
+cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
+systemctl daemon-reload
+systemctl enable devmon
+systemctl start devmon
+```
+
 ### 6. If xymon hosts.cfg change
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
 
