@@ -124,8 +124,4 @@ chown xymon /var/xymon/server/ext/devmon
 chgrp xymon /var/xymon/server/ext/devmon
 ```
 
-This procedure assumes that you have devmon installed in `/var/xymon/server/ext/devmon/devmon` and that the user `xymon` exists. Adjust the paths and user as necessary based on your specific setup.
-
-   - For systemd (CentOS 7, Ubuntu, etc.):
-     - Add the systemd file to `devmon/extras/systemd`.
 
