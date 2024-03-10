@@ -64,7 +64,7 @@ sub poll_devices {
     }
     do_log( "Starting snmp queries", INFO );
     $g{snmppolltime} = time;
-    my %snmp_input     = ();
+    my %snmp_input   = ();
     my %snmp_try_max = ();
     %{ $g{oid}{snmp_polled} } = ();
 
@@ -113,8 +113,8 @@ QUERYHASH: for my $device ( sort keys %{ $g{devices} } ) {
         # 3. Retry are also temporary and should be removed
         my $snmp_input_device_ref = \$g{devices}{$device}{snmp_input};
 
-        $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} = $g{snmp_try_max}         if not defined $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val};
-        $g{devices}{$device}{discover}                             = ( $g{current_cycle} == 1 ) if not defined $g{discover};
+        $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} = $g{snmp_try_max}           if not defined $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val};
+        $g{devices}{$device}{discover}                           = ( $g{current_cycle} == 1 ) if not defined $g{discover};
         ${$snmp_input_device_ref}->{is_discover_cycle} = ( $g{current_cycle} == 1 ) if not defined $g{is_discover_cycle};
         ${$snmp_input_device_ref}->{current_cycle}     = $g{current_cycle};
         ${$snmp_input_device_ref}->{current_try}       = 0;
@@ -785,10 +785,10 @@ DEVICE: while (1) {    # We should never leave this loop
             $SNMP_Session::suppress_warnings = $g{debug} ? 0 : 1;
 
             # Get SNMP variables
-            my $snmp_cid       = $data_in{cid};
-            my $snmp_port      = $data_in{port} // 161;
-            my $ip             = $data_in{ip};
-            my $device         = $data_in{dev};
+            my $snmp_cid     = $data_in{cid};
+            my $snmp_port    = $data_in{port} // 161;
+            my $ip           = $data_in{ip};
+            my $device       = $data_in{dev};
             my $snmp_try_max = 1;
 
             # we substract 0.2 millisecond to timeout before the main process (to be ckecked if best value)
@@ -987,7 +987,7 @@ DEVICE: while (1) {    # We should never leave this loop
             if ($is_discover_cycle) {
                 $host = "$snmp_cid\@$hostip:$snmp_port:5:1:$backoff:$snmp_ver";    # Set timeout to 5 sec and tries to 1
                 my $snmp_timeout = 5;
-                my $snmp_tries = 1;
+                my $snmp_tries   = 1;
 
                 if ( not $snmp_ver == 1 ) {
 
@@ -998,7 +998,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                                                             # Discovery Stage 1: The max getbulk responses
                                                                             # Try a huge query from the top of the tree (standard = 100)
                         my @ret1 = snmpgetbulk( $host, 0, 1000, '1.3.6.1' );    # if $sgbmo > 1;
-                        #my @ret1 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver , 0, 1000, '1.3.6.1' );   # Set timeout to 5 sec and tries to 1
+                                                                                #my @ret1 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver , 0, 1000, '1.3.6.1' );   # Set timeout to 5 sec and tries to 1
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Timeout at discovery stage:1, will retry until success";
@@ -1025,7 +1025,8 @@ DEVICE: while (1) {    # We should never leave this loop
                         }
 
                         my @ret2 = snmpgetbulk( $host, 0, 1, @oids );
-                        #my @ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 1, @oids );  
+
+                        #my @ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 1, @oids );
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Timeout at discovery stage:2. will retry until success";
@@ -1048,6 +1049,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         # This time this is quick unlikely to timout: for now we consider that as a read failur
 
                         @ret2 = snmpgetbulk( $host, 0, 2, $oids[0], $oids[1] );
+
                         #@ret2 = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 2, $oids[0], $oids[1] );
                         if ( $SNMP_Session::errmsg ne '' ) {
                             if ( $SNMP_Session::errmsg =~ /no response received/ ) {
@@ -1056,7 +1058,8 @@ DEVICE: while (1) {    # We should never leave this loop
                                 $sgbmomr2                                = 0;
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "Try workaround with max-repetitions set to 100";
                                 @ret2                                    = snmpgetbulk( $host, 0, 100, $oids[0], $oids[1] );
-                                #@ret2                                    = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 100, $oids[0], $oids[1] );   
+
+                                #@ret2                                    = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $snmp_timeout, $snmp_tries, $backoff, $snmp_ver, 0, 100, $oids[0], $oids[1] );
                                 if ( $SNMP_Session::errmsg eq '' ) {
                                     $data_out{snmp_msg}{ ++$snmp_msg_count } = "Max-repetitions set to 100 works";
                                     $sgbmomr100 = 1;
@@ -1351,11 +1354,13 @@ DEVICE: while (1) {    # We should never leave this loop
                 if ( $snmp_ver == 1 ) {
                     $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret  = snmpgetnext( $host, @oid_in_query );
-                    #@ret  = snmpgetnext( $hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, @oid_in_query ); 
+
+                    #@ret  = snmpgetnext( $hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, @oid_in_query );
                 } else {
 
                     $host = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret  = snmpgetbulk( $host, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
+
                     #@ret  = snmpgetbulk( $hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
                 }
 
@@ -1422,7 +1427,7 @@ DEVICE: while (1) {    # We should never leave this loop
                                 $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID";
                             }
                         }
-                        if ( !$branch_cnt and $is_try1 and not exists $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject}) {                       
+                        if ( !$branch_cnt and $is_try1 and not exists $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} ) {
                             $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
                             $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
                         }
@@ -2272,6 +2277,7 @@ sub dive_val : lvalue {
 
 sub snmpgetbulk ($$$@) {
     my ( $host, $nr, $mr, @vars ) = @_;
+
     #my ($hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver, $nr, $mr, @vars ) = @_;
     my ( @enoid, $var, $response, $bindings, $binding );
     my ( $value, $upoid, $oid, @retvals );
@@ -2280,6 +2286,7 @@ sub snmpgetbulk ($$$@) {
 
     @retvals = ();
     $session = &snmpopen( $host, 0, \@vars );
+
     #$session = &snmpopen($hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver , 0, \@vars );
     if ( !defined($session) ) {
         carp "SNMPGETBULK Problem for $host\n"
@@ -2484,7 +2491,7 @@ sub snmpopen ($$$) {
 #
 sub snmpopen1 ($$$) {
     my ( $session, $session_host, $session_version, $session_lhost, $session_ipv4only, $host, $type, $vars ) = @_;
-    my ( $session_return_array_refs, $session_return_hash_refs);
+    my ( $session_return_array_refs, $session_return_hash_refs );
     my ( $nhost, $port, $community, $lhost, $lport, $nlhost );
     my ( $timeout, $retries, $backoff, $version );
     my $v4onlystr;
