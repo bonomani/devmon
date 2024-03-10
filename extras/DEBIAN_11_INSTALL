@@ -85,14 +85,6 @@ vi /usr/lib/xymon/server/ext/devmon/devmon.cfg
 ----------------------
 HOSTSCFG=/usr/lib/xymon/server/etc/hosts.cfg
 SNMPCIDS=YOURSNMPSTRING
-LOGFILE=/var/log/xymon/devmon.log
 ----------------------------
-cp /usr/lib/xymon/server/ext/devmon/extras/devmon-graphs.cfg /usr/lib/xymon/server/etc/graphs.d/.
----------------
-cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
-----------------------------
-systemctl daemon-reload
-systemctl enable devmon 
-systemctl start devmon 
 
 
