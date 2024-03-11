@@ -1,42 +1,40 @@
-Devmon changelog.  Contributors of specific features/patches are listed
-in parenthesis next to the respective entry.
-Devmon v0.21.09
-Changes since v0.21.08
-  Stabilyze SNMPv3 (thanks to Stef Coene)
-  New command line option:
+## Devmon changelog  
+Contributors of specific features/patches are listed in parenthesis next to the respective entry.
+
+### Devmon v0.21.09
+- Stabilyze SNMPv3 (thanks to Stef Coene)
+- New command line option:
   - Single device and single test: devmon -o 1.1.1.1=fan   
   - Dont need to stop devmon anymore 
   - Print result to sdtout and to xymon
   - See devmon -?
-  Logging restructured (need more work)
+- Logging restructured (need more work)
   - See discussion
   - devmon -t[race] for very detailled info 
 
-Devmon v0.21.08
-Changes since v0.21.07
-  First SNMPv3 version (read install)
-  Update template for vmware7 (thanks to Roemer)
-  Update wiki (mainly for devmon dev)
-  Tidy code (start to have best practice)
-  Update logs
-  Fix bugs
+### Devmon v0.21.08
+- First SNMPv3 version (read install)
+- Update template for vmware7 (thanks to Roemer)
+- Update wiki (mainly for devmon dev)
+- Tidy code (start to have best practice)
+- Update logs
+- Fix bugs
 
-Devmon v0.21.07
+### Devmon v0.21.07
 Changes since v0.21.06
   No new Feature, nor bug resolved
   Move Wiki (Github Wikis are not indexed by Google)
   Update README and CHANGELOG 
 
-Devmon v0.21.06
-Changes since v0.16.12
-  New features
+### Devmon v0.21.06
+- New features
   - CPU revamp (Cisco, Huawei), mainly the "uptime" part
     - Reboot cause analysis with a auto disable timer
     - Better Uptime value, calculation with (snmp and system oid)
   - Threshold automatch acccept multiple value
      - We can have not multiple empty (automatch) threshold for an oid
      - Empty threshold of the current color is prefered
-  Bug resolved
+- Bug resolved
   - MATH transform with constant (without other deps oids)
   - TSWITCH calc
   - Perl 5.28 compatibility (thanks to Stef Coene)
@@ -46,8 +44,8 @@ Changes since v0.16.12
 
 !!Some change are missing here!!
 
-Devmon v0.16.12 
-  Changes since v0.3.1-beta1
+### Devmon v0.16.12 
+- Changes since v0.3.1-beta1
   - Fork Soureforge
   - New release versioning
     - Stay under 1 (we consider there is a room of improvement befer release 1.
@@ -125,7 +123,7 @@ BUG
 ===========================================================================================================================================
   
 
-Devmon v0.3.1-beta1 :: Released 2009-01-23
+### Devmon v0.3.1-beta1 :: Released 2009-01-23
  Changes since 0.3.0
   - Fix loading non-standard ports from the config file
   - Fix segfault in hobbitd_rrd caused by do_devmon.c and data with spaces in 
@@ -161,7 +159,7 @@ Devmon v0.3.1-beta1 :: Released 2009-01-23
      line of the status message
   - Filters in hobbitdboard are regex's, anchor the conn text (Simeon Berkley)
 
-Devmon v0.3.0 :: Released 2008-04-03
+### Devmon v0.3.0 :: Released 2008-04-03
  Changes since 0.3.0-rc1
   - Ensure that send_msgs returns when display server is inaccessible.
     This change fixes the "Devmon turns purple" issue (Buchan Milne)
@@ -211,7 +209,7 @@ Devmon v0.3.0 :: Released 2008-04-03
       test for devmon node works where hostname is FQDN) (Buchan Milne)
 
 
- Changes since 0.2.2
+### Changes since 0.2.2
 
   Changed:
   - If you specify a non-absolute path to a config file (using -c)
@@ -246,7 +244,7 @@ Devmon v0.3.0 :: Released 2008-04-03
   - Fixed cisco 3500 templates to correctly translate ifc speed
   - Fixed REGSUB transform to work leaf OIDs (Gaetan Frenoy)
   
-Devmon v0.2.2 :: Released 05/18/2006
+### Devmon v0.2.2 :: Released 05/18/2006
 
   Changed:
   - Fixed cisco templates that had an uneccesary ifSpeed entry
@@ -260,9 +258,8 @@ Devmon v0.2.2 :: Released 05/18/2006
   - Fixed the MATH transform so that doesnt misinterpret
     some numbers as a divide by zero condition and returning 0.
 
-Devmon v0.2.1    :: Not released
 
-Devmon v0.2 beta :: Released 05/09/2006
+### Devmon v0.2 beta :: Released 05/09/2006
 
   Changed:
   - Changed the way the TABLE: message directive is read.
@@ -323,7 +320,7 @@ Devmon v0.2 beta :: Released 05/09/2006
   - Fixed the command line config override (Steve Aiello)
   - Fixed problem with non-HTML tables (Dan Vande More)
 
-Devmon v0.1.2 beta :: Not released
+### Devmon v0.1.2 beta :: Not released
 
   Added:
   - Support for non-HTML(NCV) type tables
@@ -334,7 +331,7 @@ Devmon v0.1.2 beta :: Not released
     devmon to crash when using 64bit counters
   - Fixed the order of alarm applications; now alarms by default
 
-Devmon v0.1.1 beta :: Released 02/28/2006
+### Devmon v0.1.1 beta :: Released 02/28/2006
 
   Added:
   
@@ -352,6 +349,6 @@ Devmon v0.1.1 beta :: Released 02/28/2006
   - Fixed extremely high polltimes when not polling any devices
 
 
-Devmon v0.1 beta   :: Released 02/23/2006
+### Devmon v0.1 beta   :: Released 02/23/2006
 
    Initial release
