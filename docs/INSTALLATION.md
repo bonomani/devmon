@@ -82,8 +82,9 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 ```
 
 ### 4. Start Devmon
-- Launch Devmon and check logs for any errors, see if the PIDS of devmon processes are stable.
-- Verify if new tests are being shown on your display server.
+- Launch Devmon and check logs for any errors
+- Look at devmon child PIDs to see if they change over the time: (If the PIDs change, this means that child processes are killed and restarted, which should not occured)
+- Verify if new 'tests' are being shown on your display server.
 - Verity if a 'dm' test exist on your monitoring server and look at the stats
 
 ### 5. Install Start/Stop Script
