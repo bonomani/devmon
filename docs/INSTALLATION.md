@@ -21,13 +21,26 @@ From Source
 ### 2. Unpack Devmon
 Extract the Devmon tarball 
 ```bash
+cd .....xymon/server/ext
+mkdir devmon
+cd devmon
 git clone https://github.com/bonomani/devmon.git 
 mv ./devmon /usr/lib/xymon/server/ext/.
+```
 or
-wget/curl https://github.com/bonomani/devmon/archive/refs/heads/main.zip
-unzip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
-mv ./devmon-main  /usr/lib/xymon/server/ext/devmon
-  
+```bash
+cd .....xymon/server/ext
+wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
+curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
+unzip devmon.zip
+mv devmon-main devmon
+```
+or 
+```bash
+cd .....xymon/server/ext
+curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
+unzip devmon.zip
+mv devmon-main devmon 
 ```
 
 ### 3. Prepare Xymon (Files are located in the xymon server etc folder)
