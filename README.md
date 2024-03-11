@@ -1,7 +1,7 @@
 <!DOCTYPE markdown>
 # Devmon Introduction
 
-Devmon is an SNMP monitoring tool developed as an open-source project. It's designed to efficiently monitor a significant number of devices, providing both graphing and alerting functionalities.
+Devmon is an SNMP monitoring tool developed to enhance the SNMP monitoring capabilities of a server running Xymon monitoring software. It's designed to efficiently monitor a significant number of devices, providing both graphing and alerting functionalities.
 
 ![Devmon's Current Overview](devmon_current_status.png)
 
