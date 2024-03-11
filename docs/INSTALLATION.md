@@ -19,15 +19,18 @@ From Source
   - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ### 2. Unpack Devmon
-Extract the Devmon tarball 
+Extract the Devmon tarball
+
+With git
 ```bash
 cd .....xymon/server/ext
 mkdir devmon
 cd devmon
-git clone https://github.com/bonomani/devmon.git 
-mv ./devmon /usr/lib/xymon/server/ext/.
+git clone https://github.com/bonomani/devmon.git
+# Exclude your devmon.cfg to be follow (to revert show below)
+git update-index --assume-unchanged devmon.cfg
 ```
-or
+Or with wget
 ```bash
 cd .....xymon/server/ext
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
@@ -35,7 +38,7 @@ curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/mai
 unzip devmon.zip
 mv devmon-main devmon
 ```
-or 
+Or with curl
 ```bash
 cd .....xymon/server/ext
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
@@ -139,5 +142,23 @@ Update ownership and group if necessary (e.g., for Xymon user):
 chown xymon /var/xymon/server/ext/devmon
 chgrp xymon /var/xymon/server/ext/devmon
 ```
-
-
+### Revert exclusion of your devmon.cfg from git to be able to update it
+Put your local modif elsewhere (the stash) if any 
+```bash
+git stash 
+```
+Reset git to head
+```bash
+git reset --hard
+```
+Take a backup of your local config and pull all modifs including devmon.cfg  
+```bash
+cp devmon.cfg devmon.cfg-old
+git pull
+```
+Update your devmon.cfg
+Reapply your local modif and re-exclude devmon.cfg from modif.
+```bash
+git stash apply
+git update-index --assume-unchanged devmon.cfg
+```
