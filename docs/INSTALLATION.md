@@ -103,7 +103,7 @@ systemctl enable devmon
 systemctl start devmon
 ```
 
-### 6. If xymon hosts.cfg change
+### 6. If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discobery anymore)
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
 
 ### 7. Devmon Purple (Obsolete):
