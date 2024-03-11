@@ -75,6 +75,9 @@ using init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)
 using systemd: [extras/systemd/](/extras/systemd/)
 ```bash
 cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
+```
+Edit the /etc/systemd/system/devmon.service file and adjust the executable path as needed
+```bash
 systemctl daemon-reload
 systemctl enable devmon
 systemctl start devmon
