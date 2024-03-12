@@ -1,7 +1,7 @@
-## Devmon changelog  
+# Changelog  
 Contributors of specific features/patches are listed in parenthesis next to the respective entry.
 
-### Devmon v0.21.09
+## Devmon v0.21.09
 - Stabilyze SNMPv3 (thanks to Stef Coene)
 - New command line option:
   - Single device and single test: devmon -o 1.1.1.1=fan   
@@ -12,7 +12,7 @@ Contributors of specific features/patches are listed in parenthesis next to the 
   - See discussion
   - devmon -t[race] for very detailled info 
 
-### Devmon v0.21.08
+## Devmon v0.21.08
 - First SNMPv3 version (read install)
 - Update template for vmware7 (thanks to Roemer)
 - Update wiki (mainly for devmon dev)
@@ -20,13 +20,13 @@ Contributors of specific features/patches are listed in parenthesis next to the 
 - Update logs
 - Fix bugs
 
-### Devmon v0.21.07
+## Devmon v0.21.07
 Changes since v0.21.06
   No new Feature, nor bug resolved
   Move Wiki (Github Wikis are not indexed by Google)
   Update README and CHANGELOG 
 
-### Devmon v0.21.06
+## Devmon v0.21.06
 - New features
   - CPU revamp (Cisco, Huawei), mainly the "uptime" part
     - Reboot cause analysis with a auto disable timer
@@ -44,7 +44,7 @@ Changes since v0.21.06
 
 !!Some change are missing here!!
 
-### Devmon v0.16.12 
+## Devmon v0.16.12 
 - Changes since v0.3.1-beta1
   - Fork Soureforge
   - New release versioning
@@ -65,65 +65,61 @@ Changes since v0.21.06
     - Wmware
     - esxi6
     - Huawei             
-  - Add patch from many conributors
-===========================================================================================================================================
+  - Add patch from many conributors  
 
-PATCH                                                                  Sourceforge Status   this release Status
-38     Template for cisco nexus 3500                                           open            fixed                  07.06.2018 07.06.2018
-37     Allow for OIDS with flag in message part of a threshold definition      open            fixed                  01.04.2017 01.04.2017
-36     Enhance REGSUB transformation capabilities                              open            fixed(alternate)       01.04.2017 01.04.2017
-35     Replacement for function render_msg in module dm_tests.pm               open            wont/partial fix(bugs) 17.03.2017 24.03.2017
-34     Replace an OID errors flag by an empty string incase of a green colour  open            fixed                  26.02.2017 04.03.2017
-33     Patch for the (T)SWITCH transform to be able to assign empty string     open            fixed                  24.02.2017 24.02.2017
-32     Formatting of result of MATH transform                                  open            reported in todo       06.02.2017 06.02.2017
-31     Fix typo in function name                                               open            fixed                  16.01.2017 16.01.2017
-30     Support for negative numbers in (T)SWITCH                               open            reported in todo       13.01.2015 13.01.2015
-29     Document default in SWITCH transform                                    open            fixed                  14.11.2014 14.11.2014
-28     Allow function time in a MATH transform                                 open            wont(use eval trans)   22.10.2014 22.10.2014
-27     Add TABLE:sort option                                                   open            fixed(alternate)       26.08.2014 26.08.2014
-26     Add transform SET                                                       open            fixed(incompleted)     18.08.2014 18.08.2014
-25     Fix bug #13                                                             open            fixed(alternate)       25.06.2014 25.06.2014
-24     Align columns of a TABLE to the right side                              open            reported in todo       23.10.2013 23.10.2013
-23     Consistent notation OIDs                                                open            fixed/alternate)       04.01.2013 04.01.2013
-22     Templates for Cisco 7609 and ITP                                        open            fixed                  29.06.2012 29.06.2012
-21     Extend capabilites of transform REGSUB                                  open            fixed(alternate)       10.01.2012 10.01.2012
-20     Add transform STATISTIC                                                 open            fixed                  06.01.2012 21.12.2012
-17     Fix syntax check of the DELTA transform                                 open            fixed(alternate)       02.01.2012 02.01.2012
-16     Change output of SPEED transform                                        open            fixed                  02.01.2012 02.01.2012
-15     Improve syntax check DELTA transform                                    open            fixed(alternate)       02.01.2012 02.01.2012
-14     Layout of devmon statistics in Xymon, test dm                           open            fixed                  02.01.2012 02.01.2012
-13     Template for OpenBSD using Net-SNMP                                     open            fixed                  09.08.2011 09.08.2011
-12     snmpEngineTime vs sysUpTimeSecs over 497 days                           open            fixed(alternate)       07.03.2011 07.03.2011
-11     Brocade SAN switch template                                             open            wont(see sf comment)   07.08.2010 07.08.2010
-10     SUBSTR negative                                                         open-remind     wont fix(disp prob)    04.03.2010 22.01.2011
-9      New templates for cisco and hp                                          open            fixed(asa+ps) wont:hp  16.11.2009 16.11.2009
-2      Cisco Template for Class Based Weighted Fair Qeueing (QoS)              open            fixed                  06.10.2008 06.10.2008
+`PATCH                                                                     SForge Status Github Status`  
+`38 Template for cisco nexus 3500                                           open         fixed                  07.06.2018 07.06.2018`  
+`37 Allow for OIDS with flag in message part of a threshold definition      open         fixed                  01.04.2017 01.04.2017`
+`36 Enhance REGSUB transformation capabilities                              open         fixed(alternate)       01.04.2017 01.04.2017`   
+`35 Replacement for function render_msg in module dm_tests.pm               open         wont/partial fix(bugs) 17.03.2017 24.03.2017`  
+`34 Replace an OID errors flag by an empty string incase of a green colour  open         fixed                  26.02.2017 04.03.2017`  
+`33 Patch for the (T)SWITCH transform to be able to assign empty string     open         fixed                  24.02.2017 24.02.2017`  
+`32 Formatting of result of MATH transform                                  open         reported in todo       06.02.2017 06.02.2017`  
+`31 Fix typo in function name                                               open         fixed                  16.01.2017 16.01.2017`  
+`30 Support for negative numbers in (T)SWITCH                               open         reported in todo       13.01.2015 13.01.2015`  
+`29 Document default in SWITCH transform                                    open         fixed                  14.11.2014 14.11.2014`  
+`28 Allow function time in a MATH transform                                 open         wont(use eval trans)   22.10.2014 22.10.2014`  
+`27 Add TABLE:sort option                                                   open         fixed(alternate)       26.08.2014 26.08.2014`  
+`26 Add transform SET                                                       open         fixed(incompleted)     18.08.2014 18.08.2014`  
+`25 Fix bug #13                                                             open         fixed(alternate)       25.06.2014 25.06.2014`  
+`24 Align columns of a TABLE to the right side                              open         reported in todo       23.10.2013 23.10.2013`  
+`23 Consistent notation OIDs                                                open         fixed/alternate)       04.01.2013 04.01.2013`  
+`22 Templates for Cisco 7609 and ITP                                        open         fixed                  29.06.2012 29.06.2012`  
+`21 Extend capabilites of transform REGSUB                                  open         fixed(alternate)       10.01.2012 10.01.2012`  
+`20 Add transform STATISTIC                                                 open         fixed                  06.01.2012 21.12.2012`  
+`17 Fix syntax check of the DELTA transform                                 open         fixed(alternate)       02.01.2012 02.01.2012`  
+`16 Change output of SPEED transform                                        open         fixed                  02.01.2012 02.01.2012`  
+`15 Improve syntax check DELTA transform                                    open         fixed(alternate)       02.01.2012 02.01.2012`  
+`14 Layout of devmon statistics in Xymon, test dm                           open         fixed                  02.01.2012 02.01.2012`  
+`13 Template for OpenBSD using Net-SNMP                                     open         fixed                  09.08.2011 09.08.2011`  
+`12 snmpEngineTime vs sysUpTimeSecs over 497 days                           open         fixed(alternate)       07.03.2011 07.03.2011`  
+`11 Brocade SAN switch template                                             open         wont(see sf comment)   07.08.2010 07.08.2010`  
+`10 SUBSTR negative                                                         open-remind  wont fix(disp prob)    04.03.2010 22.01.2011`  
+`9  New templates for cisco and hp                                          open         fixed(asa+ps) wont:hp  16.11.2009 16.11.2009`  
+`2  Cisco Template for Class Based Weighted Fair Qeueing (QoS)              open         fixed                  06.10.2008 06.10.2008`  
 
-FEATURE REQUEST
-10     New templates for other devices                                         open            wont/part. fixed(1/3)  29.09.2016 29.09.2016
-9      Allow for empty repeater-type OIDs                                      open            reported in todo       05.06.2012 05.06.2012
-8      exceptions based on other oid values                                    open            reported in todo       19.04.2012 19.04.2012
-7      Share templates for similar devices                                     open            reported in todo       22.01.2010 22.01.2010
-3      Use OID value in threshold comparison                                   open            reported in todo       31.12.2008 04.04.2011
-2      SNMP V3 support                                                         open            reported in todo       17.10.2008 17.10.2008
+`FEATURE REQUEST`  
+`10 New templates for other devices                                         open         wont/part. fixed(1/3)  29.09.2016 29.09.2016`  
+`9  Allow for empty repeater-type OIDs                                      open         reported in todo       05.06.2012 05.06.2012`  
+`8  exceptions based on other oid values                                    open         reported in todo       19.04.2012 19.04.2012`  
+`7  Share templates for similar devices                                     open         reported in todo       22.01.2010 22.01.2010`  
+`3  Use OID value in threshold comparison                                   open         reported in todo       31.12.2008 04.04.2011`  
+`2  SNMP V3 support                                                         open         reported in todo       17.10.2008 17.10.2008`  
+
+`BUGs`  
+`16 Some interface of cisco Router do not appear                            open         nothing to do          20.09.2015 15.03.2017`  
+`15 MATH transform fails if with both repeaters and non-repeaters           open         fixed                  22.10.2014 22.10.2014`  
+`14 Cisco-6509 wrong oids for serial                                        open-later   wont(cannot test)      21.12.2011 03.01.2013`  
+`13 Thresholds remain undefined                                             open         fixed                  30.08.2011 30.08.2011`  
+`12 New templates for Cisco 3750 switch                                     open         fixed(alternate)       01.02.2011 01.02.2011`  
+`10 Many templates share "sysdesc" in specs                                 open         wont                   22.01.2010 22.01.2010`  
+`9  Template exceptions sorted misleadingly                                 open-remind  reported in todo       31.12.2009 22.01.2011`  
+`8  devmon goes purple                                                      open         fixed(alternate)       13.11.2009 13.11.2009`  
+`6  cisco-2811 has wrong ifName oids                                        open-later   fixed                  19.02.2009 05.02.2010`  
+`5  Wrong threshold calculation for Cisco templates                         open         fixed                  03.02.2009 03.02.2009`  
 
 
-BUG
-16     Some interface of cisco Router do not appear                            open            nothing to do          20.09.2015 15.03.2017
-15     MATH transform fails if with both repeaters and non-repeaters           open            fixed                  22.10.2014 22.10.2014
-14     Cisco-6509 wrong oids for serial                                        open-later      wont(cannot test)      21.12.2011 03.01.2013
-13     Thresholds remain undefined                                             open            fixed                  30.08.2011 30.08.2011
-12     New templates for Cisco 3750 switch                                     open            fixed(alternate)       01.02.2011 01.02.2011
-10     Many templates share "sysdesc" in specs                                 open            wont                   22.01.2010 22.01.2010
-9      Template exceptions sorted misleadingly                                 open-remind     reported in todo       31.12.2009 22.01.2011
-8      devmon goes purple                                                      open            fixed(alternate)       13.11.2009 13.11.2009
-6      cisco-2811 has wrong ifName oids                                        open-later      fixed                  19.02.2009 05.02.2010
-5      Wrong threshold calculation for Cisco templates                         open            fixed                  03.02.2009 03.02.2009
-
-===========================================================================================================================================
-  
-
-### Devmon v0.3.1-beta1 :: Released 2009-01-23
+## Devmon v0.3.1-beta1 :: Released 2009-01-23
  Changes since 0.3.0
   - Fix loading non-standard ports from the config file
   - Fix segfault in hobbitd_rrd caused by do_devmon.c and data with spaces in 
@@ -159,14 +155,14 @@ BUG
      line of the status message
   - Filters in hobbitdboard are regex's, anchor the conn text (Simeon Berkley)
 
-### Devmon v0.3.0 :: Released 2008-04-03
+## Devmon v0.3.0 :: Released 2008-04-03
  Changes since 0.3.0-rc1
   - Ensure that send_msgs returns when display server is inaccessible.
     This change fixes the "Devmon turns purple" issue (Buchan Milne)
   - Fix Hobbit-only dont-poll-if-down feature (Buchan Milne)
   - Distribute a more complete patch for hobbit that includes do_devmon.c
 
- Changes since 0.3.0-beta2
+## Changes since 0.3.0-beta2
   Changed:
   - Ignore hidden template directories (e.g. .svn) (Francois Lacroix)
   - Add negated regexp threshold (Nathan Hand)
@@ -209,7 +205,7 @@ BUG
       test for devmon node works where hostname is FQDN) (Buchan Milne)
 
 
-### Changes since 0.2.2
+## Changes since 0.2.2
 
   Changed:
   - If you specify a non-absolute path to a config file (using -c)
@@ -244,7 +240,7 @@ BUG
   - Fixed cisco 3500 templates to correctly translate ifc speed
   - Fixed REGSUB transform to work leaf OIDs (Gaetan Frenoy)
   
-### Devmon v0.2.2 :: Released 05/18/2006
+## Devmon v0.2.2 :: Released 05/18/2006
 
   Changed:
   - Fixed cisco templates that had an uneccesary ifSpeed entry
@@ -259,7 +255,7 @@ BUG
     some numbers as a divide by zero condition and returning 0.
 
 
-### Devmon v0.2 beta :: Released 05/09/2006
+## Devmon v0.2 beta :: Released 05/09/2006
 
   Changed:
   - Changed the way the TABLE: message directive is read.
@@ -320,7 +316,7 @@ BUG
   - Fixed the command line config override (Steve Aiello)
   - Fixed problem with non-HTML tables (Dan Vande More)
 
-### Devmon v0.1.2 beta :: Not released
+## Devmon v0.1.2 beta :: Not released
 
   Added:
   - Support for non-HTML(NCV) type tables
@@ -331,7 +327,7 @@ BUG
     devmon to crash when using 64bit counters
   - Fixed the order of alarm applications; now alarms by default
 
-### Devmon v0.1.1 beta :: Released 02/28/2006
+## Devmon v0.1.1 beta :: Released 02/28/2006
 
   Added:
   
@@ -349,6 +345,6 @@ BUG
   - Fixed extremely high polltimes when not polling any devices
 
 
-### Devmon v0.1 beta   :: Released 02/23/2006
+## Devmon v0.1 beta   :: Released 02/23/2006
 
    Initial release
