@@ -1,6 +1,6 @@
- ## DEVMON TEMPLATES
+# TEMPLATES
  
- ### What are templates?
+## What are templates?
 Templates are a core component of Devmon, enhancing its adaptability compared
 to other monitoring scripts. They enable tailored configurations for device 
 management, addressing specific needs per device model. With templates, users
@@ -16,7 +16,7 @@ This flexibility empowers system administrators to monitor diverse devices for
 various conditions, assuming SNMP monitoring capability is available for the
 device.
 
-### Rolling your own
+## Rolling your own
 Rolling your own Devmon template is a straightforward task that doesn't require 
 programming experience but may benefit from some familiarity with regular 
 expressions. If you're new to regular expressions, it's recommended to spend a
@@ -162,7 +162,7 @@ of templates matches the ones used in the database.
  variable or another.
 
 
- ### The 'OID' concept
+## The 'OID' concept
 
  More explaination of the 'OID' term as it is a key concept that should be
  well understood.
@@ -302,14 +302,14 @@ of templates matches the ones used in the database.
  below: (listed in alphabetical order)
 
 
- ### BEST transform
+## BEST transform
  This transform takes two data aliases as input, and stores
  the values for the one with the 'best' alarm color (green being the 'best'
  and red being the 'worst') in the transformed data alias. The oids can either
  be comma or space delimited.
 
 
- ### CHAIN transform
+## CHAIN transform
 
  Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
  string value under another OID (the 'leaf' oid). The CHAIN transform will
@@ -345,7 +345,7 @@ of templates matches the ones used in the database.
     chainedOid.2 = 'System fans are non-operational'
 
 
- ### CONVERT transform
+## CONVERT transform
 
  Convert a string in either hexadecimal or octal to its decimal equivalent.
  Takes two arguments, a target OID alias and a conversion type, which must be
@@ -357,7 +357,7 @@ of templates matches the ones used in the database.
     intYear : CONVERT: {hexYear} hex
 
 
- ### DELTA transform
+## DELTA transform
 
  The DELTA transform performs a 'change over time' calculation on the
  supplied data. It takes a single data alias, with an optional 'upper limit'
@@ -395,7 +395,7 @@ of templates matches the ones used in the database.
  based off the target alias).
 
 
- ### DATE transform
+## DATE transform
 
  This transform takes a single data alias as input, the value of which Devmon
  assumes to be seconds in "Unix time" (i.e. seconds since the Epoch [00:00:00
@@ -404,7 +404,7 @@ of templates matches the ones used in the database.
  the format CCYY-MM-DD, HH:MM:SS (24 hour time).
 
 
- ### ELAPSED transform
+## ELAPSED transform
 
  This transform takes a single data alias as input, the value of which Devmon
  assumes to be in seconds. It then stores a text string in the transformed
@@ -412,7 +412,7 @@ of templates matches the ones used in the database.
  equal to the number of seconds provided as input to the transform.
 
 
- ### INDEX transform
+## INDEX transform
 
  This transform allows you to access the index part of a numerical OID in a
  repeater OID.
@@ -435,7 +435,7 @@ of templates matches the ones used in the database.
  an OID value. Any operations you need to do on the index value should be
  possible with existing transforms.
 
- ### MATCH transform
+## MATCH transform
 
  In some badly designed MIBs multiple types of information are presented in a
  single table with two columns (branches), often in just a name, value format.
@@ -546,11 +546,11 @@ of templates matches the ones used in the database.
  value is 2 precision characters. To remove the decimal characters
  alltogether, specify a value of 0.
 
- ### UNPACK transform 
+## UNPACK transform 
   
  The inverse of the 'PACK' transform.
 
- ### REGSUB transform
+## REGSUB transform
 
  One of the most powerful and complicated transforms, the regsub transform
  allows you to perform a regular expression substitution against a single data
@@ -570,7 +570,7 @@ of templates matches the ones used in the database.
  about substitution, you might want to google 'regular expression
  substitution' and try reading up on it.
 
- ### SET transform
+## SET transform
 
  The SET transform creates a repeater-type OID, and presets it with a sequence
  of constants. The indexes of the individual values of the OID created by SET
@@ -622,7 +622,7 @@ of templates matches the ones used in the database.
  The SET transform introduces the same possibility for a repeater-type OID.
 
 
- ### SPEED transform
+## SPEED transform
 
  This transform takes a single data alias as input, which it assumes to be a
  speed in bits. It then stores a value in the transformed data alias,
@@ -630,7 +630,7 @@ of templates matches the ones used in the database.
  would render the string '1.2 Kbps', a value of 13000000 will return a value
  of '13 Mbps', etc.
 
- ### STATISTIC transform
+## STATISTIC transform
 
  This transform takes a repeater type data alias as the input for the
  transform and computes a non-repeater type data alias. The STATISTIC
@@ -656,7 +656,7 @@ of templates matches the ones used in the database.
     MIN : Minimum value
     SUM : Sum of the values
 
- ### SUBSTR transform
+## SUBSTR transform
 
  The substr transform is used to extract a portion of the text (aka a
  'substring') stored in the target OID alias. This transform takes as
@@ -676,7 +676,7 @@ of templates matches the ones used in the database.
  stores 'master switch' in the 'switchName' alias
 
 
- ### SWITCH transform
+## SWITCH transform
 
  The switch transform transposes one data value for another. This is most
  commonly used to transform a numeric value returned by an snmp query into its
@@ -729,7 +729,7 @@ of templates matches the ones used in the database.
  if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
  value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
 
- ### UNPACK transform
+## UNPACK transform
 
  The unpack transform is used to unpack binary data into any one of a number
  of different data types (all of which are eventually stored as a string by
@@ -768,7 +768,7 @@ of templates matches the ones used in the database.
        x  | null byte
        
 
- ### WORST transform
+## WORST transform
 
  This transform takes two data aliases as input, and stores the values for the
  one with the 'worst' alarm color (red being the 'worst' and green being the
