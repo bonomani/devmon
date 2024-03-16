@@ -107,7 +107,7 @@ Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_change
    - You will find the generic in devmon/extra folder 
 
 ## Git Notes
-### Update of devmon.cfg on the repo and locally excluded block the update (abandon)
+### Update of devmon.cfg from the github repo and locally excluded block the update (abandon)
 Revert exclusion of your devmon.cfg from git to be able to update it
 Put your local modif (else than devmon.cfg if any) on the stash
 ```bash
@@ -128,7 +128,7 @@ Pull modif from repo
 git pull
 ```
 Update your devmon.cfg
-Reapply your local modif and re-exclude devmon.cfg from modif.
+Reapply *manually* your local modif and re-exclude devmon.cfg from modif.
 ```bash
 git update-index --assume-unchanged devmon.cfg
 ```
