@@ -106,28 +106,36 @@ Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_change
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
    - You will find the generic in devmon/extra folder 
 
-## Notes
-### Revert exclusion of your devmon.cfg from git to be able to update it
-Put your local modif elsewhere (the stash) if any 
+## Git Notes
+### Update of devmon.cfg on the repo and locally excluded block the update (abandon)
+Revert exclusion of your devmon.cfg from git to be able to update it
+Put your local modif (else than devmon.cfg if any) on the stash
 ```bash
 git stash 
 ```
-Reset git to head
+Take a backup of your local config and pull all modifs including devmon.cfg  
+Note: Alternative also recommended: copy the devmon folder elsewhere (if you did some modification on the code, it is possible to have conflict: so it always good to have a backup)
+```bash
+cp devmon.cfg devmon.cfg-old
+```
+
+Reset git to head (as it was originally when downloaded)
 ```bash
 git reset --hard
 ```
-Take a backup of your local config and pull all modifs including devmon.cfg  
+Pull modif from repo
 ```bash
-cp devmon.cfg devmon.cfg-old
 git pull
 ```
 Update your devmon.cfg
 Reapply your local modif and re-exclude devmon.cfg from modif.
 ```bash
-git stash apply
 git update-index --assume-unchanged devmon.cfg
 ```
-
+```bash
+Reapply your modif
+git stash apply
+```
 ### Additional step possibilities (NOT NEEDED, BUT KEPT FOR INFO: NEED CLEANING)
 Create a directory for devmon:
 ```bash
