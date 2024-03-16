@@ -2,15 +2,19 @@
 # Installation
 ## Prerequisits: Install SNMP_Session (Perl module) and Net-SNMP (Perl module + C lib) 
 RHEL 
+
 ```bash
 yum install perl-SNMP_Session.noarch
 yum install net-snmp net-snmp-devel net-snmp-utils
 ```
+
 Debian
+
 ```bash
 apt install libsnmp-session-perl
 apt install snmp
 ```
+
 From Source
 - Download [SNMP_Session](https://github.com/sleinen/snmp-session)
 - See how to install [Net-SNMP](http://www.net-snmp.org)
@@ -20,6 +24,7 @@ From Source
 
 ## Download and unpack Devmon
 With git
+
 ```bash
 cd .....xymon/server/ext
 mkdir devmon
@@ -28,7 +33,9 @@ git clone https://github.com/bonomani/devmon.git
 # Exclude your devmon.cfg to be follow (to revert show below)
 git update-index --assume-unchanged devmon.cfg
 ```
+
 Or with wget
+
 ```bash
 cd .....xymon/server/ext
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
@@ -36,13 +43,16 @@ curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/mai
 unzip devmon.zip
 mv devmon-main devmon
 ```
+
 Or with curl
+
 ```bash
 cd .....xymon/server/ext
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 unzip devmon.zip
 mv devmon-main devmon 
 ```
+
 ## Prepare Xymon (Files are located in the xymon server 'etc' folder)
 Modify `cgioptions.cfg`:
 ```
