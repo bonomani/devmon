@@ -118,27 +118,34 @@ Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_change
 
 ## Git Notes
 ### Update of devmon.cfg from the github repo and locally excluded block the update (abandon)
+Recommended: copy the complete devmon folder elsewhere (so you have a backup in case somthing goes wrong)  
+```bash
+cp -rf devmon devmon-dateYYMMDD
+```
+
+Take a backup of your local config and pull all modifs including devmon.cfg  
+```bash
+cp devmon.cfg devmon.cfg-old
+```
+
 Revert exclusion of your devmon.cfg from git to be able to update it
 Put your local modif (else than devmon.cfg if any) on the stash
 ```bash
 git stash 
-```
-Take a backup of your local config and pull all modifs including devmon.cfg  
-Note: Alternative also recommended: copy the devmon folder elsewhere (if you did some modification on the code, it is possible to have conflict: so it always good to have a backup)
-```bash
-cp devmon.cfg devmon.cfg-old
 ```
 
 Reset git to head (as it was originally when downloaded)
 ```bash
 git reset --hard
 ```
+
 Pull modif from repo
 ```bash
 git pull
 ```
+
 Update your devmon.cfg
-Reapply *manually* your local modif and re-exclude devmon.cfg from modif.
+Reapply **manually** your local modif and re-exclude devmon.cfg from modif.
 ```bash
 git update-index --assume-unchanged devmon.cfg
 ```
