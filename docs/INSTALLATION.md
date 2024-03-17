@@ -158,11 +158,11 @@ git stash apply
 ## Obsolete or additional steps 
 
 ### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discovery anymore)
-Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
+Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg, in folder: devmon/extra
 
 ### Devmon Purple (Obsolete)
-   - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
-   - You will find the generic in devmon/extra folder
+For systemd (tested for CentOS only): in folder `devmon/extra/systemd`.
+
 
 
 
