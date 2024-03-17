@@ -23,6 +23,7 @@ The can start Devmon to run periodically for all relevant tests for those device
 You can configure Devmon using various options within the `bb-hosts` tag, such as:
 
 - `cid()` for custom SNMP Community ID
+- [cid()](#cid()) 
 - `ip()` for a custom IP address
 - `port()` for a custom UDP SNMP port
 - `model()` to manually set the device's vendor and model
