@@ -33,11 +33,10 @@ folders on your other servers. This avoids confusion when syncing templates
 to your database, making sure everything matches up.
 
 ## The 'specs' file
-Under each vendor-model directory, there should be a single
-file, named 'specs' (for specifications), and one or more
-subdirectories, each of which represent a particular test for that
-vendor-model.  The specs file contains data that is vendor-model 
-specific, but not necessarily test specific.
+Each vendor-model directory must contain a file named 'specs' for specifications.
+Additionally, there can be one or more subdirectories within each directory,
+each representing a specific test for that vendor-model. The 'specs' file 
+holds data specific to the vendor-model
 
 The 'specs' file should look something like this:
 
