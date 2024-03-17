@@ -14,15 +14,17 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - User-frendly data manipulation logic   
 
 ## Learning More
-- [Installation](docs/INSTALLATION.md) documentation and prerequisit
+- [Installation](docs/INSTALLATION.md): documentation and prerequisit
 - [Using](docs/USING.md): How to integrate it with Xymon hosts.cfg
 - [Overview](docs/OVERVIEW.md): A global overview on how it works
-- [Template](docs/TEMPLATE.msd): How to create or update your device templates 
+- [Template](docs/TEMPLATE.msd): How to create or update your device templates
+- [Roadmap](discussions/94): What we are working on 
 - [Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): A valuable resource for developers with best practices
 - [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): A screenshot collection.
 - [Contributing](docs/CONTRIBUTING.md)
   
 
 ## Support
-For inquiries, feedback, or further information, don't hesitate to [contact](https://ubiquitous-network.ch/contact/) us. We're always looking for ways to improve and welcome your input.
-```
+- GitHub [issues](https://github.com/bonomani/devmon/issues)
+- GitHub [discussions](https://github.com/bonomani/devmon/discussions)
+- [Contact](https://ubiquitous-network.ch/contact/) us privately
