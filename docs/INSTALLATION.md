@@ -62,7 +62,8 @@ chown -R xymon ./devmon
 chgrp -R xymon ./devmon
 ```
 
-## Prepare Xymon (Files are located in the xymon server 'etc' folder)
+## Prepare Xymon 
+In the xymon server 'etc' folder  
 Modify `cgioptions.cfg`:
 ```
 CGI_SVC_OPTS="--env=$XYMONENV --no-svcid --history=top --multigraphs=,disk,inode,qtree,quotas,snapshot,TblSpace,cpu_dm,disk_dm,mem_dm,if_col,if_dsc,if_err,if_load,fans,temp"
