@@ -9,7 +9,6 @@ Contributors of specific features/patches are listed in parenthesis next to the 
   - Prevent memory leaks, by eliminating fork failures.
   - Better control the SNMP oid walking process by using low level "snmpgetbulk" queries
   - Speeds up monitoring, particularly for slower devices 
-- Notes:
   - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) as new logic not implemented for NET-SNMP 
 - Bug fixes
   
