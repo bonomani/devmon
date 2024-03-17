@@ -114,5 +114,5 @@ DEVMON:except(all;ifName;ao:Gi0/[1-2])
 
 ```
 
-Exceptions use regular expressions and are anchored, meaning they must match the OID value **exactly**.
+Exceptions use regular expressions and are anchored, meaning they must match the OID value **exactly**.  
 For more information on [templates](docs/TEMPLATES.md)
