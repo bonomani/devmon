@@ -61,6 +61,25 @@ chown -R xymon ./devmon
 chgrp -R xymon ./devmon
 ```
 
+## Configure Devmon (Single-node)
+
+### Edit `devmon.cfg` Configuration File 
+- Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
+
+## Install as a service 
+ 
+### Systemd: [extras/systemd/](/extras/systemd/)
+```bash
+cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
+```
+Edit the /etc/systemd/system/devmon.service file and adjust the executable path as needed
+```bash
+systemctl daemon-reload
+systemctl enable devmon
+systemctl start devmon
+```
+### Init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)  
+
 ## Prepare Xymon 
 In the Xymon server 'etc' folder  
 Modify `cgioptions.cfg`:
@@ -81,25 +100,6 @@ cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/g
 Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 - directory /var/xymon/server/etc/graphs.d
 - include /var/xymon/server/etc/graphs.d/devmon-graphs.cfg
-
-## Configure Devmon (Single-node)
-
-### Edit `devmon.cfg` Configuration File 
-- Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
-
-## Install as a service 
- 
-### Systemd: [extras/systemd/](/extras/systemd/)
-```bash
-cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
-```
-Edit the /etc/systemd/system/devmon.service file and adjust the executable path as needed
-```bash
-systemctl daemon-reload
-systemctl enable devmon
-systemctl start devmon
-```
-### Init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)  
 
 ## Git Notes
 ### Problem: `git pull` blocked: (abandon)
