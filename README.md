@@ -18,8 +18,8 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - User-frendly data manipulation logic   
 
 ## Learning More
-- [Installation](docs/INSTALLATION.md)
-- [Usage](docs/USAGE.md)
+- [Installation](docs/INSTALLATION.md) documentation and prerequisit
+- [Using](docs/USING.md): How to integrate it with Xymon hosts.cfg
 - [Contributions](docs/CONTRIBUTING.md)
 - [Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): A valuable resource for developers with best practices
 - [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): A screenshot collection.
