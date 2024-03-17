@@ -25,9 +25,8 @@ apt install snmp
   - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ## Download and unpack Devmon
-With your prefer tool
+### With you prefered tool
 - Git
-
 ```bash
 cd .....xymon/server/ext
 mkdir devmon
@@ -37,8 +36,7 @@ git clone https://github.com/bonomani/devmon.git
 git update-index --assume-unchanged devmon.cfg
 ```
 
-### Wget
-
+- wget
 ```bash
 cd .....xymon/server/ext
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
@@ -47,8 +45,7 @@ unzip devmon.zip
 mv devmon-main devmon
 ```
 
-### Using curl
-
+-curl
 ```bash
 cd .....xymon/server/ext
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
@@ -56,7 +53,7 @@ unzip devmon.zip
 mv devmon-main devmon 
 ```
 
-## Update ownership and group
+### Update ownership and group
 ```
 According to the user that will run devmon (here xymon)
 chown -R xymon ./devmon
