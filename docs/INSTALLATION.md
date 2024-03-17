@@ -25,7 +25,7 @@ apt install snmp
   - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ## Download and unpack Devmon
-With git
+### Using git
 
 ```bash
 cd .....xymon/server/ext
@@ -36,7 +36,7 @@ git clone https://github.com/bonomani/devmon.git
 git update-index --assume-unchanged devmon.cfg
 ```
 
-Or with wget
+### Using wget
 
 ```bash
 cd .....xymon/server/ext
@@ -46,13 +46,20 @@ unzip devmon.zip
 mv devmon-main devmon
 ```
 
-Or with curl
+### Using curl
 
 ```bash
 cd .....xymon/server/ext
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 unzip devmon.zip
 mv devmon-main devmon 
+```
+
+## Update ownership and group
+```
+According to the user that will run devmon (here xymon)
+chown -R xymon ./devmon
+chgrp -R xymon ./devmon
 ```
 
 ## Prepare Xymon (Files are located in the xymon server 'etc' folder)
@@ -111,12 +118,6 @@ systemctl enable devmon
 systemctl start devmon
 ```
 
-### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discobery anymore)
-Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
-
-### Devmon Purple (Obsolete):
-   - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
-   - You will find the generic in devmon/extra folder 
 
 ## Git Notes
 ### Update of devmon.cfg from the github repo and locally excluded block the update (abandon)
@@ -155,13 +156,25 @@ git update-index --assume-unchanged devmon.cfg
 Reapply your modif
 git stash apply
 ```
-### Additional step possibilities (NOT NEEDED, BUT KEPT FOR INFO: NEED CLEANING)
-Create a directory for devmon:
-```bash
-mkdir /var/run/devmon
-chown xymon /var/run/devmon
-chgrp xymon /var/run/devmon
- ```
+
+### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discobery anymore)
+Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
+
+### Devmon Purple (Obsolete):
+   - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
+   - You will find the generic in devmon/extra folder
+   - 
+### Obsolete or additional steps 
+Not needed normally on modern system, but kept info
+
+### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discovery anymore)
+Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
+
+### Devmon Purple (Obsolete)
+   - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
+   - You will find the generic in devmon/extra folder
+
+### Devmon Init.d Script
 Copy the devmon init.d script to the appropriate directory:
 ```bash
 cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
@@ -185,10 +198,5 @@ Add devmon to the system startup and start the service:
 chkconfig --add devmon
 chkconfig devmon on
 service devmon start
-```
-Update ownership and group if necessary (e.g., for Xymon user):
-```bash
-chown xymon /var/xymon/server/ext/devmon
-chgrp xymon /var/xymon/server/ext/devmon
 ```
 
