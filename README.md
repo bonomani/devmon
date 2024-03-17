@@ -1,7 +1,8 @@
 <!DOCTYPE markdown>
 # Devmon
 Devmon is an SNMP opensource monitoring tool integrated to Xymon system monitoring
-![Devmon's Current Overview](devmon_current_status.png)
+![Devmon's Current Overview](devmon_current_status.png)  
+[A screenshot collection](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots)
 
 ## Introduction
 Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling comprehensive surveillance of network devices such as routers, switches, firewalls, and servers. It provides both graphing and alerting functionalities
@@ -17,10 +18,10 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - [Installation](docs/INSTALLATION.md): and prerequisits
 - [Using](docs/USING.md): How to integrate it with Xymon hosts.cfg
 - [Overview](docs/OVERVIEW.md): A global overview on how it works
-- [Template](docs/TEMPLATE.msd): How to create or update your device templates
+- [Template](docs/TEMPLATE.md): How to create or update your device templates
+- [Graphing]((ocs/GRAPHING.md): 
 - [Roadmap](discussions/94): What we are working on 
 - [Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): A valuable resource for developers with best practices
-- [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): A screenshot collection.
 - [Contributing](docs/CONTRIBUTING.md)
   
 
