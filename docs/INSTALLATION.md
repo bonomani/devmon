@@ -144,7 +144,7 @@ Pull modif from repo
 git pull
 ```
 
-Update your devmon.cfg
+Update your devmon.cfg  
 Reapply **manually** your local modif and re-exclude devmon.cfg from modif.
 ```bash
 git update-index --assume-unchanged devmon.cfg
