@@ -105,9 +105,9 @@ ps -aux | grep devmon
 - Verify if new 'tests' are being shown on your display server.
 - Verity if a 'dm' test exist on your monitoring server and look at the stats
 
-### Install Start/Stop Script
-using init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)   
-using systemd: [extras/systemd/](/extras/systemd/)
+### Install as a servuce Start/Stop Script
+ 
+#### Systemd: [extras/systemd/](/extras/systemd/)
 ```bash
 cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
 ```
@@ -117,6 +117,7 @@ systemctl daemon-reload
 systemctl enable devmon
 systemctl start devmon
 ```
+#### Init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)  
 
 ## Git Notes
 ### Problem: `git pull` blocked: (abandon)
