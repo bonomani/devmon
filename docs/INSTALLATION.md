@@ -1,21 +1,23 @@
 <!DOCTYPE markdown>
 # Installation
-## Prerequisits: Install SNMP_Session (Perl module) and Net-SNMP (Perl module + C lib) 
-RHEL 
+## Prerequisits
+Install SNMP_Session (Perl module) and Net-SNMP (Perl module + C lib)
+
+### RHEL 
 
 ```bash
 yum install perl-SNMP_Session.noarch
 yum install net-snmp net-snmp-devel net-snmp-utils
 ```
 
-Debian
+### Debian
 
 ```bash
 apt install libsnmp-session-perl
 apt install snmp
 ```
 
-From Source
+### From Source
 - Download [SNMP_Session](https://github.com/sleinen/snmp-session)
 - See how to install [Net-SNMP](http://www.net-snmp.org)
 - Both are recommended but not mandatory for compatibility with all SNMP versions.
