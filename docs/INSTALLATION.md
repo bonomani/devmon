@@ -155,9 +155,7 @@ Reapply your modif
 git stash apply
 ```
 
-   - 
 ## Obsolete or additional steps 
-Not needed normally on modern system, but kept info
 
 ### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discovery anymore)
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
