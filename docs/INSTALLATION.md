@@ -82,18 +82,14 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 - directory /var/xymon/server/etc/graphs.d
 - include /var/xymon/server/etc/graphs.d/devmon-graphs.cfg
 
-## Install and configure Devmon (Single-node)
+## Configure Devmon (Single-node)
 
 ### Edit `devmon.cfg` Configuration File 
 - Pay attention to options like `HOSTSCFG`, `SNMPCIDS`, `SECNAMES`, `LOGFILE`, etc.
 
-### Configure Xymon Hosts File
-- Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the xymon `HOSTSCFG` file.
-- Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
-
-### Install as a service 
+## Install as a service 
  
-#### Systemd: [extras/systemd/](/extras/systemd/)
+### Systemd: [extras/systemd/](/extras/systemd/)
 ```bash
 cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
 ```
@@ -103,7 +99,7 @@ systemctl daemon-reload
 systemctl enable devmon
 systemctl start devmon
 ```
-#### Init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)  
+### Init.d: [devmon.initd.redhat](/extras/devmon.initd.redhat)  
 
 ## Git Notes
 ### Problem: `git pull` blocked: (abandon)
