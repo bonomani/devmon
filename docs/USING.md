@@ -46,9 +46,7 @@ However, following options are invalid:
 10.0.0.1        myrouter      # DEVMON:tests (power)
 ```
 
-### Examples of Devmon Tag Options
-
-### cid()
+## cid()
 
 For devices with unique SNMP Community String (cids) not listed in `devmon.cfg`:
 
@@ -56,7 +54,7 @@ For devices with unique SNMP Community String (cids) not listed in `devmon.cfg`:
 DEVMON:cid(mycommunity)
 ```
 
-### ip()
+## ip()
 
 To query devices at a secondary IP address:
 
@@ -64,7 +62,7 @@ To query devices at a secondary IP address:
 DEVMON:ip(10.0.0.11)
 ```
 
-### port()
+## port()
 
 For devices using non-standard SNMP ports:
 
@@ -72,7 +70,7 @@ For devices using non-standard SNMP ports:
 DEVMON:port(5161)
 ```
 
-### model()
+## model()
 
 To manually set a device's model, avoiding auto-detection:
 
@@ -80,7 +78,7 @@ To manually set a device's model, avoiding auto-detection:
 DEVMON:model(cisco;2950)
 ```
 
-### tests() and notests()
+## tests() and notests()
 
 To limit tests to certain ones or exclude some:
 
@@ -89,7 +87,7 @@ DEVMON:tests(cpu,if_err)
 DEVMON:notests(fans)
 ```
 
-### thresh()
+## thresh()
 
 To customize test thresholds, specify the test, OID, and new threshold values:
 
