@@ -1,5 +1,5 @@
 ## Using
-## Devmon Tags in the Xymon hosts.cfg File
+## Devmon Tags 
 
 After installing Devmon, you can start monitoring remote hosts by adding the `DEVMON` tag to their entries in the `hosts.cfg` file.
 
@@ -18,9 +18,9 @@ less hosts.db
 ```
 The can start Devmon to run periodically for all relevant tests for those devices
 
-## Using Options with a Devmon Tag
+## Options
 
-You can configure Devmon using various options within the `bb-hosts` tag, such as:
+You can configure Devmon using various options within the `hosts.cfg` tag, such as:
 
 - [cid()](#cid) for custom SNMP Community ID
 - [ip()](#ip) for a custom IP address
