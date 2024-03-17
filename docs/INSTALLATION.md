@@ -117,7 +117,8 @@ systemctl start devmon
 ```
 
 ## Git Notes
-### Update of devmon.cfg from the github repo and locally excluded block the update (abandon)
+### Problem: `git pull` blocked: (abandon)
+An update of devmon.cfg from the github repo and locally excluded devmon.cfg are blocking the `git pull`  
 Recommended: copy the complete devmon folder elsewhere (so you have a backup in case somthing goes wrong)  
 ```bash
 cp -rf devmon devmon-dateYYMMDD
