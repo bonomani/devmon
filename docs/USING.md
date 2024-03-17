@@ -108,8 +108,12 @@ For repeater type OIDs, there are four exception types, each with its abbreviati
 - 'No alarm' (abbreviated as 'na'): Allows only rows without matching primary OIDs to generate alarms.
 
 ```
-# No specific example provided in the original text
+
+DEVMON:except(if_stat;ifName;ao:Fa0/4[8-9])
+DEVMON:except(if_stat;ifName;i:Vl.*|Lo.*|Nu.*)
+DEVMON:except(all;ifName;ao:Gi0/[1-2])
+
 ```
 
 Exceptions use regular expressions and are anchored, meaning they must match the OID value exactly.
-
+For more information on [templates])(docs/TEMPLATES.md)
