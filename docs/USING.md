@@ -4,19 +4,19 @@
 After installing Devmon, you can start monitoring remote hosts by adding the `DEVMON` tag to their entries in the `hosts.cfg` file.
 
 A typical entry looks like this:
-
 ```
 10.0.0.1        myrouter      # DEVMON
 ```
 
-The `DEVMON` tag signals Devmon to monitor this host. You should discover and identify the device's vendor and model, determining which test templates to apply.
+## Discover
+Devmon should discover and identify the device's vendor and model, determining which test templates to apply.
 
 Run the  process and look at the result
 ```
-devmon -read
+./devmon -read
 less hosts.db
 ```
-The can start Devmon to run periodically for all relevant tests for those devices
+Now you can start Devmon to run periodically for all relevant tests for those devices
 
 ## Options
 
