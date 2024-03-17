@@ -100,7 +100,12 @@ Thresholds can be numeric or non-numeric, with non-numeric thresholds treated as
 
 ### except()
 
-For repeater type OIDs, to set exceptions on what rows to display or alarm:
+For repeater type OIDs, there are four exception types, each with its abbreviation:
+
+'Only' (abbreviated as 'o'): Displays only rows with matching primary OIDs.
+'Ignore' (abbreviated as 'i'): Shows only rows without matching primary OIDs.
+'Alarm on' (abbreviated as 'ao'): Enables rows with matching primary OIDs to generate alarms.
+'No alarm' (abbreviated as 'na'): Allows only rows without matching primary OIDs to generate alarms.
 
 ```
 # No specific example provided in the original text
