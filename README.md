@@ -15,7 +15,7 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - User-frendly data manipulation logic   
 
 ## Learning More
-- [Installation](docs/INSTALLATION.md): and prerequisits
+- [Installation](docs/INSTALLATION.md) and prerequisits
 - [Using](docs/USING.md): How to integrate it with Xymon hosts.cfg
 - [Overview](docs/OVERVIEW.md): A global overview on how it works
 - [Template](docs/TEMPLATE.md): How to create or update your device templates
