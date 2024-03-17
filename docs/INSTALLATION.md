@@ -30,17 +30,17 @@ apt install snmp
 ### With you prefered tool
 - Git
 ```bash
-cd .....xymon/server/ext
+cd ...xymon/server/ext
 mkdir devmon
 cd devmon
 git clone https://github.com/bonomani/devmon.git
-# Exclude your devmon.cfg to be follow (to revert show below)
+# Exclude your devmon.cfg to be follow (to revert show git notes)
 git update-index --assume-unchanged devmon.cfg
 ```
 
 - wget
 ```bash
-cd .....xymon/server/ext
+cd ...xymon/server/ext
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 unzip devmon.zip
 mv devmon-main devmon
