@@ -155,14 +155,8 @@ Reapply your modif
 git stash apply
 ```
 
-### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discobery anymore)
-Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg (devmon/extras)
-
-### Devmon Purple (Obsolete):
-   - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
-   - You will find the generic in devmon/extra folder
    - 
-### Obsolete or additional steps 
+## Obsolete or additional steps 
 Not needed normally on modern system, but kept info
 
 ### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discovery anymore)
@@ -172,29 +166,5 @@ Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_change
    - For systemd (tested for CentOS only), find it in `devmon/extra/systemd`.
    - You will find the generic in devmon/extra folder
 
-### Devmon Init.d Script
-Copy the devmon init.d script to the appropriate directory:
-```bash
-cp /var/xymon/server/ext/devmon/extras/devmon.initd.redhat /etc/init.d/devmon
-```
-Edit the devmon init.d script:
-```bash
-vi /etc/init.d/devmon
-```
-Update the `prog` variable to point to the correct devmon location:
-```diff
--prog="/usr/local/devmon/devmon"
-+prog="/var/xymon/server/ext/devmon/devmon"
-```
-Update the `RUNASUSER` variable to the appropriate user (xymon):
-```diff
--#RUNASUSER=devmon
-+RUNASUSER=xymon
-```
-Add devmon to the system startup and start the service:
-```bash
-chkconfig --add devmon
-chkconfig devmon on
-service devmon start
-```
+
 
