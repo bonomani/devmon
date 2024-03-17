@@ -776,8 +776,7 @@ of templates matches the ones used in the database.
  delimited.
 
 
- The 'thresholds' file
- ------------------------------------------------------------------------------
+## The 'thresholds' file
 
  The thresholds file defines the limits against which the various data aliases
  that you have created in your 'oids' and 'transforms' files are measured
@@ -813,26 +812,21 @@ of templates matches the ones used in the database.
  they do not need as there is only one value. The threshold field cannot use
  data aliases (oids) value (this is feature request). 
 
- Starting with version 0.20.1
- - We can have multiple error message for a color
- - The threshold engine change it behaviour
-  
- New threshold engine v0.20.1
- 0. Split the threshold field with the comma delimiter 
- 1. Evaluate the precision of the threshold based on its operator
-    7. =, eq
-    6. > >= < >=
-    5. ~= (smart match)
-    4. !~  (negative smart match)
-    3. !=, ne
-    2. _AUTOMATCH_
-    1. (empty)
- 2. Then the order from highest severity to the lowest red->yellow->clear->green 
+ The evaluation order has 2 level
+ The precision is evaluate first  
+ ### A 'precise' threshold has a higher priority
+ - Priority 7: =, eq
+ - Priority 6: > >= < >=
+ - Priority 5: ~= (smart match)
+ - Priority 4: !~  (negative smart match)
+ - Priority 3: !=, ne
+ - Priority 2: _AUTOMATCH_
+ - Priority 1: (empty)
  
- This change normnally is mainly compatible with previous implementation, but
- but add greater flexibility
+ ### A 'highest severity' has a higher priority 
+ - Priority for high to low  red->yellow->clear->green 
 
- One thing to note about thresholds is that they are lumped into one of twoi
+ One thing to note about thresholds is that they are lumped into one of two
  categories: numeric and non-numeric
  - Some operateur like Smart match only appy to non-numeric. 
  - Numeric operator are evaluated first
