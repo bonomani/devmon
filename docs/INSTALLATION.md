@@ -34,7 +34,7 @@ cd ...xymon/server/ext
 mkdir devmon
 cd devmon
 git clone https://github.com/bonomani/devmon.git
-# Exclude your devmon.cfg to be follow (to revert show git notes)
+# Exclude your devmon.cfg to be follow (to revert show git notes below)
 git update-index --assume-unchanged devmon.cfg
 ```
 
