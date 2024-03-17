@@ -1,4 +1,5 @@
-# A Quick Overview of How Devmon Works
+# Overview
+A quick overview of how Devmon works
 
 ## Initialization
 - Devmon starts by reading the list of hosts to monitor from its database.
