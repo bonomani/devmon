@@ -6,7 +6,7 @@ After installing Devmon, you can start monitoring remote hosts by adding the `DE
 A typical entry looks like this:
 
 ```
-10.0.0.1        myrouter # badconn:1:1:2 NAME:"My router" DEVMON
+10.0.0.1        myrouter      # DEVMON
 ```
 
 The `DEVMON` tag signals Devmon to monitor this host. It should discover the device's vendor and model, determining which test templates to apply.
