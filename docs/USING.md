@@ -1,7 +1,7 @@
 ## Using
-## Devmon Tags in the bb-hosts File
+## Devmon Tags in the Xymon hosts.cfg File
 
-After installing Devmon and setting it up to run periodically with the `--readbbhosts` flag, you can start monitoring remote hosts by adding the `devmon` tag to their entries in the `bb-hosts` file.
+After installing Devmon and running the dicovery processe (devmon -read with the `--read` flag), you can start monitoring remote hosts by adding the `DEVMON` tag to their entries in the `hosts.cfg` file.
 
 A typical entry looks like this:
 
