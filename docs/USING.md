@@ -9,9 +9,9 @@ A typical entry looks like this:
 10.0.0.1        myrouter      # DEVMON
 ```
 
-The `DEVMON` tag signals Devmon to monitor this host. It should discover the device's vendor and model, determining which test templates to apply.
+The `DEVMON` tag signals Devmon to monitor this host. You should discover and identify the device's vendor and model, determining which test templates to apply.
 
-Run the discovery process and look at the result
+Run the  process and look at the result
 ```
 devmon -read
 less hosts.db
