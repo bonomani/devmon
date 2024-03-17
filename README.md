@@ -14,6 +14,7 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - SNMPv1,v2c,v3
 - Multitread engines
 - Device templates
+- Automated Device Discovery
 - User-frendly data manipulation logic   
 
 ## Ongoing Initiatives and Future Directions
@@ -24,16 +25,8 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - **Enhancing Clustering Support**: To accommodate diverse and large-scale network environments.
 - **Optimizing Discovery and Ping Tests**: Striving for better stability and performance.
 
-## Key Features and Technologies
-Devmon utilizes technologies like Xymon, SNMP, Perl5, and MySQL to provide:
-- **Efficient Polling**: Through a multithreaded engine that allows quick querying of numerous devices.
-- **Automated Device Discovery**: For easy integration and management of network devices.
-- **Scalable Solutions**: Catering to both small and large network environments with potential for cluster configurations.
-
-## Getting Started
-Requirements for running Devmon include:
-- A Perl-compatible system for script execution. See the [INSTALLATION.md](https://github.com/bonomani/devmon/blob/main/docs/INSTALLATION.md) guide in our docs.
-- Xymon for displaying monitoring results. Ensure at least one host is set up in Xymon that matches a Devmon template for effective polling.
+## Installation
+Rfer to our installation documentation [Click here for the Installation Guide](docs/installation)
 
 ## Project Status
 - **Under Active Development**: We are currently working with a pre-release version, indicating that the software is still in the experimental stages
