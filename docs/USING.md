@@ -39,7 +39,8 @@ For instance following options are valid:
 10.0.0.1        myrouter         DEVMON:tests(power,fans,cpu),cid(testcid)
 10.0.0.1        myrouter         DEVMON:tests(cpu),thresh(cpu;CPUTotal5Min;y:50;r:90)
 ```
-however, following options are invalid:
+However, following options are invalid:
+```
 10.0.0.1        myrouter         DEVMON:
 10.0.0.1        myrouter         DEVMON: tests(power)
 10.0.0.1        myrouter         DEVMON:tests (power)
