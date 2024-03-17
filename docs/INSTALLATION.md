@@ -1,9 +1,12 @@
 <!DOCTYPE markdown>
 # Installation
 ## Prerequisits
-- Perl
+- Perl v5.10.0
 - SNMP_Session (Perl module)
+  - Support for SNMPv1 and SNMPv2c
 - Net-SNMP (Perl module + C lib)
+  - Optional, Support for SNMPv2c and SNMPv3
+
 
 ### RHEL 
 
@@ -22,9 +25,6 @@ apt install snmp
 ### From Source
 - Download [SNMP_Session](https://github.com/sleinen/snmp-session)
 - See how to install [Net-SNMP](http://www.net-snmp.org)
-- Both are recommended but not mandatory for compatibility with all SNMP versions.
-  - SNMP_Session provides SNMPv1 and SNMPv2c 
-  - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ## Download and unpack Devmon
 ### With you prefered tool
