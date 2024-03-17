@@ -1,4 +1,4 @@
-# DEVMON GRAPHING 
+# GRAPHING 
 
 ## Quick Start
 
