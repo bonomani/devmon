@@ -116,7 +116,6 @@ systemctl enable devmon
 systemctl start devmon
 ```
 
-
 ## Git Notes
 ### Update of devmon.cfg from the github repo and locally excluded block the update (abandon)
 Recommended: copy the complete devmon folder elsewhere (so you have a backup in case somthing goes wrong)  
