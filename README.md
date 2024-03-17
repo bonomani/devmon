@@ -1,5 +1,5 @@
 <!DOCTYPE markdown>
-# Devmon Introduction
+# Devmon
 
 Devmon is an SNMP monitoring tool that enhance Xymon server monitoring capabilities. It monitors a significant number of devices, providing both graphing and alerting functionalities.
 
@@ -7,21 +7,8 @@ Devmon is an SNMP monitoring tool that enhance Xymon server monitoring capabilit
 
 Discover more through [screenshots](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots).
 
-## Recent Enhancements (September 2023)
-- **New Table Alignment Feature**: Credit to W. Nelis
-- **Resolved Issues**: Various bug fixes.
-
-## Enhancing SNMPwalk Engine (July 2023)
-
-- **Smarter Retry Logic and Efficient SNMPwalk** :
-  - Addresses memory leaks: no more dying fork
-  - Utilizes "snmpgetbulk" and manages partial responses.
-- **Enhanced Performance**:
-  - Improves monitoring speed, particularly for slow devices.
-- **Upgrade**: Recommended 
-- **Notes**:
-  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) for improved operation.
-  - **SNMPv3**: Still dependent on external "C" library; partial retries not fully implemented.
+## Introduction
+Devmon extends Xymon functionality with advanced SNMP monitoring features. It specializes in utilizing SNMP to provide a comprehensive view of various network devices and servers. It excels in gathering and analyzing performance metrics and operational statuses from a wide array of devices, including routers, switches, firewalls, and servers.
 
 ## Ongoing Initiatives and Future Directions
 - **Engagement and Roadmap**: Join our [GitHub discussions](https://github.com/bonomani/devmon/discussions) and view [issues](https://github.com/bonomani/devmon/issues) for the latest updates and to participate in our community.
