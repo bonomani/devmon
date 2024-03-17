@@ -98,7 +98,7 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 
 ### Start Devmon
 - Launch Devmon and check logs for any errors
-- Look at devmon child PIDs to see if they change over the time  (If the PIDs change, this means that child processes are killed and restarted, which should not occured)
+- Monitor devmon child PIDs to see if they change over time. If the PIDs change, it indicates that child processes are being killed and restarted, which should not occur
 ```bash
 ps -aux | grep devmon
 ```
