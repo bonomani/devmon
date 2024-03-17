@@ -23,7 +23,7 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 ## Usage
 
 ## Contributing
-[Guidelines for contributions](docs/INSTALLATION.md)
+[Guidelines for contributions](CONTRIBUTING.md)
 
 ## Project Status
 - **Under Active Development**: We are currently working with a pre-release version, indicating that the software is still in the experimental stages
