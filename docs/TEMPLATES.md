@@ -1,20 +1,13 @@
 # TEMPLATES
  
-## What are templates?
-Templates are a core component of Devmon, enhancing its adaptability compared
-to other monitoring scripts. They enable tailored configurations for device 
-management, addressing specific needs per device model. With templates, users
-can define:
+## A core component
 
-- Preferred SNMP versions
-- Specific OIDs for querying (both repeater and non-repeaters)
-- Data transformation requirements
-- Model-specific thresholds and exceptions
-- Custom output messages
+Devmon's templates enable :
 
-This flexibility empowers system administrators to monitor diverse devices for
-various conditions, assuming SNMP monitoring capability is available for the
-device.
+- Defines specific OIDs
+- Transform received data
+- Define thresholds and alarm message
+- Custom Xymon output messages.
 
 ## Rolling your own
 Rolling your own Devmon template is a straightforward task that doesn't require 
