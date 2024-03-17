@@ -107,6 +107,3 @@ For repeater type OIDs, to set exceptions on what rows to display or alarm:
 
 Exceptions use regular expressions and are anchored, meaning they must match the OID value exactly.
 
---- 
-
-This version condenses the guide to its essential instructions and examples, making it more straightforward to follow.
