@@ -1,6 +1,18 @@
 # Changelog  
 Contributors of specific features/patches are listed in parenthesis next to the respective entry.
+## Devmon v0.23.09
+- **New Table Alignment Feature**: Credit to W. Nelis
+- Bug fixes
 
+## Devmon v0.23.07
+- Enhanced SNMP Retry Logic
+  - Prevent memory leaks, by eliminating fork failures.
+  - Better control the SNMP oid walking process by using low level "snmpgetbulk" queries
+  - Speeds up monitoring, particularly for slower devices 
+- Notes:
+  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) as new logic not implemented for NET-SNMP 
+- Bug fixes
+  
 ## Devmon v0.21.09
 - Stabilyze SNMPv3 (thanks to Stef Coene)
 - New command line option:
