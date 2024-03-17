@@ -16,7 +16,7 @@ Run the  process and look at the result
 devmon -read
 less hosts.db
 ```
-The you should run Devmon peridocally to poll devices for all relevant tests for that devices
+The can start Devmon to run periodically for all relevant tests for those devices
 
 ## Using Options with a Devmon Tag
 
