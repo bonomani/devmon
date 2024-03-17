@@ -62,8 +62,8 @@ The 'snmpver' variable is no longer in use and has been deprecated. It
 can be safely removed from all templates.
 
 The 'sysdesc' variable is utilized in Devmon's auto-detection process 
-when reading the host from the bb-hosts file (especially when using the 
-'--readbbhosts' command line argument). This value should be distinct 
+when reading the host from the Xymon hosts.cfg file (especially when using 
+the '--readbbhosts' command line argument). This value should be distinct 
 from those in other templates and can accommodate complex patterns since 
 it is interpreted as a regular expression.
 
