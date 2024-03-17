@@ -1,7 +1,7 @@
 # Using
 ## Devmon Tags 
 
-After installing Devmon, you can start monitoring remote hosts by adding the `DEVMON` tag to their entries in the `hosts.cfg` file.
+Start monitoring remote hosts by adding the `DEVMON` tag in the Xymon `hosts.cfg` file.
 
 A typical entry looks like this:
 ```
