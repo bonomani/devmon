@@ -13,6 +13,8 @@ Run a Discovery (optionally in debug mode) and look at the result:
 ./devmon -read -de 
 less hosts.db
 ```
+Note 
+
 Now you can start Devmon to run periodically for all relevant tests for those devices
 
 ## Options
