@@ -1,7 +1,9 @@
 <!DOCTYPE markdown>
 # Installation
 ## Prerequisits
-Install SNMP_Session (Perl module) and Net-SNMP (Perl module + C lib)
+- Perl
+- SNMP_Session (Perl module)
+- Net-SNMP (Perl module + C lib)
 
 ### RHEL 
 
