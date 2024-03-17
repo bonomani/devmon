@@ -26,7 +26,7 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - **Optimizing Discovery and Ping Tests**: Striving for better stability and performance.
 
 ## Installation
-[Click here for the Installation Guide](docs/installation)
+[Click here for the Installation Guide](docs/INSTALLATION.md)
 
 ## Project Status
 - **Under Active Development**: We are currently working with a pre-release version, indicating that the software is still in the experimental stages
