@@ -91,21 +91,7 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 - Add the Devmon tag (specified by `XYMONTAG`, defaults to 'DEVMON') to hosts you want to monitor in the xymon `HOSTSCFG` file.
 - Example: `10.0.0.1 myrouter # badconn:1:1:2 DEVMON`
 
-### Run a Discovery (in debug mode)
-```bash
-./devmon --read -de 
-```
-
-### Start Devmon
-- Launch Devmon and check logs for any errors
-- Monitor Devmon child PIDs to see if they change over time. If the PIDs change, it indicates that child processes are being killed and restarted, which should not occur
-```bash
-ps -aux | grep devmon
-```
-- Verify if new 'tests' are being shown on your display server.
-- Verity if a 'dm' test exist on your monitoring server and look at the stats
-
-### Install as a servuce Start/Stop Script
+### Install as a service 
  
 #### Systemd: [extras/systemd/](/extras/systemd/)
 ```bash
