@@ -25,7 +25,8 @@ apt install snmp
   - Net-SNMP provides SNMPv2c and SNMPv3 
 
 ## Download and unpack Devmon
-### Using git
+With your prefer tool
+- Git
 
 ```bash
 cd .....xymon/server/ext
@@ -36,7 +37,7 @@ git clone https://github.com/bonomani/devmon.git
 git update-index --assume-unchanged devmon.cfg
 ```
 
-### Using wget
+### Wget
 
 ```bash
 cd .....xymon/server/ext
