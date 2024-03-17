@@ -17,17 +17,12 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - Automated Device Discovery
 - User-frendly data manipulation logic   
 
-## Installation
-[Installation Guide](docs/INSTALLATION.md)
-
-## Usage
-
-## Contributing
-[Guidelines for contributions](docs/CONTRIBUTING.md)
-
 ## Learning More
-- [Devmon Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): A valuable resource for developers with best practices and detailed documentation.
-- [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): Get insights into what Devmon offers through our screenshot collection.
+- [Installation](docs/INSTALLATION.md)
+- [Usage](docs/USAGE.md)
+- [Contributions](docs/CONTRIBUTING.md)
+- [Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): A valuable resource for developers with best practices
+- [Visual Gallery](https://wiki.ubiquitous-network.ch/doku.php?id=en:devmon:screenshots): A screenshot collection.
 
 ## Support
 For inquiries, feedback, or further information, don't hesitate to [contact](https://ubiquitous-network.ch/contact/) us. We're always looking for ways to improve and welcome your input.
