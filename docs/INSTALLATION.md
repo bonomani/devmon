@@ -45,7 +45,7 @@ unzip devmon.zip
 mv devmon-main devmon
 ```
 
--curl
+- curl
 ```bash
 cd .....xymon/server/ext
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
