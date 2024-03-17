@@ -49,23 +49,23 @@ sysdesc  : C2950
 ```
 <!----end file--------------------------->
 
-Note that their variables and their values are each listed on their own
-newline, and separated by colons. This is the format used for most (if not
-all) of the files in the Devmon template structure.
+Note: Variable names and their corresponding values are listed separately, 
+each on a new line and separated by colons. This format is consistent across 
+most, if not all, files in the Devmon template structure.
 
-The 'vendor' and 'model' variables are specific to this particular device
-type -- there should not be another specs file elsewhere in the templates
-tree that has the same values for both variables. If there is, Devmon will
-complain about trying to redefine a template and reject the second template.
+For this particular device type, the variables 'vendor' and 'model' are 
+unique and should not have the same values in any other specs file within 
+the template tree. If duplicates are found, Devmon will detect them as 
+attempts to redefine a template and will reject the second occurrence.
 
-The 'snmpver' variable is DEPRECATED and can be safely removed from all
-templates as it is not used anymore.
+The 'snmpver' variable is no longer in use and has been deprecated. It 
+can be safely removed from all templates.
 
-The 'sysdesc' variable is used by the type auto-detection that Devmon does
-when it initially reads the host from the bb-hosts file (when using the --
-readbbhosts command line argument). This value should be unique when compared
-to the value of the other templates. It's a regular expression, so you can
-match a fairly complicated pattern, if you so desire.
+The 'sysdesc' variable is utilized in Devmon's auto-detection process 
+when reading the host from the bb-hosts file (especially when using the 
+'--readbbhosts' command line argument). This value should be distinct 
+from those in other templates and can accommodate complex patterns since 
+it is interpreted as a regular expression.
 
 ## Test directory
 
