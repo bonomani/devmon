@@ -8,7 +8,7 @@ Add the `DEVMON` tag in the Xymon `hosts.cfg` file:
 
 ## Discover 
 Devmon should discover and identify the device's vendor and model, determining which test templates to apply.  
-Run a Discovery (optionally in debug mode) nnd look at the result:
+Run a Discovery (optionally in debug mode) and look at the result:
 ```bash
 ./devmon -read -de 
 less hosts.db
