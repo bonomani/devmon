@@ -19,8 +19,7 @@ less hosts.db
 Now you can start Devmon to run periodically for all relevant tests for those devices
 
 ## Options
-
-You can configure Devmon using various options within the `hosts.cfg` tag, such as:
+Within the `hosts.cfg`, you can configure the `DEVMON` tag with various options:
 
 - [cid()](#cid) for custom SNMP Community ID
 - [ip()](#ip) for a custom IP address
