@@ -1,15 +1,17 @@
 # Using
 ## Devmon Tags 
 
-Start monitoring remote hosts by adding the `DEVMON` tag in the Xymon `hosts.cfg` file.
-
-A typical entry looks like this:
+Add the `DEVMON` tag in the Xymon `hosts.cfg` file:
 ```
 10.0.0.1        myrouter      # DEVMON
 ```
 
 ## Discover
-Devmon should discover and identify the device's vendor and model, determining which test templates to apply.
+Devmon should discover and identify the device's vendor and model, determining which test templates to apply.  
+Run a Discovery (optionally in debug mode):
+```bash
+./devmon --read -de 
+```
 
 Run the  process and look at the result
 ```
