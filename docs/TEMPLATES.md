@@ -46,55 +46,51 @@ directories on your Devmon nodes should be removed. This ensures clarity when
 syncing templates on disk to your database, avoiding confusion about which set
 of templates matches the ones used in the database.
 
- The 'specs' file
- ------------------------------------------------------------------------------
+## The 'specs' file
+Under each vendor-model directory, there should be a single
+file, named 'specs' (for specifications), and one or more
+subdirectories, each of which represent a particular test for that
+vendor-model.  The specs file contains data that is vendor-model 
+specific, but not necessarily test specific.
 
- Under each vendor-model directory, there should be a single
- file, named 'specs' (for specifications), and one or more
- subdirectories, each of which represent a particular test for that
- vendor-model.  The specs file contains data that is vendor-model 
- specific, but not necessarily test specific.
+The 'specs' file should look something like this:
 
- The 'specs' file should look something like this:
+<!--start file--------------------------->
+```
+vendor   : cisco
+model    : 2950
+snmpver  : 2
+sysdesc  : C2950
+```
+<!----end file--------------------------->
 
-  <!--start file--------------------------->
-  ```
-  vendor   : cisco
-  model    : 2950
-  snmpver  : 2
-  sysdesc  : C2950
-  ```
-  <!----end file--------------------------->
+Note that their variables and their values are each listed on their own
+newline, and separated by colons. This is the format used for most (if not
+all) of the files in the Devmon template structure.
 
- Note that their variables and their values are each listed on their own
- newline, and separated by colons. This is the format used for most (if not
- all) of the files in the Devmon template structure.
+The 'vendor' and 'model' variables are specific to this particular device
+type -- there should not be another specs file elsewhere in the templates
+tree that has the same values for both variables. If there is, Devmon will
+complain about trying to redefine a template and reject the second template.
 
- The 'vendor' and 'model' variables are specific to this particular device
- type -- there should not be another specs file elsewhere in the templates
- tree that has the same values for both variables. If there is, Devmon will
- complain about trying to redefine a template and reject the second template.
+The 'snmpver' variable is DEPRECATED and can be safely removed from all
+templates as it is not used anymore.
 
- The 'snmpver' variable is DEPRECATED and can be safely removed from all
- templates as it is not used anymore.
+The 'sysdesc' variable is used by the type auto-detection that Devmon does
+when it initially reads the host from the bb-hosts file (when using the --
+readbbhosts command line argument). This value should be unique when compared
+to the value of the other templates. It's a regular expression, so you can
+match a fairly complicated pattern, if you so desire.
 
- The 'sysdesc' variable is used by the type auto-detection that Devmon does
- when it initially reads the host from the bb-hosts file (when using the --
- readbbhosts command line argument). This value should be unique when compared
- to the value of the other templates. It's a regular expression, so you can
- match a fairly complicated pattern, if you so desire.
+## Test directory
 
+Each subdirectory of the vendor-model directory represents an individual
+test. The name of the directory is significant, as it is what determines the
+name of the test reported to your display server! So the subdirectory in your
+vendor-model directory named 'cpu' defines the cpu test, the one named
+'if_err' defines the if_err test, etc.
 
- Test directory
- ------------------------------------------------------------------------------
-
- Each subdirectory of the vendor-model directory represents an individual
- test. The name of the directory is significant, as it is what determines the
- name of the test reported to your display server! So the subdirectory in your
- vendor-model directory named 'cpu' defines the cpu test, the one named
- 'if_err' defines the if_err test, etc.
-
- Under each test subdirectory, there are five files:
+Under each test subdirectory, there are five files:
 
     oids
     transforms
@@ -102,10 +98,10 @@ of templates matches the ones used in the database.
     exceptions
     message
 
- All five files MUST be present for the template to be read successfully,
- although the thresholds, transforms and exceptions files can all be empty.
- So, a quick list of files needed for a 'cpu' test on a Cisco 2950 should look
- as follows:
+All five files MUST be present for the template to be read successfully,
+although the thresholds, transforms and exceptions files can all be empty.
+So, a quick list of files needed for a 'cpu' test on a Cisco 2950 should look
+as follows:
 
     /usr/local/devmon/templates/cisco-2950/specs
     /usr/local/devmon/templates/cisco-2950/cpu/oids
@@ -114,202 +110,198 @@ of templates matches the ones used in the database.
     /usr/local/devmon/templates/cisco-2950/cpu/exceptions
     /usr/local/devmon/templates/cisco-2950/cpu/message
 
- Note that all of these files except for the message file can contain
- comments. Any line that starts with a pound symbol (#) is treated as a
- comment by Devmon, and ignored.
+Note that all of these files except for the message file can contain
+comments. Any line that starts with a pound symbol (#) is treated as a
+comment by Devmon, and ignored.
 
- Now we'll go over each of these files in detail...
+Now we'll go over each of these files in detail...
 
 
- The 'oids' file 
- ------------------------------------------------------------------------------
+## The 'oids' file 
 
- The oids file contains, you guessed it, the oids that you want to SNMP query
- for this type of device. It should look something like this:
+The oids file contains, you guessed it, the oids that you want to SNMP query
+for this type of device. It should look something like this:
 
- <!--start file--------------------------->
+<!--start file--------------------------->
 
-    sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
-    sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
-    sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
-    CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
+sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
+sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
+sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
+CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 
- <!----end file--------------------------->
+<!----end file--------------------------->
 
- Note that there are three values per line; the first value is the alias that
- Devmon uses throughout the rest of the template files, the second value is
- the *NUMERIC* value for the oid, the third is the repeater type ('leaf',
- which is a non-repeater type oid, vs 'branch' which is a repeater type).
+Note that there are three values per line; the first value is the alias that
+Devmon uses throughout the rest of the template files, the second value is
+the *NUMERIC* value for the oid, the third is the repeater type ('leaf',
+which is a non-repeater type oid, vs 'branch' which is a repeater type).
 
- Its important that you use the numeric version of an oid for the second value
- in this file. Devmon will not map the string version of an OID to its numeric
- version before it does a query, which means that your SNMP query will fail if
- you use an alphanumeric oid instead of a numeric one (i.e. 'sysDescr' is
- alphanumeric, '.1.3.6.1.2.1.1.1.0' is numeric). I chose to do this because it
- is a pain to keep all the various MIBs installed on all of the nodes in a multi-
- node cluster, and it was just easier to specify them once here. Note that the
- oid aliases are case sensitive: 'SysDescr' is treated as a separate alias
- from 'sysDescr'.
+Its important that you use the numeric version of an oid for the second value
+in this file. Devmon will not map the string version of an OID to its numeric
+version before it does a query, which means that your SNMP query will fail if
+you use an alphanumeric oid instead of a numeric one (i.e. 'sysDescr' is
+alphanumeric, '.1.3.6.1.2.1.1.1.0' is numeric). I chose to do this because it
+is a pain to keep all the various MIBs installed on all of the nodes in a multi-
+node cluster, and it was just easier to specify them once here. Note that the
+oid aliases are case sensitive: 'SysDescr' is treated as a separate alias
+from 'sysDescr'.
 
- Also important to note is that OIDs are shared between tests on the same
- template. So if you specify OID aliases with identical names (they are case
- sensitive, remember) in multiple tests in a template, there is only going to
- be a single value stored in memory, which both OID aliases point to. The
- upshot of this is, if you use the same OID alias in multiple tests (and this
- is recommended, as it will make your template run faster), then they *MUST*
- have the numeric OID value. If they dont, you are going to get inconsistent
- results, as the value stored in memory might arbitrarily be from one SNMP
- variable or another.
+Also important to note is that OIDs are shared between tests on the same
+template. So if you specify OID aliases with identical names (they are case
+sensitive, remember) in multiple tests in a template, there is only going to
+be a single value stored in memory, which both OID aliases point to. The
+upshot of this is, if you use the same OID alias in multiple tests (and this
+is recommended, as it will make your template run faster), then they *MUST*
+have the numeric OID value. If they dont, you are going to get inconsistent
+results, as the value stored in memory might arbitrarily be from one SNMP
+variable or another.
 
 
 ## The 'OID' concept
 
- More explaination of the 'OID' term as it is a key concept that should be
- well understood.
+More explaination of the 'OID' term as it is a key concept that should be
+well understood.
 
- SNMP standard and Devmon:
+SNMP standard and Devmon:
 
- - In SNMP, we have 'table' OIDs and 'scalar' OIDs
- - In Devmon, we have OIDs of type 'branch' and 'leaf'
+- In SNMP, we have 'table' OIDs and 'scalar' OIDs
+- In Devmon, we have OIDs of type 'branch' and 'leaf'
 
- The relation between the both is:
+The relation between the both is:
 
- - A 'branch' OID is a snmp 'table'
- - A 'leaf' OID can be:
-   - A snmp 'scalar' OID (end with 0)
-   - An instance of a snmp 'table' OID (do not end with 0, normally...)
+- A 'branch' OID is a snmp 'table'
+- A 'leaf' OID can be:
+  - A snmp 'scalar' OID (end with 0)
+  - An instance of a snmp 'table' OID (do not end with 0, normally...)
 
 
-  How it works:
-  <!-- A query from the shell -->
-  ```
-  snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
-  .1.3.4.6.9.4.3.1.20.3 = 8732588786
-  .1.3.4.6.9.4.3.1.20.4 = 5858738454
-  ```
+How it works:
+<!-- A query from the shell -->
+```
+snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
+.1.3.4.6.9.4.3.1.20.3 = 8732588786
+.1.3.4.6.9.4.3.1.20.4 = 5858738454
+```
 
-  Let's analyse the answer:
-  ```
-  .1.3.4.6.9.4.3.1.20.3 = 8732588786
-  <-  oid -> <- index-> = <-result->
-  ```
+Let's analyse the answer:
+```
+.1.3.4.6.9.4.3.1.20.3 = 8732588786
+<-  oid -> <- index-> = <-result->
+```
 
- There are 2 information on each line:
+There are 2 information on each line:
 
- - The 'result' can be of different types: String, Integer, OID, ...
- - The 'index' has type: OID (most of the time it is an Integer)
+- The 'result' can be of different types: String, Integer, OID, ...
+- The 'index' has type: OID (most of the time it is an Integer)
 
- So depending on the type of our OID we have:
+So depending on the type of our OID we have:
 
     Branch: result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
     Leaf  : result      = snmp(oid)    ->  1 result (but no index)
 
- The meaning of the OID can be confusiong as it is the variable to be polled
- AND the polling 'result'.
+The meaning of the OID can be confusiong as it is the variable to be polled
+AND the polling 'result'.
 
     oid(idx) = snmp(oid)   
     oid      = snmp(oid)
 
- Note: If a leaf OID is an instance (element) of an OID. Try to transform it
+Note: If a leaf OID is an instance (element) of an OID. Try to transform it
        to a 'branch'!
 
- - it's more scalable
- - it's probably be more efficient (TODO: add an example like: hp- ilo/cpu_dm).
+- it's more scalable
+- it's probably be more efficient (TODO: add an example like: hp- ilo/cpu_dm).
 
- The OID term is also use in Devmon to designate the result of a transform:
- - oidT=transform{oidS} 
+The OID term is also use in Devmon to designate the result of a transform:
+- oidT=transform{oidS} 
 
- Note that in Devmon a transform can have multiple oids:
- - oidT = transform {oidS1, oidS2, ... }
- - the 'primary oid' is the 'first' source oids : oidS1 
- - The resulting oidT have the same indexes as the carefuilyl chosen 'primary oid': oidS1 
- - 'source oid(s)' is/are what is polled or transformed
- - 'target oid' is the result after a transformation
+Note that in Devmon a transform can have multiple oids:
+- oidT = transform {oidS1, oidS2, ... }
+- the 'primary oid' is the 'first' source oids : oidS1 
+- The resulting oidT have the same indexes as the carefuilyl chosen 'primary oid': oidS1 
+- 'source oid(s)' is/are what is polled or transformed
+- 'target oid' is the result after a transformation
 
+## The 'transforms' file
 
- The 'transforms' file
- ------------------------------------------------------------------------------
+The most complicated file in your template, the transforms file lays out the
+different data transformations that Devmon needs to perform on the collected
+SNMP data before it applies thresholds and renders the final message.
 
- The most complicated file in your template, the transforms file lays out the
- different data transformations that Devmon needs to perform on the collected
- SNMP data before it applies thresholds and renders the final message.
+The cisco 2950 cpu test uses a very simple transforms file:
 
- The cisco 2950 cpu test uses a very simple transforms file:
-
-    <!--start file--------------------------->
+<!--start file--------------------------->
 
     sysUpTimeSecs   : MATH          : {sysUpTime} / 100
     UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 
-    <!----end file--------------------------->
+<!----end file--------------------------->
 
- Like the oids file, it has three values per line, separated by colons.
+Like the oids file, it has three values per line, separated by colons.
 
- The first value is the OID alias. Note that this should be a unique value
- compared to any of the aliases defined in the 'oids' file. Notice in this
- example that the 'sysUpTimeSecs' alias is a transformed version of the
- 'sysUpTime' alias, which was defined in the oids file and whose data is
- collected via SNMP. For the rest of this help file, we use the term 'alias'
- to interchangeably refer to either a variable containing data collected via
- SNMP or containing data from a translation.
+The first value is the OID alias. Note that this should be a unique value
+compared to any of the aliases defined in the 'oids' file. Notice in this
+example that the 'sysUpTimeSecs' alias is a transformed version of the
+'sysUpTime' alias, which was defined in the oids file and whose data is
+collected via SNMP. For the rest of this help file, we use the term 'alias'
+to interchangeably refer to either a variable containing data collected via
+SNMP or containing data from a translation.
 
- The second value in the line is the name of the type of transform. These are
- case insensitive (i.e. 'MATH' is the same as 'math') but we refer to them in
- the uppercase form to distinguish them from other functions.
+The second value in the line is the name of the type of transform. These are
+case insensitive (i.e. 'MATH' is the same as 'math') but we refer to them in
+the uppercase form to distinguish them from other functions.
 
- The third value defines the 'data input' for the transform specified by the
- second value. The result of this data put through the specified transform
- will be stored in the alias defined by the first value. Note that any aliases
- supplied in this field are encased in curly braces (e.g. {sysUpTime}). This
- tells Devmon that this is an alias containing an snmp or translated value,
- and not just a normal string.
+The third value defines the 'data input' for the transform specified by the
+second value. The result of this data put through the specified transform
+will be stored in the alias defined by the first value. Note that any aliases
+supplied in this field are encased in curly braces (e.g. {sysUpTime}). This
+tells Devmon that this is an alias containing an snmp or translated value,
+and not just a normal string.
 
- The data input for a transform can (depending on the transform type) consist
- of one or more OID aliases defined elsewhere. These aliases don't have to
- necessarily be defined in a line prior the transform that they are used in,
- Devmon is smart enough to figure out the hierarchy in which they should be
- used. If you have a dependency loop somewhere, Devmon will point that out to
- you, as well.
+The data input for a transform can (depending on the transform type) consist
+of one or more OID aliases defined elsewhere. These aliases don't have to
+necessarily be defined in a line prior the transform that they are used in,
+Devmon is smart enough to figure out the hierarchy in which they should be
+used. If you have a dependency loop somewhere, Devmon will point that out to
+you, as well.
 
- Also, note that if you use a non-repeater type data alias as the input for
- a transform, the transformed alias will also be a non-repeater. Likewise
- for a repeater type data alias. If you mix repeater and non-repeater type
- data aliases in the transform input, the resulting transformed alias will
- be a repeater.
+Also, note that if you use a non-repeater type data alias as the input for
+a transform, the transformed alias will also be a non-repeater. Likewise
+for a repeater type data alias. If you mix repeater and non-repeater type
+data aliases in the transform input, the resulting transformed alias will
+be a repeater.
 
- With regard to duplicated OID aliases across multiple tests in a single
- template, transformed OID aliases have the same rules as non-transformed
- aliases: if you use the same transformed OID alias in multiple tests (which
- is recommended as this cuts down on the time Devmon spends running test
- logic) then their transform rules *must be identical*, as must all OID
- aliases that your transformed alias depends on. So, for example, if you have
- this defined in your if_load test on your cisco-2950 template:
+With regard to duplicated OID aliases across multiple tests in a single
+template, transformed OID aliases have the same rules as non-transformed
+aliases: if you use the same transformed OID alias in multiple tests (which
+is recommended as this cuts down on the time Devmon spends running test
+logic) then their transform rules *must be identical*, as must all OID
+aliases that your transformed alias depends on. So, for example, if you have
+this defined in your if_load test on your cisco-2950 template:
 
     ifInBps         : MATH          : {ifInOps} x 8
 
- and this defined in your if_stat test on your cisco-2950 template:
+and this defined in your if_stat test on your cisco-2950 template:
 
     ifInBps         : MATH          : {ifInOctets} x {time} x 8
 
- you are going to be in trouble, because the 'time' OID alias might not even
- exist in the if_load test. So try to keep your duplicated OID aliases as
- simple as possible, so you dont have your tests stepping on each others toes
- (although if you do have two transformed OIDs doing the same transform on the
- same data, you should by all means duplicate them, as this will make your
- tests run much faster).
+you are going to be in trouble, because the 'time' OID alias might not even
+exist in the if_load test. So try to keep your duplicated OID aliases as
+simple as possible, so you dont have your tests stepping on each others toes
+(although if you do have two transformed OIDs doing the same transform on the
+same data, you should by all means duplicate them, as this will make your
+tests run much faster).
 
- There are a number of different types of transforms, which we will discuss
- below: (listed in alphabetical order)
+There are a number of different types of transforms, which we will discuss
+below: (listed in alphabetical order)
 
-
-## BEST transform
+### BEST transform
  This transform takes two data aliases as input, and stores
  the values for the one with the 'best' alarm color (green being the 'best'
  and red being the 'worst') in the transformed data alias. The oids can either
  be comma or space delimited.
 
 
-## CHAIN transform
+### CHAIN transform
 
  Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
  string value under another OID (the 'leaf' oid). The CHAIN transform will
@@ -345,7 +337,7 @@ of templates matches the ones used in the database.
     chainedOid.2 = 'System fans are non-operational'
 
 
-## CONVERT transform
+### CONVERT transform
 
  Convert a string in either hexadecimal or octal to its decimal equivalent.
  Takes two arguments, a target OID alias and a conversion type, which must be
@@ -357,7 +349,7 @@ of templates matches the ones used in the database.
     intYear : CONVERT: {hexYear} hex
 
 
-## DELTA transform
+### DELTA transform
 
  The DELTA transform performs a 'change over time' calculation on the
  supplied data. It takes a single data alias, with an optional 'upper limit'
@@ -395,7 +387,7 @@ of templates matches the ones used in the database.
  based off the target alias).
 
 
-## DATE transform
+### DATE transform
 
  This transform takes a single data alias as input, the value of which Devmon
  assumes to be seconds in "Unix time" (i.e. seconds since the Epoch [00:00:00
@@ -404,7 +396,7 @@ of templates matches the ones used in the database.
  the format CCYY-MM-DD, HH:MM:SS (24 hour time).
 
 
-## ELAPSED transform
+### ELAPSED transform
 
  This transform takes a single data alias as input, the value of which Devmon
  assumes to be in seconds. It then stores a text string in the transformed
@@ -412,7 +404,7 @@ of templates matches the ones used in the database.
  equal to the number of seconds provided as input to the transform.
 
 
-## INDEX transform
+### INDEX transform
 
  This transform allows you to access the index part of a numerical OID in a
  repeater OID.
@@ -435,7 +427,7 @@ of templates matches the ones used in the database.
  an OID value. Any operations you need to do on the index value should be
  possible with existing transforms.
 
-## MATCH transform
+### MATCH transform
 
  In some badly designed MIBs multiple types of information are presented in a
  single table with two columns (branches), often in just a name, value format.
@@ -546,11 +538,11 @@ of templates matches the ones used in the database.
  value is 2 precision characters. To remove the decimal characters
  alltogether, specify a value of 0.
 
-## UNPACK transform 
+### UNPACK transform 
   
  The inverse of the 'PACK' transform.
 
-## REGSUB transform
+### REGSUB transform
 
  One of the most powerful and complicated transforms, the regsub transform
  allows you to perform a regular expression substitution against a single data
@@ -570,7 +562,7 @@ of templates matches the ones used in the database.
  about substitution, you might want to google 'regular expression
  substitution' and try reading up on it.
 
-## SET transform
+### SET transform
 
  The SET transform creates a repeater-type OID, and presets it with a sequence
  of constants. The indexes of the individual values of the OID created by SET
@@ -622,7 +614,7 @@ of templates matches the ones used in the database.
  The SET transform introduces the same possibility for a repeater-type OID.
 
 
-## SPEED transform
+### SPEED transform
 
  This transform takes a single data alias as input, which it assumes to be a
  speed in bits. It then stores a value in the transformed data alias,
@@ -630,7 +622,7 @@ of templates matches the ones used in the database.
  would render the string '1.2 Kbps', a value of 13000000 will return a value
  of '13 Mbps', etc.
 
-## STATISTIC transform
+### STATISTIC transform
 
  This transform takes a repeater type data alias as the input for the
  transform and computes a non-repeater type data alias. The STATISTIC
@@ -656,7 +648,7 @@ of templates matches the ones used in the database.
     MIN : Minimum value
     SUM : Sum of the values
 
-## SUBSTR transform
+### SUBSTR transform
 
  The substr transform is used to extract a portion of the text (aka a
  'substring') stored in the target OID alias. This transform takes as
@@ -676,7 +668,7 @@ of templates matches the ones used in the database.
  stores 'master switch' in the 'switchName' alias
 
 
-## SWITCH transform
+### SWITCH transform
 
  The switch transform transposes one data value for another. This is most
  commonly used to transform a numeric value returned by an snmp query into its
@@ -729,7 +721,7 @@ of templates matches the ones used in the database.
  if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
  value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
 
-## UNPACK transform
+### UNPACK transform
 
  The unpack transform is used to unpack binary data into any one of a number
  of different data types (all of which are eventually stored as a string by
@@ -768,7 +760,7 @@ of templates matches the ones used in the database.
        x  | null byte
        
 
-## WORST transform
+### WORST transform
 
  This transform takes two data aliases as input, and stores the values for the
  one with the 'worst' alarm color (red being the 'worst' and green being the
@@ -778,11 +770,11 @@ of templates matches the ones used in the database.
 
 ## The 'thresholds' file
 
- The thresholds file defines the limits against which the various data aliases
- that you have created in your 'oids' and 'transforms' files are measured
- against. An example thresholds file is as follows:
+The thresholds file defines the limits against which the various data aliases
+that you have created in your 'oids' and 'transforms' files are measured
+against. An example thresholds file is as follows:
 
- -<start file>-----------------------------
+-<start file>-----------------------------
 
     upsLoadOut  : red     : 90          : UPS load is very high
     upsLoadOut  : yellow  : 70          : UPS load is high
@@ -795,129 +787,127 @@ of templates matches the ones used in the database.
 
     upsBattRep  : red     : replacing : {upsBattRep}
 
- -<end file>-------------------------------
+-<end file>-------------------------------
 
- As you can see, the thresholds file consists of one entry per line, with each
- entry consisting of three to four fields separated by colons. The first field
- in an entry is the data alias that the threshold is to be applied against.
- The second field is the color that will be assigned to the data alias should
- it match this threshold. The third field has the threshold values, which are
- the values that the data alias in the first field will be compared against.
- You can have multiple values, delimited by vertical bars, in the third field.
- The fourth field is the threshold message, which will be assigned to the data
- alias in the first field if it matches this threshold.
+As you can see, the thresholds file consists of one entry per line, with each
+entry consisting of three to four fields separated by colons. The first field
+in an entry is the data alias that the threshold is to be applied against.
+The second field is the color that will be assigned to the data alias should
+it match this threshold. The third field has the threshold values, which are
+the values that the data alias in the first field will be compared against.
+You can have multiple values, delimited by vertical bars, in the third field.
+The fourth field is the threshold message, which will be assigned to the data
+alias in the first field if it matches this threshold.
 
- The threshold message can contain other data alias(es) (oids): if they are of a 
- branch type they have to share indexes with the first field. If they are leafs
- they do not need as there is only one value. The threshold field cannot use
- data aliases (oids) value (this is feature request). 
+The threshold message can contain other data alias(es) (oids): if they are of a 
+branch type they have to share indexes with the first field. If they are leafs
+they do not need as there is only one value. The threshold field cannot use
+data aliases (oids) value (this is feature request). 
 
- The evaluation order has 2 level
- The precision is evaluate first  
- ### A 'precise' threshold has a higher priority
- - Priority 7: =, eq
- - Priority 6: > >= < >=
- - Priority 5: ~= (smart match)
- - Priority 4: !~  (negative smart match)
- - Priority 3: !=, ne
- - Priority 2: _AUTOMATCH_
- - Priority 1: (empty)
+### The evaluation order
+2 level, the precision is evaluate first  
+#### A 'precise' threshold has a higher priority
+- Priority 7: =, eq
+- Priority 6: > >= < >=
+- Priority 5: ~= (smart match)
+- Priority 4: !~  (negative smart match)
+- Priority 3: !=, ne
+- Priority 2: _AUTOMATCH_
+- Priority 1: (empty)
  
- ### A 'highest severity' has a higher priority 
- - Priority for high to low  red->yellow->clear->green 
+#### A 'highest severity' has a higher priority 
+- Priority from higher to lower:  red->yellow->clear->green 
 
- One thing to note about thresholds is that they are lumped into one of two
- categories: numeric and non-numeric
- - Some operateur like Smart match only appy to non-numeric. 
- - Numeric operator are evaluated first
+One thing to note about thresholds is that they are lumped into one of two
+categories: numeric and non-numeric
+- Some operateur like Smart match only appy to non-numeric. 
+- Numeric operator are evaluated first
 
- If no math operator is defined in the threshold, Devmon assumes that it is a
- 'greater than' type threshold. That is, if the value obtained via SNMP is
- greater than this threshold value, the threshold is considered to be met
- and Devmon will deal with it accordingly. This is ambiguous with '='. This 
- should be avoid and replace with the '>' operator. (Should raised a warning 
- TODO: make a deprecation notice)
+If no math operator is defined in the threshold, Devmon assumes that it is a
+'greater than' type threshold. That is, if the value obtained via SNMP is
+greater than this threshold value, the threshold is considered to be met
+and Devmon will deal with it accordingly. This is ambiguous with '='. This 
+should be avoid and replace with the '>' operator. (Should raised a warning 
+TODO: make a deprecation notice)
 
- If a threshold value contains even one non-numeric character (other than the
- math operators illustrated above), it is considered a non-numeric threshold.
+If a threshold value contains even one non-numeric character (other than the
+math operators illustrated above), it is considered a non-numeric threshold.
 
- Regular expressions in threshold matches are non-anchored, which means they
- can match any substring of the compared data. So be careful how you define
- your thresholds, as you could match more than you intend to! If you want to
- make sure your pattern matches explicitly, precede it with a '^' and
- terminate it with a '$'.
+Regular expressions in threshold matches are non-anchored, which means they
+can match any substring of the compared data. So be careful how you define
+your thresholds, as you could match more than you intend to! If you want to
+make sure your pattern matches explicitly, precede it with a '^' and
+terminate it with a '$'.
 
 
- The 'exceptions' file
- ------------------------------------------------------------------------------
+## The 'exceptions' file
 
- The exceptions file is contains rules which are only applied against repeater
- type data aliases.
+The exceptions file is contains rules which are only applied against repeater
+type data aliases.
 
- An example of a exceptions file is as follows:
+An example of a exceptions file is as follows:
 
- -<start file>-----------------------------
+-<start file>-----------------------------
 
     ifName : alarm  : Gi.+
     ifName : ignore : Nu.+|Vl.+
 
- -<end file>-------------------------------
+-<end file>-------------------------------
 
- You can see that each entry is on its on line, with three fields separated by
- colons. The first field is the primary data alias that the exception should
- be applied against. The second field is the exception type, and the third
- field is the regular expression that the primary alias is matched against.
- Exception regular expressions (unlike non-numeric thresholds) ARE anchored,
- and thus need to match the primary oid EXACTLY.
+You can see that each entry is on its on line, with three fields separated by
+colons. The first field is the primary data alias that the exception should
+be applied against. The second field is the exception type, and the third
+field is the regular expression that the primary alias is matched against.
+Exception regular expressions (unlike non-numeric thresholds) ARE anchored,
+and thus need to match the primary oid EXACTLY.
 
- Exceptions are only applied against the first (primary) alias in a repeater
- table (which is described below). There are four types of exceptions types
- that you can use, they are:
+Exceptions are only applied against the first (primary) alias in a repeater
+table (which is described below). There are four types of exceptions types
+that you can use, they are:
 
- - ignore
+- ignore
 
- The 'ignore' exception type causes Devmon to not display rows in a repeater
- table which have a primary oid that matches the exception regexp.
+The 'ignore' exception type causes Devmon to not display rows in a repeater
+table which have a primary oid that matches the exception regexp.
 
- - only
+- only
 
- The 'only' exception type causes Devmon to only display rows in a repeater
- table which have a primary oid that matches the exception regexp.
+The 'only' exception type causes Devmon to only display rows in a repeater
+table which have a primary oid that matches the exception regexp.
 
- - alarm
+- alarm
 
- The 'alarm' exception causes Devmon to only generate alarms for rows in a
- repeater table that have a primary oid that matches the exception regexp.
+The 'alarm' exception causes Devmon to only generate alarms for rows in a
+repeater table that have a primary oid that matches the exception regexp.
 
- - noalarm
+- noalarm
 
- The 'noalarm' exception causes Devmon to not generate alarms for rows in a
- repeater table that have a primary oid that matches the exception regexp.
+The 'noalarm' exception causes Devmon to not generate alarms for rows in a
+repeater table that have a primary oid that matches the exception regexp.
 
- The exceptions are applied in the order above, and one primary alias can
- match multiple exceptions. So if you have a primary alias that matches both
- an 'ignore' and an 'alarm' exception, no alarm will be generated (in fact,
- the row won't even be displayed in the repeater table).
+The exceptions are applied in the order above, and one primary alias can
+match multiple exceptions. So if you have a primary alias that matches both
+an 'ignore' and an 'alarm' exception, no alarm will be generated (in fact,
+the row won't even be displayed in the repeater table).
 
- The example file listed above, from a cisco 2950 if_stat test, tells Devmon
- to only alarm on repeater table rows which have a primary oid (in this case,
- ifName) that starts with 'Gi' and has any number of characters after that
- (which will match any Gigabit interfaces on the switch). Also, it tells
- Devmon not to display any rows with a primary alias that has a value that
- behind with Nu (a Null interface) or Vl (A VLAN interface).
+The example file listed above, from a cisco 2950 if_stat test, tells Devmon
+to only alarm on repeater table rows which have a primary oid (in this case,
+ifName) that starts with 'Gi' and has any number of characters after that
+(which will match any Gigabit interfaces on the switch). Also, it tells
+Devmon not to display any rows with a primary alias that has a value that
+behind with Nu (a Null interface) or Vl (A VLAN interface).
 
 
- The 'messages' file
- ------------------------------------------------------------------------------
+## The 'messages' file
 
- The messages file is what brings all the data collected from the other files
- in the template together in a single cohesive entry. It is basically a web
- page (indeed, you can add html to it, if you like) with some special macros
- embedded in it.
+The messages file is what brings all the data collected from the other files
+in the template together in a single cohesive entry. It is basically a web
+page (indeed, you can add html to it, if you like) with some special macros
+embedded in it.
 
- An example of a simple messages file is as follows:
+An example of a simple messages file is as follows:
 
- -<start file>-----------------------------
+-<start file>-----------------------------
 
     {upsStatus.errors}
     {upsBattStat.errors}
@@ -942,209 +932,208 @@ of templates matches the ones used in the database.
     Last failure due to: {upsFailCause}
     Time on battery:     {upsSecsOnBatt} secs
 
- -<end file>-------------------------------
+-<end file>-------------------------------
 
- You can see in this file that it is just a bunch of data aliases, with one or
- two special exceptions. Most of these will just be replaced with their
- corresponding values. You can see at the top of the file, however, that there
- are a few weird looking data aliases (the ones that end in .errors). These
- are just normal data aliases with a special flag appended to them, that lets
- Devmon know that you want something from them than just their data value.
+You can see in this file that it is just a bunch of data aliases, with one or
+two special exceptions. Most of these will just be replaced with their
+corresponding values. You can see at the top of the file, however, that there
+are a few weird looking data aliases (the ones that end in .errors). These
+are just normal data aliases with a special flag appended to them, that lets
+Devmon know that you want something from them than just their data value.
 
- Here are all of the alias flags, and their functions:
+Here are all of the alias flags, and their functions:
 
- - color
+- color
 
- This flag will print out the bb/hobbit/xymon color string assigned to this
- data alias by the thresholds (this string looks like '&red' or '&green',
- etc). This color string will be interpreted by xymon as a colored icon, which
- makes alarm conditions much easier to recognize. Like the 'errors' flag, it
- will also modify the global color.
+This flag will print out the bb/hobbit/xymon color string assigned to this
+data alias by the thresholds (this string looks like '&red' or '&green',
+etc). This color string will be interpreted by xymon as a colored icon, which
+makes alarm conditions much easier to recognize. Like the 'errors' flag, it
+will also modify the global color.
 
- - errors 
+- errors 
 
- The errors flag on a data alias will list any errors on this data alias. In
- this case, 'errors' refers to the message assigned to the alias from a non-
- green threshold match (the message is the value assigned in the fourth field
- of an entry in the thresholds file, remember?). If the value assigned to a
- data alias is green, then the value that replaces this flag will be blank.
+The errors flag on a data alias will list any errors on this data alias. In
+this case, 'errors' refers to the message assigned to the alias from a non-
+green threshold match (the message is the value assigned in the fourth field
+of an entry in the thresholds file, remember?). If the value assigned to a
+data alias is green, then the value that replaces this flag will be blank.
 
- Error messages will always be printed at the TOP of the message file,
- regardless of where they are defined within it. This is done to make sure
- that the user sees any errors that might have occurred, which they might miss
- if the messages file is too long.
+Error messages will always be printed at the TOP of the message file,
+regardless of where they are defined within it. This is done to make sure
+that the user sees any errors that might have occurred, which they might miss
+if the messages file is too long.
 
- The errors flag will also modify the global color of the message. So if this
- error flag reports a yellow error, and the global color is currently green,
- it will increase the global color to yellow. If the error flag reports a red
- error, it will increase the global color to red. The global color of a
- message defaults to green, and is modified upwards (if you consider more
- severe colors to be 'up') depending on the contents of the 'error' and
- 'color' flags.
+The errors flag will also modify the global color of the message. So if this
+error flag reports a yellow error, and the global color is currently green,
+it will increase the global color to yellow. If the error flag reports a red
+error, it will increase the global color to red. The global color of a
+message defaults to green, and is modified upwards (if you consider more
+severe colors to be 'up') depending on the contents of the 'error' and
+'color' flags.
  
- Starting with the github version, we decide to 'propagate' errors and their
- messages from a transform to the next one. Why? 
- - There is a need to : tswitch was aleardy doing so 
- - We would like to catch also other errors and see were they come from 
- Errors generated by threshold are in fact just alarms. But we have also:
- - Connectivity error: Not any value or some "undefined" value -> Undef 
- - Computational error: Impossible result                      -> NaN
- - Impcompaible matrix: holes in a table                       -> n/a
- About the severity: 
- - During the threshold processing, the color(=severityi) and the error are set 
-   - if yellow, red, clear: the error is set (and will be raised)
-   - if green or blue: no error are raised
- - if error is set: furher transform will bypass the threshold processing 
- - Transform usually just transforms data, but if a problem is detected it can:
-   - Set a severity (without setting the error), usually yellow (minor) 
-   - The threshold processing is done, so the severity can be override
-   - If not overriden, the error is set at the end of the threshold processing
- - A connectivity error is currently put in severity = 'gray' or 'no report'
- - A processing error is currenty put in 'yellow' and set the value to 'NaN'
+Starting with the github version of devmon, we decide to 'propagate' errors
+and their messages from a transform to the next one. Why? 
+- There is a need to : tswitch was aleardy doing so 
+- We would like to catch also other errors and see were they come from 
+Errors generated by threshold are in fact just alarms. But we have also:
+- Connectivity error: Not any value or some "undefined" value -> Undef 
+- Computational error: Impossible result                      -> NaN
+- Impcompaible matrix: holes in a table                       -> n/a
+About the severity: 
+- During the threshold processing, the color(=severityi) and the error are set 
+  - if yellow, red, clear: the error is set (and will be raised)
+  - if green or blue: no error are raised
+- if error is set: furher transform will bypass the threshold processing 
+- Transform usually just transforms data, but if a problem is detected it can:
+  - Set a severity (without setting the error), usually yellow (minor) 
+  - The threshold processing is done, so the severity can be override
+  - If not overriden, the error is set at the end of the threshold processing
+- A connectivity error is currently put in severity = 'gray' or 'no report'
+- A processing error is currenty put in 'yellow' and set the value to 'NaN'
  
- - msg
+- msg
 
- The msg flag prints out the message assigned to the data alias by its
- threshold. Unlike the errors flag, it prints the message even if the data
- alias matches a green threshold and it also does NOT modify the global color
- of the message.
+The msg flag prints out the message assigned to the data alias by its
+threshold. Unlike the errors flag, it prints the message even if the data
+alias matches a green threshold and it also does NOT modify the global color
+of the message.
 
- - thresh
+- thresh
 
- The syntax for the thresh flag is {oid.thresh:<color>}. It displays the value
- in the threshold file (or custom threshold) that corresponds with the
- supplied color. So, {CPUTotal5Min.thresh:yellow} would display the template
- value for the yellow threshold for the CPUTotal5Min oid, or a per-device
- custom threshold if one was defined.
+The syntax for the thresh flag is {oid.thresh:<color>}. It displays the value
+in the threshold file (or custom threshold) that corresponds with the
+supplied color. So, {CPUTotal5Min.thresh:yellow} would display the template
+value for the yellow threshold for the CPUTotal5Min oid, or a per-device
+custom threshold if one was defined.
 
- A more complicated message file is this one, taken from a Cisco 2950 switch
- if_stat test:
+A more complicated message file is this one, taken from a Cisco 2950 switch
+if_stat test:
 
 
- -<begin file------------------------------
+-<begin file------------------------------
       TABLE:
       Ifc name|Ifc speed|Ifc status
       {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
 
- -<end file>-------------------------------
+-<end file>-------------------------------
 
- In this message file, we are using a repeater table. Repeater tables are used
- to display repeater-type data aliases (which ultimately stem from 'branch'
- type snmp oids). The 'TABLE:' keyword (case sensitive, no leading whitespace
- allowed) is what alerts Devmon that the next one to two lines are a repeater
- table definition.
+In this message file, we are using a repeater table. Repeater tables are used
+to display repeater-type data aliases (which ultimately stem from 'branch'
+type snmp oids). The 'TABLE:' keyword (case sensitive, no leading whitespace
+allowed) is what alerts Devmon that the next one to two lines are a repeater
+table definition.
 
- Devmon basically just builds an HTML table out of the repeater data. It can
- have an optional header, which should be specified on the line immediately
- after the 'TABLE:' tag. If no table header is desired, the line after the
- table tag should be the row data identifier. The column separator in the
- header line is a '|'. By default the content of a column will be left
- aligned. If the content should be aligned on the right side, use '|>' rather
- than '|' as the separator. Note that the leftmost column cannot be right
- aligned in this way.
+Devmon basically just builds an HTML table out of the repeater data. It can
+have an optional header, which should be specified on the line immediately
+after the 'TABLE:' tag. If no table header is desired, the line after the
+table tag should be the row data identifier. The column separator in the
+header line is a '|'. By default the content of a column will be left
+aligned. If the content should be aligned on the right side, use '|>' rather
+than '|' as the separator. Note that the leftmost column cannot be right
+aligned in this way.
 
- The row data identifier is the one that contains one or more data aliases.
- The first of these aliases is referred to as the 'primary' alias, and must be
- a repeater-type alias. Any other repeater type aliases in the row will be
- keyed off the primary alias; that is, if the primary aliases has leaves
- numbered '100,101,102,103,104', the table will have five rows, with the first
- row having all repeater aliases using leaf 100, the second row having all
- repeaters using leaf 101, etc. Any non-repeaters defined in the table will
- have a constant value throughout all of the rows.
+The row data identifier is the one that contains one or more data aliases.
+The first of these aliases is referred to as the 'primary' alias, and must be
+a repeater-type alias. Any other repeater type aliases in the row will be
+keyed off the primary alias; that is, if the primary aliases has leaves
+numbered '100,101,102,103,104', the table will have five rows, with the first
+row having all repeater aliases using leaf 100, the second row having all
+repeaters using leaf 101, etc. Any non-repeaters defined in the table will
+have a constant value throughout all of the rows.
 
- The TABLE: key can have one or more, comma-delimited options following it
- that allow you to modify the way in which Devmon will display the data. These
- options can have values assigned to them if they are not boolean ('nonhtml',
- for example, is boolean, while 'border' is not boolean).
+The TABLE: key can have one or more, comma-delimited options following it
+that allow you to modify the way in which Devmon will display the data. These
+options can have values assigned to them if they are not boolean ('nonhtml',
+for example, is boolean, while 'border' is not boolean).
 
- The TABLE options
+The TABLE options
 
- - nonhtml
+- nonhtml
 
- Don't use HTML tags when displaying the table. Instead all columns will
- be separated by a colon (:). This is useful for doing NCV rrd graphing
- in hobbit.
+Don't use HTML tags when displaying the table. Instead all columns will
+be separated by a colon (:). This is useful for doing NCV rrd graphing
+in hobbit.
 
- - plain
+- plain
 
- Don't do any formatting. This allows repeater data (each item on it's own
- line), without colons or HTML tables. One use of this option is to format
- repeater data with compatibility with a format Hobbit already understands. An
- example is available in the disk test for the linux-openwrt template.
+Don't do any formatting. This allows repeater data (each item on it's own
+line), without colons or HTML tables. One use of this option is to format
+repeater data with compatibility with a format Hobbit already understands. An
+example is available in the disk test for the linux-openwrt template.
 
- - noalarmsmsg
+- noalarmsmsg
 
- Prevent Devmon from displaying the 'Alarming on' header at the top of a
- table.
+Prevent Devmon from displaying the 'Alarming on' header at the top of a
+table.
 
- - alarmsonbottom
+- alarmsonbottom
 
- Cause Devmon to display the 'Alarming on' message at the bottom of the table
- data, as opposed to the top.
+Cause Devmon to display the 'Alarming on' message at the bottom of the table
+data, as opposed to the top.
 
- - border=n
+- border=n
 
- Set the HTML table border size that Devmon will use
- (a value of 0 will disable the border)
+Set the HTML table border size that Devmon will use
+(a value of 0 will disable the border)
 
- - pad=n
+- pad=n
 
- Set the HTML table cellpadding size that Devmon will use
+Set the HTML table cellpadding size that Devmon will use
 
- - rrd
+- rrd
 
- See the GRAPHING document in this directory for explanation
+See the GRAPHING document in this directory for explanation
 
- An example of some TABLE options in use:
+An example of some TABLE options in use:
 
-    TABLE: alarmsonbottom,border=0,pad=10
+   TABLE: alarmsonbottom,border=0,pad=10
 
- The STATUS: key allows you to extend the first line of the status message
- that Devmon sends to BB/Hobbit/Xymon. For example, if you need to get data
- to a Xymon rrd collector module that evaluates data in the first line of the
- message (such as the Hobbit la collector which expects "up: <time>, %d
- users, %d procs load=%d.%d" you can use this key as follows to get a load
- average graph:
+The STATUS: key allows you to extend the first line of the status message
+that Devmon sends to BB/Hobbit/Xymon. For example, if you need to get data
+to a Xymon rrd collector module that evaluates data in the first line of the
+message (such as the Hobbit la collector which expects "up: <time>, %d
+users, %d procs load=%d.%d" you can use this key as follows to get a load
+average graph:
 
     STATUS: up: load={laLoadFloat2}
 
 
- Done!
- ------------------------------------------------------------------------------
+### Done!
 
- That's it! Once you've completed the five files mentioned above, you should,
- in theory, have a working template. I would recommend building the template
- under a separate 'test' installation of Devmon, as the single-node version
- of Devmon re-reads the template directory once per poll period, and having
- an incomplete or broken template will cause Devmon to throw error messages
- into its log.
+That's it! Once you've completed the five files mentioned above, you should,
+in theory, have a working template. I would recommend building the template
+under a separate 'test' installation of Devmon, as the single-node version
+of Devmon re-reads the template directory once per poll period, and having
+an incomplete or broken template will cause Devmon to throw error messages
+into its log.
 
- Try extracting the Devmon tarball to somewhere like "/usr/local/devmontest",
- and fiddle with the templates from there. Run Devmon from this directory in
- single-node mode, using a dummy bb-hosts file (even if your production Devmon
- cluster runs in multi-node mode, running the test Devmon in single node mode
- prevents you from having to create an additional database for your Devmon
- "test" installation). With the -vv and -p flags (i.e. devmon -vv -p), you
- will get verbose output from Devmon, and if you have a host in the bb-hosts
- file that matches the sysdesc in the specs file of the the model-vendor for
- the new template you created, you will also get textual output of your new
- template! (The -p flag causes Devmon to not run in the background and to
- print messages to STDOUT as opposed to sending them to the display server,
- and the -vv flag causes Devmon to log verbosely.)
+Try extracting the Devmon tarball to somewhere like "/usr/local/devmontest",
+and fiddle with the templates from there. Run Devmon from this directory in
+single-node mode, using a dummy bb-hosts file (even if your production Devmon
+cluster runs in multi-node mode, running the test Devmon in single node mode
+prevents you from having to create an additional database for your Devmon
+"test" installation). With the -vv and -p flags (i.e. devmon -vv -p), you
+will get verbose output from Devmon, and if you have a host in the bb-hosts
+file that matches the sysdesc in the specs file of the the model-vendor for
+the new template you created, you will also get textual output of your new
+template! (The -p flag causes Devmon to not run in the background and to
+print messages to STDOUT as opposed to sending them to the display server,
+and the -vv flag causes Devmon to log verbosely.)
 
- Once you are satisfied that your template is working correctly, you can put
- it to work in your production installation. In a single-node installation,
- this is as simple as copying the template directory to the appropriate
- subdirectory of your templates/ dir. On the next poll cycle, Devmon will pick
- up the new template, and any new hosts discovered by your readbbhosts cron
- job will be added to the Devmon database using this new template.
+Once you are satisfied that your template is working correctly, you can put
+it to work in your production installation. In a single-node installation,
+this is as simple as copying the template directory to the appropriate
+subdirectory of your templates/ dir. On the next poll cycle, Devmon will pick
+up the new template, and any new hosts discovered by your readbbhosts cron
+job will be added to the Devmon database using this new template.
 
- In a multinode installation, adding a new template is only slightly more
- difficult. Copy the template directory to the appropriate place on the
- machine where you keep all your templates (earlier we recommended using your
- display server, and deleting all the template directories on the node
- machines). Once you have it in place, run devmon with the --synctemplates
- flag. This will read in the templates, update the database as necessary, and
- then notify all the Devmon nodes that they need to reload their templates. A
- full template reload on all your machines can take up to twice the interval
- of your polling cycle, so be patient!
+In a multinode installation, adding a new template is only slightly more
+difficult. Copy the template directory to the appropriate place on the
+machine where you keep all your templates (earlier we recommended using your
+display server, and deleting all the template directories on the node
+machines). Once you have it in place, run devmon with the --synctemplates
+flag. This will read in the templates, update the database as necessary, and
+then notify all the Devmon nodes that they need to reload their templates. A
+full template reload on all your machines can take up to twice the interval
+of your polling cycle, so be patient!
