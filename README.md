@@ -1,7 +1,7 @@
 <!DOCTYPE markdown>
 # Devmon
 
-Devmon is an SNMP opensource monitoring tool
+Devmon is an SNMP opensource monitoring tool integrated to Xymon system monitoring
 
 ![Devmon's Current Overview](devmon_current_status.png)
 
