@@ -68,7 +68,7 @@ chgrp -R xymon ./devmon
 
 ## Install as a service 
  
-### [Systemd](/extras/systemd/)
+### Systemd
 ```bash
 cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
 ```
@@ -78,8 +78,8 @@ systemctl daemon-reload
 systemctl enable devmon
 systemctl start devmon
 ```
-### [Init.d](/extras/devmon.initd.redhat)  
-
+### Init.d  
+- See [/extras/devmon.initd.redhat](/extras/devmon.initd.redhat)  
 ## Prepare Xymon 
 In the Xymon server 'etc' folder  
 Modify `cgioptions.cfg`:
