@@ -50,10 +50,10 @@ However, following options are invalid:
 
 ### cid()
 
-For devices with unique SNMP Community IDs not listed in `devmon.cfg`:
+For devices with unique SNMP Community String (cids) not listed in `devmon.cfg`:
 
 ```
-badconn:1:1:2 DEVMON:cid(uniqueID)
+DEVMON:cid(mycommunity)
 ```
 
 ### ip()
@@ -61,7 +61,7 @@ badconn:1:1:2 DEVMON:cid(uniqueID)
 To query devices at a secondary IP address:
 
 ```
-10.0.0.10 multihomehost # conn=worst,10.0.0.11 DEVMON:ip(10.0.0.11)
+DEVMON:ip(10.0.0.11)
 ```
 
 ### port()
