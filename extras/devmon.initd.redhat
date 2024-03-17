@@ -4,16 +4,25 @@
 # Should-Start: $network
 # Should-Stop: $network
 # Default-Start: 345
-# Short-Description: Starts the Devmon SNMP data collector for Xymon/Hobbit
-# Description: This startup script launches Devmon SNMP collector for Xymon/Hobbit
+# Short-Description: Starts the Devmon SNMP data collector for Xymon
+# Description: This startup script launches Devmon SNMP collector for Xymon
 ### END INIT INFO
 #
 # chkconfig: 2345 90 10
 # description: An snmp data collector for the hobbit & BigBrother network
 #              monitoring suites
 # processname: devmon
-# pidfile: /var/run/devmon/devmon.pid
-# config: /usr/local/devmon/devmon.cfg
+### UPDATE ACCORDING TO YOUR NEEDS 
+# PIDFILE=/var/run/devmon/devmon.pid
+# RUNASUSER=devmon
+# prog="/usr/local/devmon/devmon"
+### INSTALL
+# cp ./devmon/extras/devmon.initd.redhat /etc/init.d/devmon
+# chkconfig --add devmon
+# chkconfig devmon on
+# service devmon start
+
+
 
 # source function library
 . /etc/init.d/functions
@@ -22,7 +31,7 @@ RETVAL=0
 PIDFILE=/var/run/devmon/devmon.pid
 KILLDELAY=5
 ARGS=""
-#RUNASUSER=devmon
+RUNASUSER=devmon
 [ -e /etc/sysconfig/devmon ] && . /etc/sysconfig/devmon
 
 prog="/usr/local/devmon/devmon"
