@@ -805,7 +805,7 @@ they do not need as there is only one value. The threshold field cannot use
 data aliases (oids) value (this is feature request). 
 
 ### The evaluation order
-2 level, the precision is evaluate first  
+2 levels: the precision level is evaluated first  
 #### A 'precise' threshold has a higher priority
 - Priority 7: =, eq
 - Priority 6: > >= < >=
