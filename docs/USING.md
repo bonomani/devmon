@@ -78,7 +78,7 @@ DEVMON:model(cisco;2950)
 
 ### tests() and notests()
 
-To limit tests to certain ones or exclude some:
+To limit or exclude some tests:
 
 ```
 DEVMON:tests(cpu,if_err)
