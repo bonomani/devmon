@@ -95,7 +95,7 @@ DEVMON:thresh(foo;opt1;r:95;y:60)
 DEVMON:thresh(foo;opt1;r:80,foo;opt2;r:90)
 ```
 
-Thresholds can be numeric or non-numeric, with non-numeric thresholds treated as regular expressions.
+Thresholds can be numeric or non-numeric, with non-numeric thresholds treated as **regular expressions**.
 
 ### except()
 
@@ -114,5 +114,5 @@ DEVMON:except(all;ifName;ao:Gi0/[1-2])
 
 ```
 
-Exceptions use regular expressions and are anchored, meaning they must match the OID value **exactly**.  
+Exceptions use **regular expressions** and are **anchored**, meaning they must match the OID value **exactly**.  
 For more information on [templates](docs/TEMPLATES.md)
