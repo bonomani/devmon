@@ -32,14 +32,14 @@ You can configure Devmon using various options within the `bb-hosts` tag, such a
 - `except()` to override default test exceptions
 
 Options are case-sensitive and should follow the `DEVMON` tag without any whitespace, separated by commas if multiple are used.  
-If you use multiple options, they should be separated by commas. For instance:
+For instance following option are valid:
 ```
 10.0.0.1        myrouter         DEVMON:cid(mysnmpid)
 10.0.0.1        myrouter         DEVMON:tests(cpu,power)
 10.0.0.1        myrouter         DEVMON:tests(power,fans,cpu),cid(testcid)
 10.0.0.1        myrouter         DEVMON:tests(cpu),thresh(cpu;CPUTotal5Min;y:50;r:90)
 ```
-however following option are invalid:
+however, following options are invalid:
 10.0.0.1        myrouter         DEVMON:
 10.0.0.1        myrouter         DEVMON: tests(power)
 10.0.0.1        myrouter         DEVMON:tests (power)
