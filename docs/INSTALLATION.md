@@ -149,8 +149,8 @@ Reapply **manually** your local modif and re-exclude devmon.cfg from modif.
 ```bash
 git update-index --assume-unchanged devmon.cfg
 ```
-```bash
 Reapply your modif
+```bash
 git stash apply
 ```
 
