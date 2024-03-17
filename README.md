@@ -14,7 +14,7 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - SNMPv1,v2c,v3
 - Multitread engines
 - Device templates
-- User-frendly data minipulation   
+- User-frendly data manipulation logic   
 
 ## Ongoing Initiatives and Future Directions
 - **Engagement and Roadmap**: Join our [GitHub discussions](https://github.com/bonomani/devmon/discussions) and view [issues](https://github.com/bonomani/devmon/issues) for the latest updates and to participate in our community.
