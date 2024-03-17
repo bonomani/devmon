@@ -26,7 +26,7 @@ apt install snmp
 - Download [SNMP_Session](https://github.com/sleinen/snmp-session)
 - See how to install [Net-SNMP](http://www.net-snmp.org)
 
-## Download and unpack Devmon
+## Download and unpack
 ### With you prefered tool
 - Git
 ```bash
