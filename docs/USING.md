@@ -92,7 +92,8 @@ DEVMON:notests(fans)
 To customize test thresholds, specify the test, OID, and new threshold values:
 
 ```
-DEVMON:thresh(foo;bar;r:95;y:60)
+DEVMON:thresh(foo;opt1;r:95;y:60)
+DEVMON:thresh(foo;opt1;r:80,foo;opt2;r:90)
 ```
 
 Thresholds can be numeric or non-numeric, with non-numeric thresholds treated as regular expressions.
