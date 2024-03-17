@@ -57,7 +57,7 @@ mv devmon-main devmon
 
 ### Update ownership and group
 ```
-According to the user that will run devmon (here xymon)
+According to the user that will run Devmon (here xymon)
 chown -R xymon ./devmon
 chgrp -R xymon ./devmon
 ```
@@ -73,7 +73,7 @@ TEST2RRD="cpu_dm=devmon,cpu=la,disk,dm=ncv,disk_dm=devmon,inode,qtree,memory,mem
 GRAPHS="la,disk,inode,qtree,files,processes,memory,users,vmstat,iostat,tcp.http,tcp,ncv,netstat,ifstat,mrtg::1,ports,temperature,ntpstat,apache,bind,sendmail,mailq,socks,bea,iishealth,citrix,bbgen,bbtest,bbproxy,hobbitd,clock,lines,deltalines,ops,stats,cifs,JVM,JMS,HitCache,Session,JDBCConn,ExecQueue,JTA,TblSpace,RollBack,MemReq,InvObj,snapmirr,snaplist,snapshot,devmon::1,cpu_dm,disk_dm,if_col,if_dsc,if_err,if_load,mem_dm,temp,paging,mdc,mdchitpct,cics,dsa,getvis,maxuser,nparts,xymongen,xymonnet,xymonproxy,xymond"
 NCV_dm="*:GAUGE"
 ```
-Add devmon graphs configuration file:
+Add Devmon graphs configuration file:
 ```
 mkdir /var/xymon/server/etc/graphs.d
 cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
@@ -98,7 +98,7 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 
 ### Start Devmon
 - Launch Devmon and check logs for any errors
-- Monitor devmon child PIDs to see if they change over time. If the PIDs change, it indicates that child processes are being killed and restarted, which should not occur
+- Monitor Devmon child PIDs to see if they change over time. If the PIDs change, it indicates that child processes are being killed and restarted, which should not occur
 ```bash
 ps -aux | grep devmon
 ```
