@@ -8,14 +8,9 @@ Add the `DEVMON` tag in the Xymon `hosts.cfg` file:
 
 ## Discover
 Devmon should discover and identify the device's vendor and model, determining which test templates to apply.  
-Run a Discovery (optionally in debug mode):
+Run a Discovery (optionally in debug mode) nnd look at the result:
 ```bash
 ./devmon --read -de 
-```
-
-Run the  process and look at the result
-```
-./devmon -read
 less hosts.db
 ```
 Now you can start Devmon to run periodically for all relevant tests for those devices
