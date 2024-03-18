@@ -14,21 +14,19 @@ Run a Discovery (optionally in debug mode) and look at the result:
 less hosts.db
 ```
 
-## Run
-### In background
-#### Systemd 
+## Run in background with Systemd
 ```bash
 systemctl start devmon
 systemctl status devmon
 ```
 
-#### Init.d
+## Run in background with Init.d
 ```bash
 service devmon start
 service devmon status
 ```
 
-### In foreground
+## Run In foreground
 - Logs are sent to the console, not to the log file (by default)
 - Xymon messages are copied to the console (but also sent to the Xymon server to be able see the result)
 - Graphing information are not sent to the Xymon (by default, to not mess rrd)
@@ -40,7 +38,7 @@ service devmon status
 ./devmon -de -p router=fans       # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
 ```
 
-#### Verify
+## Verify
 - Keep an eye on Devmon's child PIDs. Changes indicate unexpected restarts: `ps -aux | grep devmon`
 - Verify if your device reports the new SNMP tests.
 - Check logs: `tail -f /var/log/devmon/devmon.log' 
