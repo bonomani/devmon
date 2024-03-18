@@ -41,7 +41,7 @@ service devmon status
 ## Verify Devmon is running correctly
 - Keep an eye on Devmon's child PIDs. Changes indicate unexpected restarts: `ps -aux | grep devmon`
 - Verify if your device reports the new SNMP tests.
-- Check logs: `tail -f /var/log/devmon/devmon.log' 
+- Check logs: `tail -f /var/log/devmon/devmon.log` 
 - Verify the server running Devmon (usually the Xymon server) reports a 'dm' test that displays SNMP statistics.
 
 ## Options
