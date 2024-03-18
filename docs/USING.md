@@ -35,7 +35,7 @@ service devmon status
 ./devmon -f -no1                  # Similar as run in background
 ./devmon -de                      # In debug mode, will stop after 1 cycle (automatically in foreground)
 ./devmon -de -no1 -p myrouter     # In debug mode, only for device: myrouter
-./devmon -de -p router=fans       # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
+./devmon -de -p myrouter=fans       # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
 ```
 
 ## Verify Devmon is running correctly
