@@ -58,7 +58,7 @@ can be safely removed from all templates.
 
 The 'sysdesc' variable is utilized in Devmon's auto-detection process 
 when reading the host from the Xymon hosts.cfg file (especially when using 
-the '--readbbhosts' command line argument). This value should be distinct 
+the '-readhostscfg' command line argument). This value should be distinct 
 from those in other templates and can accommodate complex patterns since 
 it is interpreted as a regular expression.
 
