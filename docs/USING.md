@@ -28,9 +28,15 @@ systemctl status devmon
 ```bash
 service devmon start
 service devmon status
-```bash
+```
 
-#### In 
+#### In foreground
+```bash
+./devmon -f -no1                  # Standard, do not stop after 1 cycle
+./devmon -de -no1                 # In debug mode, automatically in foreground
+./devmon -de -no1 -p myrouter     # In debug mode, only for device: myrouter
+./devmon -de -p router=fans       # In debug mode, 1 cycle only for device: myrouter and only for test:fan
+```
 
 #### Verify
 - Check logs: `tail -f /var/log/devmon/devmon.log'
