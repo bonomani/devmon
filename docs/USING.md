@@ -38,7 +38,7 @@ service devmon status
 ./devmon -de -p router=fans       # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
 ```
 
-## Verify
+## Verify Devmon is running correctly
 - Keep an eye on Devmon's child PIDs. Changes indicate unexpected restarts: `ps -aux | grep devmon`
 - Verify if your device reports the new SNMP tests.
 - Check logs: `tail -f /var/log/devmon/devmon.log' 
