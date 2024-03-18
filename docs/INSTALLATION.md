@@ -26,9 +26,8 @@ apt install snmp
 - Download [SNMP_Session](https://github.com/sleinen/snmp-session)
 - See how to install [Net-SNMP](http://www.net-snmp.org)
 
-## Download and unpack
-### With you prefered tool
-- Git
+## Download and unpack Devmon with git
+
 ```bash
 cd ...xymon/server/ext
 mkdir devmon
@@ -38,20 +37,15 @@ git clone https://github.com/bonomani/devmon.git
 git update-index --assume-unchanged devmon.cfg
 ```
 
-- wget
+## Download and unpack Devmon with wget or curl
 ```bash
 cd ...xymon/server/ext
+# wget
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
-unzip devmon.zip
-mv devmon-main devmon
-```
-
-- curl
-```bash
-cd .....xymon/server/ext
+# curl
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 unzip devmon.zip
-mv devmon-main devmon 
+mv devmon-main devmon
 ```
 
 ### Update ownership and group
