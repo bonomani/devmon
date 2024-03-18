@@ -40,9 +40,9 @@ git update-index --assume-unchanged devmon.cfg
 ## Download and unpack Devmon with wget or curl
 ```bash
 cd ...xymon/server/ext
-# wget
+# with wget
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
-# curl
+# or with curl
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 # Extract and rename
 unzip devmon.zip
