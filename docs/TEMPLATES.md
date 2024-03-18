@@ -71,24 +71,23 @@ vendor-model directory named 'cpu' defines the cpu test, the one named
 'if_err' defines the if_err test, etc.
 
 Under each test subdirectory, there are five files:
-
-    oids
-    transforms
-    thresholds
-    exceptions
-    message
+- oids
+- transforms
+- thresholds
+- exceptions
+- message
 
 All five files MUST be present for the template to be read successfully,
 although the thresholds, transforms and exceptions files can all be empty.
 So, a quick list of files needed for a 'cpu' test on a Cisco 2950 should look
 as follows:
 
-    /usr/local/devmon/templates/cisco-2950/specs
-    /usr/local/devmon/templates/cisco-2950/cpu/oids
-    /usr/local/devmon/templates/cisco-2950/cpu/transforms
-    /usr/local/devmon/templates/cisco-2950/cpu/thresholds
-    /usr/local/devmon/templates/cisco-2950/cpu/exceptions
-    /usr/local/devmon/templates/cisco-2950/cpu/message
+- /usr/local/devmon/templates/cisco-2950/specs
+- /usr/local/devmon/templates/cisco-2950/cpu/oids
+- /usr/local/devmon/templates/cisco-2950/cpu/transforms
+- /usr/local/devmon/templates/cisco-2950/cpu/thresholds
+- /usr/local/devmon/templates/cisco-2950/cpu/exceptions
+- /usr/local/devmon/templates/cisco-2950/cpu/message
 
 Note that all of these files except for the message file can contain
 comments. Any line that starts with a pound symbol (#) is treated as a
@@ -103,12 +102,12 @@ The oids file contains, you guessed it, the oids that you want to SNMP query
 for this type of device. It should look something like this:
 
 <!--start file--------------------------->
-
+```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
 sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
 sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
-
+```
 <!----end file--------------------------->
 
 Note that there are three values per line; the first value is the alias that
