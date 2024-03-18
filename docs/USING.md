@@ -13,9 +13,30 @@ Run a Discovery (optionally in debug mode) and look at the result:
 ./devmon -read -de 
 less hosts.db
 ```
-Note 
 
-Now you can start Devmon to run periodically for all relevant tests for those devices
+## Run
+Now you can start Devmon 
+### Periodically for all relevant tests for those devices
+
+#### Systemd 
+```bash
+systemctl start devmon
+systemctl status devmon
+```
+
+#### Init.d
+```bash
+service devmon start
+service devmon status
+```bash
+
+#### In 
+
+#### Verify
+- Check logs: `tail -f /var/log/devmon/devmon.log'
+- Keep an eye on Devmon's child PIDs. Changes indicate unexpected restarts: `ps -aux | grep devmon`
+- Verify if your device reports the new SNMP tests.
+- Verify the server running Devmon (usually the Xymon server) reports a 'dm' test that displays SNMP statistics.
 
 ## Options
 Within the `hosts.cfg`, you can configure the `DEVMON` tag with various options:
