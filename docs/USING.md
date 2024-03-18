@@ -15,15 +15,14 @@ less hosts.db
 ```
 
 ## Run
-Now you can start Devmon
-
-### Systemd 
+### In background
+#### Systemd 
 ```bash
 systemctl start devmon
 systemctl status devmon
 ```
 
-### Init.d
+#### Init.d
 ```bash
 service devmon start
 service devmon status
