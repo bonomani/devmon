@@ -26,7 +26,7 @@ service devmon start
 service devmon status
 ```
 
-## Run In foreground
+## Run in foreground
 - Logs are sent to the console, not to the log file (by default)
 - Xymon messages are copied to the console (but also sent to the Xymon server to be able see the result)
 - Graphing information are not sent to the Xymon (by default, to not mess rrd)
