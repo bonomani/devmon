@@ -82,12 +82,12 @@ although the thresholds, transforms and exceptions files can all be empty.
 So, a quick list of files needed for a 'cpu' test on a Cisco 2950 should look
 as follows:
 
-- /usr/local/devmon/templates/cisco-2950/specs
-- /usr/local/devmon/templates/cisco-2950/cpu/oids
-- /usr/local/devmon/templates/cisco-2950/cpu/transforms
-- /usr/local/devmon/templates/cisco-2950/cpu/thresholds
-- /usr/local/devmon/templates/cisco-2950/cpu/exceptions
-- /usr/local/devmon/templates/cisco-2950/cpu/message
+- .../devmon/templates/cisco-2950/specs
+- .../devmon/templates/cisco-2950/cpu/oids
+- .../devmon/templates/cisco-2950/cpu/transforms
+- .../devmon/templates/cisco-2950/cpu/thresholds
+- .../devmon/templates/cisco-2950/cpu/exceptions
+- .../devmon/templates/cisco-2950/cpu/message
 
 Note that all of these files except for the message file can contain
 comments. Any line that starts with a pound symbol (#) is treated as a
