@@ -15,33 +15,36 @@ less hosts.db
 ```
 
 ## Run
-Now you can start Devmon 
-### Periodically for all relevant tests for those devices
+Now you can start Devmon
 
-#### Systemd 
+### Systemd 
 ```bash
 systemctl start devmon
 systemctl status devmon
 ```
 
-#### Init.d
+### Init.d
 ```bash
 service devmon start
 service devmon status
 ```
 
-#### In foreground
+### In foreground
+- Logs are sent to the console, not to the log file (by default)
+- Xymon message are copied to the console (but also sent to the Xymon server)
+- Graphing information are not sent to the Xymon (by default, to not mess rrd)
+- You dont need to stop Xymon running in background 
 ```bash
-./devmon -f -no1                  # Standard, do not stop after 1 cycle
-./devmon -de -no1                 # In debug mode, automatically in foreground
+./devmon -f -no1                  # Similar as run in background
+./devmon -de                      # In debug mode, will stop after 1 cycle (automatically in foreground)
 ./devmon -de -no1 -p myrouter     # In debug mode, only for device: myrouter
-./devmon -de -p router=fans       # In debug mode, 1 cycle only for device: myrouter and only for test:fan
+./devmon -de -p router=fans       # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
 ```
 
 #### Verify
-- Check logs: `tail -f /var/log/devmon/devmon.log'
 - Keep an eye on Devmon's child PIDs. Changes indicate unexpected restarts: `ps -aux | grep devmon`
 - Verify if your device reports the new SNMP tests.
+- Check logs: `tail -f /var/log/devmon/devmon.log' (if use in backgroup)
 - Verify the server running Devmon (usually the Xymon server) reports a 'dm' test that displays SNMP statistics.
 
 ## Options
