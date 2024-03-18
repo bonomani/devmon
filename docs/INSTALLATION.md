@@ -51,7 +51,7 @@ mv devmon-main devmon
 
 ### Update ownership and group
 ```
-According to the user that will run Devmon (here xymon)
+# According to the user that will run Devmon (here xymon)
 chown -R xymon ./devmon
 chgrp -R xymon ./devmon
 ```
