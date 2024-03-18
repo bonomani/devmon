@@ -10,17 +10,12 @@ Devmon's templates enable :
 - Custom Xymon output messages.
 
 ## Rolling your own
-Creating your own Devmon template is easy. You don't need programming
-skills, but knowing a bit about regular expressions can help. If you're 
-new to them, check out resources like http://www.regular-expressions.info/.
+Creating a Devmon template is easy. No coding required. Knowing regular 
+expressions helps: http://www.regular-expressions.info/
 
-Now, let's look at how templates are structured. All template data is 
-kept in the "templates" folder of your Devmon installation. If you have 
-one server, Devmon reads this folder regularly. If you have multiple 
-servers, Devmon reads from the database as needed.
-
-For our examples, let's say the template folder is "/usr/local/devmon/templates," 
-but it might be different depending on your setup.
+Let's explore template structure. Template data is stored in the "templates" 
+folder of your Devmon installation. For a single server, the folder is read 
+regularly; for multiple servers, the database is utilized.
 
 Inside the "templates" folder, there are subfolders for each vendor and model, 
 like "Cisco 2950" or "Cisco 3750." The names of these folders don't matter much, 
