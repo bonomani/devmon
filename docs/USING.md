@@ -32,10 +32,10 @@ service devmon status
 - Graphing information are not sent to the Xymon (by default, to not mess rrd)
 - You do not need to stop Xymon running in background 
 ```bash
-./devmon -f -no1                  # Similar as running in background
-./devmon -de                      # In debug mode, will stop after 1 cycle (automatically in foreground)
-./devmon -de -no1 -p myrouter     # In debug mode, only for device: myrouter
-./devmon -de -p myrouter=fans       # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
+./devmon -f -no1                # Similar as running in background
+./devmon -de                    # In debug mode, will stop after 1 cycle (automatically in foreground)
+./devmon -de -no1 -p myrouter   # In debug mode, only for device: myrouter
+./devmon -de -p myrouter=fans   # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
 ```
 
 ## Verify Devmon is running correctly
