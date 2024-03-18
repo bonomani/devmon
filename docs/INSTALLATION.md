@@ -44,6 +44,7 @@ cd ...xymon/server/ext
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 # curl
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
+# Extract and rename
 unzip devmon.zip
 mv devmon-main devmon
 ```
