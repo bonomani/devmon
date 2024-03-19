@@ -276,7 +276,12 @@ sub snmp_query {
     # the number of snmp device is normally the number of device that have at
     # least one successfull Xymon test. As we skip this discovering phase
     # we define it as the number of devices if it is not defined!
-    $g{numsnmpdevs} = $g{numdevs} if ( !defined $g{numsnmpdevs} );
+    #$g{numsnmpdevs} = $g{numdevs} if ( !defined $g{numsnmpdevs} );
+    #do_log("Maxpoll $g{numsnmpdevs}");
+    if ( $g{numsnmpdevs} == 0 ) {
+         #$g{numsnmpdevs} = scalar keys %{$snmp_input}; 
+         $g{maxpolltime} = $g{snmp_try_small_timeout} * $g{snmp_try_small_maxcnt} * (scalar keys %{$snmp_input});
+    }
 
     # Start forks if needed
     fork_queries()
@@ -293,7 +298,6 @@ sub snmp_query {
                                                                 # Initialize max tries for read host discovery!
         if ( not exists $g{devices}{$device}{oids}{snmp_perm}{snmp_try_maxcnt} ) {
             $g{devices}{$device}{oids}{snmp_perm}{snmp_try_maxcnt}{val} = 1;
-            $g{maxpolltime} = 7;    #(timeout is 3 so 2 retries + 1 sec
         }
     }
 
@@ -498,7 +502,6 @@ sub snmp_query {
                     }
                 }
             }
-
             # If our forks are idle, give them something to do
             if ( !defined $g{forks}{$fork}{dev} and @devices ) {
                 my $device = shift @devices;
@@ -525,6 +528,7 @@ sub snmp_query {
                         next;
                     }
                     ++$active_forks;
+                    
                     $g{forks}{$fork}{time} = $polltime_start;
                 }
             }
