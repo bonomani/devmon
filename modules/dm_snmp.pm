@@ -279,8 +279,9 @@ sub snmp_query {
     #$g{numsnmpdevs} = $g{numdevs} if ( !defined $g{numsnmpdevs} );
     #do_log("Maxpoll $g{numsnmpdevs}");
     if ( $g{numsnmpdevs} == 0 ) {
-         #$g{numsnmpdevs} = scalar keys %{$snmp_input}; 
-         $g{maxpolltime} = $g{snmp_try_small_timeout} * $g{snmp_try_small_maxcnt} * (scalar keys %{$snmp_input});
+
+        #$g{numsnmpdevs} = scalar keys %{$snmp_input};
+        $g{maxpolltime} = $g{snmp_try_small_timeout} * $g{snmp_try_small_maxcnt} * ( scalar keys %{$snmp_input} );
     }
 
     # Start forks if needed
@@ -502,6 +503,7 @@ sub snmp_query {
                     }
                 }
             }
+
             # If our forks are idle, give them something to do
             if ( !defined $g{forks}{$fork}{dev} and @devices ) {
                 my $device = shift @devices;
@@ -528,7 +530,7 @@ sub snmp_query {
                         next;
                     }
                     ++$active_forks;
-                    
+
                     $g{forks}{$fork}{time} = $polltime_start;
                 }
             }
