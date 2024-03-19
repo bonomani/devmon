@@ -965,14 +965,11 @@ custom threshold if one was defined.
 
 A more complicated message file is this one, taken from a Cisco 2950 switch
 if_stat test:
-
-
--<begin file------------------------------
-      TABLE:
-      Ifc name|Ifc speed|Ifc status
-      {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
-
--<end file>-------------------------------
+```
+TABLE:
+Ifc name|Ifc speed|Ifc status
+{ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
+```
 
 In this message file, we are using a repeater table. Repeater tables are used
 to display repeater-type data aliases (which ultimately stem from 'branch'
@@ -1042,17 +1039,18 @@ Set the HTML table cellpadding size that Devmon will use
 See the GRAPHING document in this directory for explanation
 
 An example of some TABLE options in use:
-
-   TABLE: alarmsonbottom,border=0,pad=10
-
+```
+TABLE: alarmsonbottom,border=0,pad=10
+```
 The STATUS: key allows you to extend the first line of the status message
 that Devmon sends to BB/Hobbit/Xymon. For example, if you need to get data
 to a Xymon rrd collector module that evaluates data in the first line of the
 message (such as the Hobbit la collector which expects "up: <time>, %d
 users, %d procs load=%d.%d" you can use this key as follows to get a load
 average graph:
-
-    STATUS: up: load={laLoadFloat2}
+```
+STATUS: up: load={laLoadFloat2}
+```
 
 ### Error Propagation
 Starting with the github version of devmon, we decide to 'propagate' errors
