@@ -424,7 +424,7 @@ sub read_oids_file {
         and return 0;
     delete $tmpl->{file}{$oids_file};
     $tmpl->{file}{$oids_file}{mtime} = ( stat($oids_file) )[9];
-    do_log( "Parsing file $oids_file", DEBUG ) if $g{debug};
+    do_log( "Parsing file $oids_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
     while ( my $line = <FILE> ) {
@@ -485,9 +485,10 @@ sub read_oids_file {
 
     if ( exists $tmpl->{file}{$oids_file}{oids} ) {
         $tmpl->{new_oids} = dclone $tmpl->{file}{$oids_file}{oids};
-        do_log( "$oids_file successfully parsed", INFO );
+        do_log( "$oids_file successfully parsed", TRACE );
     } else {
         do_log( "$oids_file is empty", WARN );
+        return 0;
     }
     $tmpl->{file}{$oids_file}{changed} = 1;
 
@@ -527,7 +528,7 @@ sub read_transforms_file {
 
     delete $tmpl->{file}{$trans_file};
     $tmpl->{file}{$trans_file}{mtime} = ( stat($trans_file) )[9];
-    do_log( "Parsing file $trans_file", INFO ) if $g{debug};
+    do_log( "Parsing file $trans_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
     my @text = <FILE>;
@@ -1136,7 +1137,7 @@ sub read_thresholds_file {
 
     delete $tmpl->{file}{$thresh_file};
     $tmpl->{file}{$thresh_file}{mtime} = ( stat($thresh_file) )[9];
-    do_log( "Parsing file $thresh_file", DEBUG ) if $g{debug};
+    do_log( "Parsing file $thresh_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
     while ( my $line = <FILE> ) {
@@ -1197,9 +1198,9 @@ sub read_thresholds_file {
     close FILE;
 
     if ( exists $tmpl->{file}{$thresh_file}{oids} ) {
-        do_log( "$thresh_file successfully parsed", INFO );
+        do_log( "$thresh_file successfully parsed", TRACE );
     } else {
-        do_log( "$thresh_file is empty", INFO );
+        do_log( "$thresh_file is empty", TRACE );
     }
     $tmpl->{file}{$thresh_file}{changed} = 1;
     return 1;
@@ -1236,7 +1237,7 @@ sub read_exceptions_file {
         and return 0;
     delete $tmpl->{file}{$except_file};
     $tmpl->{file}{$except_file}{mtime} = ( stat($except_file) )[9];
-    do_log( "Parsing file $except_file", INFO ) if $g{debug};
+    do_log( "Parsing file $except_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
     while ( my $line = <FILE> ) {
@@ -1295,9 +1296,9 @@ sub read_exceptions_file {
 
     }
     if ( exists $tmpl->{file}{$except_file}{oid} ) {
-        do_log( "$except_file successfully parsed", INFO );
+        do_log( "$except_file successfully parsed", TRACE );
     } else {
-        do_log( "$except_file is empty", INFO );
+        do_log( "$except_file is empty", TRACE );
     }
 
     close FILE;
@@ -1331,7 +1332,7 @@ sub read_message_file {
         and return 0;
     delete $tmpl->{file}{$msg_file};
     $tmpl->{file}{$msg_file}{mtime} = ( stat($msg_file) )[9];
-    do_log( "Parsing file $msg_file", INFO );
+    do_log( "Parsing file $msg_file", TRACE );
 
     # Go through file, read in oids
     my $table_at = 0;
@@ -1487,9 +1488,9 @@ sub read_message_file {
     close FILE;
 
     if ( ( defined $msg ) and ( $msg ne "" ) ) {
-        do_log( "$msg_file successfully parsed", INFO );
+        do_log( "$msg_file successfully parsed", TRACE );
     } else {
-        do_log( "$msg_file is empty", INFO );
+        do_log( "$msg_file is empty", TRACE );
     }
     $tmpl->{file}{$msg_file}{changed} = 1;
     return 1;
