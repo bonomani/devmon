@@ -170,16 +170,16 @@ There are 2 information on each line:
 - The 'index' has type: OID (most of the time it is an Integer)
 
 So depending on the type of our OID we have:
-
-    Branch: result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
-    Leaf  : result      = snmp(oid)    ->  1 result (but no index)
-
+```
+Branch: result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
+Leaf  : result      = snmp(oid)    ->  1 result (but no index)
+```
 The meaning of the OID can be confusiong as it is the variable to be polled
 AND the polling 'result'.
-
-    oid(idx) = snmp(oid)   
-    oid      = snmp(oid)
-
+```
+oid(idx) = snmp(oid)   
+oid      = snmp(oid)
+```
 Note: If a leaf OID is an instance (element) of an OID. Try to transform it
        to a 'branch'!
 
@@ -205,8 +205,8 @@ SNMP data before it applies thresholds and renders the final message.
 The cisco 2950 cpu test uses a very simple transforms file:
 
 ```
-    sysUpTimeSecs   : MATH          : {sysUpTime} / 100
-    UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
+sysUpTimeSecs   : MATH          : {sysUpTime} / 100
+UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
 
 Like the oids file, it has three values per line, separated by colons.
@@ -288,15 +288,15 @@ dataOid  : .1.1.3     : branch
 ```
 
 After walking leafOid and dataOid, they return the values:
-
+```
 .1.1.2.1 = '.1.1.3.1194'
 .1.1.2.2 = '.1.1.3.2342'
-
+```
 and
-
+```
 .1.1.3.1194 = 'CPU is above nominal temperature'
 .1.1.3.2342 = 'System fans are non-operational'
-
+```
 Chances are that you won't know what leaf values will be returned for
 .1.1.3, but you know that .1.1.2 returns consistent values. You can use the
 CHAIN transform to 'chain' these two oids together to make the data more
