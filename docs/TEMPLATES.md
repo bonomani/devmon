@@ -35,14 +35,12 @@ holds data specific to the vendor-model
 
 The 'specs' file should look something like this:
 
-<!--start file--------------------------->
 ```
 vendor   : cisco
 model    : 2950
 snmpver  : 2
 sysdesc  : C2950
 ```
-<!----end file--------------------------->
 
 Note: Variable names and their corresponding values are listed separately, 
 each on a new line and separated by colons. This format is consistent across 
@@ -101,14 +99,12 @@ Now we'll go over each of these files in detail...
 The oids file contains, you guessed it, the oids that you want to SNMP query
 for this type of device. It should look something like this:
 
-<!--start file--------------------------->
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
 sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
 sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
-<!----end file--------------------------->
 
 Note that there are three values per line; the first value is the alias that
 Devmon uses throughout the rest of the template files, the second value is
@@ -208,12 +204,10 @@ SNMP data before it applies thresholds and renders the final message.
 
 The cisco 2950 cpu test uses a very simple transforms file:
 
-<!--start file--------------------------->
-
+```
     sysUpTimeSecs   : MATH          : {sysUpTime} / 100
     UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
-
-<!----end file--------------------------->
+```
 
 Like the oids file, it has three values per line, separated by colons.
 
@@ -256,13 +250,13 @@ is recommended as this cuts down on the time Devmon spends running test
 logic) then their transform rules *must be identical*, as must all OID
 aliases that your transformed alias depends on. So, for example, if you have
 this defined in your if_load test on your cisco-2950 template:
-
-    ifInBps         : MATH          : {ifInOps} x 8
-
+```
+ifInBps         : MATH          : {ifInOps} x 8
+```
 and this defined in your if_stat test on your cisco-2950 template:
-
-    ifInBps         : MATH          : {ifInOctets} x {time} x 8
-
+```
+ifInBps         : MATH          : {ifInOctets} x {time} x 8
+```
 you are going to be in trouble, because the 'time' OID alias might not even
 exist in the if_load test. So try to keep your duplicated OID aliases as
 simple as possible, so you dont have your tests stepping on each others toes
@@ -282,230 +276,233 @@ below: (listed in alphabetical order)
 
 ### CHAIN transform
 
- Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
- string value under another OID (the 'leaf' oid). The CHAIN transform will
- create a third 'transformed' oid, containing the leaves of the 'leaf' oid and
- the values of the 'data' oid. A quick example:
+Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
+string value under another OID (the 'leaf' oid). The CHAIN transform will
+create a third 'transformed' oid, containing the leaves of the 'leaf' oid and
+the values of the 'data' oid. A quick example:
 
- In your oids file, you have defined:
+In your oids file, you have defined:
+```
+leafOid  : .1.1.2     : branch
+dataOid  : .1.1.3     : branch
+```
 
-    leafOid  : .1.1.2     : branch
-    dataOid  : .1.1.3     : branch
+After walking leafOid and dataOid, they return the values:
 
- After walking leafOid and dataOid, they return the values:
+.1.1.2.1 = '.1.1.3.1194'
+.1.1.2.2 = '.1.1.3.2342'
 
-    .1.1.2.1 = '.1.1.3.1194'
-    .1.1.2.2 = '.1.1.3.2342'
+and
 
- and
+.1.1.3.1194 = 'CPU is above nominal temperature'
+.1.1.3.2342 = 'System fans are non-operational'
 
-    .1.1.3.1194 = 'CPU is above nominal temperature'
-    .1.1.3.2342 = 'System fans are non-operational'
+Chances are that you won't know what leaf values will be returned for
+.1.1.3, but you know that .1.1.2 returns consistent values. You can use the
+CHAIN transform to 'chain' these two oids together to make the data more
+accessible. The format for the CHAIN transform is:
+```
+chainedOid   : CHAIN    : {leafOd} {dataOid}
+```
 
- Chances are that you won't know what leaf values will be returned for
- .1.1.3, but you know that .1.1.2 returns consistent values. You can use the
- CHAIN transform to 'chain' these two oids together to make the data more
- accessible. The format for the CHAIN transform is:
-
-    chainedOid   : CHAIN    : {leafOd} {dataOid}
-
- If you used the above transform with the previously mentioned data, you
- would end up with:
-
-    chainedOid.1 = 'CPU is above nominal temperature'
-    chainedOid.2 = 'System fans are non-operational'
-
+If you used the above transform with the previously mentioned data, you
+would end up with:
+```
+chainedOid.1 = 'CPU is above nominal temperature'
+chainedOid.2 = 'System fans are non-operational'
+```
 
 ### CONVERT transform
 
- Convert a string in either hexadecimal or octal to its decimal equivalent.
- Takes two arguments, a target OID alias and a conversion type, which must be
- either 'hex' or 'oct'.
+Convert a string in either hexadecimal or octal to its decimal equivalent.
+Takes two arguments, a target OID alias and a conversion type, which must be
+either 'hex' or 'oct'.
 
- For instance, to convert the hex string '07d6' to its decimal equivalent
- (2006, as it so happens), do this:
-
-    intYear : CONVERT: {hexYear} hex
-
+For instance, to convert the hex string '07d6' to its decimal equivalent
+(2006, as it so happens), do this:
+```
+intYear : CONVERT: {hexYear} hex
+```
 
 ### DELTA transform
 
- The DELTA transform performs a 'change over time' calculation on the
- supplied data. It takes a single data alias, with an optional 'upper limit'
- (separated from the alias by whitespace) as input.
+The DELTA transform performs a 'change over time' calculation on the
+supplied data. It takes a single data alias, with an optional 'upper limit'
+(separated from the alias by whitespace) as input.
 
- The change over time calculation will be performed between one poll interval
- and the next, and returns a measurement of data units per second.
+The change over time calculation will be performed between one poll interval
+and the next, and returns a measurement of data units per second.
 
- The limit is used as the maximum value of the data alias, and comes in to
- play when the value from supplied data alias from the last polling cycle is
- more than the value from your current polling cycle.
+The limit is used as the maximum value of the data alias, and comes in to
+play when the value from supplied data alias from the last polling cycle is
+more than the value from your current polling cycle.
 
- This typically occurs when you have counter-wrap issues in SNMP (as most
- counters are still 32 bit; an interface with heavy traffic can wrap its
- ifOctet counters in less than two minutes).
+This typically occurs when you have counter-wrap issues in SNMP (as most
+counters are still 32 bit; an interface with heavy traffic can wrap its
+ifOctet counters in less than two minutes).
 
- If you don't specify a limit and Devmon detects a counter- wrap, it will use
- either the 32bit or 64bit upper limit, accordingly.
+If you don't specify a limit and Devmon detects a counter- wrap, it will use
+either the 32bit or 64bit upper limit, accordingly.
 
- The upshot of this is that you CANNOT MEASURE NEGATIVE DELTAS WITH THIS
- TRANSFORM. If you really really need to, please contact the software author
- and make a feature request.
+The upshot of this is that you CANNOT MEASURE NEGATIVE DELTAS WITH THIS
+TRANSFORM. If you really really need to, please contact the software author
+and make a feature request.
 
- Delta examples:
-
-    changeInValue  : DELTA : {value}
-
- or
-
-    changeInValue  : DELTA : {value} 2543456983
-
- Keep in mind that the DELTA transform takes at least two poll cycles to
- return meaningful data, so in the mean time you will get a 'wait' result
- stored in the target OID alias (as well as in aliases that are transformed
- based off the target alias).
+Delta examples:
+```
+changeInValue  : DELTA : {value}
+```
+or
+```
+changeInValue  : DELTA : {value} 2543456983
+```
+Keep in mind that the DELTA transform takes at least two poll cycles to
+return meaningful data, so in the mean time you will get a 'wait' result
+stored in the target OID alias (as well as in aliases that are transformed
+based off the target alias).
 
 
 ### DATE transform
 
- This transform takes a single data alias as input, the value of which Devmon
- assumes to be seconds in "Unix time" (i.e. seconds since the Epoch [00:00:00
- GMT, January 1, 1970]) It then stores in the transformed data alias a text
- string containing the date corresponding to the number of seconds input, in
- the format CCYY-MM-DD, HH:MM:SS (24 hour time).
+This transform takes a single data alias as input, the value of which Devmon
+assumes to be seconds in "Unix time" (i.e. seconds since the Epoch [00:00:00
+GMT, January 1, 1970]) It then stores in the transformed data alias a text
+string containing the date corresponding to the number of seconds input, in
+the format CCYY-MM-DD, HH:MM:SS (24 hour time).
 
 
 ### ELAPSED transform
 
- This transform takes a single data alias as input, the value of which Devmon
- assumes to be in seconds. It then stores a text string in the transformed
- data alias containing the number of years, days, hours, minutes and seconds
- equal to the number of seconds provided as input to the transform.
+This transform takes a single data alias as input, the value of which Devmon
+assumes to be in seconds. It then stores a text string in the transformed
+data alias containing the number of years, days, hours, minutes and seconds
+equal to the number of seconds provided as input to the transform.
 
 
 ### INDEX transform
 
- This transform allows you to access the index part of a numerical OID in a
- repeater OID.
+This transform allows you to access the index part of a numerical OID in a
+repeater OID.
 
- For example, in the cdpCache table for the Cisco CDP MIB, walking the
- cdpCacheDevicePort OID will return values such as:
-
-    CISCO-CDP-MIB::cdpCacheDevicePort.4.3 = STRING: GigabitEthernet4/41
-    CISCO-CDP-MIB::cdpCacheDevicePort.9.1 = STRING: GigabitEthernet2/16
-    CISCO-CDP-MIB::cdpCacheDevicePort.12.14 = STRING: Serial2/2
-
- The value is the interface on the remote side, and there is no OID for the
- interface on the local side. To get the interface on the local side, you must
- use the last value in the index (e.g. 3 for GigabitEthernet4/41) and look in
- the ifTable:
-
-    IF-MIB::ifName.3 = STRING: Fa0/0
-
- The index transform allows you to get the index value (4.3 in this case) as
- an OID value. Any operations you need to do on the index value should be
- possible with existing transforms.
+For example, in the cdpCache table for the Cisco CDP MIB, walking the
+cdpCacheDevicePort OID will return values such as:
+```
+CISCO-CDP-MIB::cdpCacheDevicePort.4.3 = STRING: GigabitEthernet4/41
+CISCO-CDP-MIB::cdpCacheDevicePort.9.1 = STRING: GigabitEthernet2/16
+CISCO-CDP-MIB::cdpCacheDevicePort.12.14 = STRING: Serial2/2
+```
+The value is the interface on the remote side, and there is no OID for the
+interface on the local side. To get the interface on the local side, you must
+use the last value in the index (e.g. 3 for GigabitEthernet4/41) and look in
+the ifTable:
+```
+IF-MIB::ifName.3 = STRING: Fa0/0
+```
+The index transform allows you to get the index value (4.3 in this case) as
+an OID value. Any operations you need to do on the index value should be
+possible with existing transforms.
 
 ### MATCH transform
 
- In some badly designed MIBs multiple types of information are presented in a
- single table with two columns (branches), often in just a name, value format.
- This transform makes it possible to split such a combined table out into
- separate tables, or to reformat the table so that it has multiple columns.
+In some badly designed MIBs multiple types of information are presented in a
+single table with two columns (branches), often in just a name, value format.
+This transform makes it possible to split such a combined table out into
+separate tables, or to reformat the table so that it has multiple columns.
 
- For example, the MIB for the TRIDIUM building management system has a table
- with outputName and outputValue, data returned looks as follows:
+For example, the MIB for the TRIDIUM building management system has a table
+with outputName and outputValue, data returned looks as follows:
+```
+TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
+TRIDIUM-MIB::outputName.2  = STRING: "I_Inc4_VaN"
+TRIDIUM-MIB::outputName.3  = STRING: "I_Inc4_VbN"
+TRIDIUM-MIB::outputName.4  = STRING: "I_Inc4_VcN"
 
-    TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
-    TRIDIUM-MIB::outputName.2  = STRING: "I_Inc4_VaN"
-    TRIDIUM-MIB::outputName.3  = STRING: "I_Inc4_VbN"
-    TRIDIUM-MIB::outputName.4  = STRING: "I_Inc4_VcN"
-    ...
-    TRIDIUM-MIB::outputValue.1 = STRING: "50.06"
-    TRIDIUM-MIB::outputValue.2 = STRING: "232.91"
-    TRIDIUM-MIB::outputValue.3 = STRING: "233.39"
-    TRIDIUM-MIB::outputValue.4 = STRING: "233.98"
+TRIDIUM-MIB::outputValue.1 = STRING: "50.06"
+TRIDIUM-MIB::outputValue.2 = STRING: "232.91"
+TRIDIUM-MIB::outputValue.3 = STRING: "233.39"
+TRIDIUM-MIB::outputValue.4 = STRING: "233.98"
+```
+To split the frequences out as a separate repeater, use:
+```
+outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
+outputVaRow    : MATCH  : {outputName} /.*_VaN$/
+```  
 
- To split the frequences out as a separate repeater, use:
+outputFreqRow will now contain the indexes of outputName that matched the
+regular expression, e.g. 1,5,9 etc. , outputVaRow will contain 2,6,10. To
+construct a table, use the chain transform to create repeaters using the
+matched indexes:
+```
+outputFreq     : CHAIN  : {outputFreqRow} {outputValue}
+outputVa       : CHAIN  : {outputVaRow} {outputValue}
+```
 
-    outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
-    outputVaRow    : MATCH  : {outputName} /.*_VaN$/
-    ...
+To create the primary repeater for a table, we do the same on outputName:
+```
+IncomerRowName : CHAIN  : {outputFreqRow} {outputName}   
+```
+In this case, it is preferable to clean up the outputFreq for display:
+```
+IncomerName    : REGSUB : {IncomerRowName} /(.*)_Freq/$1/
+```
+A table created as follows:
+```
+Incomer|Frequency (Hz)|Voltage A|Voltage B|Voltage C
+```
+Would now contain in its first row:
+```
+I_Inc4|50.06|232.91|233.39|233.98   
+```
 
- outputFreqRow will now contain the indexes of outputName that matched the
- regular expression, e.g. 1,5,9 etc. , outputVaRow will contain 2,6,10. To
- construct a table, use the chain transform to create repeaters using the
- matched indexes:
+### 'MATH' transform:
 
-    outputFreq     : CHAIN  : {outputFreqRow} {outputValue}
-    outputVa       : CHAIN  : {outputVaRow} {outputValue}
-    ...
-
- To create the primary repeater for a table, we do the same on outputName:
-
-    IncomerRowName : CHAIN  : {outputFreqRow} {outputName}   
-
- In this case, it is preferable to clean up the outputFreq for display:
-
-    IncomerName    : REGSUB : {IncomerRowName} /(.*)_Freq/$1/
-
- A table created as follows:
-
-    Incomer|Frequency (Hz)|Voltage A|Voltage B|Voltage C
-
- Would now contain in its first row:
-
-    I_Inc4|50.06|232.91|233.39|233.98   
-
- 'MATH' transform:
-
- The MATH transform performs a mathematical expression defined by the
- supplied data. It can use the following mathematical operators:
-
-    '+'           (Addition)
-    '-'           (Subtraction)
-    '*'           (Muliplication)
-    ' x '         (Multiplication - note white space on each side) (deprecated)
-    '/'           (Division)
-    '^'           (Exponentiation)
-    '%'           (Modulo or Remainder)
-    '&'           (bitwise AND)
-    '|'           (bitwise OR)
-    ' . '         (string concatenation - note white space each side)
-    '(' and ')'   (Expression nesting)
-
- This transform is not whitespace sensitive, except in the case of ' x ' and
- ' . ' , so both:
-
-    {sysUpTime} / 100
-
- and
-
-    {sysUpTime}/100
-
- ...would be accepted, and are functionally equivalent. However:
-
-    {ifInOps} x 8
-
- will work, while:
-
-    {ifInOps}x8
-
- will not. This is to avoid problems with oid names containing the character
- 'x'. New templates should rather use the '*' operator to avoid problems, e.g.:
-
-    {ifInOps}*8
-
- The mathematical expressions you can perform can be
- quite complex, such as:
-
-    ((({sysUpTime}/100) ^ 2 ) x 15) + 10
-
- Note that the syntax of the MATH transform is not stringently checked at
- the time the template is loaded, so if there are any logic errors, they
- will not be apparent until you attempt to use the template for the first
- time (any errors will be dumped to the devmon.log file on the node that
- they occurred on).
+The MATH transform performs a mathematical expression defined by the
+supplied data. It can use the following mathematical operators:
+```
+'+'           (Addition)
+'-'           (Subtraction)
+'*'           (Muliplication)
+' x '         (Multiplication - note white space on each side) (deprecated)
+'/'           (Division)
+'^'           (Exponentiation)
+'%'           (Modulo or Remainder)
+'&'           (bitwise AND)
+'|'           (bitwise OR)
+' . '         (string concatenation - note white space each side)
+'(' and ')'   (Expression nesting)
+```
+This transform is not whitespace sensitive, except in the case of ' x ' and
+' . ' , so both:
+```
+{sysUpTime} / 100
+```
+and
+```
+{sysUpTime}/100
+```
+...would be accepted, and are functionally equivalent. However:
+```
+{ifInOps} x 8
+```
+will work, while:
+```
+{ifInOps}x8
+```
+will not. This is to avoid problems with oid names containing the character
+'x'. New templates should rather use the '*' operator to avoid problems, e.g.:
+```
+{ifInOps}*8
+```
+The mathematical expressions you can perform can be
+quite complex, such as:
+```
+((({sysUpTime}/100) ^ 2 ) x 15) + 10
+```
+Note that the syntax of the MATH transform is not stringently checked at
+the time the template is loaded, so if there are any logic errors, they
+will not be apparent until you attempt to use the template for the first
+time (any errors will be dumped to the devmon.log file on the node that
+they occurred on).
 
  Decimal precision can also be controlled via an additional variable seperated
  from the main expression via a colon:
