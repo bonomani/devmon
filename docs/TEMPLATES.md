@@ -95,9 +95,6 @@ Notes:
 - Its important to use the **numeric** version of an OID as Devmon do not map its string version
 - If the same OID alias is used in multiple test in a template, it MUST have the same numeric OID value to avoid inconsistent results
 
-
-## The 'OID' concept
-
 OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
 
 - In SNMP, we distinguish between `table` and `scalar` OIDs.
@@ -110,15 +107,12 @@ The relationship between them is:
   - An SNMP `scalar` OID (ending with 0)
   - An instance of an SNMP `table` OID (usually not ending with 0)
 
-
 How it works:
-<!-- A query from the shell -->
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 ```
-
 Let's analyse the answer:
 ```
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
@@ -127,8 +121,8 @@ Let's analyse the answer:
 
 There are 2 information on each line:
 
-- The 'result' can be of different types: String, Integer, OID, ...
-- The 'index' has type: OID (most of the time it is an Integer)
+- The `result` can have various types such as String, Integer, numeric OID, etc.
+- The `index` is of type numeric OID, which can often be reduced to an Integer.
 
 So depending on the type of our OID we have:
 ```
