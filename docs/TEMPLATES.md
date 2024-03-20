@@ -69,12 +69,13 @@ as follows:
 - .../devmon/templates/cisco-2950/cpu/exceptions
 - .../devmon/templates/cisco-2950/cpu/message
 
-A line beginning with "#" is a comment, supported by all these files except the "message" file.
+A line beginning with "#" is a comment, supported by all these files except 
+the "message" file.
 
 ## The 'oids' file 
 
-The oids file contains, you guessed it, the oids that you want to SNMP query
-for this type of device. It should look something like this:
+The "oids" file contains the SNMP queries you want to make for this device 
+type. It should look something like this:
 
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
