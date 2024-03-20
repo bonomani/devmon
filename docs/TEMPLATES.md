@@ -27,8 +27,8 @@ templates folder, preferably on your main server. Remove any extra template
 folders on your other servers. This avoids confusion when syncing templates 
 to your database, making sure everything matches up.
 
-## The 'specs' file
-The 'specs' file holds data specific to the vendor-model ans should look like
+## The `specs` file
+The `specs` file holds data specific to the vendor-model ans should look like
 
 ```
 vendor   : cisco
