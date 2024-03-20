@@ -14,7 +14,7 @@ Crafting your own Devmon template is a breeze. You don't need to write a
 single line of code! But having a bit of know-how with regular expressions 
 helps: http://www.regular-expressions.info/
 
-Template data is stored in the "templates" folder of your Devmon installation. 
+Template data is stored in the `templates` folder of your Devmon installation. 
 For a single server, the folder is read regularly; for multiple servers, the 
 database is utilized.
 
