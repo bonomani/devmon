@@ -135,19 +135,17 @@ UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 In a generic form
 ```
 targetOID       : TRANSFORM      : {sourceOID1} ... {sourceOID2} ...
-```
-In the 'transform context' we use slightly different terms that help to be more precise: 
-- The primaryOID = sourceOID1 (the first sourceOID that is a repeater, so it should be also sourceOID2), from left to right
-- The **targetOID** has the **same indexes** as **the primaryOID**
 
-Three values per line:
-1. The **OID** (case sensitive): unique compared to those in the 'oids' file. For example, 
+In the 'transform context' we use slightly different terms that help to be more precise. Three values per line:
+1. The **targetOID** (case sensitive): unique compared to those in the 'oids' file. For example, 
 'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
 Throughout, 'alias' refers to either SNMP-collected or transformed data.  
 2. The **transform** : (case insensitive, e.g., 'MATH' or 'math')
-3. The **input data**: a string with one or more OID aliases (should be enclosed in {}), defined elsewhere
+3. The **input data**: a string with one or more sourceOID(s), be enclosed in {}, defined elsewhere
 
-Note
+Notes
+- The primaryOID = sourceOID1 (the first sourceOID that is a repeater, so it should be also sourceOID2), from left to right
+- The **targetOID** has the **same indexes** as **the primaryOID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
 - Like for the `oid` file, the same consideration for OID aliases across multiple tests should be taken
 
