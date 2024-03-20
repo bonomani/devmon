@@ -104,27 +104,22 @@ The relationship between them is:
   - An SNMP `scalar` OID (ending with 0)
   - An instance of an SNMP `table` OID (usually not ending with 0)
 
-Let's analyse a SNMP request 
+Let's analyse a SNMP request for a `branch'
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-  oid -> <- index-> = <-result->
 ```
+- There are muliple result
+- Ech line carry 2 new information: 
+  - The `result`, which can have various types: String, Integer, numeric OID, etc.
+  - The `index`, is of type numeric OID, often an Integer.
+- For a `leaf`, there is only 1 result (and no index as it is not needed)
 
-For 1 oid we receive 2 information on each line:
-
-- The `result`, which can have various types: String, Integer, numeric OID, etc.
-- The `index`, is of type numeric OID, often an Integer.
-
-Depending on the type of our OID we have:
-```
-Type 'branch': result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
-Type 'Leaf'  : result      = snmp(oid)    ->  1(or 0) result and no index
-```
 Note: 
-- The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and the index
-- If a leaf OID is not a scalar (do not end by 0), it cannot be retrieved without its parent table: Use a 'branch' type! 
+- The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and also the index
+- If a leaf OID is not a scalar (do not end by 0), it will not be retrieved without its parent table. So use a 'branch' type! 
 
 The OID term is also use in Devmon to designate the result of a transform:
 - oidT=transform{oidS} 
