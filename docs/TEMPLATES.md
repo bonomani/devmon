@@ -147,7 +147,7 @@ Notes
 - The **primaryOID** = **sourceOID1** (the first sourceOID that is a repeater, so it should be also sourceOID2), from left to right
 - The **targetOID** has the **same indexes** as **the primaryOID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
-- Like for the `oid` file, the same consideration for OID aliases across multiple tests should be taken
+- Like for the `oid` file, the same consideration for targetOID across multiple tests should be taken (duplicate the line!)
 
 ### BEST transform
  This transform takes two data aliases as input, and stores
