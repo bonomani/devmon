@@ -85,15 +85,15 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
 There are three values per line
-- The **oid** alias (case sensitive)
+- The **OID** alias (case sensitive)
 - the **numeric** value of the oid alias
 - The repeater **type**
   - 'leaf', which is a non-repeater type oid
   - 'branch' which is a repeater type oid
 
 Notes:
-- Its important to use the numeric version of an oid as Devmon do not map the string version of an OID
-- If you use the same OID alias in multiple test for a template, they MUST have the same numeric OID value to avoid inconsistent results
+- Its important to use the **numeric** version of an OID as Devmon do not map its string version
+- If the same OID alias is used in multiple test in a template, it MUST have the same numeric OID value to avoid inconsistent results
 
 
 ## The 'OID' concept
