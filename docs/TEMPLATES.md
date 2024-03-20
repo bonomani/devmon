@@ -142,25 +142,15 @@ The cisco 2950 cpu test uses a very simple transforms file:
 sysUpTimeSecs   : MATH          : {sysUpTime} / 100
 UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
+The first value is the OID alias, unique compared to those in the 'oids' file. For example, 
+'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
+Throughout, 'alias' refers to either SNMP-collected or transformed data.
 
-The first value is the OID alias. Note that this should be a unique value
-compared to any of the aliases defined in the 'oids' file. Notice in this
-example that the 'sysUpTimeSecs' alias is a transformed version of the
-'sysUpTime' alias, which was defined in the oids file and whose data is
-collected via SNMP. For the rest of this help file, we use the term 'alias'
-to interchangeably refer to either a variable containing data collected via
-SNMP or containing data from a translation.
+The second value signifies the transform type, regardless of case (e.g., 'MATH' or 'math')
 
-The second value in the line is the name of the type of transform. These are
-case insensitive (i.e. 'MATH' is the same as 'math') but we refer to them in
-the uppercase form to distinguish them from other functions.
-
-The third value defines the 'data input' for the transform specified by the
-second value. The result of this data put through the specified transform
-will be stored in the alias defined by the first value. Note that any aliases
-supplied in this field are encased in curly braces (e.g. {sysUpTime}). This
-tells Devmon that this is an alias containing an snmp or translated value,
-and not just a normal string.
+The third value defines the input data for the specified transform. The transformed data is 
+stored in the alias from the first value. Curly braces (e.g., {sysUpTime}) signal to Devmon 
+that this holds SNMP or transformed data, not just a string.
 
 The data input for a transform can (depending on the transform type) consist
 of one or more OID aliases defined elsewhere. These aliases don't have to
