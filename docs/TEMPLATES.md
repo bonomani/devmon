@@ -20,7 +20,7 @@ database is utilized.
 
 Inside the `templates` folder, there are subfolders for each vendor-model, 
 like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
-because each one must have a 'specs' file that specifies the template
+because each one must have a `specs` file that specifies the template
 
 Note: If you have multiple servers, it's best to keep only one copy of your 
 templates folder, preferably on your main server. Remove any extra template 
