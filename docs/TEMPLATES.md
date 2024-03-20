@@ -142,22 +142,12 @@ The cisco 2950 cpu test uses a very simple transforms file:
 sysUpTimeSecs   : MATH          : {sysUpTime} / 100
 UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
-The first value is the OID alias, unique compared to those in the 'oids' file. For example, 
+There are three values per line
+1. The **OID alias** (case sensitive): unique compared to those in the 'oids' file. For example, 
 'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
-Throughout, 'alias' refers to either SNMP-collected or transformed data.
-
-The second value signifies the transform type, regardless of case (e.g., 'MATH' or 'math')
-
-The third value defines the input data for the specified transform. The transformed data is 
-stored in the alias from the first value. Curly braces (e.g., {sysUpTime}) signal to Devmon 
-that this holds SNMP or transformed data, not just a string.
-
-The data input for a transform can (depending on the transform type) consist
-of one or more OID aliases defined elsewhere. These aliases don't have to
-necessarily be defined in a line prior the transform that they are used in,
-Devmon is smart enough to figure out the hierarchy in which they should be
-used. If you have a dependency loop somewhere, Devmon will point that out to
-you, as well.
+Throughout, 'alias' refers to either SNMP-collected or transformed data.  
+2. The **transform** : (case insensitive, e.g., 'MATH' or 'math')
+3. The **input data**: a string with one or more OID aliases (should be enclosed in {}), defined elsewhere
 
 Also, note that if you use a non-repeater type data alias as the input for
 a transform, the transformed alias will also be a non-repeater. Likewise
