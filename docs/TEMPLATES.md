@@ -86,7 +86,7 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 
 There are three values per line
 1. The **targetOID** (case sensitive): a **textual** representation of an OID, but can differ from the offical one  
-2. The **numericOID**: the standard form of OID (The **textual** OID representation do not work) 
+2. The **numericOID**: the standard form of OID (The official **textual** OID representation that you can find in MIBS do not work) 
 3. The repeater **type**: `leaf`(= a non-repeater oid), `branch`(= a repeater oid)
 
 Notes:
