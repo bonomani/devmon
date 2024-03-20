@@ -85,14 +85,14 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
 There are three values per line
-- The **OID** alias (case sensitive)
-- the **numeric** value of the oid alias
+- The **OID** alias (case sensitive): a **textual** representation of an OID, but can differ from the offical one  
+- The **numeric** OID: the standard form of OID representation
 - The repeater **type**
   - `leaf`: a non-repeater oid
   - `branch`: a repeater oid
 
 Notes:
-- Its important to use the **numeric** version of an OID as Devmon do not map its string version
+- Its important to use the **numeric** version of an OID as Devmon do not map its **textual** representation 
 - If the same OID alias is used in multiple test in a template, it MUST have the same numeric OID value to avoid inconsistent results
 
 OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
