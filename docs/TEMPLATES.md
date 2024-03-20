@@ -92,8 +92,8 @@ There are three values per line
   - `branch`: a repeater oid
 
 Notes:
-- Its important to use the **numeric** version of an OID as Devmon do not map its **textual** representation 
-- If the same OID alias is used in multiple test in a template, it MUST have the same numeric OID value to avoid inconsistent results
+- Its important to use the **numeric** version of an OID as Devmon do will not work with the official **textual** representation 
+- If the same OID alias is used in multiple tests within a template, the complete line (alias: numeric OID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
 OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
 
