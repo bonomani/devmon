@@ -111,7 +111,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-  oid -> <- index-> = <-result->
 ```
-- There are muliple result
+- There are muliple result, 1 per line
 - Each line carries 2 new information: 
   - The `result`, which can have various types: String, Integer, numeric OID, etc.
   - The `index`, is of type numeric OID, often simply an Integer.
