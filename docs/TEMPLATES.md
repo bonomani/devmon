@@ -4,7 +4,7 @@
 
 Devmon's templates enable :
 
-- Defines specific OIDs
+- Define specific OIDs
 - Transform received data
 - Define thresholds and alarm message
 - Custom Xymon output messages.
