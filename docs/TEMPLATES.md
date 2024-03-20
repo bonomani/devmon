@@ -85,8 +85,8 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
 There are three values per line
-- The **OID** alias (case sensitive): a **textual** representation of an OID, but can differ from the offical one  
-- The **numeric** OID: the standard form of OID representation
+- The **OID alias** (case sensitive): a **textual** representation of an OID, but can differ from the offical one  
+- The **numeric OID**: the standard form of OID representation
 - The repeater **type**
   - `leaf`: a non-repeater oid
   - `branch`: a repeater oid
