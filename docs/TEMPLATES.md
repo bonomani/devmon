@@ -109,16 +109,16 @@ Let's analyse a SNMP request for a `branch'
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
-<- numoid -> <- index-> = <-result->
+<-numOID-> <- index-> = <-result->
 ```
 - There are muliple result, 1 per line
 - Each line carries 2 new information: 
-  - The `result`, which can have various types: String, Integer, numeric OID, etc.
+  - The `result` can have various types: String, Integer, numericOID, etc.
   - The `index`, is of type numeric OID, often simply an Integer.
-- For a `leaf`, there is only 1 result (and no index as it is not needed)
+- For a `leaf`, there is only 1 targetOID (=result) (and no index as it is not needed)
 
 Note: 
-- The meaning of the OID can be confusiong as everything is an OID: the targetOID, the numericOID and also the index
+- The meaning of the OID can be confusiong as everything is called `OID`: the targetOID, the numericOID and also the index
 - If a leaf OID is not a scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
 
 ## The 'transforms' file
