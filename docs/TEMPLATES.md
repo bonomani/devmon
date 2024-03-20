@@ -111,6 +111,7 @@ Let's see a request and hot it is analysed
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
+.1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-  oid -> <- index-> = <-result->
 ```
 
