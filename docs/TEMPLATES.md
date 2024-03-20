@@ -112,9 +112,9 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 <-  oid -> <- index-> = <-result->
 ```
 - There are muliple result
-- Ech line carry 2 new information: 
+- Each line carries 2 new information: 
   - The `result`, which can have various types: String, Integer, numeric OID, etc.
-  - The `index`, is of type numeric OID, often an Integer.
+  - The `index`, is of type numeric OID, often simply an Integer.
 - For a `leaf`, there is only 1 result (and no index as it is not needed)
 
 Note: 
