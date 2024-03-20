@@ -18,8 +18,8 @@ Template data is stored in the "templates" folder of your Devmon installation.
 For a single server, the folder is read regularly; for multiple servers, the 
 database is utilized.
 
-Inside the "templates" folder, there are subfolders for each vendor-model, 
-like "Cisco 2950" or "Cisco 3750". The names of these subfolders don't matter
+Inside the `templates` folder, there are subfolders for each vendor-model, 
+like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
 because each one must have a 'specs' file that specifies the template
 
 Note: If you have multiple servers, it's best to keep only one copy of your 
