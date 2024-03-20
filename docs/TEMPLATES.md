@@ -121,16 +121,6 @@ Note:
 - The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and also the index
 - If a leaf OID is not a scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
 
-The OID term is also use in Devmon to designate the result of a transform:
-- oidT=transform{oidS} 
-
-Note that in Devmon a transform can have multiple oids:
-- oidT = transform {oidS1, oidS2, ... }
-- the 'primary oid' is the 'first' source oids : oidS1 
-- The resulting oidT have the same indexes as the carefuilyl chosen 'primary oid': oidS1 
-- 'source oid(s)' is/are what is polled or transformed
-- 'target oid' is the result after a transformation
-
 ## The 'transforms' file
 
 The transforms file in your template details the data changes Devmon makes to collected 
@@ -149,35 +139,13 @@ Throughout, 'alias' refers to either SNMP-collected or transformed data.
 2. The **transform** : (case insensitive, e.g., 'MATH' or 'math')
 3. The **input data**: a string with one or more OID aliases (should be enclosed in {}), defined elsewhere
 
-Also, note that if you use a non-repeater type data alias as the input for
-a transform, the transformed alias will also be a non-repeater. Likewise
-for a repeater type data alias. If you mix repeater and non-repeater type
-data aliases in the transform input, the resulting transformed alias will
-be a repeater.
-
-With regard to duplicated OID aliases across multiple tests in a single
-template, transformed OID aliases have the same rules as non-transformed
-aliases: if you use the same transformed OID alias in multiple tests (which
-is recommended as this cuts down on the time Devmon spends running test
-logic) then their transform rules *must be identical*, as must all OID
-aliases that your transformed alias depends on. So, for example, if you have
-this defined in your if_load test on your cisco-2950 template:
-```
-ifInBps         : MATH          : {ifInOps} x 8
-```
-and this defined in your if_stat test on your cisco-2950 template:
-```
-ifInBps         : MATH          : {ifInOctets} x {time} x 8
-```
-you are going to be in trouble, because the 'time' OID alias might not even
-exist in the if_load test. So try to keep your duplicated OID aliases as
-simple as possible, so you dont have your tests stepping on each others toes
-(although if you do have two transformed OIDs doing the same transform on the
-same data, you should by all means duplicate them, as this will make your
-tests run much faster).
-
-There are a number of different types of transforms, which we will discuss
-below: (listed in alphabetical order)
+Note
+- The term `OID` designate often an `OID alias` 
+- A commonly describe as: `targetOID` : transform : ... {sourceOID1} ... {sourceOID1} , ... 
+  - The `primaryOID` = `sourceOID1` (that is a repeater) 
+  - The `targetOID` has the same indexes as the `primaryOID`  
+- Mixing repeater and non-repeater type result in a repeater type OID.
+- Like for the `oid` file, the same consideration for OID aliases across multiple tests should be taken
 
 ### BEST transform
  This transform takes two data aliases as input, and stores
@@ -185,9 +153,7 @@ below: (listed in alphabetical order)
  and red being the 'worst') in the transformed data alias. The oids can either
  be comma or space delimited.
 
-
 ### CHAIN transform
-
 Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
 string value under another OID (the 'leaf' oid). The CHAIN transform will
 create a third 'transformed' oid, containing the leaves of the 'leaf' oid and
