@@ -100,8 +100,8 @@ Notes:
 
 OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
 
-In SNMP, we distinguish between `table` and `scalar` OIDs.
-In Devmon, we classify OIDs as either `branch` or `leaf`.
+- In SNMP, we distinguish between `table` and `scalar` OIDs.
+- In Devmon, we classify OIDs as either `branch` or `leaf`.
 
 The relationship between them is:
 
