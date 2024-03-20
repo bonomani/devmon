@@ -47,7 +47,7 @@ can be safely removed from all templates.
 
 Each subfolder in the vendor-model directory is a separate test. The folder's 
 name is important because it defines the test name reported to your display 
-server. For example, a subfolder named 'cpu' in your vendor-model directory 
+server. For example, a subfolder named `cpu` in your vendor-model directory 
 defines the CPU test.
 
 Under each test subfolder, there are five files:
@@ -59,7 +59,7 @@ Under each test subfolder, there are five files:
 
 All five files MUST be present for the template to be read successfully,
 although the thresholds, transforms and exceptions files can all be empty.
-So, a quick list of files needed for a 'cpu' test on a Cisco 2950 should look
+So, a quick list of files needed for a `cpu` test on a Cisco 2950 should look
 as follows:
 
 - .../devmon/templates/cisco-2950/specs
@@ -88,8 +88,8 @@ There are three values per line
 - The **OID** alias (case sensitive)
 - the **numeric** value of the oid alias
 - The repeater **type**
-  - `leaf`, which is a non-repeater type oid
-  - `branch` which is a repeater type oid
+  - `leaf`: a non-repeater oid
+  - `branch`: a repeater oid
 
 Notes:
 - Its important to use the **numeric** version of an OID as Devmon do not map its string version
