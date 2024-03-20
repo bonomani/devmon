@@ -85,12 +85,12 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
 There are three values per line
-1. The **OID alias** (case sensitive): a **textual** representation of an OID, but can differ from the offical one  
-2. The **numeric OID**: the standard form of OID (The **textual** OID representation do not work) 
+1. The **targetOID** (case sensitive): a **textual** representation of an OID, but can differ from the offical one  
+2. The **numericOID**: the standard form of OID (The **textual** OID representation do not work) 
 3. The repeater **type**: `leaf`(= a non-repeater oid), `branch`(= a repeater oid)
 
 Notes:
-- If the same OID alias is used in multiple tests within a template, the complete line (alias: numeric OID: type) MUST be duplicated in those tests to avoid inconsistent results.
+- If the same targetOID is used in multiple tests within a template, the complete line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
 OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
 
@@ -109,7 +109,7 @@ Let's analyse a SNMP request for a `branch'
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
-<-  oid -> <- index-> = <-result->
+<- numoid -> <- index-> = <-result->
 ```
 - There are muliple result, 1 per line
 - Each line carries 2 new information: 
@@ -118,7 +118,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 - For a `leaf`, there is only 1 result (and no index as it is not needed)
 
 Note: 
-- The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and also the index
+- The meaning of the OID can be confusiong as everything is an OID: the targetOID, the numericOID and also the index
 - If a leaf OID is not a scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
 
 ## The 'transforms' file
