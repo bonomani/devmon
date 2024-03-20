@@ -10,17 +10,17 @@ Devmon's templates enable :
 - Custom Xymon output messages.
 
 ## Rolling your own
-Creating a Devmon template is easy. No coding required. Knowing regular 
-expressions helps: http://www.regular-expressions.info/
+Crafting your own Devmon template is a breeze. You don't need to write a 
+single line of code! But having a bit of know-how with regular expressions 
+helps: http://www.regular-expressions.info/
 
-Let's explore template structure. Template data is stored in the "templates" 
-folder of your Devmon installation. For a single server, the folder is read 
-regularly; for multiple servers, the database is utilized.
+Template data is stored in the "templates" folder of your Devmon installation. 
+For a single server, the folder is read regularly; for multiple servers, the 
+database is utilized.
 
-Inside the "templates" folder, there are subfolders for each vendor and model, 
-like "Cisco 2950" or "Cisco 3750." The names of these folders don't matter much, 
-as the vendor and model are specified in another file called 'specs.' But it's 
-helpful to name them in a way that's easy to understand.
+Inside the "templates" folder, there are subfolders for each vendor-model, 
+like "Cisco 2950" or "Cisco 3750". The names of these subfolders don't matter
+because each one must have a 'specs' file that specifies the template
 
 Note: If you have multiple servers, it's best to keep only one copy of your 
 templates folder, preferably on your main server. Remove any extra template 
@@ -28,12 +28,7 @@ folders on your other servers. This avoids confusion when syncing templates
 to your database, making sure everything matches up.
 
 ## The 'specs' file
-Each vendor-model directory must contain a file named 'specs' for specifications.
-Additionally, there can be one or more subdirectories within each directory,
-each representing a specific test for that vendor-model. The 'specs' file 
-holds data specific to the vendor-model
-
-The 'specs' file should look something like this:
+The 'specs' file holds data specific to the vendor-model ans should look like
 
 ```
 vendor   : cisco
