@@ -120,7 +120,7 @@ There are 2 information on each line:
 - The `result` can have various types such as String, Integer, numeric OID, etc.
 - The `index` is of type numeric OID, which can often be reduced to an Integer.
 
-So depending on the type of our OID we have:
+Depending on the type of our OID we have:
 ```
 Branch: result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
 Leaf  : result      = snmp(oid)    ->  1 result (but no index)
