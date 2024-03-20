@@ -85,9 +85,9 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
 There are three values per line
-- The oid alias (case sensitive=
-- the numeric value of the oid alias
-- The repeater type
+- The **oid** alias (case sensitive)
+- the **numeric** value of the oid alias
+- The repeater **type**
   - 'leaf', which is a non-repeater type oid
   - 'branch' which is a repeater type oid
 
