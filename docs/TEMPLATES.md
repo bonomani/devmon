@@ -112,27 +112,19 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 <-  oid -> <- index-> = <-result->
 ```
 
-There are 2 information on each line:
+For 1 oid we receive 2 information on each line:
 
-- The `result` can have various types such as String, Integer, numeric OID, etc.
-- The `index` is of type numeric OID, which can often be reduced to an Integer.
+- The `result`, which can have various types: String, Integer, numeric OID, etc.
+- The `index`, is of type numeric OID, often an Integer.
 
 Depending on the type of our OID we have:
 ```
-Branch: result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
-Leaf  : result      = snmp(oid)    ->  1 result (but no index)
+Type 'branch': result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
+Type 'Leaf'  : result      = snmp(oid)    ->  1 result (but no index)
 ```
-The meaning of the OID can be confusiong as it is the variable to be polled
-AND the polling 'result'.
-```
-oid(idx) = snmp(oid)   
-oid      = snmp(oid)
-```
-Note: If a leaf OID is an instance (element) of an OID. Try to transform it
-       to a 'branch'!
-
-- it's more scalable
-- it's probably be more efficient (TODO: add an example like: hp- ilo/cpu_dm).
+Note: 
+- The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and the index
+- If a leaf OID is not a scalar (do not end by 0), it cannot be retrieved without its parent table: Use a 'branch' type! 
 
 The OID term is also use in Devmon to designate the result of a transform:
 - oidT=transform{oidS} 
