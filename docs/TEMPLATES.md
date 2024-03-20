@@ -84,30 +84,16 @@ sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
-Note that there are three values per line; the first value is the alias that
-Devmon uses throughout the rest of the template files, the second value is
-the *NUMERIC* value for the oid, the third is the repeater type ('leaf',
-which is a non-repeater type oid, vs 'branch' which is a repeater type).
+There are three values per line
+- The oid alias (case sensitive=
+- the numeric value of the oid alias
+- The repeater type
+  - 'leaf', which is a non-repeater type oid
+  - 'branch' which is a repeater type oid
 
-Its important that you use the numeric version of an oid for the second value
-in this file. Devmon will not map the string version of an OID to its numeric
-version before it does a query, which means that your SNMP query will fail if
-you use an alphanumeric oid instead of a numeric one (i.e. 'sysDescr' is
-alphanumeric, '.1.3.6.1.2.1.1.1.0' is numeric). I chose to do this because it
-is a pain to keep all the various MIBs installed on all of the nodes in a multi-
-node cluster, and it was just easier to specify them once here. Note that the
-oid aliases are case sensitive: 'SysDescr' is treated as a separate alias
-from 'sysDescr'.
-
-Also important to note is that OIDs are shared between tests on the same
-template. So if you specify OID aliases with identical names (they are case
-sensitive, remember) in multiple tests in a template, there is only going to
-be a single value stored in memory, which both OID aliases point to. The
-upshot of this is, if you use the same OID alias in multiple tests (and this
-is recommended, as it will make your template run faster), then they *MUST*
-have the numeric OID value. If they dont, you are going to get inconsistent
-results, as the value stored in memory might arbitrarily be from one SNMP
-variable or another.
+Notes:
+- Its important to use the numeric version of an oid as Devmon do not map the string version of an OID
+- If you use the same OID alias in multiple test for a template, they MUST have the same numeric OID value to avoid inconsistent results
 
 
 ## The 'OID' concept
