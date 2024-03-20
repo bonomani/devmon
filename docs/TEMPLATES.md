@@ -107,7 +107,7 @@ The relationship between them is:
   - An SNMP `scalar` OID (ending with 0)
   - An instance of an SNMP `table` OID (usually not ending with 0)
 
-Let's see a request and hot it is analysed 
+Let's analyse a SNMP request 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
