@@ -36,24 +36,14 @@ model    : 2950
 snmpver  : 2
 sysdesc  : C2950
 ```
+The 'sysdesc' variable is utilized in Devmon's discovery process when 
+reading the host from the Xymon hosts.cfg file (using the '-readhostscfg'
+command line argument).This value MUST be unique and can handle complex 
+patterns because it's treated as a regular expression.
 
-Note: Variable names and their corresponding values are listed separately, 
-each on a new line and separated by colons. This format is consistent across 
-most, if not all, files in the Devmon template structure.
-
-For this particular device type, the variables 'vendor' and 'model' are 
-unique and should not have the same values in any other specs file within 
-the template tree. If duplicates are found, Devmon will detect them as 
-attempts to redefine a template and will reject the second occurrence.
-
+Note: 
 The 'snmpver' variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
-
-The 'sysdesc' variable is utilized in Devmon's discovery process 
-when reading the host from the Xymon hosts.cfg file (especially when using 
-the '-readhostscfg' command line argument). This value should be distinct 
-from those in other templates and can accommodate complex patterns since 
-it is interpreted as a regular expression.
 
 ## Test directory
 
