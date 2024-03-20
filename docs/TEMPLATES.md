@@ -141,7 +141,7 @@ Throughout, 'alias' refers to either SNMP-collected or transformed data.
 
 Note
 - The term `OID` designate often an `OID alias` 
-- A commonly describe as: `targetOID` : TRANSFORM : ... {sourceOID1} ... {sourceOID1} , ... 
+- A commonly describe as: `targetOID` : `TRANSFORM` : ... `{sourceOID1}` ... `{sourceOID1}`  ... 
   - The `primaryOID` = `sourceOID1` (that is a repeater) 
   - The `targetOID` has the same indexes as the `primaryOID`  
 - Mixing repeater and non-repeater type result in a repeater type OID.
