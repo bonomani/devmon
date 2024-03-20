@@ -141,7 +141,7 @@ In the 'transform context' we use slightly different terms that help to be more 
 'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
 Throughout, 'alias' refers to either SNMP-collected or transformed data.  
 2. The **transform** : (case insensitive, e.g., 'MATH' or 'math')
-3. The **input data**: a string with **one or more sourceOID(s)**, be enclosed in {}, defined elsewhere
+3. The **input data**: a string with **one or more sourceOID(s)**, enclosed in {}, defined elsewhere
 
 Notes
 - The **primaryOID** = **sourceOID1** (the first sourceOID that is a repeater, so it should be also sourceOID2), from left to right
