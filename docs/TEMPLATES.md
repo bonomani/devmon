@@ -36,11 +36,11 @@ model    : 2950
 snmpver  : 2
 sysdesc  : C2950
 ```
-- The 'sysdesc' variable is utilized in Devmon's discovery process when 
+- The `sysdesc` variable is utilized in Devmon's discovery process when 
 reading the host from the Xymon hosts.cfg file (using the '-readhostscfg'
 command line argument).This value MUST be unique and can handle complex 
 patterns because it's treated as a regular expression.
-- The 'snmpver' variable is no longer in use and has been deprecated. It 
+- The `snmpver` variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
 
 ## Test directory
@@ -69,12 +69,12 @@ as follows:
 - .../devmon/templates/cisco-2950/cpu/exceptions
 - .../devmon/templates/cisco-2950/cpu/message
 
-A line beginning with "#" is a comment, supported by all these files except 
-the "message" file.
+A line beginning with `#` is a comment, supported by all these files except 
+the `message` file.
 
-## The 'oids' file 
+## The `oids` file 
 
-The "oids" file contains the SNMP queries you want to make for this device 
+The `oids` file contains the SNMP queries you want to make for this device 
 type. It should look something like this:
 
 ```
@@ -88,8 +88,8 @@ There are three values per line
 - The **OID** alias (case sensitive)
 - the **numeric** value of the oid alias
 - The repeater **type**
-  - 'leaf', which is a non-repeater type oid
-  - 'branch' which is a repeater type oid
+  - `leaf`, which is a non-repeater type oid
+  - `branch` which is a repeater type oid
 
 Notes:
 - Its important to use the **numeric** version of an OID as Devmon do not map its string version
