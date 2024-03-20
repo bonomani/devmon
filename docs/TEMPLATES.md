@@ -120,7 +120,7 @@ For 1 oid we receive 2 information on each line:
 Depending on the type of our OID we have:
 ```
 Type 'branch': result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
-Type 'Leaf'  : result      = snmp(oid)    ->  1 result (but no index)
+Type 'Leaf'  : result      = snmp(oid)    ->  1(or 0) result and no index
 ```
 Note: 
 - The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and the index
