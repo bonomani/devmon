@@ -115,7 +115,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 - Each line carries 2 new information: 
   - The `value` can have various types: String, Integer, numericOID, etc.
   - The `index`, is of type numeric OID, often simply an Integer.
-- For a `leaf`, there is only 1 targetOID (=result) (and no index as it is not needed)
+- For a `leaf`, there is only 1 targetOID (=value) (and no index as it is not needed)
 
 Note: 
 - The meaning of the OID can be confusiong as everything is called `OID`: the targetOID, the numericOID and also the index
