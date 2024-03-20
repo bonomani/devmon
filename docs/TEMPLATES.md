@@ -133,9 +133,8 @@ Note that in Devmon a transform can have multiple oids:
 
 ## The 'transforms' file
 
-The most complicated file in your template, the transforms file lays out the
-different data transformations that Devmon needs to perform on the collected
-SNMP data before it applies thresholds and renders the final message.
+The transforms file in your template details the data changes Devmon makes to collected 
+SNMP data, before setting thresholds and creating the message.
 
 The cisco 2950 cpu test uses a very simple transforms file:
 
@@ -143,8 +142,6 @@ The cisco 2950 cpu test uses a very simple transforms file:
 sysUpTimeSecs   : MATH          : {sysUpTime} / 100
 UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
-
-Like the oids file, it has three values per line, separated by colons.
 
 The first value is the OID alias. Note that this should be a unique value
 compared to any of the aliases defined in the 'oids' file. Notice in this
