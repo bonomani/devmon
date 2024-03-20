@@ -119,7 +119,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 
 Note: 
 - The meaning of the OID can be confusiong as everything is an OID: the OID alias, the numeric OID and also the index
-- If a leaf OID is not a scalar (do not end by 0), it will not be retrieved without its parent table. So use a 'branch' type! 
+- If a leaf OID is not a scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
 
 The OID term is also use in Devmon to designate the result of a transform:
 - oidT=transform{oidS} 
