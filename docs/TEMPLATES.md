@@ -45,13 +45,12 @@ can be safely removed from all templates.
 
 ## Test directory
 
-Each subdirectory of the vendor-model directory represents an individual
-test. The name of the directory is significant, as it is what determines the
-name of the test reported to your display server! So the subdirectory in your
-vendor-model directory named 'cpu' defines the cpu test, the one named
-'if_err' defines the if_err test, etc.
+Each subfolder in the vendor-model directory is a separate test. The folder's 
+name is important because it defines the test name reported to your display 
+server. For example, a subfolder named 'cpu' in your vendor-model directory 
+defines the CPU test.
 
-Under each test subdirectory, there are five files:
+Under each test subfolder, there are five files:
 - oids
 - transforms
 - thresholds
@@ -70,12 +69,7 @@ as follows:
 - .../devmon/templates/cisco-2950/cpu/exceptions
 - .../devmon/templates/cisco-2950/cpu/message
 
-Note that all of these files except for the message file can contain
-comments. Any line that starts with a pound symbol (#) is treated as a
-comment by Devmon, and ignored.
-
-Now we'll go over each of these files in detail...
-
+Except for the message file, all these files can have comments. Any line starting with "#" is ignored.
 
 ## The 'oids' file 
 
