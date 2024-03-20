@@ -69,7 +69,7 @@ as follows:
 - .../devmon/templates/cisco-2950/cpu/exceptions
 - .../devmon/templates/cisco-2950/cpu/message
 
-Except for the message file, all these files can have comments. Any line starting with "#" is ignored.
+A line beginning with "#" is a comment, supported by all these files except the "message" file.
 
 ## The 'oids' file 
 
