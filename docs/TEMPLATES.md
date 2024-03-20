@@ -104,7 +104,7 @@ The relationship between them is:
   - An SNMP `scalar` OID (ending with 0)
   - An instance of an SNMP `table` OID (usually not ending with 0)
 
-Let's analyse a SNMP request for a `branch'
+Let's analyse a SNMP request for the numeric OID `.1.3.4.6.9` that could be defined as type `branch`: 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
