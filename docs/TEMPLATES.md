@@ -109,11 +109,11 @@ Let's analyse a SNMP request for the numeric OID `.1.3.4.6.9` that could be defi
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
-<-numOID-> <- index-> = <-result->
+<-numOID-> <- index-> = <- value ->
 ```
-- There are muliple result, 1 per line
+- There are muliple result, 1 per line, all those will be stored in the `targetOID`
 - Each line carries 2 new information: 
-  - The `result` can have various types: String, Integer, numericOID, etc.
+  - The `value` can have various types: String, Integer, numericOID, etc.
   - The `index`, is of type numeric OID, often simply an Integer.
 - For a `leaf`, there is only 1 targetOID (=result) (and no index as it is not needed)
 
