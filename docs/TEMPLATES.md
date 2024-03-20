@@ -98,20 +98,17 @@ Notes:
 
 ## The 'OID' concept
 
-More explaination of the 'OID' term as it is a key concept that should be
-well understood.
+OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
 
-SNMP standard and Devmon:
+In SNMP, we distinguish between `table` and `scalar` OIDs.
+In Devmon, we classify OIDs as either `branch` or `leaf`.
 
-- In SNMP, we have 'table' OIDs and 'scalar' OIDs
-- In Devmon, we have OIDs of type 'branch' and 'leaf'
+The relationship between them is:
 
-The relation between the both is:
-
-- A 'branch' OID is a snmp 'table'
-- A 'leaf' OID can be:
-  - A snmp 'scalar' OID (end with 0)
-  - An instance of a snmp 'table' OID (do not end with 0, normally...)
+- A `branch` OID corresponds to an SNMP `table`
+- A `leaf` OID can represent either:
+  - An SNMP 'scalar' OID (ending with 0)
+  - An instance of an SNMP 'table' OID (usually not ending with 0)
 
 
 How it works:
