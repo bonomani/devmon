@@ -4,10 +4,10 @@
 
 Devmon's templates enable you to:
 
-- Define specific SNMP OIDs to be polled
-- Transform data (collected by SNMP or already transformed data)
+- Define specific SNMP OIDs 
+- Transform data (collected by SNMP or already transformed)
 - Define thresholds and alarm message
-- Define how Devmon 'tests' will be display in Xymon (output message))
+- Define how Devmon `tests` will be display in Xymon (output message)
 
 ## Rolling your own
 Crafting your own Devmon template is a breeze. You don't need to write a 
