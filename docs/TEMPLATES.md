@@ -164,7 +164,8 @@ Notes
 
 ### CHAIN transform
 Sometimes, a device saves a numeric SNMP identifier as a string under 
-a different OID. The CHAIN transform combines these. A brief example:
+a different OID, resulting has **having 2 OIDs** to poll to reach the values. 
+The CHAIN transform combines these 2 OIDs. A brief example:
 
 In your oids file, you have defined:
 ```
