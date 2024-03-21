@@ -161,12 +161,12 @@ Notes
 ### CHAIN transform
 Sometimes, a device saves a numeric SNMP identifier as a string under 
 a different OID, resulting has **having 2 OIDs** to poll to reach the values. 
+The CHAIN transform combines these 2 OIDs:
 ```
 chainedOid   : CHAIN    : {OID1} {OID2}
 ```
-The CHAIN transform combines these 2 OIDs. A brief example:
 
-In your oids file, you have defined:
+Example: In your oids file, you have defined:
 ```
 OID1  : .1.1.2     : branch
 OID2  : .1.1.3     : branch
