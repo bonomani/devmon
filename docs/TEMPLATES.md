@@ -1,6 +1,6 @@
 # TEMPLATES
  
-## Rolling your own tests
+## Rolling your own test
 Devmon's templates let you create your own test: You don't need to write a 
 single line of code! But having a bit of know-how with regular expressions 
 helps: http://www.regular-expressions.info/. You will have to: 
