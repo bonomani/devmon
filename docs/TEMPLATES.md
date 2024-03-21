@@ -43,7 +43,8 @@ can be safely removed from all templates.
 ## The test folders
 Each subfolder in a vendor-model folder is a separate test. **The folder's 
 name is important as this is the test name reported to your Xymon server**. For example, 
-a folder named `cpu` defines the `cpu` test in Xymon. Each test contains five files:
+a folder named `cpu` defines the `cpu` test in Xymon. 
+Each test folder contains five files:
 - oids
 - transforms
 - thresholds
