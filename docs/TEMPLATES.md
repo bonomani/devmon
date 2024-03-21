@@ -1,35 +1,32 @@
 # TEMPLATES
  
-## A core component
-
-Devmon's templates enable you to:
-
-- Define specific SNMP OIDs 
-- Transform data (collected by SNMP or already transformed)
-- Define thresholds and alarm message
-- Define how Devmon `tests` will be display in Xymon (output message)
-
-## Rolling your own
-Crafting your own Devmon template is a breeze. You don't need to write a 
+## Rolling your own tests
+Devmon's templates let you create your own test: You don't need to write a 
 single line of code! But having a bit of know-how with regular expressions 
 helps: http://www.regular-expressions.info/
 
+- Select the SNMP OIDs to query
+- Transform data gathered through SNMP or previously transformed
+- Define thresholds and alarm messages
+- Define how the test will be displayed in Xymon (output message)
+
+### The Template folder
 Template data is stored in the `templates` folder of your Devmon installation. 
 For a single server, the folder is read regularly; for multiple servers, the 
 database is utilized.
-
-Inside the `templates` folder, there are subfolders for each vendor-model, 
-like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
-because each one must have a `specs` file that specifies the template
 
 Note: If you have multiple servers, it's best to keep only one copy of your 
 templates folder, preferably on your main server. Remove any extra template 
 folders on your other servers. This avoids confusion when syncing templates 
 to your database, making sure everything matches up.
 
+## The vendor-model folders
+Inside the `templates` folder, there are subfolders for each vendor-model, 
+like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
+because each one must have a `specs` file that specifies the template
+
 ## The `specs` file
 The `specs` file holds data specific to the vendor-model ans should look like
-
 ```
 vendor   : cisco
 model    : 2950
@@ -43,32 +40,29 @@ treated as a regular expression.
 - The `snmpver` variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
 
-## Test directory
-
+## The test folders
 Each subfolder in the vendor-model directory is a separate test. The folder's 
-name is important because it defines the test name reported to your display 
-server. For example, a subfolder named `cpu` in your vendor-model directory 
-defines the CPU test.
-
-Under each test subfolder, there are five files:
+name defines the test name reported to your display Xymon server. For example, 
+a folder named `cpu` defines the `cpu` test in Xymon. Each test contains five files:
 - oids
 - transforms
 - thresholds
 - exceptions
 - message
 
-All five files MUST be present for the template to be read successfully,
+These files MUST be present for the template to be read successfully,
 although the thresholds, transforms and exceptions files can all be empty.
-So, a quick list of files needed for a `cpu` test on a Cisco 2950 should look
-as follows:
 
-.../devmon/templates/cisco-2950/specs  
-.../devmon/templates/cisco-2950/cpu/oids  
-.../devmon/templates/cisco-2950/cpu/transforms  
-.../devmon/templates/cisco-2950/cpu/thresholds  
-.../devmon/templates/cisco-2950/cpu/exceptions  
-.../devmon/templates/cisco-2950/cpu/message  
-
+## The complete stuture of a test 
+The filed need for the `cpu` test on a `Cisco 2950` will look like:
+```
+templates/cisco-2950/specs  
+templates/cisco-2950/cpu/oids  
+templates/cisco-2950/cpu/transforms  
+templates/cisco-2950/cpu/thresholds  
+templates/cisco-2950/cpu/exceptions  
+templates/cisco-2950/cpu/message  
+```
 A line beginning with `#` is a comment, supported by all these files except 
 the `message` file.
 
