@@ -2,12 +2,12 @@
  
 ## A core component
 
-Devmon's templates enable :
+Devmon's templates enable you to:
 
-- Define specific OIDs
-- Transform received data
+- Define specific SNMP OIDs to be polled
+- Transform data (collected by SNMP or already transformed data)
 - Define thresholds and alarm message
-- Custom Xymon output messages.
+- Define Xymon output messages
 
 ## Rolling your own
 Crafting your own Devmon template is a breeze. You don't need to write a 
