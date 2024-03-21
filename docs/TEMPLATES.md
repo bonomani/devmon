@@ -53,8 +53,8 @@ a folder named `cpu` defines the `cpu` test in Xymon. Each test contains five fi
 These files MUST be present for the template to be read successfully,
 although the thresholds, transforms and exceptions files can all be empty.
 
-## The complete stuture of a test 
-The filed need for the `cpu` test on a `Cisco 2950` will look like:
+## The file structure of a test 
+The files needed for the `cpu` test on a `Cisco 2950` will look like:
 ```
 templates/cisco-2950/specs  
 templates/cisco-2950/cpu/oids  
