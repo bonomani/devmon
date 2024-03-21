@@ -51,8 +51,7 @@ Each test folder MUST contains five files:
 - exceptions
 - message
 
-## Example 
-The files needed for the `cpu` test on a `Cisco 2950` will look like:
+## Example: a `cpu` test on a `Cisco 2950`
 ```
 templates/cisco-2950/specs  
 templates/cisco-2950/cpu/oids  
@@ -62,8 +61,8 @@ templates/cisco-2950/cpu/exceptions
 templates/cisco-2950/cpu/message  
 ```
 Note: 
-- The thresholds, transforms and exceptions files can can be empty.
-- A line beginning with `#` is a comment is supported by all these files except 
+- The thresholds, transforms and exceptions files can be empty.
+- A line beginning with `#` is a comment. Comments are supported by all these files except 
 the `message` file.
 
 ## The `oids` file 
