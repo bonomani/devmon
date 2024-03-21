@@ -213,7 +213,7 @@ OID values are reset in th device. Without a specified limit, the system will
 choose an appropriate maximum based on whether it's dealing with 32-bit or 64-bit data. 
   
 The DELTA transform takes at least two poll cycles to return meaningful data.
-In the mean time you will get a 'wait' result stored in the targetOID alias.
+In the mean time you will get a `wait` result stored in the targetOID alias.
 
 This method doesn't allow for measuring decreases (negative changes) in the data.
 
