@@ -177,9 +177,10 @@ Walking the OID1 and OID2 return the values:
 OID1:
 .1.1.2.1 = '.1.1.3.1194'
 .1.1.2.2 = '.1.1.3.2342'
-OID2
-.1.1.3.1194 = 'CPU is above nominal temperature'
-.1.1.3.2342 = 'System fans are non-operational'
+ 
+OID2:
+            .1.1.3.1194 = 'CPU is above nominal temperature'
+            .1.1.3.2342 = 'System fans are non-operational'
 ```
 Chances are that you won't know what leaf values will be returned for
 .1.1.3, but you know that .1.1.2 returns consistent values. You can use the
