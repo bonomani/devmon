@@ -101,8 +101,8 @@ The relationship between them is:
 
 - A `branch` OID corresponds to an SNMP `table`
 - A `leaf` OID can represent either:
-  - An SNMP `scalar` OID (ending with 0)
-  - An instance of an SNMP `table` OID (usually not ending with 0)
+  - A SNMP `scalar` OID (ending with 0)
+  - An element of a SNMP `table` OID (usually not ending with 0)
 
 Let's analyse a SNMP request for the numeric OID `.1.3.4.6.9` that could be defined as type `branch`: 
 ```
