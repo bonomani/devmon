@@ -207,8 +207,8 @@ intYear : CONVERT: {hexYear} hex
 ```
 
 ### DELTA transform
-The DELTA transform compares the **previous data** to the **current 
-one** changes over the time and shows the change in **unit per second** rate.  
+The DELTA transform **compares** the **previous values** to the **current 
+one** changes **over the time** and shows the change in **unit per second** rate.  
   
 You can give it a maximum value (upper limit): the limit helps prevent 
 incorrect results by setting a maximum value of the rate, that can occure when
