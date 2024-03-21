@@ -161,7 +161,6 @@ targetOid   : BEST    : {sourceOID1},{sourceOID2}
 Notes
 - SourceOIDs present in the BEST transform **are exlcuded from the globale page color calculation** (the worst color of the page)
 
-
 ### CHAIN transform
 Sometimes, a device saves a numeric SNMP identifier as a string under 
 a different OID, resulting has **having 2 OIDs** to poll to reach the values. 
@@ -197,7 +196,6 @@ The combined result: The chainedOID corresponds to
 ```
 
 ### CONVERT transform
-
 **Convert** a string in **hexadecimal** or **octal** to the **decimal** equivalent.
 Two arguments:
 - an `OID` 
@@ -209,7 +207,6 @@ intYear : CONVERT: {hexYear} hex
 ```
 
 ### DELTA transform
-
 The DELTA transform compares the **previous data** to the **current 
 one** changes over the time and shows the change in **unit per second** rate.  
   
@@ -229,25 +226,19 @@ changeInValue  : DELTA : {value}
 changeInValue  : DELTA : {value} 2543456983
 ```
 
-
 ### DATE transform
-
 This transform converts Unix time (seconds since January 1, 1970, 00:00:00 GMT) 
 into a readable date and time format. It changes the input of seconds into a 
 text string that shows the date and time as "YYYY-MM-DD, HH:MM:SS" (using 24-hour time).
 
-
 ### ELAPSED transform
-
 This transform converts a given number of seconds into a text string that shows 
 the equivalent amount of time in years, days, hours, minutes, and seconds.
 
 
 ### INDEX transform
-
-This transform allows you to access the index part of repeater OID.
-
-For example, walking the cdpCacheDevicePort OID returns :
+This transform allows you to access the index part of repeater OID. For example, 
+walking the cdpCacheDevicePort OID returns :
 ```
 CISCO-CDP-MIB::cdpCacheDevicePort.4.3 = STRING: GigabitEthernet4/41
 CISCO-CDP-MIB::cdpCacheDevicePort.9.1 = STRING: GigabitEthernet2/16
@@ -265,8 +256,7 @@ the REGSUB transform to further extract the `3` value
 ### MATCH transform
 This transform addresses the issue found in MIBs that mix different data types 
 in just two columns. It either separates these mixed tables into distinct ones 
-or rearranges them to have more columns
-
+or rearranges them to have more columns.   
 For example, the MIB for the TRIDIUM building management system contains a table 
 with two columns: outputName and outputValue.
 ```
@@ -313,8 +303,7 @@ Would now contain in its first row:
 I_Inc4|50.06|232.91|233.39|233.98   
 ```
 
-### 'MATH' transform:
-
+### MATH transform:
 The MATH transform performs a mathematical expression defined by the
 supplied data. It can use the following mathematical operators:
 ```
@@ -363,173 +352,167 @@ will not be apparent until you attempt to use the template for the first
 time (any errors will be dumped to the devmon.log file on the node that
 they occurred on).
 
- Decimal precision can also be controlled via an additional variable seperated
- from the main expression via a colon:
+Decimal precision can also be controlled via an additional variable seperated
+from the main expression via a colon:
+```
+transTime : MATH : ((({sysUpTime}/100) ^ 2 ) x 15) + 10 : 4 
+```
 
-     transTime : MATH : ((({sysUpTime}/100) ^ 2 ) x 15) + 10 : 4 
-
- This would ensure that the transTime alias would have a precision value (zero
- padded, if needed) of exactly 4 characters (i.e. 300549.3420). The default
- value is 2 precision characters. To remove the decimal characters
- alltogether, specify a value of 0.
+This would ensure that the transTime alias would have a precision value (zero
+padded, if needed) of exactly 4 characters (i.e. 300549.3420). The default
+value is 2 precision characters. To remove the decimal characters
+alltogether, specify a value of 0.
 
 ### UNPACK transform 
-  
- The inverse of the 'PACK' transform.
+The inverse of the 'PACK' transform.
 
 ### REGSUB transform
-
- One of the most powerful and complicated transforms, the regsub transform
- allows you to perform a regular expression substitution against a single data
- alias input. The data input for a regsub transform should consist of a single
- data alias, followed by a regular expression substitution (the leading 's'
- for the expression should be left off). For example:
-
-    ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
-
- The transform above takes the input from the ifAlias data alias and, assuming
- that it is not an empty string (ifAlias has to have at least one non-
- whitespace character in it) it puts square braces around the value and puts a
- space in front of it. This example is used by all of the Cisco interface
- templates included with Devmon, to include the ifAlias information for an
- interface, but only if it has a value defined. A very powerful, but easily
- misused transform. If you are interested in using it but don't know much
- about substitution, you might want to google 'regular expression
- substitution' and try reading up on it.
+One of the most powerful and complicated transforms, the regsub transform
+allows you to perform a regular expression substitution against a single data
+alias input. The data input for a regsub transform should consist of a single
+data alias, followed by a regular expression substitution (the leading 's'
+for the expression should be left off). For example:
+```
+ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
+```
+The transform above takes the input from the ifAlias data alias and, assuming
+that it is not an empty string (ifAlias has to have at least one non-
+whitespace character in it) it puts square braces around the value and puts a
+space in front of it. This example is used by all of the Cisco interface
+templates included with Devmon, to include the ifAlias information for an
+interface, but only if it has a value defined. A very powerful, but easily
+misused transform. If you are interested in using it but don't know much
+about substitution, you might want to google 'regular expression
+substitution' and try reading up on it.
 
 ### SET transform
 
- The SET transform creates a repeater-type OID, and presets it with a sequence
- of constants. The indexes of the individual values of the OID created by SET
- are numbered starting from 1. The constants are defined in the third field.
- The constants are separated by a comma, optionally surrounded by zero or more
- spaces. Leading and trailing spaces in the list of constants are ignored. At
- least one constant must be specified. A constant is either a number or a
- string of characters, which should not include ',', '{' or '}'. It is not
- possible to define spaces at the start or at the end of the string.
+The SET transform creates a repeater-type OID, and presets it with a sequence
+of constants. The indexes of the individual values of the OID created by SET
+are numbered starting from 1. The constants are defined in the third field.
+The constants are separated by a comma, optionally surrounded by zero or more
+spaces. Leading and trailing spaces in the list of constants are ignored. At
+least one constant must be specified. A constant is either a number or a
+string of characters, which should not include ',', '{' or '}'. It is not
+possible to define spaces at the start or at the end of the string.
 
- Like the MATCH transform, the SET transform is meant to be used for a badly
- designed MIB. While MATCH is used if two branches are used, containing the
- name and the value, SET is used if only one branch is used, containing a list
- of values.
+Like the MATCH transform, the SET transform is meant to be used for a badly
+designed MIB. While MATCH is used if two branches are used, containing the
+name and the value, SET is used if only one branch is used, containing a list
+of values.
 
- For example, the MIB for the McAfee MEB 4500 contains a section describing (a
- part of) the file systems. For each file system, the utilisation of space,
- the size, the free space, the utilisation of the i-nodes, the total number of
- i-nodes and the number of free i-nodes are available. A better representation
- is a table with 6 columns. The following configuration is used to map the
- single column onto 6 columns.
+For example, the MIB for the McAfee MEB 4500 contains a section describing (a
+part of) the file systems. For each file system, the utilisation of space,
+the size, the free space, the utilisation of the i-nodes, the total number of
+i-nodes and the number of free i-nodes are available. A better representation
+is a table with 6 columns. The following configuration is used to map the
+single column onto 6 columns.
+```
+fsInfo    : .1.3.6.1.4.1.1230.2.4.1.2.3.1 : branch
 
-     fsInfo    : .1.3.6.1.4.1.1230.2.4.1.2.3.1 : branch
+fsiUtil   : SET    : 11.0,17.0,23.0,29.0,35.0,41.0
+fsiSize   : SET    : 12.0,18.0,24.0,30.0,36.0,42.0
+fsiFree   : SET    : 13.0,19.0,25.0,31.0,37.0,43.0
+fsiIUtil  : SET    : 14.0,20.0,26.0,32.0,38.0,44.0
+fsiISize  : SET    : 15.0,21.0,27.0,33.0,39.0,45.0
+fsiIFree  : SET    : 16.0,22.0,28.0,34.0,40.0,46.0
 
-     fsiUtil   : SET    : 11.0,17.0,23.0,29.0,35.0,41.0
-     fsiSize   : SET    : 12.0,18.0,24.0,30.0,36.0,42.0
-     fsiFree   : SET    : 13.0,19.0,25.0,31.0,37.0,43.0
-     fsiIUtil  : SET    : 14.0,20.0,26.0,32.0,38.0,44.0
-     fsiISize  : SET    : 15.0,21.0,27.0,33.0,39.0,45.0
-     fsiIFree  : SET    : 16.0,22.0,28.0,34.0,40.0,46.0
+fsbName   : SET    : deferred,quaratine,scandir,logs,var,working
+fsbUtil   : CHAIN  : {fsiUtil} {fsInfo}
+fsbSize   : CHAIN  : {fsiSize} {fsInfo}
+fsbFree   : CHAIN  : {fsiFree} {fsInfo}
+fsbIUtil  : CHAIN  : {fsiIUtil} {fsInfo}
+fsbISize  : CHAIN  : {fsiISize} {fsInfo}
+fsbIFree  : CHAIN  : {fsiIFree} {fsInfo}
+```
 
-     fsbName   : SET    : deferred,quaratine,scandir,logs,var,working
-     fsbUtil   : CHAIN  : {fsiUtil} {fsInfo}
-     fsbSize   : CHAIN  : {fsiSize} {fsInfo}
-     fsbFree   : CHAIN  : {fsiFree} {fsInfo}
-     fsbIUtil  : CHAIN  : {fsiIUtil} {fsInfo}
-     fsbISize  : CHAIN  : {fsiISize} {fsInfo}
-     fsbIFree  : CHAIN  : {fsiIFree} {fsInfo}
+The OIDs named fsb.+ can be used in transforms and in the TABLE directive in
+file 'message'.
 
- The OIDs named fsb.+ can be used in transforms and in the TABLE directive in
- file 'message'.
+From a theoretical stand point, the SET transform complements the set of
+transforms. There was already the possibility to set a leaf-type OID to a
+constant value, using a statement like:
+```
+AScalar  : MATH   : 123
+```
 
- From a theoretical stand point, the SET transform complements the set of
- transforms. There was already the possibility to set a leaf-type OID to a
- constant value, using a statement like:
-
-    AScalar  : MATH   : 123
-
- The SET transform introduces the same possibility for a repeater-type OID.
-
+The SET transform introduces the same possibility for a repeater-type OID.
 
 ### SPEED transform
-
- This transform takes a single data alias as input, which it assumes to be a
- speed in bits. It then stores a value in the transformed data alias,
- corresponding to the largest whole speed measurement. So a value of 1200
- would render the string '1.2 Kbps', a value of 13000000 will return a value
- of '13 Mbps', etc.
+This transform takes a single data alias as input, which it assumes to be a
+speed in bits. It then stores a value in the transformed data alias,
+corresponding to the largest whole speed measurement. So a value of 1200
+would render the string '1.2 Kbps', a value of 13000000 will return a value
+of '13 Mbps', etc.
 
 ### STATISTIC transform
+This transform takes a repeater type data alias as the input for the
+transform and computes a non-repeater type data alias. The STATISTIC
+transform can compute the minimum value, the maximum value, the average value
+and the sum of the values of the repeater type data alias. Moreover it can
+count the number of values of the repeater type data alias.
 
- This transform takes a repeater type data alias as the input for the
- transform and computes a non-repeater type data alias. The STATISTIC
- transform can compute the minimum value, the maximum value, the average value
- and the sum of the values of the repeater type data alias. Moreover it can
- count the number of values of the repeater type data alias.
+If the input is a non-repeater data alias, the transform returns the value of
+the input data. However, if the number of values is to be counted the
+returned value is 1.
 
- If the input is a non-repeater data alias, the transform returns the value of
- the input data. However, if the number of values is to be counted the
- returned value is 1.
-
- If for example the average temperature in a device with multiple temperature
- sensors is to be monitored, the transformation could be:
-
-    TempAvg : STATISTIC : {ciscoEnvMonTemperatureStatusValue} AVG
-
- As the example shows, the last keyword determines the value to be returned.
- The possible keywords are:
-
-    AVG : Average value
-    CNT : Number of values
-    MAX : Maximum value
-    MIN : Minimum value
-    SUM : Sum of the values
+If for example the average temperature in a device with multiple temperature
+sensors is to be monitored, the transformation could be:
+```
+TempAvg : STATISTIC : {ciscoEnvMonTemperatureStatusValue} AVG
+```
+As the example shows, the last keyword determines the value to be returned. The 
+possible keywords are:
+- `AVG` : Average value
+- `CNT` : Number of values
+- `MAX` : Maximum value
+- `MIN` : Minimum value
+- `SUM` : Sum of the values
 
 ### SUBSTR transform
+The substr transform is used to extract a portion of the text (aka a
+'substring') stored in the target OID alias. This transform takes as
+arguments: a target alias, a starting position (zero based, i.e. the first
+position is 0, not 1), and an optional length value. If a length value is
+not specified, substr will copy up to the end of the target string.
 
- The substr transform is used to extract a portion of the text (aka a
- 'substring') stored in the target OID alias. This transform takes as
- arguments: a target alias, a starting position (zero based, i.e. the first
- position is 0, not 1), and an optional length value. If a length value is
- not specified, substr will copy up to the end of the target string.
-
- So, if you had an OID alias 'systemName' that contained the value 'Cisco
- master switch', you could do the following:
-
-    switchName : SUBSTR : {systemName} 0 12
-
- stores 'Cisco master' in the 'switchName' alias, or
-
-    switchName : SUBSTR : {systemName} 6
-
- stores 'master switch' in the 'switchName' alias
-
+So, if you had an OID alias 'systemName' that contained the value 'Cisco
+master switch', you could do the following:
+```
+switchName : SUBSTR : {systemName} 0 12
+```
+stores 'Cisco master' in the 'switchName' alias, or
+```
+switchName : SUBSTR : {systemName} 6
+```
+stores 'master switch' in the 'switchName' alias
 
 ### SWITCH transform
+The switch transform transposes one data value for another. This is most
+commonly used to transform a numeric value returned by an snmp query into its
+textual equivalent. The first argument in the transform input should be the
+oid to be transformed. Following this should be a list of comma- delimited
+pairs of values, with each pair of values being separated by an equals sign.
 
- The switch transform transposes one data value for another. This is most
- commonly used to transform a numeric value returned by an snmp query into its
- textual equivalent. The first argument in the transform input should be the
- oid to be transformed. Following this should be a list of comma- delimited
- pairs of values, with each pair of values being separated by an equals sign.
+For example: 
+```
+upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
+```
+So this transform would take the input from the 'upsBattRepNum'
+data alias and compare it to its list of switch values. If
+the value of upsBattRepNum was 1, it would store a 'Battery OK'
+value in the 'upsBattRep' data alias. 
 
- For example: 
-
-    upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
-
- So this transform would take the input from the 'upsBattRepNum'
- data alias and compare it to its list of switch values. If
- the value of upsBattRepNum was 1, it would store a 'Battery OK'
- value in the 'upsBattRep' data alias. 
-
- You can use simple mathematical tests on the values of the source OID
- alias, as well as assigning values for different OIDs to the target alias.
- For instance:
-
-    dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
-
- The format for the tests are as follows (assuming 'n','a' and 'b' are
- floating point numerical value [i.e. 1, 5.33, 0.001, etc], and 's' is a
- alphanumeric string):
-
+You can use simple mathematical tests on the values of the source OID
+alias, as well as assigning values for different OIDs to the target alias.
+For instance:
+```
+dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
+```
+The format for the tests are as follows (assuming 'n','a' and 'b' are
+floating point numerical value [i.e. 1, 5.33, 0.001, etc], and 's' is a
+alphanumeric string):
+```
     n       : Source alias is equal to this amount
     >n      : Source alias is greater than this amount
     >=n     : Source alias is greater than or equal to this amount
@@ -542,33 +525,32 @@ they occurred on).
     default : Default value for the target alias, used in cas of undefined
               values or any unmatch statement (specially usefull for incomplet
               oids, prefer ".*" if there is no reason to use it!
+```
+Note that switch statements are applied in a left to right order; so if you
+have a value that matches the source value on multiple switch statements, the
+leftmost statement will be the one applied.
 
- Note that switch statements are applied in a left to right order; so if you
- have a value that matches the source value on multiple switch statements, the
- leftmost statement will be the one applied.
-
- The switch statement can also assign values from another OID to the target
- OID alias, depending on the value of the source OID alias, like this:
-
-    dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
-
- This would assign the value 'No DHCP' to the 'dhcpStatus' alias if and only
- if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
- value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
+The switch statement can also assign values from another OID to the target
+OID alias, depending on the value of the source OID alias, like this:
+```
+dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
+```
+This would assign the value 'No DHCP' to the 'dhcpStatus' alias if and only
+if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
+value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
 
 ### UNPACK transform
+The unpack transform is used to unpack binary data into any one of a number
+of different data types (all of which are eventually stored as a string by
+Devmon). This transform requires a target OID alias and an unpack type (case
+sensitive), separated by a space.
 
- The unpack transform is used to unpack binary data into any one of a number
- of different data types (all of which are eventually stored as a string by
- Devmon). This transform requires a target OID alias and an unpack type (case
- sensitive), separated by a space.
-
- As an example, to unpack a hex string (high nybble first), try this:
-
-    hexString : UNPACK : {binaryHex} H
-
- The unpack types are as follows:
-
+As an example, to unpack a hex string (high nybble first), try this:
+```
+hexString : UNPACK : {binaryHex} H
+```
+The unpack types are as follows:
+```
     Type  |  Description              
     ---------------------------------------------------
        a  | ascii string, null padded
@@ -593,36 +575,30 @@ they occurred on).
        V  | long integer in little-endian order
        u  | uuencoded string
        x  | null byte
-       
+```       
 
 ### WORST transform
-
- This transform takes two data aliases as input, and stores the values for the
- one with the 'worst' alarm color (red being the 'worst' and green being the
- 'best') in the transformed data alias. The oids can either be comma or space
- delimited.
-
+This transform takes two data aliases as input, and stores the values for the
+one with the 'worst' alarm color (red being the 'worst' and green being the
+'best') in the transformed data alias. The oids can either be comma or space
+delimited.
 
 ## The 'thresholds' file
-
 The thresholds file defines the limits against which the various data aliases
 that you have created in your 'oids' and 'transforms' files are measured
 against. An example thresholds file is as follows:
+```
+upsLoadOut  : red     : 90          : UPS load is very high
+upsLoadOut  : yellow  : 70          : UPS load is high
 
--<start file>-----------------------------
+upsBattStat : red     : Battery low : Battery time remaining is low
+upsBattStat : yellow  : Unknown     : Battery status is unknown
 
-    upsLoadOut  : red     : 90          : UPS load is very high
-    upsLoadOut  : yellow  : 70          : UPS load is high
+upsOutStat  : red     : On battery|Off|Bypass              : {upsOutStat}
+upsOutStat  : yellow  : Unknown|voltage|Sleeping|Rebooting : {upsOutStat}
 
-    upsBattStat : red     : Battery low : Battery time remaining is low
-    upsBattStat : yellow  : Unknown     : Battery status is unknown
-
-    upsOutStat  : red     : On battery|Off|Bypass              : {upsOutStat}
-    upsOutStat  : yellow  : Unknown|voltage|Sleeping|Rebooting : {upsOutStat}
-
-    upsBattRep  : red     : replacing : {upsBattRep}
-
--<end file>-------------------------------
+upsBattRep  : red     : replacing : {upsBattRep}
+```
 
 As you can see, the thresholds file consists of one entry per line, with each
 entry consisting of three to four fields separated by colons. The first field
@@ -682,12 +658,10 @@ type data aliases.
 
 An example of a exceptions file is as follows:
 
--<start file>-----------------------------
-
-    ifName : alarm  : Gi.+
-    ifName : ignore : Nu.+|Vl.+
-
--<end file>-------------------------------
+```
+ifName : alarm  : Gi.+
+ifName : ignore : Nu.+|Vl.+
+```
 
 You can see that each entry is on its on line, with three fields separated by
 colons. The first field is the primary data alias that the exception should
@@ -741,33 +715,30 @@ page (indeed, you can add html to it, if you like) with some special macros
 embedded in it.
 
 An example of a simple messages file is as follows:
+```
+{upsStatus.errors}
+{upsBattStat.errors}
+{upsLoadOut.errors}
+{upsBattRep.errors}
 
--<start file>-----------------------------
+UPS status:
 
-    {upsStatus.errors}
-    {upsBattStat.errors}
-    {upsLoadOut.errors}
-    {upsBattRep.errors}
+Vendor:              apc
+Model:               {upsModel}
 
-    UPS status:
+UPS Status:          {upsOutStat}
+Battery Status:      {upsBattStat}
 
-    Vendor:              apc
-    Model:               {upsModel}
+Runtime Remaining:   {upsMinsRunTime} minutes
+Battery Capacity:    {upsBattCap}%
+UPS Load:            {upsLoadOut}%
 
-    UPS Status:          {upsOutStat}
-    Battery Status:      {upsBattStat}
+Voltage in:          {upsVoltageIn}v
+Voltage out:         {upsVoltageOut}v
 
-    Runtime Remaining:   {upsMinsRunTime} minutes
-    Battery Capacity:    {upsBattCap}%
-    UPS Load:            {upsLoadOut}%
-
-    Voltage in:          {upsVoltageIn}v
-    Voltage out:         {upsVoltageOut}v
-
-    Last failure due to: {upsFailCause}
-    Time on battery:     {upsSecsOnBatt} secs
-
--<end file>-------------------------------
+Last failure due to: {upsFailCause}
+Time on battery:     {upsSecsOnBatt} secs
+```
 
 You can see in this file that it is just a bunch of data aliases, with one or
 two special exceptions. Most of these will just be replaced with their
@@ -776,7 +747,7 @@ are a few weird looking data aliases (the ones that end in .errors). These
 are just normal data aliases with a special flag appended to them, that lets
 Devmon know that you want something from them than just their data value.
 
-### The alias flags
+### The OIDs flags
 
 - color
 
