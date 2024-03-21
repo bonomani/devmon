@@ -152,11 +152,8 @@ Notes
 ### BEST transform
 The BEST transform selects the OID that has the **best alarm color** (green as 'best', red as 'worst')  
 Mainly use in the `msg` file with its color and error parts only : {targetOID.color} {targetOID.error}  
-The OIDs can either be comma or space delimited.
 ```
 targetOid   : BEST    : {sourceOID1} {sourceOID2}
-targetOid   : BEST    : {sourceOID1},{sourceOID2}
-
 ```
 Notes
 - SourceOIDs present in the BEST transform **are excluded from the globale page color calculation** (the worst color of the page)
