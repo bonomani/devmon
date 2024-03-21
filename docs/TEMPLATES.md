@@ -231,19 +231,15 @@ changeInValue  : DELTA : {value} 2543456983
 
 ### DATE transform
 
-This transform takes a single data alias as input, the value of which Devmon
-assumes to be seconds in "Unix time" (i.e. seconds since the Epoch [00:00:00
-GMT, January 1, 1970]) It then stores in the transformed data alias a text
-string containing the date corresponding to the number of seconds input, in
-the format CCYY-MM-DD, HH:MM:SS (24 hour time).
+This transform converts Unix time (seconds since January 1, 1970, 00:00:00 GMT) 
+into a readable date and time format. It changes the input of seconds into a 
+text string that shows the date and time as "YYYY-MM-DD, HH:MM:SS" (using 24-hour time).
 
 
 ### ELAPSED transform
 
-This transform takes a single data alias as input, the value of which Devmon
-assumes to be in seconds. It then stores a text string in the transformed
-data alias containing the number of years, days, hours, minutes and seconds
-equal to the number of seconds provided as input to the transform.
+This transform converts a given number of seconds into a text string that shows 
+the equivalent amount of time in years, days, hours, minutes, and seconds.
 
 
 ### INDEX transform
