@@ -10,7 +10,7 @@ helps: http://www.regular-expressions.info/. You will have to:
 - Define thresholds and alarm messages
 - Define how the test will be displayed in Xymon (output message)
 
-## The Template folder
+## The templates folder
 Template data is stored in the `templates` folder of your Devmon installation. 
 For a single server, the folder is read regularly; for multiple servers, the 
 database is utilized.
@@ -25,7 +25,7 @@ Inside the `templates` folder, there are subfolders for each vendor-model,
 like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
 because each one must have a `specs` file that specifies the template
 
-## The `specs` file
+## The specs file
 The `specs` file holds data specific to the vendor-model ans should look like
 ```
 vendor   : cisco
