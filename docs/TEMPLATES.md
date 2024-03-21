@@ -1,14 +1,14 @@
 # TEMPLATES
  
-## Rolling your own test
-Devmon's templates let you create your own test: You don't need to write a 
+## Rolling your own 
+Devmon's templates let you create your own templare: You don't need to write a 
 single line of code! But having a bit of know-how with regular expressions 
 helps: http://www.regular-expressions.info/. You will have to: 
 
 - Select the SNMP OIDs to query
 - Transform data gathered through SNMP or previously transformed
 - Define thresholds and alarm messages
-- Define how the test will be displayed in Xymon (output message)
+- Define how tests are displayed in Xymon (output message)
 
 ## The templates folder
 Template data is stored in the `templates` folder of your Devmon installation. 
