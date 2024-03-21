@@ -161,6 +161,9 @@ Notes
 ### CHAIN transform
 Sometimes, a device saves a numeric SNMP identifier as a string under 
 a different OID, resulting has **having 2 OIDs** to poll to reach the values. 
+```
+chainedOid   : CHAIN    : {OID1} {OID2}
+```
 The CHAIN transform combines these 2 OIDs. A brief example:
 
 In your oids file, you have defined:
@@ -169,7 +172,7 @@ OID1  : .1.1.2     : branch
 OID2  : .1.1.3     : branch
 ```
 
-Walking the OID1 and OID2 return the values:
+Walking the OID1 and OID2 return the values and results when combining to:
 ```
 OID1:
 .1.1.2.1 = .1.1.3.1194
@@ -178,19 +181,12 @@ OID1:
 OID2:
             .1.1.3.1194 = CPU is above nominal temperature
             .1.1.3.2342 = System fans are non-operational
+
+chainedOid:
+.1.1.2.1                = CPU is above nominal temperature
+.1.1.2.2                = System fans are non-operational
 ```
-Chances are that you won't know what leaf values will be returned for
-.1.1.3, but you know that .1.1.2 returns consistent values. You can use the
-CHAIN transform to 'chain' these two oids together to make the data more
-accessible. The format for the CHAIN transform is:
-```
-chainedOid   : CHAIN    : {OID1} {OID2}
-```
-The combined result: The chainedOID corresponds to  
-```
-.1.1.2.1 = CPU is above nominal temperature
-.1.1.2.2 = System fans are non-operational
-```
+
 
 ### CONVERT transform
 **Convert** a string in **hexadecimal** or **octal** to the **decimal** equivalent.
