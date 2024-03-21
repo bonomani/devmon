@@ -213,15 +213,13 @@ intYear : CONVERT: {hexYear} hex
 
 ### DELTA transform
 
-The DELTA transform calculates how much something changes over time. 
-This calculation is done by comparing the previous data to the current 
-one and shows the change in data units per second.  
+The DELTA transform compares the **previous data** to the **current 
+one** changes over the time and shows the change in **unit per second** rate.  
   
 You can give it a maximum value (upper limit): the limit helps prevent 
-incorrect results by setting a maximum value for the data. Without a specified limit, 
-if there's a sudden drop in data (like with some SNMP counters that reset 
-after reaching a high value), the system will choose an appropriate maximum 
-value based on whether it's dealing with 32-bit or 64-bit data. 
+incorrect results by setting a maximum value of the rate, that can occure when
+OID values are reset in th device. Without a specified limit, the system will 
+choose an appropriate maximum based on whether it's dealing with 32-bit or 64-bit data. 
   
 The DELTA transform takes at least two poll cycles to return meaningful data.
 In the mean time you will get a 'wait' result stored in the targetOID alias.
