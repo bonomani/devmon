@@ -202,11 +202,12 @@ chainedOid.2 = 'System fans are non-operational'
 ### CONVERT transform
 
 Convert a string in either hexadecimal or octal to its decimal equivalent.
-Takes two arguments, a target OID alias and a conversion type, which must be
-either 'hex' or 'oct'.
+Takes two arguments:
+- an OID 
+- a conversion type: `hex` or `oct`
 
 For instance, to convert the hex string '07d6' to its decimal equivalent
-(2006, as it so happens), do this:
+(2006, as it so happens):
 ```
 intYear : CONVERT: {hexYear} hex
 ```
