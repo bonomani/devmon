@@ -259,19 +259,16 @@ the ifTable:
 ```
 IF-MIB::ifName.3 = STRING: Fa0/0
 ```
-The index transform allows you to get the index value (4.3 in this case) as
-an OID value. Any operations you need to do on the index value should be
-possible with existing transforms.
+The index transform allows you to get the index value `4.3` as an OID value. You can use 
+the REGSUB transform to further extract the `3` value
 
 ### MATCH transform
+This transform addresses the issue found in MIBs that mix different data types 
+in just two columns. It either separates these mixed tables into distinct ones 
+or rearranges them to have more columns
 
-In some badly designed MIBs multiple types of information are presented in a
-single table with two columns (branches), often in just a name, value format.
-This transform makes it possible to split such a combined table out into
-separate tables, or to reformat the table so that it has multiple columns.
-
-For example, the MIB for the TRIDIUM building management system has a table
-with outputName and outputValue, data returned looks as follows:
+For example, the MIB for the TRIDIUM building management system contains a table 
+with two columns: outputName and outputValue.
 ```
 TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
 TRIDIUM-MIB::outputName.2  = STRING: "I_Inc4_VaN"
