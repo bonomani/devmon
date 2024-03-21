@@ -190,7 +190,7 @@ accessible. The format for the CHAIN transform is:
 ```
 chainedOid   : CHAIN    : {OID1} {OID2}
 ```
-Which result as having a chainedOID corresponding to  
+The combined result: The chainedOID corresponds to  
 ```
 .1.1.2.1 = 'CPU is above nominal temperature'
 .1.1.2.2 = 'System fans are non-operational'
