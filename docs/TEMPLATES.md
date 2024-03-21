@@ -286,9 +286,10 @@ outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
 outputVaRow    : MATCH  : {outputName} /.*_VaN$/
 ```  
 
-outputFreqRow will now contain the indexes of outputName that matched the
-regular expression, e.g. 1,5,9 etc. , outputVaRow will contain 2,6,10. To
-construct a table, use the chain transform to create repeaters using the
+`outputFreqRow` will now contain the indexes of outputName that matched the
+regular expression, e.g. 1,5,9,...  
+`outputVaRow` will contain 2,6,10...  
+To construct a table, use the chain transform to create repeaters using the
 matched indexes:
 ```
 outputFreq     : CHAIN  : {outputFreqRow} {outputValue}
