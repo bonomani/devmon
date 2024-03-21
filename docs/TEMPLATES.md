@@ -221,22 +221,18 @@ You can give it a maximum value (upper limit): the limit helps prevent
 incorrect results by setting a maximum value for the data. Without a specified limit, 
 if there's a sudden drop in data (like with some SNMP counters that reset 
 after reaching a high value), the system will choose an appropriate maximum 
-value based on whether it's dealing with 32-bit or 64-bit data.  
+value based on whether it's dealing with 32-bit or 64-bit data. 
+  
+The DELTA transform takes at least two poll cycles to return meaningful data.
+In the mean time you will get a 'wait' result stored in the targetOID alias.
 
 This method doesn't allow for measuring decreases (negative changes) in the data.
 
 Delta examples:
 ```
 changeInValue  : DELTA : {value}
-```
-or
-```
 changeInValue  : DELTA : {value} 2543456983
 ```
-Keep in mind that the DELTA transform takes at least two poll cycles to
-return meaningful data, so in the mean time you will get a 'wait' result
-stored in the target OID alias (as well as in aliases that are transformed
-based off the target alias).
 
 
 ### DATE transform
