@@ -64,7 +64,7 @@ templates/cisco-2950/cpu/thresholds
 templates/cisco-2950/cpu/exceptions  
 templates/cisco-2950/cpu/message  
 ```
-A line beginning with `#` is a comment, supported by all these files except 
+Note: A line beginning with `#` is a comment, supported by all these files except 
 the `message` file.
 
 ## The `oids` file 
