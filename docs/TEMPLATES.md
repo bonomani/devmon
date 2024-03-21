@@ -245,19 +245,16 @@ the equivalent amount of time in years, days, hours, minutes, and seconds.
 
 ### INDEX transform
 
-This transform allows you to access the index part of a numerical OID in a
-repeater OID.
+This transform allows you to access the index part of repeater OID.
 
-For example, in the cdpCache table for the Cisco CDP MIB, walking the
-cdpCacheDevicePort OID will return values such as:
+For example, walking the cdpCacheDevicePort OID returns :
 ```
 CISCO-CDP-MIB::cdpCacheDevicePort.4.3 = STRING: GigabitEthernet4/41
 CISCO-CDP-MIB::cdpCacheDevicePort.9.1 = STRING: GigabitEthernet2/16
 CISCO-CDP-MIB::cdpCacheDevicePort.12.14 = STRING: Serial2/2
 ```
-The value is the interface on the remote side, and there is no OID for the
-interface on the local side. To get the interface on the local side, you must
-use the last value in the index (e.g. 3 for GigabitEthernet4/41) and look in
+The value is the interface on the remote side. To get the interface on the local side, 
+you must use the last value in the index (e.g. 3 for GigabitEthernet4/41) and look in
 the ifTable:
 ```
 IF-MIB::ifName.3 = STRING: Fa0/0
