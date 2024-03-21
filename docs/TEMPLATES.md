@@ -163,24 +163,21 @@ Notes
 
 
 ### CHAIN transform
-Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
-string value under another OID (the 'leaf' oid). The CHAIN transform will
-create a third 'transformed' oid, containing the leaves of the 'leaf' oid and
-the values of the 'data' oid. A quick example:
+Sometimes, a device saves a numeric SNMP identifier as a string under 
+a different OID. The CHAIN transform combines these. A brief example:
 
 In your oids file, you have defined:
 ```
-leafOid  : .1.1.2     : branch
-dataOid  : .1.1.3     : branch
+OID1  : .1.1.2     : branch
+OID2  : .1.1.3     : branch
 ```
 
-After walking leafOid and dataOid, they return the values:
+Walking the OID1 and OID2 return the values:
 ```
+OID1:
 .1.1.2.1 = '.1.1.3.1194'
 .1.1.2.2 = '.1.1.3.2342'
-```
-and
-```
+OID2
 .1.1.3.1194 = 'CPU is above nominal temperature'
 .1.1.3.2342 = 'System fans are non-operational'
 ```
@@ -189,14 +186,12 @@ Chances are that you won't know what leaf values will be returned for
 CHAIN transform to 'chain' these two oids together to make the data more
 accessible. The format for the CHAIN transform is:
 ```
-chainedOid   : CHAIN    : {leafOd} {dataOid}
+chainedOid   : CHAIN    : {OID1} {OID2}
 ```
-
-If you used the above transform with the previously mentioned data, you
-would end up with:
+Which result as having a chainedOID corresponding to  
 ```
-chainedOid.1 = 'CPU is above nominal temperature'
-chainedOid.2 = 'System fans are non-operational'
+.1.1.2.1 = 'CPU is above nominal temperature'
+.1.1.2.2 = 'System fans are non-operational'
 ```
 
 ### CONVERT transform
