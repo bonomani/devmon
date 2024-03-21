@@ -159,7 +159,7 @@ targetOid   : BEST    : {sourceOID1},{sourceOID2}
 
 ```
 Notes
-- SourceOIDs present in the BEST transform **are exlcuded from the globale page color calculation** (the worst color of the page)
+- SourceOIDs present in the BEST transform **are excluded from the globale page color calculation** (the worst color of the page)
 
 ### CHAIN transform
 Sometimes, a device saves a numeric SNMP identifier as a string under 
