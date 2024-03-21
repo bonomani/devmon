@@ -44,15 +44,12 @@ can be safely removed from all templates.
 Each subfolder in a vendor-model folder is a separate test. **The folder's 
 name is important as this is the test name reported to your Xymon server**. For example, 
 a folder named `cpu` defines the `cpu` test in Xymon. 
-Each test folder contains five files:
+Each test folder MUST contains five files:
 - oids
 - transforms
 - thresholds
 - exceptions
 - message
-
-These files MUST be present for the template to be read successfully,
-although the thresholds, transforms and exceptions files can all be empty.
 
 ## The file structure of a test 
 The files needed for the `cpu` test on a `Cisco 2950` will look like:
@@ -64,7 +61,9 @@ templates/cisco-2950/cpu/thresholds
 templates/cisco-2950/cpu/exceptions  
 templates/cisco-2950/cpu/message  
 ```
-Note: A line beginning with `#` is a comment, supported by all these files except 
+Note: 
+- The thresholds, transforms and exceptions files can can be empty.
+- A line beginning with `#` is a comment is supported by all these files except 
 the `message` file.
 
 ## The `oids` file 
