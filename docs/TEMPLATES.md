@@ -51,7 +51,7 @@ Each test folder MUST contains five files:
 - exceptions
 - message
 
-## The file structure of a test 
+## Example of a test file structure 
 The files needed for the `cpu` test on a `Cisco 2950` will look like:
 ```
 templates/cisco-2950/specs  
