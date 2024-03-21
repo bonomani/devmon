@@ -159,7 +159,7 @@ targetOid   : BEST    : {sourceOID1},{sourceOID2}
 
 ```
 Notes
-- SourceOIDs in a BEST transform **do not participate in establishing the globale page color** (the worst color of the page)
+- SourceOIDs present in the BEST transform **are exlcuded from the globale page color calculation** (the worst color of the page)
 
 
 ### CHAIN transform
