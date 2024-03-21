@@ -213,27 +213,17 @@ intYear : CONVERT: {hexYear} hex
 
 ### DELTA transform
 
-The DELTA transform performs a 'change over time' calculation on the
-supplied data. It takes a single data alias, with an optional 'upper limit'
-(separated from the alias by whitespace) as input.
+The DELTA transform calculates how much something changes over time. 
+This calculation is done by comparing the previous data to the current 
+one and shows the change in data units per second.  
+  
+You can give it a maximum value (upper limit): the limit helps prevent 
+incorrect results by setting a maximum value for the data. Without a specified limit, 
+if there's a sudden drop in data (like with some SNMP counters that reset 
+after reaching a high value), the system will choose an appropriate maximum 
+value based on whether it's dealing with 32-bit or 64-bit data.  
 
-The change over time calculation will be performed between one poll interval
-and the next, and returns a measurement of data units per second.
-
-The limit is used as the maximum value of the data alias, and comes in to
-play when the value from supplied data alias from the last polling cycle is
-more than the value from your current polling cycle.
-
-This typically occurs when you have counter-wrap issues in SNMP (as most
-counters are still 32 bit; an interface with heavy traffic can wrap its
-ifOctet counters in less than two minutes).
-
-If you don't specify a limit and Devmon detects a counter- wrap, it will use
-either the 32bit or 64bit upper limit, accordingly.
-
-The upshot of this is that you CANNOT MEASURE NEGATIVE DELTAS WITH THIS
-TRANSFORM. If you really really need to, please contact the software author
-and make a feature request.
+This method doesn't allow for measuring decreases (negative changes) in the data.
 
 Delta examples:
 ```
