@@ -337,10 +337,8 @@ alltogether, specify a value of 0.
 The inverse of the 'PACK' transform.
 
 ### REGSUB transform
-One of the most powerful and complicated transforms, the regsub transform
-allows you to perform a regular expression substitution against a single data
-alias input. The data input for a regsub transform should consist of a single
-data alias, followed by a regular expression substitution (the leading 's'
+The regsub transform is a powerful yet complex technique that allows you to 
+replace segments of a single sourceOID using regular expressions (the leading 's'
 for the expression should be left off). For example:
 ```
 ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
