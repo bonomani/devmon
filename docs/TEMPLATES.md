@@ -343,15 +343,12 @@ for the expression should be left off). For example:
 ```
 ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
 ```
-The transform above takes the input from the ifAlias data alias and, assuming
-that it is not an empty string (ifAlias has to have at least one non-
-whitespace character in it) it puts square braces around the value and puts a
-space in front of it. This example is used by all of the Cisco interface
-templates included with Devmon, to include the ifAlias information for an
-interface, but only if it has a value defined. A very powerful, but easily
-misused transform. If you are interested in using it but don't know much
-about substitution, you might want to google 'regular expression
-substitution' and try reading up on it.
+If `ifAlias` contain at least one non-whitespace character, square brackets are 
+added around the value with a space in front. This example is used in all Cisco 
+interface templates in Devmon to include `ifAlias` information for an interface, 
+but only if it's defined. It's a powerful transform, but can be misused. If you're 
+interested but unfamiliar with substitution, consider looking up `regular 
+expression substitution` for more information.
 
 ### SET transform
 
