@@ -80,7 +80,7 @@ There are three values per line
 Notes:
 - If the same targetOID is used in multiple tests within a template, the complete line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
-OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
+### OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
 
 - In SNMP, we distinguish between `table` and `scalar` OIDs.
 - In Devmon, we classify OIDs as either `branch` or `leaf`.
