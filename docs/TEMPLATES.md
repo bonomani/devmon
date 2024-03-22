@@ -3,9 +3,8 @@
 ## Custom Templates Made Easy
 Devmon's templates allow you to effortlessly craft your own monitoring 
 templates using declarative configuration files. This means there's no need 
-for complex coding! A little familiarity with regular expressions can enhance 
-your capabilities, though. For an introduction to regular expressions, check 
-out [Regular Expressions Info](http://www.regular-expressions.info).
+for complex coding! Some knowledge of regular expressions can boost your skills.
+For an intro, visit [Regular Expressions Info](http://www.regular-expressions.info).
 To begin crafting your custom templates, get ready to:
 
 - Select the SNMP OIDs to query
