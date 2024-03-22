@@ -26,7 +26,7 @@ to your database, making sure everything matches up.
 ## The vendor-model folders
 Inside the `templates` folder, there are subfolders for each vendor-model, 
 like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
-because each one must have a `specs` file that specifies the template
+because each one must have a `specs` file that specifies the template.
 
 ### The specs file
 The `specs` file holds data specific to the vendor-model ans should look like
@@ -43,7 +43,7 @@ pattern) to match the SNMP system description, ensuring flexible classification.
 can be safely removed from all templates.
 
 ### The test folders
-Each subfolder in a vendor-model folder represents a distinct test. **This folder's name matters** as it's what appears as the test name on your Xymon server
+Each subfolder in a vendor-model folder represents a distinct test. **This folder's name matters** as it's what appears as the test name on your Xymon server.
 
 ### Example
 For a `cpu` test on a `Cisco 2950` (vendor-model)
