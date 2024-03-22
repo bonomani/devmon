@@ -9,7 +9,7 @@ out [Regular Expressions Info](http://www.regular-expressions.info).
 To start creating your custom templates, be prepared to:
 
 - Select the SNMP OIDs to query
-- Transform data gathered through SNMP or previously transformed
+- Transform data gathered through SNMP
 - Define thresholds and alarm messages
 - Define how tests are displayed in Xymon (output message)
 
