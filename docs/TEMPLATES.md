@@ -1,9 +1,12 @@
 # TEMPLATES
  
-## Rolling your own 
-Devmon's templates let you create your own templare: You don't need to write a 
-single line of code! But having a bit of know-how with regular expressions 
-helps: http://www.regular-expressions.info/. You will have to: 
+## Custom Templates Made Easy
+Devmon's templates allow you to effortlessly craft your own monitoring 
+templates using declarative configuration files. This means there's no need 
+for complex coding! A little familiarity with regular expressions can enhance 
+your capabilities, though. For an introduction to regular expressions, check 
+out [Regular Expressions Info](http://www.regular-expressions.info).
+To start creating your custom templates, be prepare to:
 
 - Select the SNMP OIDs to query
 - Transform data gathered through SNMP or previously transformed
