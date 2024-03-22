@@ -90,7 +90,7 @@ The relationship between them is:
   - A SNMP `scalar` OID (ending with 0)
   - An element of a SNMP `table` OID (usually not ending with 0)
 
-Let's analyse a SNMP request for the numeric OID `.1.3.4.6.9` that could be defined as type `branch`: 
+Let's analyse a SNMP request to a `branch` numeric OID `.1.3.4.6.9` : 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
@@ -101,7 +101,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 - Each line carries 2 new information: 
   - The `value` can have various types: String, Integer, numericOID, etc.
   - The `index`, is of type numeric OID, often simply an Integer.
-- For a `leaf`, there is only 1 targetOID (=value) (and no index as it is not needed)
+- For a `leaf`, there is only 1 targetOID (=value) and **no index**
 
 Note: 
 - The meaning of the OID can be confusiong as everything is called `OID`: the targetOID, the numericOID and also the index
