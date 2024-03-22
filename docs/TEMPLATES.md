@@ -28,7 +28,7 @@ Inside the `templates` folder, there are subfolders for each vendor-model,
 like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
 because each one must have a `specs` file that specifies the template
 
-## The specs file
+### The specs file
 The `specs` file holds data specific to the vendor-model ans should look like
 ```
 vendor   : cisco
@@ -42,18 +42,11 @@ pattern) to match the SNMP system description, ensuring flexible classification.
 - The `snmpver` variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
 
-## The test folders
-Each subfolder in a vendor-model folder is a separate test. **The folder's 
-name is important as this is the test name reported to your Xymon server**. For example, 
-a folder named `cpu` defines the `cpu` test in Xymon. 
-Each test folder MUST contains five files:
-- oids
-- transforms
-- thresholds
-- exceptions
-- message
+### The test folders
+Each subfolder in a vendor-model folder represents a distinct test. **This folder's name matters** as it's what appears as the test name on your Xymon server
 
-## Example: a `cpu` test on a `Cisco 2950`
+### Example
+For a `cpu` test on a `Cisco 2950` (vendor-model)
 ```
 templates/cisco-2950/specs  
 templates/cisco-2950/cpu/oids  
