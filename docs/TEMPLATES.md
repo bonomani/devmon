@@ -29,7 +29,8 @@ like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
 because each one must have a `specs` file that specifies the template.
 
 ### The test folders
-Each subfolder in a vendor-model folder represents a distinct test. **This folder's name matters** as it's what appears as the test name on your Xymon server.
+Each subfolder in a vendor-model folder represents a distinct test. **This 
+folder's name matters** as it's what appears as the test name on your Xymon server.
 
 ### Example
 For a `cpu` test on a `Cisco 2950` (vendor-model), these files are required:
@@ -73,12 +74,16 @@ CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 
 There are three values per line
-1. The **targetOID** (case sensitive): the variable name that will contains the result of the polling. The names can be similar to the **textual** representation of a OID, but do not have to. 
-2. The **numericOID**: the standard form of OID (The official **textual** OID representation that you can find in MIBS do not work) 
+1. The **targetOID** (case sensitive): the variable name that will contains 
+the result of the polling. The names can be similar to the **textual** 
+representation of a OID, but do not have to. 
+2. The **numericOID**: the standard form of OID (The official **textual** OID 
+representation that you can find in MIBS do not work) 
 3. The repeater **type**: `leaf`(= a non-repeater oid), `branch`(= a repeater oid)
 
 Notes:
-- If the same targetOID is used in multiple tests within a template, the complete line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
+- If the same targetOID is used in multiple tests within a template, the complete 
+line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
 ### OIDs or Object Identifiers
 - In SNMP, we distinguish between `table` and `scalar` OIDs.
@@ -97,15 +102,21 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-numOID-> <- index-> = <- value ->
 ```
-- There are multiple result, 1 per line, all those will be stored in the `targetOID` as key-value pairs
+- There are multiple result, 1 per line, all those will be stored in the `targetOID` as 
+  key-value pairs
 - Each line carries 2 information : 
-  - The `index` is of type numeric OID, often simply an Integer. As this is the `key` it MUST be unique.
+  - The `index` is of type numeric OID, often simply an Integer. As this is the `key`
+    it MUST be unique.
   - The `value` can have various types: String, Integer, numericOID, etc.
-- For a `leaf`, there is only 1 result: The targetOID is a scalar (= 1 value) and there is **no index**
+- For a `leaf`, there is only 1 result: The targetOID is a scalar (= 1 value) and there 
+  is **no index**
 
 Note: 
-- The meaning of the OID can be confusiong as everything is called `OID`: the targetOID, the numericOID and also the index
-- If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
+- The meaning of the OID can be confusiong as everything is called `OID`: the targetOID,
+ the numericOID and also the index
+- If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be 
+retrieved (Due to the way SNMP works): This is very similar has using the parent OID of 
+type `branch`...
 
 ## The transforms file
 
