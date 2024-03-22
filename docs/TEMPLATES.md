@@ -18,7 +18,7 @@ Template configuration files are stored in the `templates` folder of your Devmon
 installation. For a single server, the folder is read regularly; for multiple 
 servers, the database is utilized.
 
-Note: 
+Notes: 
 - If you have multiple servers, it's best to keep only one copy of your 
 templates folder, preferably on your main server. Remove any extra template 
 folders on your other servers. This avoids confusion when syncing templates 
@@ -44,7 +44,7 @@ templates/cisco-2950/cpu/thresholds
 templates/cisco-2950/cpu/exceptions  
 templates/cisco-2950/cpu/message  
 ```
-Note: 
+Notes: 
 - The thresholds, transforms and exceptions files can be empty.
 - A line beginning with `#` is a comment. Comments are supported by all these files except 
 the `message` file.
@@ -113,7 +113,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 - For a `leaf`, there is only 1 result: The targetOID is a scalar (= 1 value) and there 
   is **no index**
 
-Note: 
+Notes: 
 - The meaning of the OID can be confusiong as everything is called `OID`: the targetOID,
  the numericOID and also the index
 - If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be 
@@ -142,7 +142,7 @@ Throughout, 'alias' refers to either SNMP-collected or transformed data.
 2. The **transform** : (case insensitive, e.g., 'MATH' or 'math')
 3. The **input data**: a string with **one or more sourceOID(s)**, enclosed in {}, defined elsewhere
 
-Notes
+Notes:
 - The **primaryOID** = **sourceOID1** (the first sourceOID that is a repeater, so it should be also sourceOID2), from left to right
 - The **targetOID** has the **same indexes** as **the primaryOID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
@@ -154,7 +154,7 @@ Mainly use in the `msg` file with its color and error parts only : {targetOID.co
 ```
 targetOid   : BEST    : {sourceOID1} {sourceOID2}
 ```
-Notes
+Notes:
 - SourceOIDs present in the BEST transform **are excluded from the globale page color calculation** (the worst color of the page)
 
 ### CHAIN transform
