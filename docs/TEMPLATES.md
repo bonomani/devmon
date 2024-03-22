@@ -492,7 +492,7 @@ alphanumeric string):
     's'     : Source alias matches this string exactly (case sensitive)
     "s"     : Source alias matches this regular expression (non-anchored)
               ".*" match anything! (similar to default: prefer it)
-    default : Default value for the target alias, used in cas of undefined
+    default : Default value for the target alias, used in case of undefined
               values or any unmatch statement (specially usefull for incomplet
               oids, prefer ".*" if there is no reason to use it!
 ```
