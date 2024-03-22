@@ -210,14 +210,13 @@ choose an appropriate maximum based on whether it's dealing with 32-bit or 64-bi
 The DELTA transform takes at least two poll cycles to return meaningful data.
 In the mean time you will get a `wait` result stored in the targetOID alias.
 
-This method doesn't allow for measuring decreases (negative changes) in the data.
-
-Delta examples:
+Examples:
 ```
 changeInValue  : DELTA : {value}
 changeInValue  : DELTA : {value} 2543456983
 ```
-
+Notes:
+- This trasnform doesn't allow for measuring decreases (negative changes) in the data.
 ### DATE transform
 This transform converts Unix time (seconds since January 1, 1970, 00:00:00 GMT) 
 into a readable date and time format. It changes the input of seconds into a 
