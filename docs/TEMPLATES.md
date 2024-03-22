@@ -206,7 +206,7 @@ one** changes **over the time** and shows the change in **unit per second** rate
   may occur when OID values reset in the device. Without a specified limit, 
   the system will automatically choose a suitable maximum based on whether it's 
   handling 32-bit or 64-bit data.
-- The DELTA transform takes at least `two poll cycles` to return meaningful data.
+- This transform takes at least `two poll cycles` to return meaningful data.
   In the mean time you will get a `wait` result stored in the targetOID alias.
 
 Examples:
