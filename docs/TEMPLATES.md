@@ -303,39 +303,16 @@ supplied data. It can use the following mathematical operators:
 '+'           (Addition)
 '-'           (Subtraction)
 '*'           (Muliplication)
-' x '         (Multiplication - note white space on each side) (deprecated)
 '/'           (Division)
 '^'           (Exponentiation)
 '%'           (Modulo or Remainder)
 '&'           (bitwise AND)
 '|'           (bitwise OR)
-' . '         (string concatenation - note white space each side)
+' . '         (string concatenation - note white space each side) (deprecated)
 '(' and ')'   (Expression nesting)
 ```
-This transform is not whitespace sensitive, except in the case of ' x ' and
-' . ' , so both:
-```
-{sysUpTime} / 100
-```
-and
-```
-{sysUpTime}/100
-```
-...would be accepted, and are functionally equivalent. However:
-```
-{ifInOps} x 8
-```
-will work, while:
-```
-{ifInOps}x8
-```
-will not. This is to avoid problems with oid names containing the character
-'x'. New templates should rather use the '*' operator to avoid problems, e.g.:
-```
-{ifInOps}*8
-```
-The mathematical expressions you can perform can be
-quite complex, such as:
+This transform is not whitespace sensitive, except in the case of ' . ' 
+The mathematical expressions you can perform can be quite complex, such as:
 ```
 ((({sysUpTime}/100) ^ 2 ) x 15) + 10
 ```
