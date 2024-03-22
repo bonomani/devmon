@@ -105,7 +105,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 
 Note: 
 - The meaning of the OID can be confusiong as everything is called `OID`: the targetOID, the numericOID and also the index
-- If a leaf OID is not a scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
+- If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
 
 ## The 'transforms' file
 
