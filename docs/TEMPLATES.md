@@ -36,10 +36,9 @@ model    : 2950
 snmpver  : 2
 sysdesc  : C2950
 ```
-- The `sysdesc` variable is utilized in Devmon's discovery process when 
-reading the Xymon hosts.cfg file (using `devmon -readhostscfg`).
-This value MUST be unique and can handle complex patterns because it's 
-treated as a regular expression.
+- In the discovery process using `devmon -readhostscfg`, Devmon identifies the hosts
+it should handle and utilizes the `sysdesc` variable (a non-anchored regular expression
+pattern) to match the SNMP system description, ensuring flexible classification.
 - The `snmpver` variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
 
