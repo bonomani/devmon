@@ -13,7 +13,7 @@ To begin crafting your custom templates, get ready to:
 - Define thresholds and alarm messages
 - Define how tests are displayed in Xymon (output message)
 
-## The templates folder
+### The templates folder
 Template configuration files are stored in the `templates` folder of your Devmon 
 installation. For a single server, the folder is read regularly; for multiple 
 servers, the database is utilized.
