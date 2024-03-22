@@ -311,7 +311,7 @@ supplied data. It can use the following mathematical operators:
 ' . '         (string concatenation - note white space each side) (deprecated)
 '(' and ')'   (Expression nesting)
 ```
-This transform is not whitespace sensitive, except in the case of ' . ' 
+This transform is not whitespace sensitive, except in the case of ' . '   
 The mathematical expressions you can perform can be quite complex, such as:
 ```
 ((({sysUpTime}/100) ^ 2 ) x 15) + 10
