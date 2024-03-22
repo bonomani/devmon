@@ -24,13 +24,14 @@ folders on your other servers. This avoids confusion when syncing templates
 to your database, making sure everything matches up.
 
 ### The vendor-model folders
-Inside the `templates` folder, there are subfolders for each vendor-model, 
-like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
-because each one must have a `specs` file that specifies the template.
+Inside the `templates` folder, there are subfolders for each `vendor-model`, 
+like `Cisco 2950` or `Cisco 3750`. This folder's name don't matter.  Each 
+test have a `specs` file that specifies the template.
 
 ### The test folders
-Each subfolder in a vendor-model folder represents a distinct test. **This 
-folder's name matters** as it's what appears as the test name on your Xymon server.
+Inside the `vendor-model` folder there are subfolders for each `test` . **This 
+folder's name matters** as it's what appears as the test name on your Xymon 
+server.
 
 ### Example
 For a `cpu` test on a `Cisco 2950` (vendor-model), these files are required:
