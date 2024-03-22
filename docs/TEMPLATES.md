@@ -202,13 +202,12 @@ intYear : CONVERT: {hexYear} hex
 The DELTA transform **compares** the **previous values** to the **current 
 one** changes **over the time** and shows the change in **unit per second** rate.  
   
-You can give it a maximum value (upper limit): the limit helps prevent 
-incorrect results by setting a maximum value of the rate, that can occure when
-OID values are reset in th device. Without a specified limit, the system will 
-choose an appropriate maximum based on whether it's dealing with 32-bit or 64-bit data. 
-  
-The DELTA transform takes at least two poll cycles to return meaningful data.
-In the mean time you will get a `wait` result stored in the targetOID alias.
+- You can set a maximum value (upper limit) to prevent incorrect results that 
+  may occur when OID values reset in the device. Without a specified limit, 
+  the system will automatically choose a suitable maximum based on whether it's 
+  handling 32-bit or 64-bit data.
+- The DELTA transform takes at least `two poll cycles` to return meaningful data.
+  In the mean time you will get a `wait` result stored in the targetOID alias.
 
 Examples:
 ```
