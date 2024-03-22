@@ -267,9 +267,9 @@ To split the frequences out as a separate repeater, use:
 outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
 outputVaRow    : MATCH  : {outputName} /.*_VaN$/
 ```  
-- `outputFreqRow` will contain s the indexes of outputName that matched the
-  regular expression, e.g. 1,5,9,... as 'values'  
-- `outputVaRow` will contain 2,6,10...  
+- `outputFreqRow` will contain the `indexes` of outputName that matched the
+  regular expression, e.g. 1,5,9,... as `values`  
+- `outputVaRow` will contain 2,6,10... as `values`  
 - There indexes start from 1  
 
 To construct a table, use the chain transform to create repeaters using the
