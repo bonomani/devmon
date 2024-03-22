@@ -60,7 +60,7 @@ Note:
 - A line beginning with `#` is a comment. Comments are supported by all these files except 
 the `message` file.
 
-## The `oids` file 
+## The oids file 
 
 The `oids` file contains the SNMP queries you want to make for this device 
 type. It should look something like this:
@@ -80,13 +80,11 @@ There are three values per line
 Notes:
 - If the same targetOID is used in multiple tests within a template, the complete line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
-### OIDs, or Object Identifiers, are fundamental concepts in both SNMP and Devmon.
-
+### OIDs, or Object Identifiers
 - In SNMP, we distinguish between `table` and `scalar` OIDs.
 - In Devmon, we classify OIDs as either `branch` or `leaf`.
 
 The relationship between them is:
-
 - A `branch` OID corresponds to an SNMP `table`
 - A `leaf` OID can represent either:
   - A SNMP `scalar` OID (ending with 0)
