@@ -347,7 +347,7 @@ If `ifAlias` contain at least one non-whitespace character, square brackets are
 added around the value with a space in front. This example is used in all Cisco 
 interface templates in Devmon to include `ifAlias` information for an interface, 
 but only if it's defined. It's a powerful transform, but can be misused. If you're 
-interested but unfamiliar with substitution, consider looking up `regular 
+interested but unfamiliar with substitution, consider looking up `regular
 expression substitution` for more information.
 
 ### SET transform
