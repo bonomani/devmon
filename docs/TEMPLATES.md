@@ -6,7 +6,7 @@ templates using declarative configuration files. This means there's no need
 for complex coding! A little familiarity with regular expressions can enhance 
 your capabilities, though. For an introduction to regular expressions, check 
 out [Regular Expressions Info](http://www.regular-expressions.info).
-To start creating your custom templates, be prepared to:
+To begin crafting your custom templates, get ready to:
 
 - Select the SNMP OIDs to query
 - Transform data gathered through SNMP
