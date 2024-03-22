@@ -98,7 +98,7 @@ snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 <-numOID-> <- index-> = <- value ->
 ```
 - There are multiple result, 1 per line, all those will be stored in the `targetOID` as key-value pairs
-- Each line carries 2 new information : 
+- Each line carries 2 information : 
   - The `index` is of type numeric OID, often simply an Integer. As this is the `key` it MUST be unique.
   - The `value` can have various types: String, Integer, numericOID, etc.
 - For a `leaf`, there is only 1 result: The targetOID is a scalar (= 1 value) and there is **no index**
