@@ -46,7 +46,7 @@ can be safely removed from all templates.
 Each subfolder in a vendor-model folder represents a distinct test. **This folder's name matters** as it's what appears as the test name on your Xymon server.
 
 ### Example
-For a `cpu` test on a `Cisco 2950` (vendor-model)
+For a `cpu` test on a `Cisco 2950` (vendor-model), these files are required:
 ```
 templates/cisco-2950/specs  
 templates/cisco-2950/cpu/oids  
