@@ -243,7 +243,7 @@ IF-MIB::ifName.3 = STRING: Fa0/0
 The index transform allows you to get the index value `4.3` as an OID value. You can use 
 the REGSUB transform to further extract the `3` value
 
-### MATCH or REINDEXMATCH transform
+### MATCH or (REINDEX-INDEX-MATCH) transform
 This transform addresses the issue found in MIBs that mix different data types 
 in just two columns. It either separates these mixed tables into distinct ones 
 or rearranges them to have more columns.   
