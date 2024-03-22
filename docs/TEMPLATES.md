@@ -23,24 +23,10 @@ templates folder, preferably on your main server. Remove any extra template
 folders on your other servers. This avoids confusion when syncing templates 
 to your database, making sure everything matches up.
 
-## The vendor-model folders
+### The vendor-model folders
 Inside the `templates` folder, there are subfolders for each vendor-model, 
 like `Cisco 2950` or `Cisco 3750`. The names of these subfolders don't matter
 because each one must have a `specs` file that specifies the template.
-
-### The specs file
-The `specs` file holds data specific to the vendor-model ans should look like
-```
-vendor   : cisco
-model    : 2950
-snmpver  : 2
-sysdesc  : C2950
-```
-- In the discovery process using `devmon -readhostscfg`, Devmon identifies the hosts
-it should handle and utilizes the `sysdesc` variable (a non-anchored regular expression
-pattern) to match the SNMP system description, ensuring flexible classification.
-- The `snmpver` variable is no longer in use and has been deprecated. It 
-can be safely removed from all templates.
 
 ### The test folders
 Each subfolder in a vendor-model folder represents a distinct test. **This folder's name matters** as it's what appears as the test name on your Xymon server.
@@ -59,6 +45,20 @@ Note:
 - The thresholds, transforms and exceptions files can be empty.
 - A line beginning with `#` is a comment. Comments are supported by all these files except 
 the `message` file.
+
+## The specs file
+The `specs` file holds data specific to the vendor-model ans should look like
+```
+vendor   : cisco
+model    : 2950
+snmpver  : 2
+sysdesc  : C2950
+```
+- In the discovery process using `devmon -readhostscfg`, Devmon identifies the hosts
+it should handle and utilizes the `sysdesc` variable (a non-anchored regular expression
+pattern) to match the SNMP system description, ensuring flexible classification.
+- The `snmpver` variable is no longer in use and has been deprecated. It 
+can be safely removed from all templates.
 
 ## The oids file 
 
