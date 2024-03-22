@@ -18,7 +18,8 @@ Template configuration files are stored in the `templates` folder of your Devmon
 installation. For a single server, the folder is read regularly; for multiple 
 servers, the database is utilized.
 
-Note: If you have multiple servers, it's best to keep only one copy of your 
+Note: 
+- If you have multiple servers, it's best to keep only one copy of your 
 templates folder, preferably on your main server. Remove any extra template 
 folders on your other servers. This avoids confusion when syncing templates 
 to your database, making sure everything matches up.
