@@ -14,9 +14,9 @@ To start creating your custom templates, be prepared to:
 - Define how tests are displayed in Xymon (output message)
 
 ## The templates folder
-Template data is stored in the `templates` folder of your Devmon installation. 
-For a single server, the folder is read regularly; for multiple servers, the 
-database is utilized.
+Template configuration files are stored in the `templates` folder of your Devmon 
+installation. For a single server, the folder is read regularly; for multiple 
+servers, the database is utilized.
 
 Note: If you have multiple servers, it's best to keep only one copy of your 
 templates folder, preferably on your main server. Remove any extra template 
