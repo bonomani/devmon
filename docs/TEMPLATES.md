@@ -80,7 +80,7 @@ There are three values per line
 Notes:
 - If the same targetOID is used in multiple tests within a template, the complete line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
-### OIDs, or Object Identifiers
+### OIDs or Object Identifiers
 - In SNMP, we distinguish between `table` and `scalar` OIDs.
 - In Devmon, we classify OIDs as either `branch` or `leaf`.
 
@@ -107,7 +107,7 @@ Note:
 - The meaning of the OID can be confusiong as everything is called `OID`: the targetOID, the numericOID and also the index
 - If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be retrieved (du to the way snmp work): This is very similar has using the parent OID of type `branch`...
 
-## The 'transforms' file
+## The transforms file
 
 The transforms file in your template details the data changes Devmon makes to collected 
 SNMP data, before setting thresholds and creating the message.
