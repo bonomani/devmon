@@ -137,11 +137,11 @@ In a generic form
 targetOID       : TRANSFORM      : {sourceOID1} ... {sourceOID2} ...
 ```
 In the 'transform context' we use slightly different terms that help to be more precise. Three values per line:
-1. The **targetOID** (case sensitive): unique compared to those in the 'oids' file. For example, 
+1. The **targetOID** (case sensitive): unique name compared to those in the 'oids' file. For example, 
 'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
 Throughout, 'alias' refers to either SNMP-collected or transformed data.  
-2. The **transform** : (case insensitive, e.g., 'MATH' or 'math')
-3. The **input data**: a string with **one or more sourceOID(s)**, enclosed in {}, defined elsewhere
+2. The **transform** (case insensitive): e.g. 'MATH' or 'math'.
+3. The **input data**: a string with **one or more sourceOID(s)** which sould be enclosed in {}.
 
 Notes:
 - The **primaryOID** = **sourceOID1** (the first sourceOID that is a repeater, so it should be also sourceOID2), from left to right
