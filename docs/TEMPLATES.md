@@ -96,7 +96,7 @@ The relationship between them is as follows:
   - A SNMP `scalar` OID (ending with .0)
   - An element of a SNMP `table` OID (which does not end with .0)
 
-When analyzing an SNMP request to a `branch` numeric OID, such as `.1.3.4.6.9` ,with the command: 
+Let's execute and analyze an SNMP request to a `branch` numeric OID: 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 ```
