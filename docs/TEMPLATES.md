@@ -133,9 +133,9 @@ UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
 In a generic form
 ```
-targetOID       : TRANSFORM      : {sourceOID1} ... {sourceOID2} ...
+targetOID       : TRANSFORM     : {sourceOID1} ... {sourceOID2} ...
 ```
-In the 'transform context' we use slightly different terms that help to be more precise. Three values per line:
+Three values per line:
 1. The **targetOID** (case sensitive): unique name compared to those in the 'oids' file. For example, 
 'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
 Throughout, 'alias' refers to either SNMP-collected or transformed data.  
