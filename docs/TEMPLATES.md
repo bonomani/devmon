@@ -64,7 +64,6 @@ pattern) to match the SNMP system description, ensuring flexible classification.
 can be safely removed from all templates.
 
 ## The oids file 
-
 The `oids` file contains the SNMP queries you want to make for this device 
 type. It should look something like this:
 
@@ -101,7 +100,6 @@ When analyzing an SNMP request to a `branch` numeric OID, such as `.1.3.4.6.9` ,
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 ```
-The output might look like this
 ```
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
@@ -124,7 +122,6 @@ Notes:
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
 ## The transforms file
-
 The transforms file in your template details the data changes Devmon makes to collected 
 SNMP data, before setting thresholds and creating the message.
 
@@ -189,7 +186,6 @@ chainedOid:
 .1.1.2.2                = System fans are non-operational
 ```
 
-
 ### CONVERT transform
 **Convert** a string in **hexadecimal** or **octal** to the **decimal** equivalent.
 Two arguments:
@@ -227,7 +223,6 @@ text string that shows the date and time as "YYYY-MM-DD, HH:MM:SS" (using 24-hou
 ### ELAPSED transform
 This transform converts a given number of seconds into a text string that shows 
 the equivalent amount of time in years, days, hours, minutes, and seconds.
-
 
 ### INDEX transform
 This transform allows you to access the index part of repeater OID. For example, 
