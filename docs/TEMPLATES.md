@@ -111,12 +111,12 @@ Outputs:
 ```
 Key points:
 - There are multiple results, one per line, with each being stored in the `targetOID` as 
-  key-value pairs-
+  key-value pairs.
 - Each line contains two pieces of information:
   - The `index` is of type numeric OID, often simply an Integer. which is of the type numeric OID, 
     often simply an Integer. As this serves as the key, it MUST stay unique.
   - The `value` which can be of various types: String, Integer, numericOID, etc.
-- In a `leaf`, as the targetOID is a scalar
+- In a `leaf`, as the targetOID is a scalar:
   - There is **no** `index`
   - There is only **one** `value` 
 Notes: 
@@ -145,6 +145,7 @@ Throughout, 'alias' refers to either SNMP-collected or transformed data.
 3. The **input data**: a string with **one or more sourceOID(s)** which sould be enclosed in {}.
 
 Notes:
+- In the context of transforms, it's preferable to use the terms `repeater/non-repeter` rather than `branch/leaf` 
 - The **primaryOID**, typically **sourceOID1**, is the first `repeater` sourceOID found from left to right
 - The **targetOID** has the **same indexes** as **the primaryOID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
