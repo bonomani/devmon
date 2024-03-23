@@ -78,14 +78,14 @@ sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 Three values per line:
-1. The **targetOID** (case sensitive): the variable name that will contains 
+- The **targetOID** (case sensitive): the variable name that will contains 
 the result of the polling. The names can be similar to the **textual** 
 representation of a OID, but do not have to. 
-2. The **numericOID**: the standard form of OID. The official **textual OID** 
+- The **numericOID**: the standard form of OID. The official **textual OID** 
 representation that you can find in MIBS **do not work**. 
-3. The **Type**:
-3.1. `branch`= a **repeater** type oid
-3.2  `leaf`  = a **non-repeater** (a scalar) type oid.
+- The **type**:
+  - `branch`= a **repeater** type oid
+  - `leaf`  = a **non-repeater** (a scalar) type oid.
 
 Notes:
 - If the **same targetOID is used in multiple tests** within a template, **the complete 
