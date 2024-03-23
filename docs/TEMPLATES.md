@@ -51,8 +51,8 @@ the `message` file.
 ## The specs file
 The `specs` file holds data specific to the vendor-model. This file is used in the 
 discovery process `./devmon -readhostscfg`, where Devmon identifies the hosts
-it should handle by using the `sysdesc` variable. This match (as a non-anchored 
-regular expression pattern) the SNMP system description, ensuring flexible classification.
+it should handle by using the `sysdesc` variable. This (non-anchored regular 
+expression) pattern should match the SNMP system description, ensuring flexible classification.
 ### Format
 ```
 vendor   : cisco
