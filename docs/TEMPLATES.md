@@ -349,27 +349,17 @@ but only if it's defined. If you're unfamiliar with substitution, consider looki
 up `regular expression substitution` for more information.
 
 ### SET transform
+The SET transform generates a repeating OID with preset values. Each value's index 
+starts from 1 and is defined in the third field, separated by commas optionally 
+surrounded by spaces. At least one constant must be provided, which can be either 
+a number or a character string excluding `,{}`. Leading and trailing spaces around 
+values are ignored. 
 
-The SET transform creates a repeater-type OID, and presets it with a sequence
-of constants. The indexes of the individual values of the OID created by SET
-are numbered starting from 1. The constants are defined in the third field.
-The constants are separated by a comma, optionally surrounded by zero or more
-spaces. Leading and trailing spaces in the list of constants are ignored. At
-least one constant must be specified. A constant is either a number or a
-string of characters, which should not include ',', '{' or '}'. It is not
-possible to define spaces at the start or at the end of the string.
-
-Like the MATCH transform, the SET transform is meant to be used for a badly
-designed MIB. While MATCH is used if two branches are used, containing the
-name and the value, SET is used if only one branch is used, containing a list
-of values.
-
-For example, the MIB for the McAfee MEB 4500 contains a section describing (a
-part of) the file systems. For each file system, the utilisation of space,
-the size, the free space, the utilisation of the i-nodes, the total number of
-i-nodes and the number of free i-nodes are available. A better representation
-is a table with 6 columns. The following configuration is used to map the
-single column onto 6 columns.
+For example, in the McAfee MEB 4500 MIB, there's a section detailing file systems. 
+Each file system includes space utilization, size, free space, i-node utilization, 
+total i-nodes, and free i-nodes. A more organized approach is to represent this 
+information in a table with 6 columns. The provided configuration accomplishes this 
+by mapping the single column into 6 columns.
 ```
 fsInfo    : .1.3.6.1.4.1.1230.2.4.1.2.3.1 : branch
 
@@ -389,12 +379,7 @@ fsbISize  : CHAIN  : {fsiISize} {fsInfo}
 fsbIFree  : CHAIN  : {fsiIFree} {fsInfo}
 ```
 
-The OIDs named fsb.+ can be used in transforms and in the TABLE directive in
-file 'message'.
-
-From a theoretical stand point, the SET transform complements the set of
-transforms. There was already the possibility to set a leaf-type OID to a
-constant value, using a statement like:
+There is the possibility to set a `leaf` OID to constant value
 ```
 AScalar  : MATH   : 123
 ```
