@@ -96,8 +96,8 @@ line** `targetOID: numericOID: type` **MUST be duplicated** in those tests to av
 - In Devmon, OIDs are classified as either `branch(or repeater)` and `leaf(or non-repeater)` OIDs.
 
 The relationship between them is as follows:
-- A `branch` OID corresponds to an SNMP `table` OID
-- A `leaf` OID can represent either:
+- A `branch(or repeater)` OID corresponds to an SNMP `table` OID
+- A `leaf(or non-repeater)` OID can represent either:
   - A SNMP `scalar` OID (does end with .0)
   - An `element` of a SNMP `table` OID (which does not end with .0)
 
