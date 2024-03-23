@@ -31,7 +31,7 @@ test have a `specs` file that specifies the template.
 
 ### The test folders
 Inside the `vendor-model` folder there are subfolders for each `test`. 
-**The name of the test folder matters** as it's what appears as the test name 
+**The `name` of the `test` folder matters** as it's what appears as the test name 
 on your Xymon server.
 
 ### Example
