@@ -54,7 +54,7 @@ The `specs` file holds data specific to the vendor-model ans should look like
 ```
 vendor   : cisco
 model    : 2950
-snmpver  : 2
+snmpver  : 2 (deprecated)
 sysdesc  : C2950
 ```
 - In the discovery process using `devmon -readhostscfg`, Devmon identifies the hosts
