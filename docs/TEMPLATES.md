@@ -66,8 +66,8 @@ Notes:
 can be safely removed from all templates.
 
 ## The oids file 
-The `oids` file contains the SNMP queries you want to make for this device 
-type. 
+### Description
+The `oids` file contains the SNMP OIDS to query for the test. 
 ### Format
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
