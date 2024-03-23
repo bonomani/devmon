@@ -112,16 +112,16 @@ Key points from this output include:
   key-value pairs-
 - Each line contains two pieces of information:
   - The `index` is of type numeric OID, often simply an Integer. which is of the type numeric OID, 
-    often simply an Integer. As this serves as the key, it MUST be unique.
+    often simply an Integer. As this serves as the key, it MUST stay unique.
   - The `value` which can be of various types: String, Integer, numericOID, etc.
-- For a `leaf`, there is only one result: The targetOID is a scalar (equals one value), and there is no **index**
-
+- In a `leaf`, as the targetOID is a scalar
+  - There is **no** `index`
+  - There is only **one** `value` 
 Notes: 
-- The terminology surrounding OIDs can be confusiong as as the term `OID` is used to refer to the `targetOID`,
- the `numericOID` and also the `index`.
-- If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be 
-retrieved (Due to the way SNMP works): This is very similar has using the parent OID of 
-type `branch`...
+- The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `targetOID`,
+  the `numericOID` and also the `index`.
+- If a leaf OID does not end with .0, indicating it is not a real SNMP scalar, retrieving it results 
+  in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
 ## The transforms file
 
