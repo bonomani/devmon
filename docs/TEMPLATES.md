@@ -106,7 +106,7 @@ Outputs:
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-numOID-> <- index-> = <- value ->
 ```
-Key points from this output include:
+Key points:
 - There are multiple results, one per line, with each being stored in the `targetOID` as 
   key-value pairs-
 - Each line contains two pieces of information:
@@ -119,7 +119,7 @@ Key points from this output include:
 Notes: 
 - The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `targetOID`,
   the `numericOID` and also the `index`.
-- If a leaf OID does not end with .0, indicating it is not a real SNMP scalar, retrieving it results 
+- If a `leaf OID` does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
 ## The transforms file
