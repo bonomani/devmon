@@ -88,34 +88,37 @@ Notes:
 line (targetOID: numericOID: type) MUST be duplicated in those tests to avoid inconsistent results.
 
 ### OIDs or Object Identifiers
-- In SNMP, we distinguish between `table` and `scalar` OIDs.
-- In Devmon, we classify OIDs as either `branch` or `leaf`.
+- In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
+- In Devmon, OIDs are classified as either `branch` or `leaf` OIDs.
 
-The relationship between them is:
-- A `branch` OID corresponds to an SNMP `table`
+The relationship between them is as follows:
+- A `branch` OID corresponds to an SNMP `table` OID
 - A `leaf` OID can represent either:
-  - A SNMP `scalar` OID (ending with 0)
-  - An element of a SNMP `table` OID (not ending with 0)
+  - A SNMP `scalar` OID (ending with .0)
+  - An element of a SNMP `table` OID (which does not end with .0)
 
-Let's analyse a SNMP request to a `branch` numeric OID `.1.3.4.6.9` : 
+When analyzing an SNMP request to a `branch` numeric OID, such as `.1.3.4.6.9` ,with the command: 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
+```
+The output might look like this
+```
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-numOID-> <- index-> = <- value ->
 ```
-- There are multiple result, 1 per line, all those will be stored in the `targetOID` as 
-  key-value pairs
-- Each line carries 2 information : 
-  - The `index` is of type numeric OID, often simply an Integer. As this is the `key`
-    it MUST be unique.
-  - The `value` can have various types: String, Integer, numericOID, etc.
-- For a `leaf`, there is only 1 result: The targetOID is a scalar (= 1 value) and there 
-  is **no index**
+Key points from this output include:
+- There are multiple results, one per line, with each being stored in the `targetOID` as 
+  key-value pairs-
+- Each line contains two pieces of information:
+  - The `index` is of type numeric OID, often simply an Integer. which is of the type numeric OID, 
+    often simply an Integer. As this serves as the key, it MUST be unique.
+  - The `value` which can be of various types: String, Integer, numericOID, etc.
+- For a `leaf`, there is only one result: The targetOID is a scalar (equals one value), and there is no **index**
 
 Notes: 
-- The meaning of the OID can be confusiong as everything is called `OID`: the targetOID,
- the numericOID and also the index
+- The terminology surrounding OIDs can be confusiong as as the term `OID` is used to refer to the `targetOID`,
+ the `numericOID` and also the `index`.
 - If a leaf OID is not real SNMP scalar (do not end by 0), the complete table will be 
 retrieved (Due to the way SNMP works): This is very similar has using the parent OID of 
 type `branch`...
