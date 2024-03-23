@@ -34,7 +34,7 @@ Inside the `vendor-model` folder there are subfolders for each `test`.
 The **name** of each `test` folder **matters** as they are the test names displayed on your Xymon server.
 
 ### Example
-For a `cpu` test on a `Cisco 2950` (vendor-model), these files are required:
+A `cpu` test on a `Cisco 2950` requires:
 ```
 templates/cisco-2950/specs  
 templates/cisco-2950/cpu/oids  
