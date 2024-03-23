@@ -281,10 +281,10 @@ outputValueVa       : CHAIN  : {outputVaRow} {outputValue}
 ```
 A table created as follows:
 ```
-Freq Name|Frequency (Hz)|Voltage Name|Voltage A
+Freq Name       |Frequency (Hz)   |Voltage Name   |Voltage A
 {outputNameFreq}|{outputValueFreq}|{outputNameVa }|{outputValueVa}
 ```
-Outputs: Would now contain in its first row:
+Outputs: 
 ```
 Freq Name  |Frequency (Hz)|Voltage Name|Voltage A
 I_Inc4_Freq|         50.06| I_Inc4_VaN |   232.91   
