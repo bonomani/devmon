@@ -78,10 +78,9 @@ sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 Three values per line, from left to right:
-- The **target OID** also known as the textual OID alias (case sensitive): the variable name that will contains 
-the result of the polling.
+- The **target OID** (case sensitive): also known as the textual OID alias, it contains the answer to the SNMP request. 
 representation of a OID, but do not have to. 
-- The **numeric OID**: the standard form of OID. 
+- The **numeric OID**: the OID requested
 - The **type**:
   - `branch`= a **repeater** type oid
   - `leaf`  = a **non-repeater** (a scalar) type oid.
