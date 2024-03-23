@@ -264,10 +264,10 @@ TRIDIUM-MIB::outputValue.2 = STRING: "232.91"
 To split the frequences and the voltage out as a separate repeater, use:
 ```
 outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
-outputVaRow    : MATCH  : {outputName} /.*_VaN$/
+outputVaNRow   : MATCH  : {outputName} /.*_VaN$/
 ```  
 - `outputFreqRow` will contains 1,... as `values`  
-- `outputVaRow` will contain 2,... as `values`  
+- `outputVaNRow` will contains 2,... as `values`  
 - There indexes start from 1  
 
 To construct a table, use the chain transform to create repeaters using the
@@ -275,14 +275,14 @@ matched indexes:
 ```
 outputNameFreq      : CHAIN  : {outputFreqRow} {outputName}
 outputValueFreq     : CHAIN  : {outputFreqRow} {outputValue}
-outputNameVa        : CHAIN  : {outputVaRow} {outputName}
-outputValueVa       : CHAIN  : {outputVaRow} {outputValue}
+outputNameVaN       : CHAIN  : {outputVaNRow} {outputName}
+outputValueVaN      : CHAIN  : {outputVaNRow} {outputValue}
 
 ```
 A table created as follows:
 ```
 Freq Name       |Frequency (Hz)   |Voltage Name   |Voltage A
-{outputNameFreq}|{outputValueFreq}|{outputNameVa }|{outputValueVa}
+{outputNameFreq}|{outputValueFreq}|{outputNameVaN}|{outputValueVaN}
 ```
 Outputs: 
 ```
