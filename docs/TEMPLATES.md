@@ -120,7 +120,8 @@ Key points:
   - The `value` which can be of various types: String, Integer, numericOID, etc.
 - In a `leaf`, as the targetOID is a scalar:
   - There is **no** `index`
-  - There is only **one** `value` 
+  - There is only **one** `value`
+     
 Notes: 
 - The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `targetOID`,
   the `numericOID` and also the `index`.
