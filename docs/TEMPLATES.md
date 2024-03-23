@@ -79,7 +79,7 @@ the result of the polling. The names can be similar to the **textual**
 representation of a OID, but do not have to. 
 2. The **numericOID**: the standard form of OID. The official **textual OID** 
 representation that you can find in MIBS **do not work**. 
-3. The repeater **type**: `leaf`= a scalar(non-repeater) oid, `branch`= a repeater oid
+3. The **repeater type**: `leaf`= a scalar(non-repeater) oid, `branch`= a repeater oid
 
 Notes:
 - If the **same targetOID is used in multiple tests** within a template, **the complete 
