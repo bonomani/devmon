@@ -387,11 +387,10 @@ AScalar  : MATH   : 123
 The SET transform introduces the same possibility for a repeater-type OID.
 
 ### SPEED transform
-This transform takes a single data alias as input, which it assumes to be a
-speed in bits. It then stores a value in the transformed data alias,
-corresponding to the largest whole speed measurement. So a value of 1200
-would render the string '1.2 Kbps', a value of 13000000 will return a value
-of '13 Mbps', etc.
+
+This transform converts speed values in bits to the largest whole speed measurement. 
+For example, 1200 would become '1.2 Kbps', and 13000000 would become '13 Mbps'.
+
 
 ### STATISTIC transform
 This transform takes a repeater type data alias as the input for the
