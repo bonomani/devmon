@@ -49,6 +49,7 @@ Notes:
 the `message` file.
 
 ## The specs file
+### Description
 The `specs` file holds data specific to the vendor-model. This file is used in the 
 discovery process `./devmon -readhostscfg`, where Devmon identifies the hosts
 it should handle by using the `sysdesc` variable. This (non-anchored regular 
@@ -123,18 +124,17 @@ Notes:
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
 ## The transforms file
-The transforms file in your template details the data changes Devmon makes to collected 
-SNMP data, before setting thresholds and creating the message.
+### Description
+The transforms file describes manipulations on SNMP data.
 
-The cisco 2950 cpu test uses a very simple transforms file:
-
+### Format
+```
+targetOID       : TRANSFORM     : {sourceOID1} ... {sourceOID2} ...
+```
+Example:
 ```
 sysUpTimeSecs   : MATH          : {sysUpTime} / 100
 UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
-```
-In a generic form
-```
-targetOID       : TRANSFORM     : {sourceOID1} ... {sourceOID2} ...
 ```
 Three values per line:
 1. The **targetOID** (case sensitive): unique name compared to those in the 'oids' file. For example, 
