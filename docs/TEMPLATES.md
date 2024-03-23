@@ -395,7 +395,7 @@ For example, 1200 would become '1.2 Kbps', and 13000000 would become '13 Mbps'.
 
 
 ### STATISTIC transform
-This transform computes statistics. The targetOID which is of the `non-repeater` type 
+This transformation computes statistics. The result type is a non-repeater.
 
 Example:
 The average temperature in a device with multiple temperature sensors is to be 
