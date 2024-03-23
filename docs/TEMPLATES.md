@@ -86,7 +86,7 @@ Notes:
 - If the **same targetOID is used in multiple tests** within a template, **the complete 
 line** `targetOID: numericOID: type` **MUST be duplicated** in those tests to avoid inconsistent results.
 
-### Deeper explaination on SNMP OIDs or Object Identifiers:
+### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
 - In Devmon, OIDs are classified as either `branch` or `leaf` OIDs.
 
