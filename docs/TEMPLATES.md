@@ -93,7 +93,7 @@ line** `targetOID: numericOID: type` **MUST be duplicated** in those tests to av
 The relationship between them is as follows:
 - A `branch` OID corresponds to an SNMP `table` OID
 - A `leaf` OID can represent either:
-  - A SNMP `scalar` OID (ending with .0)
+  - A SNMP `scalar` OID (does end with .0)
   - An `element` of a SNMP `table` OID (which does not end with .0)
 
 Let's execute and analyze an SNMP request to a `branch` numeric OID: 
@@ -119,7 +119,7 @@ Key points:
 Notes: 
 - The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `targetOID`,
   the `numericOID` and also the `index`.
-- If a `leaf OID` does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
+- If a `leaf` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
 ## The transforms file
