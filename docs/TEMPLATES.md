@@ -77,7 +77,7 @@ sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
 sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
-Three values per line:
+Three values per line, from left to right:
 - The **targetOID** (case sensitive): the variable name that will contains 
 the result of the polling. The names can be similar to the **textual** 
 representation of a OID, but do not have to. 
