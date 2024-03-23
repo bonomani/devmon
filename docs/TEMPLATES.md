@@ -287,9 +287,14 @@ Freq Name       |Frequency (Hz)   |Voltage Name   |Voltage A
 Outputs: 
 ```
 Freq Name  |Frequency (Hz)|Voltage Name|Voltage A
-I_Inc4_Freq|         50.06| I_Inc4_VaN |   232.91   
+I_Inc4_Freq|         50.06|  I_Inc4_VaN|   232.91   
 ```
-You can further improve it for example not repeating I_Inc4
+You can further improve it for example not repeating I_Inc4 and try to have
+```
+Name  |Frequency (Hz)|Voltage A
+I_Inc4|         50.06|   232.91   
+```
+
 
 ### MATH transform:
 The MATH transform performs a mathematical expression defined by the
