@@ -49,16 +49,18 @@ Notes:
 the `message` file.
 
 ## The specs file
-The `specs` file holds data specific to the vendor-model ans should look like
+The `specs` file holds data specific to the vendor-model. This file is used in the 
+discovery process `./devmon -readhostscfg`, where Devmon identifies the hosts
+it should handle by using the `sysdesc` variable. This match (as a non-anchored 
+regular expression pattern) the SNMP system description, ensuring flexible classification.
+### Format
 ```
 vendor   : cisco
 model    : 2950
 snmpver  : 2 (deprecated)
 sysdesc  : C2950
 ```
-- In the discovery process using `devmon -readhostscfg`, Devmon identifies the hosts
-it should handle and utilizes the `sysdesc` variable (a non-anchored regular expression
-pattern) to match the SNMP system description, ensuring flexible classification.
+Notes:
 - The `snmpver` variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
 
@@ -66,7 +68,6 @@ can be safely removed from all templates.
 The `oids` file contains the SNMP queries you want to make for this device 
 type. 
 ### Format
-
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
 sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
