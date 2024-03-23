@@ -48,12 +48,13 @@ Notes:
 - A line beginning with `#` is a comment. Comments are supported by all these files except 
 the `message` file.
 
+
 ## The specs file
-### Description
 The `specs` file holds data specific to the vendor-model. This file is used in the 
 discovery process `./devmon -readhostscfg`, where Devmon identifies the hosts
 it should handle by using the `sysdesc` variable. This (non-anchored regular 
 expression) pattern should match the SNMP system description, ensuring the classification.
+
 ### Format
 ```
 vendor   : cisco
@@ -65,9 +66,10 @@ Notes:
 - The `snmpver` variable is no longer in use and has been deprecated. It 
 can be safely removed from all templates.
 
+
 ## The oids file 
-### Description
 The `oids` file contains the SNMP OIDS to query for the test. 
+
 ### Format
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
@@ -124,7 +126,6 @@ Notes:
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
 ## The transforms file
-### Description
 The transforms file describes manipulations on SNMP data.
 
 ### Format
@@ -242,8 +243,12 @@ IF-MIB::ifName.3 = STRING: Fa0/0
 The index transform allows you to get the index value `4.3` as an OID value. You can use 
 the REGSUB transform to further extract the `3` value
 
-### MATCH or (REINDEX-INDEX-MATCH) transform
-This transform addresses the issue found in MIBs that mix different data types 
+### MATCH transform
+This transform allow the `targetOID` to have :
+1. For index: An incremental index, starting from 1   
+2. For value: The index of the matched `sourceOID` value
+
+This transform addresses an issue found in MIBs that mix different data types 
 in just two columns. It either separates these mixed tables into distinct ones 
 or rearranges them to have more columns.   
 For example, the MIB for the TRIDIUM building management system contains a table 
@@ -251,47 +256,40 @@ with two columns: outputName and outputValue.
 ```
 TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
 TRIDIUM-MIB::outputName.2  = STRING: "I_Inc4_VaN"
-TRIDIUM-MIB::outputName.3  = STRING: "I_Inc4_VbN"
-TRIDIUM-MIB::outputName.4  = STRING: "I_Inc4_VcN"
 
 TRIDIUM-MIB::outputValue.1 = STRING: "50.06"
 TRIDIUM-MIB::outputValue.2 = STRING: "232.91"
-TRIDIUM-MIB::outputValue.3 = STRING: "233.39"
-TRIDIUM-MIB::outputValue.4 = STRING: "233.98"
+
 ```
-To split the frequences out as a separate repeater, use:
+To split the frequences and the voltage out as a separate repeater, use:
 ```
 outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
 outputVaRow    : MATCH  : {outputName} /.*_VaN$/
 ```  
-- `outputFreqRow` will contain the `indexes` of outputName that matched the
-  regular expression, e.g. 1,5,9,... as `values`  
-- `outputVaRow` will contain 2,6,10... as `values`  
+- `outputFreqRow` will contains 1,... as `values`  
+- `outputVaRow` will contain 2,... as `values`  
 - There indexes start from 1  
 
 To construct a table, use the chain transform to create repeaters using the
 matched indexes:
 ```
-outputFreq     : CHAIN  : {outputFreqRow} {outputValue}
-outputVa       : CHAIN  : {outputVaRow} {outputValue}
-```
+outputNameFreq      : CHAIN  : {outputFreqRow} {outputName}
+outputValueFreq     : CHAIN  : {outputFreqRow} {outputValue}
+outputNameVa        : CHAIN  : {outputVaRow} {outputName}
+outputValueVa       : CHAIN  : {outputVaRow} {outputValue}
 
-To create the primary repeater for a table, we do the same on outputName:
-```
-IncomerRowName : CHAIN  : {outputFreqRow} {outputName}   
-```
-In this case, it is preferable to clean up the outputFreq for display:
-```
-IncomerName    : REGSUB : {IncomerRowName} /(.*)_Freq/$1/
 ```
 A table created as follows:
 ```
-Incomer|Frequency (Hz)|Voltage A|Voltage B|Voltage C
+Freq Name|Frequency (Hz)|Voltage Name|Voltage A
+{outputNameFreq}|{outputValueFreq}|{outputNameVa }|{outputValueVa}
 ```
-Would now contain in its first row:
+Outputs: Would now contain in its first row:
 ```
-I_Inc4|50.06|232.91|233.39|233.98   
+Freq Name  |Frequency (Hz)|Voltage Name|Voltage A
+I_Inc4_Freq|         50.06| I_Inc4_VaN |   232.91   
 ```
+You can further improve it for example not repeating I_Inc4
 
 ### MATH transform:
 The MATH transform performs a mathematical expression defined by the
