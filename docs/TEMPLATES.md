@@ -391,18 +391,11 @@ For example, 1200 would become '1.2 Kbps', and 13000000 would become '13 Mbps'.
 
 
 ### STATISTIC transform
-This transform takes a repeater type data alias as the input for the
-transform and computes a non-repeater type data alias. The STATISTIC
-transform can compute the minimum value, the maximum value, the average value
-and the sum of the values of the repeater type data alias. Moreover it can
-count the number of values of the repeater type data alias.
+This transform computes statistics to the targetOID which is of `non-repeater` type 
 
-If the input is a non-repeater data alias, the transform returns the value of
-the input data. However, if the number of values is to be counted the
-returned value is 1.
-
-If for example the average temperature in a device with multiple temperature
-sensors is to be monitored, the transformation could be:
+Example:
+The average temperature in a device with multiple temperature sensors is to be 
+monitored, the transformation could be:
 ```
 TempAvg : STATISTIC : {ciscoEnvMonTemperatureStatusValue} AVG
 ```
