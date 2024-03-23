@@ -384,7 +384,6 @@ There is the possibility to set a `leaf` OID to constant value
 AScalar  : MATH   : 123
 ```
 
-The SET transform introduces the same possibility for a repeater-type OID.
 
 ### SPEED transform
 
