@@ -93,7 +93,7 @@ line** `targetOID: numericOID: type` **MUST be duplicated** in those tests to av
 
 ### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
-- In Devmon, OIDs are classified as either `branch` or `leaf` OIDs.
+- In Devmon, OIDs are classified as either `branch(or repeater)` and `leaf(or non-repeater)` OIDs.
 
 The relationship between them is as follows:
 - A `branch` OID corresponds to an SNMP `table` OID
@@ -147,7 +147,7 @@ Throughout, 'alias' refers to either SNMP-collected or transformed data.
 3. The **input data**: a string with **one or more sourceOID(s)** which sould be enclosed in {}.
 
 Notes:
-- In the context of transforms, it's preferable to use the terms `repeater/non-repeter` rather than `branch/leaf` 
+- In the context of transforms, it's preferable to use the terms `repeater/non-repeater` rather than `branch/leaf` 
 - The **primaryOID**, typically **sourceOID1**, is the first `repeater` sourceOID found from left to right
 - The **targetOID** has the **same indexes** as **the primaryOID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
