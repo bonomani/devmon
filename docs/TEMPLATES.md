@@ -65,7 +65,7 @@ can be safely removed from all templates.
 ## The oids file 
 The `oids` file contains the SNMP queries you want to make for this device 
 type. 
-### File format
+### Format
 
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
@@ -73,8 +73,6 @@ sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
 sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
-
-### Description: 
 Three values per line:
 1. The **targetOID** (case sensitive): the variable name that will contains 
 the result of the polling. The names can be similar to the **textual** 
@@ -83,7 +81,7 @@ representation of a OID, but do not have to.
 representation that you can find in MIBS **do not work**. 
 3. The **repeater type**: `leaf`= a **non-repeater** (a scalar) oid, `branch`= a **repeater** oid
 
-### Notes:
+Notes:
 - If the **same targetOID is used in multiple tests** within a template, **the complete 
 line** `targetOID: numericOID: type` **MUST be duplicated** in those tests to avoid inconsistent results.
 
