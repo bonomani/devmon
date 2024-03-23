@@ -277,7 +277,6 @@ outputNameFreq      : CHAIN  : {outputFreqRow} {outputName}
 outputValueFreq     : CHAIN  : {outputFreqRow} {outputValue}
 outputNameVaN       : CHAIN  : {outputVaNRow} {outputName}
 outputValueVaN      : CHAIN  : {outputVaNRow} {outputValue}
-
 ```
 A table created as follows:
 ```
