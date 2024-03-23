@@ -251,7 +251,9 @@ This transform allow the `targetOID` to have :
 This transform addresses an issue found in MIBs that mix different data types 
 in just two columns. It either separates these mixed tables into distinct ones 
 or rearranges them to have more columns.   
-For example, the MIB for the TRIDIUM building management system contains a table 
+
+Example: 
+The MIB for the TRIDIUM building management system contains a table 
 with two columns: outputName and outputValue.
 ```
 TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
@@ -310,16 +312,15 @@ supplied data. It can use the following mathematical operators:
 ' . '         (string concatenation - note white space each side) (deprecated)
 '(' and ')'   (Expression nesting)
 ```
-This transform is not whitespace sensitive, except in the case of ' . '   
+This transform is not whitespace sensitive, except in the case of ' . ', which 
+will be deprecated soon.     
 The mathematical expressions you can perform can be quite complex, such as:
 ```
 ((({sysUpTime}/100) ^ 2 ) x 15) + 10
 ```
-Note that the syntax of the MATH transform is not stringently checked at
-the time the template is loaded, so if there are any logic errors, they
-will not be apparent until you attempt to use the template for the first
-time (any errors will be dumped to the devmon.log file on the node that
-they occurred on).
+Notes:
+The MATH transform syntax isn't rigorously checked upon template loading. Any 
+errors will only surface when you first use the template, logged in the devmon.log file
 
 Decimal precision can also be controlled via an additional variable seperated
 from the main expression via a colon:
@@ -327,10 +328,9 @@ from the main expression via a colon:
 transTime : MATH : ((({sysUpTime}/100) ^ 2 ) x 15) + 10 : 4 
 ```
 
-This would ensure that the transTime alias would have a precision value (zero
-padded, if needed) of exactly 4 characters (i.e. 300549.3420). The default
-value is 2 precision characters. To remove the decimal characters
-alltogether, specify a value of 0.
+This ensures that the transTime OID has a precision of exactly 4 characters, 
+padded with zeros if necessary (e.g., 300549.3420). By default, it has 2 precision 
+characters. To eliminate decimals entirely, specify a value of 0.
 
 ### UNPACK transform 
 The inverse of the 'PACK' transform.
@@ -343,11 +343,10 @@ for the expression should be left off). For example:
 ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
 ```
 If `ifAlias` contain at least one non-whitespace character, square brackets are 
-added around the value with a space in front. This example is used in all Cisco 
+added around its value with a space in front. This example is used in all Cisco 
 interface templates in Devmon to include `ifAlias` information for an interface, 
-but only if it's defined. It's a powerful transform, but can be misused. If you're 
-interested but unfamiliar with substitution, consider looking up `regular
-expression substitution` for more information.
+but only if it's defined. If you're unfamiliar with substitution, consider looking 
+up `regular expression substitution` for more information.
 
 ### SET transform
 
