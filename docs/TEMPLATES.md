@@ -408,9 +408,11 @@ possible keywords are:
 - `SUM` : Sum of the values
 
 ### SUBSTR transform
-The substr transform extracts a portion of text, It requires specifying an `OID`, 
-`a starting position` (zero-based), and optionally, `a length` value. If no `length` 
-is provided, substr copies until the end of the string.
+The substr transform extracts a portion of text
+This transform requires:
+- an `OID`, 
+- `a starting position` (zero-based)
+- `a length` value (optional). If no `length` is provided, substr copies until the end of the string.
 
 Example:  
 **systemName** contains `Cisco master switch`
