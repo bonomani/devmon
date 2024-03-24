@@ -517,15 +517,13 @@ The unpack types are as follows:
 ```       
 
 ### WORST transform
-This transform takes two data aliases as input, and stores the values for the
-one with the 'worst' alarm color (red being the 'worst' and green being the
-'best') in the transformed data alias. The oids can either be comma or space
-delimited.
+The transform takes two 'source OIDs' and stores the value associated with the worst alarm color 
+(red as the worst, green as the best) in the `target oid`.
 
-## The 'thresholds' file
-The thresholds file defines the limits against which the various data aliases
-that you have created in your 'oids' and 'transforms' files are measured
-against. An example thresholds file is as follows:
+## The thresholds file
+Specify threshold limits for the OIDs, including their corresponding alarm color levels and messages
+
+### Format
 ```
 upsLoadOut  : red     : 90          : UPS load is very high
 upsLoadOut  : yellow  : 70          : UPS load is high
@@ -539,20 +537,14 @@ upsOutStat  : yellow  : Unknown|voltage|Sleeping|Rebooting : {upsOutStat}
 upsBattRep  : red     : replacing : {upsBattRep}
 ```
 
-As you can see, the thresholds file consists of one entry per line, with each
-entry consisting of three to four fields separated by colons. The first field
-in an entry is the data alias that the threshold is to be applied against.
-The second field is the color that will be assigned to the data alias should
-it match this threshold. The third field has the threshold values, which are
-the values that the data alias in the first field will be compared against.
-You can have multiple values, delimited by vertical bars, in the third field.
-The fourth field is the threshold message, which will be assigned to the data
-alias in the first field if it matches this threshold.
-
-The threshold message can contain other data alias(es) (oids): if they are of a 
-branch type they have to share indexes with the first field. If they are leafs
-they do not need as there is only one value. The threshold field cannot use
-data aliases (oids) value (this is feature request). 
+The thresholds file comprises one entry per line, each containing three to four fields separated by colons:
+- The first field: The OID for which the threshold is applied
+- The second field: The color assigned if the threshold is met
+- The third field: contains threshold values
+  - Cannot use OIDs (this is feature request, vote for it!)
+- The fourth field: is the threshold message, that is a string that can contains OIDs, enclosed in {}
+  - If the message contains an OID of type 'branch': They have to share indexes with the first field
+  - And the message can also contain an OID of type 'leaf'
 
 ### The evaluation order
 2 levels: the precision level is evaluated first  
