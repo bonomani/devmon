@@ -453,8 +453,7 @@ alphanumeric string):
               values or any unmatch statement (specially usefull for incomplet
               oids, prefer ".*" if there is no reason to use it!
 ```
-The switch statement can assign values from another OID to the target
-OID alias, depending on the value of the source OID alias, like this:
+The switch statement can use values from other OIDs, like this:
 ```
 dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
 ```
@@ -526,7 +525,7 @@ The thresholds file comprises one entry per line, each containing three to four 
 - The first field: The OID for which the threshold is applied
 - The second field: The color assigned if the threshold is met
 - The third field: contains threshold values
-  - Cannot use OIDs (this is feature request, vote for it!)
+  - Cannot currently use OIDs (this is a feature request, please vote for it!)"
 - The fourth field: is the threshold message, that is a string that can contains OIDs, enclosed in {}
   - If the message contains an OID of type 'repeater': They have to share indexes with the first field
   - And the message can also contain an OID of type 'non-repeater'
