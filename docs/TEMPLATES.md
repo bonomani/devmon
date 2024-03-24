@@ -543,32 +543,20 @@ The evaluation order consists of two main levels: By order of priority:
  
 #### A 'highest severity' has a higher priority 
 Priority from higher to lower
-- red -> yellow -> clear -> green 
+- `red` -> `yellow` -> `clear` -> `green` 
 
-One thing to note about thresholds is that they are lumped into one of two
-categories: numeric and non-numeric
-- Some operateur like Smart match only appy to non-numeric. 
-- Numeric operator are evaluated first
-
-If no math operator is defined in the threshold, Devmon assumes that it is a
-'greater than' type threshold. That is, if the value obtained via SNMP is
-greater than this threshold value, the threshold is considered to be met
-and Devmon will deal with it accordingly. This is ambiguous with '='. This 
-should be avoid and replace with the '>' operator. (Should raised a warning 
-TODO: make a deprecation notice)
-
-If a threshold value contains even one non-numeric character (other than the
-math operators illustrated above), it is considered a non-numeric threshold.
-
-Regular expressions in threshold matches are non-anchored, which means they
-can match any substring of the compared data. So be careful how you define
-your thresholds, as you could match more than you intend to! If you want to
-make sure your pattern matches explicitly, precede it with a '^' and
-terminate it with a '$'.
+Notes:
+- Numeric operators are evaluated first.
+- Some operators, like Smart match, only apply to non-numeric values. 
+- If no operator is specified in the threshold, Devmon assumes it's a `greater than`
+  threshold. If the SNMP value exceeds this threshold, Devmon treats it as met. 
+  This behavior is deprecated: Use the `>` operator for clarity and self-documentation.
+  (TODO: Add a deprecation notice)
+- Regular expressions in threshold matches are non-anchored. If you want to ensure
+  your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
 
 
-## The 'exceptions' file
-
+## The exceptions file
 The exceptions file is contains rules which are only applied against repeater
 type data aliases.
 
