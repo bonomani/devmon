@@ -562,7 +562,7 @@ as a templating engine containing special keywords for specific functionalities
 and allows the use of HTML. This enables the rendering of a message that can 
 be understood by Xymon.
 
-An example with non-repeater OIDs:
+### Non-repeater OIDs example:
 ```
 {upsStatus.errors}
 {upsBattStat.errors}
@@ -608,39 +608,34 @@ special flag attached, indicating to Devmon that you want more than just their v
   - The syntax for the thresh flag is {oid.thresh:<color>}
   - Print the theshold value that corresponds with the supplied color. 
 
-An example with `repeater` OIDs:
+### Repeater OID - Table example
 if_stat test:
 ```
 TABLE:
 Ifc name|Ifc speed|Ifc status
 {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
 ```
+- The first line: The special keyword `TABLE:`(case sensitive, no leading whitespace allowed) alerts Devmon that 
+the we are in a table definition. Devmon will constructs an HTML table. Table options can be set immediately 
+after the 'TABLE:' tag on the same line.  
 
-In this message file, we are using the special keyword `TABLE:`(case 
-sensitive, no leading whitespace allowed). This keyword alerts Devmon that 
-the next one to two lines are a repeater table definition.
-
-Devmon constructs an HTML table from repeater data. You can specify an optional attribute to the table 
-immediately after the 'TABLE:' tag on the same line.  
-
-The next line is table header line. The column separator is '|'.  By default, column content is 
+- The next line is `table header line`: The column separator is '|'.  By default, column content is 
 left-aligned. To align content on the right side, use '|>' instead of '|'. Note that the leftmost 
 column cannot be right-aligned in this way.
   
-The next line is the table content. The row contains one or more OIDs. The first is the `primary` OID. 
+- The next line is the `table content`. The row contains one or more OIDs. The first is the `primary` OID. 
 Other OIDs in the row are linked to the primary OID, by their indexes (key). For example, if the primary 
 OID has leaves indexed as '100,101,102,103,104', the table will have five rows and only theses indexes 
 will be display for any OIDs. Non-repeater aliases in the table will be a constant. 
 
-The `TABLE:` keyword can have one or more, comma-delimited options following it
-that allow you to modify the way in which Devmon will display the data. These
+### The TABLE options
+The `TABLE:` keyword can have one or more, comma-delimited options following it. These
 options can have values assigned to them if they are not boolean ('nonhtml',
 for example, is boolean, while 'border' is not boolean).
 
-### The TABLE options
 Example:
 ```
-TABLE: alarmsonbottom,border=0,pad=10
+TABLE:alarmsonbottom,border=0,pad=10
 ```
 - nonhtml: Don't use HTML tags when displaying the table. Instead all columns will
   be separated by a colon (:). This is useful for doing NCV rrd graphing in Xymon.
