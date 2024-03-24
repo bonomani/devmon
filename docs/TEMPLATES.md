@@ -417,11 +417,11 @@ Example: For a 'systemName' OID that contained the value 'Cisco master switch'
 ```
 switchName : SUBSTR : {systemName} 0 12
 ```
-stores 'Cisco master' in the 'switchName' OID
+`switchName` stores `Cisco master` 
 ```
 switchName : SUBSTR : {systemName} 6
 ```
-stores 'master switch' in the 'switchName' OID
+`switchName` stores `master switch`
 
 ### SWITCH transform
 The switch transform transposes one data value for another. This is most
