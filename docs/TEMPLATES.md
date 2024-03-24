@@ -409,22 +409,19 @@ possible keywords are:
 - `SUM` : Sum of the values
 
 ### SUBSTR transform
-The substr transform is used to extract a portion of the text (aka a
-'substring') stored in the target OID alias. This transform takes as
-arguments: a target alias, a starting position (zero based, i.e. the first
-position is 0, not 1), and an optional length value. If a length value is
-not specified, substr will copy up to the end of the target string.
+The substr transform extracts a portion of text, It requires specifying an OID, 
+a starting position (zero-based), and optionally, a length value. If no length 
+is provided, substr copies until the end of the string."
 
-So, if you had an OID alias 'systemName' that contained the value 'Cisco
-master switch', you could do the following:
+Example: For a 'systemName' OID that contained the value 'Cisco master switch'
 ```
 switchName : SUBSTR : {systemName} 0 12
 ```
-stores 'Cisco master' in the 'switchName' alias, or
+stores 'Cisco master' in the 'switchName' OID
 ```
 switchName : SUBSTR : {systemName} 6
 ```
-stores 'master switch' in the 'switchName' alias
+stores 'master switch' in the 'switchName' OID
 
 ### SWITCH transform
 The switch transform transposes one data value for another. This is most
