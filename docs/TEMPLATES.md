@@ -427,11 +427,10 @@ The transformed value `master switch`
 The switch transform substitutes one data value with another. It's often used to convert a numeric 
 value from an SNMP query to its corresponding text. The statements are applied in a left to right order.
 
-Example1: 
+Examples: 
 ```
 upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
 ```
-Example2: 
 ```
 dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
 ```
