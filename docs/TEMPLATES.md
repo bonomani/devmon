@@ -559,59 +559,30 @@ Notes:
 
 
 ## The exceptions file
-The exceptions file is contains rules which are only applied against repeater
-type data aliases.
+The exceptions file contains rules that are only applied to repeater OIDs
 
-An example of a exceptions file is as follows:
-
+Example
 ```
 ifName : alarm  : Gi.+
 ifName : ignore : Nu.+|Vl.+
 ```
+Three fields:
+- The first field: The primary OID against which the exception is applied. 
+- The second field: The exception type
+- The third field: The regular expression used to match the primary OID. Unlike
+  non-numeric thresholds, exception regular expressions are anchored and must match exactly.
 
-You can see that each entry is on its on line, with three fields separated by
-colons. The first field is the primary data alias that the exception should
-be applied against. The second field is the exception type, and the third
-field is the regular expression that the primary alias is matched against.
-Exception regular expressions (unlike non-numeric thresholds) ARE anchored,
-and thus need to match the primary oid EXACTLY.
-
-Exceptions are only applied against the first (primary) alias in a repeater
-table (which is described below). There are four types of exceptions types
-that you can use, they are:
-
-- ignore
-
-The 'ignore' exception type causes Devmon to not display rows in a repeater
-table which have a primary oid that matches the exception regexp.
-
-- only
-
-The 'only' exception type causes Devmon to only display rows in a repeater
-table which have a primary oid that matches the exception regexp.
-
-- alarm
-
-The 'alarm' exception causes Devmon to only generate alarms for rows in a
-repeater table that have a primary oid that matches the exception regexp.
-
-- noalarm
-
-The 'noalarm' exception causes Devmon to not generate alarms for rows in a
-repeater table that have a primary oid that matches the exception regexp.
-
-The exceptions are applied in the order above, and one primary alias can
-match multiple exceptions. So if you have a primary alias that matches both
-an 'ignore' and an 'alarm' exception, no alarm will be generated (in fact,
-the row won't even be displayed in the repeater table).
+Exceptions are only applied against the primary OID of tables that are the msg file  
+There are four types of exceptions types, applied in the following order
+- `ignore`: Do not display rows that match the regexp  
+- `only`: Only display rows that match the regexp
+- `alarm`: Only generate alarms for rows that match the regexp
+- `noalarm`: Do not generate alarms for rows that match the regexp
 
 The example file listed above, from a cisco 2950 if_stat test, tells Devmon
-to only alarm on repeater table rows which have a primary oid (in this case,
-ifName) that starts with 'Gi' and has any number of characters after that
-(which will match any Gigabit interfaces on the switch). Also, it tells
-Devmon not to display any rows with a primary alias that has a value that
-behind with Nu (a Null interface) or Vl (A VLAN interface).
-
+to:
+- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
+- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
 
 ## The messages file
 
