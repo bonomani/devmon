@@ -124,6 +124,7 @@ Notes:
   the `numeric OID` and also the `index`.
 - If a `leaf` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
+- Prefer using the terms 'repeater' and 'non-repeater' over 'branch' and 'leaf' as they are self-explanatory.
 
 ## The transforms file
 The transforms file describes manipulations on SNMP data.
