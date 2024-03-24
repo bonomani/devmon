@@ -160,12 +160,13 @@ Alarm and error are propagated from source oids to targets oids. If the error fl
 The first error that can occur is an SNMP error involving `getting no response from the device`
 - If the OID is not defined in the device, it results in a global value of the OID being set to `NoOID`.
 - In the event of partial SNMP polling failure, this leads to some (if not all) values of the OIDs being set to `NoOID`, there indexes are based on the previous successful polling.
-- This typically trigger a "clear" status color, defined as "no report" in Xymon.
+n.
 
 #### Computational error: 
-Occurs when the result is impossible, for example for a numerical result the value is set to `NaN`
+Occurs when the result is impossible. For example for a numerical result the value is set to `NaN`
 
 #### Handling error as alarm
+Errors trigger a "clear" alarm status color, defined as "no report" in Xymon
 During threshold processing, the color (severity) and the error are set as follows:
 - If yellow, red, or clear: the error is set to true, and generally, a message is associated (and will be raised).
 - If green or blue: no error is raised.
