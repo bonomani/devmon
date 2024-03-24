@@ -462,11 +462,12 @@ value of the 'dhcpAvail' alias would be assigned to dhcpStatus.
 
 ### UNPACK transform
 The unpack transform is used to unpack binary data into any one of a number
-of different data types (all of which are eventually stored as a string by
-Devmon). This transform requires a target OID alias and an unpack type (case
-sensitive), separated by a space.
+of different data types.  
+This transform requires
+- an OID 
+- unpack type (case sensitive), separated by a space.
 
-As an example, to unpack a hex string (high nybble first), try this:
+As an example, to unpack a hex string (high nybble first):
 ```
 hexString : UNPACK : {binaryHex} H
 ```
