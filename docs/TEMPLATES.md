@@ -91,11 +91,11 @@ be duplicated** in those tests to avoid inconsistent results.
 
 ### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
-- In Devmon, OIDs are classified as either `branch(or repeater)` and `leaf(or non-repeater)` OIDs.
+- In Devmon, OIDs are classified as either `branch` and `leaf` OIDs.
 
 The relationship between them is as follows:
-- A `branch(or repeater)` OID corresponds to an SNMP `table` OID
-- A `leaf(or non-repeater)` OID can represent either:
+- A `branch` OID corresponds to an SNMP `table` OID
+- A `leaf` OID can represent either:
   - A SNMP `scalar` OID (does end with .0)
   - An `element` of a SNMP `table` OID (which does not end with .0)
 
@@ -110,11 +110,10 @@ Outputs:
 <-numOID-> <- index-> = <- value ->
 ```
 Key points:
-- There are multiple results, one per line, with each being stored in the `targetOID` as 
+- There are multiple results, one per line, with each being stored in the `target OID` as 
   key-value pairs.
 - Each line contains two pieces of information:
-  - The `index` is of type numeric OID, often simply an Integer. which is of the type numeric OID, 
-    often simply an Integer. As this serves as the key, it MUST stay unique.
+  - The `index` acts as the key and must remain unique. It's a sequence of integers, like a numeric OID, often simply represented by a single integer.
   - The `value` which can be of various types: String, Integer, numericOID, etc.
 - In a `leaf`, as the targetOID is a scalar:
   - There is **no** `index`
