@@ -557,33 +557,6 @@ Notes:
 - Regular expressions in threshold matches are non-anchored. If you want to ensure
   your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
 
-
-## The exceptions file
-The exceptions file contains rules that are only applied to repeater OIDs
-
-Example
-```
-ifName : alarm  : Gi.+
-ifName : ignore : Nu.+|Vl.+
-```
-Three fields:
-- The first field: The primary OID against which the exception is applied. 
-- The second field: The exception type
-- The third field: The regular expression used to match the primary OID. Unlike
-  non-numeric thresholds, exception regular expressions are anchored and must match exactly.
-
-Exceptions are only applied against the primary OID of tables that are the msg file  
-There are four types of exceptions types, applied in the following order
-- `ignore`: Do not display rows that match the regexp  
-- `only`: Only display rows that match the regexp
-- `alarm`: Only generate alarms for rows that match the regexp
-- `noalarm`: Do not generate alarms for rows that match the regexp
-
-The example file listed above, from a cisco 2950 if_stat test, tells Devmon
-to:
-- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
-- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
-
 ## The messages file
 
 The messages file is what brings all the data collected from the other files
@@ -623,6 +596,28 @@ corresponding values. You can see at the top of the file, however, that there
 are a few weird looking data aliases (the ones that end in .errors). These
 are just normal data aliases with a special flag appended to them, that lets
 Devmon know that you want something from them than just their data value.
+
+## The exceptions file
+The exceptions file contains rules that are only applied to the primary OID of tables in the `messages` file
+
+Example
+```
+ifName : alarm  : Gi.+
+ifName : ignore : Nu.+|Vl.+
+```
+Three fields:
+- Field #1: The `primary OID` against which the exception is applied. 
+- Field #2: The exception type. Applied in the following order:
+  - `ignore`: Do not display rows that match the regexp  
+  - `only`: Only display rows that match the regexp
+  - `alarm`: Only generate alarms for rows that match the regexp
+  - `noalarm`: Do not generate alarms for rows that match the regexp
+- Field #3: The regular expression used to match the primary OID. Regexp is 
+  anchored and must match exactly.
+
+In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
+- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
+- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
 
 ### The OIDs flags
 
