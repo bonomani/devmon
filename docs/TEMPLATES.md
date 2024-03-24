@@ -414,15 +414,15 @@ The substr transform extracts a portion of text, It requires specifying an `OID`
 is provided, substr copies until the end of the string.
 
 Example: 
-For a systemName OID that contained the value `Cisco master switch`
+For a **systemName** OID that contained the value `Cisco master switch`
 ```
 switchName : SUBSTR : {systemName} 0 12
 ```
-switchName stores `Cisco master` 
+**switchName** stores `Cisco master` 
 ```
 switchName : SUBSTR : {systemName} 6
 ```
-switchName stores `master switch`
+**switchName** stores `master switch`
 
 ### SWITCH transform
 The switch transform transposes one data value for another. This is most
