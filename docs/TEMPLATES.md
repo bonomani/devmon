@@ -615,15 +615,14 @@ special flag attached, indicating to Devmon that you want more than just their v
 
 ### The OIDs flags
 - `color` 
-  - Prints the alarm color of the OID.
+  - Prints the alarm color of the OID in a format recognized by Xymon.
   - Modifies the global color of the page, if not used in a 'best' transform.
-- `errors` 
-  - List any errors of the OID (non-green color) and print them at the top of the message 
-  file, regardless of their location within it. 
+- `errors` (deprecated)
+  - Prints the alarm message of the OID and at the top/bottom of the message 
   - Modifies the global color of the page, if not used in a 'best' transform.
 - `msg`
-  - Prints the msg of the OID regardless alarm color.
-  - Do not modify the global color of the page.
+  - Prints the alarm message of the OID and at the top/bottom of the message 
+  - Modifies the global color of the page, if not used in a 'best' transform.
 - `thresh` 
   - The syntax for the thresh flag is {oid.thresh:<color>}
   - Print the theshold value that corresponds with the supplied color. 
