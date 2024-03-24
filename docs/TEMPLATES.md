@@ -93,7 +93,7 @@ be duplicated** in those tests to avoid inconsistent results.
 
 ### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
-- In Devmon, OIDs are classified as either `branch` and `leaf` OIDs.
+- In Devmon, OIDs are classified as either `repeater` and `non-repeater` OIDs.
 
 The relationship between them is as follows:
 - A `repeater` OID corresponds to an SNMP `table` OID
