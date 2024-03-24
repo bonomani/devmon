@@ -531,8 +531,8 @@ The thresholds file comprises one entry per line, each containing three to four 
   - And the message can also contain an OID of type 'non-repeater'
 
 ### The evaluation order
-2 levels: the precision level is evaluated first  
-#### A 'precise' threshold has a higher priority
+The evaluation order consists of two main levels: By order of priority: 
+#### A 'precise' threshold operator holds higher priority as follows:
 - Priority 7: =, eq
 - Priority 6: > >= < >=
 - Priority 5: ~= (smart match)
@@ -542,7 +542,8 @@ The thresholds file comprises one entry per line, each containing three to four 
 - Priority 1: (empty)
  
 #### A 'highest severity' has a higher priority 
-- Priority from higher to lower:  red->yellow->clear->green 
+Priority from higher to lower
+- red -> yellow -> clear -> green 
 
 One thing to note about thresholds is that they are lumped into one of two
 categories: numeric and non-numeric
