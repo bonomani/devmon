@@ -97,9 +97,9 @@ be duplicated** in those tests to avoid inconsistent results.
 
 The relationship between them is as follows:
 - A `repeater` OID corresponds to an SNMP `table` OID
-- A `non-repeater` OID can represent either:
-  - A SNMP `scalar` (The numeric OID does end with .0)
-  - An `instance` (an element) of a SNMP `table` (The numeric OID which does not end with .0)
+- A `non-repeater` OID can is either:
+  - A SNMP `scalar` (Its numeric OID does end with .0)
+  - An `instance` (an element) of a SNMP `table` (Its numeric OID does not end with .0)
 
 Let's execute and analyze an SNMP request to numeric OID of type `repeater`: 
 ```
