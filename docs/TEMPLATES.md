@@ -146,13 +146,13 @@ Three values per line:
 Notes:
 - In the context of transforms, it's preferable to use the terms `repeater/non-repeater` rather than `branch/leaf` 
 - The **primary OID**, typically **source OID1**, is the first `repeater` source OID found from left to right
-- The **targetOID** has the **same indexes** as **the primaryOID**
+- The **target OID** has the **same indexes** as the **primary OID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
-- Like for the `oid` file, the same consideration for targetOID across multiple tests should be taken (duplicate the line!)
+- Like for the `oid` file, the same consideration for `target OID` across multiple tests should be taken (duplicate the line!)
 
 ### BEST transform
 The BEST transform selects the OID that has the **best alarm color** (green as 'best', red as 'worst')  
-Mainly use in the `msg` file with its color and error parts only : {targetOID.color} {targetOID.error}  
+Mainly use in the `msg` file with its color and error parts only : {target_OID.color} {target_OID.error}  
 ```
 target_OID  : BEST    : {source_OID1} {source_OID2}
 ```
@@ -208,7 +208,7 @@ one** changes **over the time** and shows the change in **unit per second** rate
   the system will automatically choose a suitable maximum based on whether it's 
   handling 32-bit or 64-bit data.
 - This transform takes at least `two poll cycles` to return meaningful data.
-  In the mean time you will get a `wait` result stored in the targetOID alias.
+  In the mean time you will get a `wait` result stored in the `target OID`.
 
 Examples:
 ```
@@ -244,7 +244,7 @@ The index transform allows you to get the index value `4.3` as an OID value. You
 the REGSUB transform to further extract the `3` value
 
 ### MATCH transform
-This transform allow the `targetOID` to have :
+This transform allow the `target OID` to have :
 1. For index: An incremental index, starting from 1   
 2. For value: The index of the matched `source OID` value
 
