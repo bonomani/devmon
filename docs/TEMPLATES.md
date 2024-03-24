@@ -563,7 +563,7 @@ as a templating engine containing special keywords for specific functionalities
 and allows the use of HTML. This enables the rendering of a message that can 
 be understood by Xymon.
 
-An example of a simple messages file is as follows:
+An example with non-repeater OIDs:
 ```
 {upsStatus.errors}
 {upsBattStat.errors}
@@ -595,17 +595,21 @@ you'll see some OIDs that end in ".errors". These are regular data aliases with 
 special flag attached, indicating to Devmon that you want more than just their value.
 
 ### The OIDs flags
-- `color`: This flag prints the alarm color of the OID, interpreted by Xymon as a colored 
-  icon ('&red' or '&green'). It modifies the global color if not used in a 'best' transform.
-- `errors`: List any errors of the OID (non-green color), printed at the top of the message 
-  file, regardless of their location within it. It modifies the global color if not used 
-  in a 'best' transform.
-- `msg`: This flag prints the msg of the OID regardless alarm color and do not modify the 
-   global color of the page.
-- thresh: The syntax for the thresh flag is {oid.thresh:<color>}. It displays the theshold value
- that corresponds with the supplied color. 
+- `color` 
+  - Prints the alarm color of the OID.
+  - Modifies the global color of the page, if not used in a 'best' transform.
+- `errors` 
+  - List any errors of the OID (non-green color) abd print thgen at the top of the message 
+  file, regardless of their location within it. 
+  - Modifies the global color of the page, if not used in a 'best' transform.
+- `msg`
+  - Prints the msg of the OID regardless alarm color.
+  - Do not modify the global color of the page.
+- `thresh` 
+  - The syntax for the thresh flag is {oid.thresh:<color>}
+  - Print the theshold value that corresponds with the supplied color. 
 
-A more complicated message file is this one, taken from a Cisco 2950 switch
+An example with repeater OIDs:
 if_stat test:
 ```
 TABLE:
@@ -613,31 +617,24 @@ Ifc name|Ifc speed|Ifc status
 {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
 ```
 
-In this message file, we are using a repeater table. Repeater tables are used
-to display repeater-type data aliases (which ultimately stem from 'branch'
-type snmp oids). The 'TABLE:' keyword (case sensitive, no leading whitespace
-allowed) is what alerts Devmon that the next one to two lines are a repeater
-table definition.
+In this message file, we are using the special keyword `TABLE:`(case 
+sensitive, no leading whitespace allowed). This keyword alerts Devmon that 
+the next one to two lines are a repeater table definition.
 
-Devmon basically just builds an HTML table out of the repeater data. It can
-have an optional header, which should be specified on the line immediately
-after the 'TABLE:' tag. If no table header is desired, the line after the
-table tag should be the row data identifier. The column separator in the
-header line is a '|'. By default the content of a column will be left
-aligned. If the content should be aligned on the right side, use '|>' rather
-than '|' as the separator. Note that the leftmost column cannot be right
-aligned in this way.
+Devmon constructs an HTML table from repeater data. You can specify an optional 
+header immediately after the 'TABLE:' tag. If no header is desired, the line after 
+the table tag should be the row data identifier. The column separator in the header 
+line is '|'. By default, column content is left-aligned. To align content on the 
+right side, use '|>' instead of '|'. Note that the leftmost column cannot be 
+right-aligned in this way.
 
-The row data identifier is the one that contains one or more data aliases.
-The first of these aliases is referred to as the 'primary' alias, and must be
-a repeater-type alias. Any other repeater type aliases in the row will be
-keyed off the primary alias; that is, if the primary aliases has leaves
-numbered '100,101,102,103,104', the table will have five rows, with the first
-row having all repeater aliases using leaf 100, the second row having all
-repeaters using leaf 101, etc. Any non-repeaters defined in the table will
-have a constant value throughout all of the rows.
+The row data identifier contains one or more OIDs. The first alias is the 'primary' OID. 
+It must be a repeater type OID. Other OIDs in the row linked to the primary OID, by 
+their indexes (key). For example, if the primary alias has leaves indexed as '100,101,102,103,104',
+the table will have five rows and only theses indexes will be display for any OIDs. 
+Non-repeater aliases in the table will be a constant 
 
-The TABLE: key can have one or more, comma-delimited options following it
+The `TABLE:` keyword can have one or more, comma-delimited options following it
 that allow you to modify the way in which Devmon will display the data. These
 options can have values assigned to them if they are not boolean ('nonhtml',
 for example, is boolean, while 'border' is not boolean).
