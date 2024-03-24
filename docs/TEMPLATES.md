@@ -78,8 +78,7 @@ sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 Three values per line, from left to right:
-- The **target OID** (case sensitive): also known as the textual OID alias, it contains the answer to the SNMP query. 
-representation of a OID, but do not have to. 
+- The **target OID** (case sensitive): also known as the OID alias, contains the response to the SNMP query. Its name often uses the **textual OID alias from MIBs**, but it's not required. 
 - The **numeric OID**: the OID requested in the SNMP query
 - The **type**:
   - `branch`= a **repeater** type oid
@@ -88,7 +87,7 @@ representation of a OID, but do not have to.
 Notes:
 - If the **same target OID is used in multiple tests** within a template, **the line with the target OID MUST 
 be duplicated** in those tests to avoid inconsistent results.
-- The **numeric OID** cannot be replace with **textual OID** alias, as Devmon do load mibs. 
+- The **numeric OID** cannot be replaced with its equivalent **textual OID alias**, as defined in MIBs, because Devmon does not load MIBs. 
 
 ### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
