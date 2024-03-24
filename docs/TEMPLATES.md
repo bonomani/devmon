@@ -378,7 +378,7 @@ fsbISize  : CHAIN  : {fsiISize} {fsInfo}
 fsbIFree  : CHAIN  : {fsiIFree} {fsInfo}
 ```
 
-There is the possibility to set a `leaf` OID to constant value
+There is the possibility to set a `non-repeater` OID to constant value
 ```
 AScalar  : MATH   : 123
 ```
