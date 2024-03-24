@@ -120,12 +120,13 @@ Key points:
 - In a `non-repeater`, as it is a scalar:
   - There is **no** `index`
   - There is only **one** `value`
-     
+   
 Notes: 
 - In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`,... can be referred to simply as an `OID` for simplicity.
 - If a `non-repeater` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results
   in getting the `parent OID` that is of type `repeater`. This behavior is part of SNMP's design...
 
+  - In case of a partial SNMP polling failure, this leads to have the a somes value of the OIDs set to `NoOID`, index are based on the previous sucessful polling  
 
 ## The transforms file
 The transforms file describes manipulations on SNMP data.
@@ -149,6 +150,12 @@ Notes:
 - The **target OID** have the **same indexes** as the **primary OID**
 - Mixing `repeater` and `non-repeater` type result in a `repeater` type.
 - Like for the `oid` file, the same consideration for `target OID` across multiple tests should be taken (duplicate the line!)
+
+Errors: 
+SNMP errors involve "getting no response from the device for an OID, some OIDs, or all OIDs," which typically trigger a "clear" status color, defined as "no report".
+- If the OID is not defined in the device, it results in a global value of the OID being set to `NoOID`.
+- In the event of partial SNMP polling failure, this leads to some (if not all) values of the OIDs being set to `NoOID`, there indexes are based on the previous successful polling.
+Those errore are propagate through the transforms and will be display on the message 
 
 ### BEST transform
 The BEST transform selects the OID that has the **best alarm color** (green as `best`, red as `worst`)  
