@@ -151,7 +151,7 @@ Notes:
 - Mixing `repeater` and `non-repeater` type result in a `repeater` type.
 - Like for the `oid` file, the same consideration for `target OID` across multiple tests should be taken (duplicate the line!)
 
-### Error 
+### Error
 The first error that can occurs is an SNMP error that involves "getting no response from the device for an OID, some OIDs, or all OIDs,". This typically trigger a "clear" status color, defined as "no report".
 - If the OID is not defined in the device, it results in a global value of the OID being set to `NoOID`.
 - In the event of partial SNMP polling failure, this leads to some (if not all) values of the OIDs being set to `NoOID`, there indexes are based on the previous successful polling.
