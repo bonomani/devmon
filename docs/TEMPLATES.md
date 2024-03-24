@@ -349,10 +349,11 @@ but only if it's defined. If you're unfamiliar with substitution, consider looki
 up `regular expression substitution` for more information.
 
 ### SET transform
-The SET transform generates a `repeater` OID with preset values. Each value's 
-index starts from 1 and is defined in the third field, separated by commas optionally 
-surrounded by spaces. At least one constant must be provided, which can be either 
-a number or a character string excluding `,{}`. Leading and trailing spaces are ignored.
+The SET transform generates a `repeater` OID with preset values. 
+- Each value's index starts from 1.
+- Each value's MUST be separated by commas optionally surrounded by spaces.
+- At least one constant MUST be provided, which can be either a number or a character 
+  string excluding `,{}`. Leading and trailing spaces are ignored.
 
 For example, in the McAfee MEB 4500 MIB, there's a section detailing file systems. 
 Each file system includes space utilization, size, free space, i-node utilization, 
