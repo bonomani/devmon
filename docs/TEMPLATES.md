@@ -165,26 +165,26 @@ Sometimes, a device saves a numeric SNMP identifier as a string under
 a different OID, resulting has **having 2 OIDs** to poll to reach the values. 
 The CHAIN transform combines these 2 OIDs:
 ```
-chainedOid   : CHAIN    : {OID1} {OID2}
+target_OID   : CHAIN    : {source_OID1} {source_OID2}
 ```
 
 Example: In your oids file, you have defined:
 ```
-OID1  : .1.1.2     : branch
-OID2  : .1.1.3     : branch
+source_OID1  : .1.1.2     : branch
+source_OID2  : .1.1.3     : branch
 ```
 
 Walking the OID1 and OID2 return the values and results when combining to:
 ```
-OID1:
+source_OID1:
 .1.1.2.1 = .1.1.3.1194
 .1.1.2.2 = .1.1.3.2342
  
-OID2:
+source_OID2:
             .1.1.3.1194 = CPU is above nominal temperature
             .1.1.3.2342 = System fans are non-operational
 
-chainedOid:
+target_OID:
 .1.1.2.1                = CPU is above nominal temperature
 .1.1.2.2                = System fans are non-operational
 ```
