@@ -126,8 +126,6 @@ Notes:
 - If a `non-repeater OID` does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results
   in getting the `parent OID` that is of type `repeater`. This behavior is part of SNMP's design...
 
-  - In case of a partial SNMP polling failure, this leads to have the a somes value of the OIDs set to `NoOID`, index are based on the previous sucessful polling  
-
 ## The transforms file
 The transforms file describes manipulations on SNMP data.
 
