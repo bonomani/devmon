@@ -122,8 +122,8 @@ Key points:
   - There is only **one** `value`
    
 Notes: 
-- In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`,... can be referred to simply as an `OID` for simplicity.
-- If a `non-repeater` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results
+- In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`, repeater OID,... all can be simply designated by the name `OID`.
+- If a `non-repeater OID` does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results
   in getting the `parent OID` that is of type `repeater`. This behavior is part of SNMP's design...
 
   - In case of a partial SNMP polling failure, this leads to have the a somes value of the OIDs set to `NoOID`, index are based on the previous sucessful polling  
