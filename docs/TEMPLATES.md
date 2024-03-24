@@ -114,14 +114,14 @@ Key points:
   key-value pairs.
 - Each line contains two pieces of information:
   - The `index` acts as the key and must remain unique. It's a sequence of integers, like a numeric OID, often simply represented by a single integer.
-  - The `value` which can be of various types: String, Integer, numericOID, etc.
+  - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP
 - In a `leaf`, as the targetOID is a scalar:
   - There is **no** `index`
   - There is only **one** `value`
      
 Notes: 
-- The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `targetOID`,
-  the `numericOID` and also the `index`.
+- The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `target OID`,
+  the `numeric OID` and also the `index`.
 - If a `leaf` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
 
