@@ -457,9 +457,9 @@ The switch statement can use values from other OIDs, like this:
 ```
 dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
 ```
-This would assign the value 'No DHCP' to the 'dhcpStatus' alias if and only
-if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
-value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
+This would assign the value `No DHCP` to `dhcpStatus` if and only
+if the `dhcpPoolSize` contained a value equal to zero. Otherwise, the
+value of the `dhcpAvail`  would be assigned to `dhcpStatus`. 
 
 ### UNPACK transform
 The unpack transform is used to unpack binary data into any one of a number
