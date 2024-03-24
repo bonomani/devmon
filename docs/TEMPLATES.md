@@ -539,7 +539,7 @@ The operator `precision` is evaluated **first**: A higher precision holds higher
 - Priority 4: `!~`  (negative smart match)
 - Priority 3: `!=` `ne`
 - Priority 2: `_AUTOMATCH_`
-- Priority 1: '(empty)'
+- Priority 1: `(empty)`
  
 `Severity` is evaluated **second**, from highest to lowest severity..
 - `red`
