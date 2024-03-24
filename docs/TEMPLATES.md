@@ -85,10 +85,11 @@ Three values per line, from left to right:
   - `leaf`  = a **non-repeater** (a scalar) type oid.
 
 Notes:
+- Prefer using the terms **repeater/non-repeater** over **branch/leaf** as they are self-explanatory and closer to SNMP terminology
 - If the **same target OID is used in multiple tests** within a template, **the line with the target OID MUST 
 be duplicated** in those tests to avoid inconsistent results.
 - The **numeric OID** cannot be replaced with its equivalent **textual OID alias**, as defined in MIBs, because Devmon does not load MIBs. 
-- Prefer using the terms `repeater` and `non-repeater` over `branch` and `leaf` as they are self-explanatory.
+
 
 ### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
