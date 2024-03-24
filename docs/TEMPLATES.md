@@ -78,7 +78,7 @@ sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
 Three values per line, from left to right:
-- The **target OID** (case sensitive): also known as the OID alias, contains the response to the SNMP query. Its name often uses the **textual OID alias from MIBs**, but it's not required. 
+- The **target OID** (case sensitive):  a **textual OID alias** (not required to be from MIBs). Contains the response to the SNMP query.
 - The **numeric OID**: the OID requested in the SNMP query
 - The **type**:
   - `branch`= a **repeater** type oid
