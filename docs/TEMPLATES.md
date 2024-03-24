@@ -533,13 +533,13 @@ The thresholds file comprises one entry per line, each containing three to four 
 ### The evaluation order
 
 The operator `precision` is evaluated **first**: A higher precision holds higher priority.
-- Priority 7: `=``eq`
-- Priority 6: `>``>=``<``>=`
+- Priority 7: `=` `eq`
+- Priority 6: `>` `>=` `<` `>=`
 - Priority 5: `~=` (smart match)
 - Priority 4: `!~`  (negative smart match)
-- Priority 3: `!=``ne`
+- Priority 3: `!=` `ne`
 - Priority 2: `_AUTOMATCH_`
-- Priority 1: ``(empty)
+- Priority 1: '(empty)'
  
 `Severity` is evaluated **second**, from highest to lowest severity..
 - `red`
