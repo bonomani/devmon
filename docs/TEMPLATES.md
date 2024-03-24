@@ -68,7 +68,7 @@ can be safely removed from all templates.
 
 
 ## The oids file 
-The `oids` file contains the SNMP OIDS to query for the test. 
+The `oids` file contains the SNMP OIDS to query and their type. 
 
 ### Format
 ```
