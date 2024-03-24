@@ -550,7 +550,7 @@ The operator `precision` is evaluated **first**: A higher precision holds higher
 Notes:
 - Numeric operators are evaluated first.
 - Some operators, like Smart match, only apply to non-numeric values. 
-- If no operator is specified in the threshold, Devmon assumes it's a `greater than`
+- If no operator is specified in the threshold field, Devmon assumes it's a `greater than`
   threshold. If the SNMP value exceeds this threshold, Devmon treats it as met. 
   This behavior is deprecated: Use the `>` operator for clarity and self-documentation.
   (TODO: Add a deprecation notice)
@@ -558,11 +558,10 @@ Notes:
   your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
 
 ## The messages file
-
-The messages file is what brings all the data collected from the other files
-in the template together in a single cohesive entry. It is basically a web
-page (indeed, you can add html to it, if you like) with some special macros
-embedded in it.
+The messages file consolidates data from various template files. It operates 
+as a templating engine containing special keywords for specific functionalities 
+and allows the use of HTML. This enables the rendering of a message that can 
+be understood by Xymon.
 
 An example of a simple messages file is as follows:
 ```
@@ -590,80 +589,21 @@ Last failure due to: {upsFailCause}
 Time on battery:     {upsSecsOnBatt} secs
 ```
 
-You can see in this file that it is just a bunch of data aliases, with one or
-two special exceptions. Most of these will just be replaced with their
-corresponding values. You can see at the top of the file, however, that there
-are a few weird looking data aliases (the ones that end in .errors). These
-are just normal data aliases with a special flag appended to them, that lets
-Devmon know that you want something from them than just their data value.
-
-## The exceptions file
-The exceptions file contains rules that are only applied to the primary OID of tables in the `messages` file
-
-Example
-```
-ifName : alarm  : Gi.+
-ifName : ignore : Nu.+|Vl.+
-```
-Three fields:
-- Field #1: The `primary OID` against which the exception is applied. 
-- Field #2: The exception type. Applied in the following order:
-  - `ignore`: Do not display rows that match the regexp  
-  - `only`: Only display rows that match the regexp
-  - `alarm`: Only generate alarms for rows that match the regexp
-  - `noalarm`: Do not generate alarms for rows that match the regexp
-- Field #3: The regular expression used to match the primary OID. Regexp is 
-  anchored and must match exactly.
-
-In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
-- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
-- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
+This file mainly consists of OIDs enclosed in {}, with a couple of exceptions. 
+These OIDs are simply replaced with their values. However, at the top of the file, 
+you'll see some OIDs that end in ".errors". These are regular data aliases with a 
+special flag attached, indicating to Devmon that you want more than just their value.
 
 ### The OIDs flags
-
-- color
-
-This flag will print out the xymon color string assigned to this
-data alias by the thresholds (this string looks like '&red' or '&green',
-etc). This color string will be interpreted by xymon as a colored icon, which
-makes alarm conditions much easier to recognize. Like the 'errors' flag, it
-will also modify the global color.
-
-- errors 
-
-The errors flag on a data alias will list any errors on this data alias. In
-this case, 'errors' refers to the message assigned to the alias from a non-
-green threshold match (the message is the value assigned in the fourth field
-of an entry in the thresholds file, remember?). If the value assigned to a
-data alias is green, then the value that replaces this flag will be blank.
-
-Error messages will always be printed at the TOP of the message file,
-regardless of where they are defined within it. This is done to make sure
-that the user sees any errors that might have occurred, which they might miss
-if the messages file is too long.
-
-The errors flag will also modify the global color of the message. So if this
-error flag reports a yellow error, and the global color is currently green,
-it will increase the global color to yellow. If the error flag reports a red
-error, it will increase the global color to red. The global color of a
-message defaults to green, and is modified upwards (if you consider more
-severe colors to be 'up') depending on the contents of the 'error' and
-'color' flags.
- 
-- msg
-
-The msg flag prints out the message assigned to the data alias by its
-threshold. Unlike the errors flag, it prints the message even if the data
-alias matches a green threshold and it also does NOT modify the global color
-of the message.
-
-- thresh
-
-The syntax for the thresh flag is {oid.thresh:<color>}. It displays the value
-in the threshold file (or custom threshold) that corresponds with the
-supplied color. So, {CPUTotal5Min.thresh:yellow} would display the template
-value for the yellow threshold for the CPUTotal5Min oid, or a per-device
-custom threshold if one was defined.
+- `color`: This flag prints the alarm color of the OID, interpreted by Xymon as a colored 
+  icon ('&red' or '&green'). It modifies the global color if not used in a 'best' transform.
+- `errors`: List any errors of the OID (non-green color), printed at the top of the message 
+  file, regardless of their location within it. It modifies the global color if not used 
+  in a 'best' transform.
+- `msg`: This flag prints the msg of the OID regardless alarm color and do not modify the 
+   global color of the page.
+- thresh: The syntax for the thresh flag is {oid.thresh:<color>}. It displays the theshold value
+ that corresponds with the supplied color. 
 
 A more complicated message file is this one, taken from a Cisco 2950 switch
 if_stat test:
@@ -753,6 +693,30 @@ average graph:
 ```
 STATUS: up: load={laLoadFloat2}
 ```
+
+## The exceptions file
+The exceptions file contains rules that are only applied to the primary OID of tables in the `messages` file
+
+Example
+```
+ifName : alarm  : Gi.+
+ifName : ignore : Nu.+|Vl.+
+```
+Three fields:
+- Field #1: The `primary OID` against which the exception is applied. 
+- Field #2: The exception type. Applied in the following order:
+  - `ignore`: Do not display rows that match the regexp  
+  - `only`: Only display rows that match the regexp
+  - `alarm`: Only generate alarms for rows that match the regexp
+  - `noalarm`: Do not generate alarms for rows that match the regexp
+- Field #3: The regular expression used to match the primary OID. Regexp is 
+  anchored and must match exactly.
+
+In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
+- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
+- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
+
+
 
 ### Error Propagation
 Starting with the github version of devmon, we decide to 'propagate' errors
