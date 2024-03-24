@@ -146,9 +146,9 @@ Three values per line:
 3. The **input data**: a string with **one or more source OID(s)** which sould be enclosed in {}.
 
 Notes:
-- The **primary OID**, typically **source OID1**, is the first `repeater` source OID found from left to right
-- The **target OID** has the **same indexes** as the **primary OID**
-- Mixing `repeater` and `non-repeater` type result in a `repeater` type OID.
+- The **primary OID**, typically `source_OID1`, is the first `source OID` of type `repeater` found from left to right
+- The **target OID** have the **same indexes** as the **primary OID**
+- Mixing `repeater` and `non-repeater` type result in a `repeater` type.
 - Like for the `oid` file, the same consideration for `target OID` across multiple tests should be taken (duplicate the line!)
 
 ### BEST transform
