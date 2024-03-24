@@ -599,7 +599,7 @@ special flag attached, indicating to Devmon that you want more than just their v
   - Prints the alarm color of the OID.
   - Modifies the global color of the page, if not used in a 'best' transform.
 - `errors` 
-  - List any errors of the OID (non-green color) abd print thgen at the top of the message 
+  - List any errors of the OID (non-green color) and print them at the top of the message 
   file, regardless of their location within it. 
   - Modifies the global color of the page, if not used in a 'best' transform.
 - `msg`
