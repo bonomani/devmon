@@ -424,7 +424,7 @@ switchName : SUBSTR : {systemName} 6
 The transformed value `master switch`
 
 ### SWITCH transform
-"The switch transform substitutes one data value with another. It's often used to convert a numeric 
+The switch transform substitutes one data value with another. It's often used to convert a numeric 
 value from an SNMP query to its corresponding text. The statements are applied in a left to right order.
 
 Example1: 
@@ -452,7 +452,7 @@ alphanumeric string):
               values or any unmatch statement (specially usefull for incomplet
               oids, prefer ".*" if there is no reason to use it!
 ```
-The switch statement can also assign values from another OID to the target
+The switch statement can assign values from another OID to the target
 OID alias, depending on the value of the source OID alias, like this:
 ```
 dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
