@@ -115,16 +115,20 @@ Key points:
 - There are multiple results, one per line, with each being stored in the `target OID` as 
   `key-value` pairs.
 - Each line contains two pieces of information:
-  - The `index` acts as the `key` and must remain `unique`. It's a sequence of integers, separated by dots, like a numeric OID. Often it is simply a single integer.
-  - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP
+  - The `index` acts as the `key` and must remain `unique`. It's a sequence of integers, 
+    separated by dots, like a numeric OID. Often it is simply a single integer.
+  - The `value` which can be of various types: String, Integer, numeric OID, etc. as 
+    defined in SNMP
 - In a `non-repeater`, as it is a scalar:
   - There is **no** `index`
   - There is only **one** `value`
    
 Notes: 
-- In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`, `repeater OID`,... all can be simply designated by the name `OID`.
-- If a `non-repeater OID` does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results
-  in getting the `parent OID` that is of type `repeater`. This behavior is part of SNMP's design...
+- In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`, 
+  `repeater OID`,... all can be simply designated by the name `OID`.
+- If a `non-repeater OID` does not end with `.0`, indicating it is not a real SNMP scalar, 
+  retrieving it results in getting the `parent OID` that is of type `repeater`. This behavior 
+  is part of SNMP's design...
 
 ## The transforms file
 The transforms file describes manipulations on SNMP data.
