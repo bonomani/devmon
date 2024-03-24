@@ -556,13 +556,13 @@ Notes:
 - Regular expressions in threshold matches are non-anchored. If you want to ensure
   your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
 
-## The messages file
-The messages file consolidates data from various template files. 
+## The message file
+The message file consolidates data from the other template files. 
 - It operates as a templating engine containing special keywords for specific functionalities 
 - It allows the use of HTML.
 - It enables the rendering of a message that can be understood by Xymon.
 
-### Simple example: only with non-repeater OIDs:
+### Simple example with only with non-repeater OIDs
 ```
 {upsStatus.errors}
 {upsBattStat.errors}
