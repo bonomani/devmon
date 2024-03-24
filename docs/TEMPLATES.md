@@ -617,7 +617,7 @@ Ifc name|Ifc speed|Ifc status
 {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
 ```
 - The first line: The special keyword `TABLE:`(case sensitive, no leading whitespace allowed) alerts Devmon that 
-the we are in a table definition. Devmon will constructs an HTML table. Table options can be set immediately 
+the we are in a table definition. Devmon will constructs an HTML table. Table options MUST be set immediately 
 after the 'TABLE:' tag on the same line.  
 
 - The next line is `table header line`: The column separator is '|'.  By default, column content is 
