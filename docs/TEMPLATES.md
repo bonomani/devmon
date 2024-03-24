@@ -86,7 +86,7 @@ Three values per line, from left to right:
 
 Notes:
 - Prefer using the terms **repeater/non-repeater** over **branch/leaf** as they are self-explanatory and closer to SNMP terminology
-- If the **same target OID is used in multiple tests** within a template, **the line with the target OID MUST 
+- If the **same target OID** is used **in multiple tests** within a template, **the line** with the target OID **MUST 
 be duplicated** in those tests to avoid inconsistent results.
 - The **numeric OID** cannot be replaced with its equivalent **textual OID alias**, as defined in MIBs, because Devmon does not load MIBs. 
 
