@@ -131,7 +131,7 @@ The transforms file describes manipulations on SNMP data.
 
 ### Format
 ```
-targetOID       : TRANSFORM     : {sourceOID1} ... {sourceOID2} ...
+target_OID      : TRANSFORM     : {source_OID1} ... {source_OID2} ...
 ```
 Example:
 ```
@@ -141,11 +141,11 @@ UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 Three values per line:
 1. The **target OID** (case sensitive): MUST be unique name compared to those in the 'oids' file and other target OIDs in the `transform` file 
 2. The **transform** (case insensitive): e.g. MATH or math.
-3. The **input data**: a string with **one or more sourceOID(s)** which sould be enclosed in {}.
+3. The **input data**: a string with **one or more source OID(s)** which sould be enclosed in {}.
 
 Notes:
 - In the context of transforms, it's preferable to use the terms `repeater/non-repeater` rather than `branch/leaf` 
-- The **primaryOID**, typically **sourceOID1**, is the first `repeater` sourceOID found from left to right
+- The **primary OID**, typically **source OID1**, is the first `repeater` source OID found from left to right
 - The **targetOID** has the **same indexes** as **the primaryOID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
 - Like for the `oid` file, the same consideration for targetOID across multiple tests should be taken (duplicate the line!)
@@ -154,10 +154,10 @@ Notes:
 The BEST transform selects the OID that has the **best alarm color** (green as 'best', red as 'worst')  
 Mainly use in the `msg` file with its color and error parts only : {targetOID.color} {targetOID.error}  
 ```
-targetOid   : BEST    : {sourceOID1} {sourceOID2}
+target_OID  : BEST    : {source_OID1} {source_OID2}
 ```
 Notes:
-- SourceOIDs present in the BEST transform **are excluded from the globale page color calculation** (the worst color of the page)
+- `Source OIDs` present in the BEST transform **are excluded from the globale page color calculation** (the worst color of the page)
 
 ### CHAIN transform
 Sometimes, a device saves a numeric SNMP identifier as a string under 
@@ -246,7 +246,7 @@ the REGSUB transform to further extract the `3` value
 ### MATCH transform
 This transform allow the `targetOID` to have :
 1. For index: An incremental index, starting from 1   
-2. For value: The index of the matched `sourceOID` value
+2. For value: The index of the matched `source OID` value
 
 This transform addresses an issue found in MIBs that mix different data types 
 in just two columns. It either separates these mixed tables into distinct ones 
@@ -337,7 +337,7 @@ The inverse of the 'PACK' transform.
 
 ### REGSUB transform
 The regsub transform is a powerful yet complex technique that allows you to 
-replace segments of a single sourceOID using regular expressions (the leading 's'
+replace segments of a single `source OID` using regular expressions (the leading 's'
 for the expression should be left off). For example:
 ```
 ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
