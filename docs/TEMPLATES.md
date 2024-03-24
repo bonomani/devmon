@@ -424,24 +424,14 @@ switchName : SUBSTR : {systemName} 6
 The transformed value `master switch`
 
 ### SWITCH transform
-The switch transform transposes one data value for another. This is most
-commonly used to transform a numeric value returned by an snmp query into its
-textual equivalent. The first argument in the transform input should be the
-oid to be transformed. Following this should be a list of comma- delimited
-pairs of values, with each pair of values being separated by an equals sign.
+"The switch transform substitutes one data value with another. It's often used to convert a numeric 
+value from an SNMP query to its corresponding text. The statements are applied in a left to right order.
 
-For example: 
+Example1: 
 ```
 upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
 ```
-So this transform would take the input from the 'upsBattRepNum'
-data alias and compare it to its list of switch values. If
-the value of upsBattRepNum was 1, it would store a 'Battery OK'
-value in the 'upsBattRep' data alias. 
-
-You can use simple mathematical tests on the values of the source OID
-alias, as well as assigning values for different OIDs to the target alias.
-For instance:
+Example2: 
 ```
 dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
 ```
@@ -462,10 +452,6 @@ alphanumeric string):
               values or any unmatch statement (specially usefull for incomplet
               oids, prefer ".*" if there is no reason to use it!
 ```
-Note that switch statements are applied in a left to right order; so if you
-have a value that matches the source value on multiple switch statements, the
-leftmost statement will be the one applied.
-
 The switch statement can also assign values from another OID to the target
 OID alias, depending on the value of the source OID alias, like this:
 ```
