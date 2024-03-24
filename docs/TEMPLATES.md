@@ -623,10 +623,10 @@ after the 'TABLE:' tag on the same line.
 left-aligned. To align content on the right side, use '|>' instead of '|'. Note that the leftmost 
 column cannot be right-aligned in this way.
   
-- The next line is the `table content`. The row contains one or more OIDs. The first is the `primary` OID. 
+- The next line is the `table content`. The row contains one or more OIDs. The first is the `primary OID`. 
 Other OIDs in the row are linked to the primary OID, by their indexes (key). For example, if the primary 
-OID has leaves indexed as '100,101,102,103,104', the table will have five rows and only theses indexes 
-will be display for any OIDs. Non-repeater aliases in the table will be a constant. 
+OID has leaves indexed as '100,101,102,103,104', the table will have five rows, theses indexes will be
+display for any OIDs even if they do not exist for some OIDs. A `non-repeater` OID in the table will be constant in all rows. 
 
 ### The TABLE options
 The `TABLE:` keyword can have one or more, comma-delimited options following it. These
