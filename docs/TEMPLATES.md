@@ -146,7 +146,7 @@ Three values per line:
 Notes:
 - The **primary OID**, typically **source OID1**, is the first `repeater` source OID found from left to right
 - The **target OID** has the **same indexes** as the **primary OID**
-- Mixing repeater and non-repeater type result in a repeater type OID.
+- Mixing `repeater` and `non-repeater` type result in a `repeater` type OID.
 - Like for the `oid` file, the same consideration for `target OID` across multiple tests should be taken (duplicate the line!)
 
 ### BEST transform
