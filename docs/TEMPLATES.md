@@ -152,7 +152,7 @@ Notes:
 - Like for the `oid` file, the same consideration for `target OID` across multiple tests should be taken (duplicate the line!)
 
 ### BEST transform
-The BEST transform selects the OID that has the **best alarm color** (green as 'best', red as 'worst')  
+The BEST transform selects the OID that has the **best alarm color** (green as `best`, red as `worst`)  
 Mainly use in the `msg` file with its color and error parts only : {target_OID.color} {target_OID.error}  
 ```
 target_OID  : BEST    : {source_OID1} {source_OID2}
