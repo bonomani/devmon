@@ -413,7 +413,7 @@ The substr transform extracts a portion of text, It requires specifying an `OID`
 is provided, substr copies until the end of the string.
 
 Example: 
-For a **systemName** OID that contained the value `Cisco master switch`
+**systemName** contains `Cisco master switch`
 ```
 switchName : SUBSTR : {systemName} 0 12
 ```
