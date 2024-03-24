@@ -501,11 +501,11 @@ The unpack types are as follows:
 ```       
 
 ### WORST transform
-The transform takes two 'source OIDs' and stores the value associated with the worst alarm color 
+The transform takes two `source OIDs` and stores the value associated with the worst alarm color 
 (red as the worst, green as the best) in the `target oid`.
 
 ## The thresholds file
-Specify threshold limits for the OIDs, including their corresponding alarm color levels and messages
+Specify `threshold` limits for the OIDs, including their corresponding alarm `color` levels and `messages`
 
 ### Format
 ```
