@@ -525,13 +525,12 @@ The thresholds file comprises one entry per line, each containing three to four 
 - The first field: The OID for which the threshold is applied
 - The second field: The color assigned if the threshold is met
 - The third field: contains threshold values
-  - Cannot currently use OIDs (this is a feature request, please vote for it!)"
+  - Cannot currently use OIDs (this is a feature request, please vote for it!)
 - The fourth field: is the threshold message, that is a string that can contains OIDs, enclosed in {}
   - If the message contains an OID of type 'repeater': They have to share indexes with the first field
   - And the message can also contain an OID of type 'non-repeater'
 
 ### The evaluation order
-
 The operator `precision` is evaluated **first**: A higher precision holds higher priority.
 - Priority 7: `=` `eq`
 - Priority 6: `>` `>=` `<` `>=`
@@ -541,7 +540,7 @@ The operator `precision` is evaluated **first**: A higher precision holds higher
 - Priority 2: `_AUTOMATCH_`
 - Priority 1: `(empty)`
  
-`Severity` is evaluated **second**, from highest to lowest severity..
+ `Severity` is evaluated **second**, from highest to lowest severity..
 - `red`
 - `yellow`
 - `clear`
@@ -609,7 +608,7 @@ special flag attached, indicating to Devmon that you want more than just their v
   - The syntax for the thresh flag is {oid.thresh:<color>}
   - Print the theshold value that corresponds with the supplied color. 
 
-An example with repeater OIDs:
+An example with `repeater` OIDs:
 if_stat test:
 ```
 TABLE:
@@ -621,72 +620,47 @@ In this message file, we are using the special keyword `TABLE:`(case
 sensitive, no leading whitespace allowed). This keyword alerts Devmon that 
 the next one to two lines are a repeater table definition.
 
-Devmon constructs an HTML table from repeater data. You can specify an optional 
-header immediately after the 'TABLE:' tag. If no header is desired, the line after 
-the table tag should be the row data identifier. The column separator in the header 
-line is '|'. By default, column content is left-aligned. To align content on the 
-right side, use '|>' instead of '|'. Note that the leftmost column cannot be 
-right-aligned in this way.
+Devmon constructs an HTML table from repeater data. You can specify an optional attribute to the table 
+immediately after the 'TABLE:' tag on the same line.  
 
-The row data identifier contains one or more OIDs. The first alias is the 'primary' OID. 
-It must be a repeater type OID. Other OIDs in the row linked to the primary OID, by 
-their indexes (key). For example, if the primary alias has leaves indexed as '100,101,102,103,104',
-the table will have five rows and only theses indexes will be display for any OIDs. 
-Non-repeater aliases in the table will be a constant 
+The next line is table header line. The column separator is '|'.  By default, column content is 
+left-aligned. To align content on the right side, use '|>' instead of '|'. Note that the leftmost 
+column cannot be right-aligned in this way.
+  
+The next line is the table content. The row contains one or more OIDs. The first is the `primary` OID. 
+Other OIDs in the row are linked to the primary OID, by their indexes (key). For example, if the primary 
+OID has leaves indexed as '100,101,102,103,104', the table will have five rows and only theses indexes 
+will be display for any OIDs. Non-repeater aliases in the table will be a constant. 
 
 The `TABLE:` keyword can have one or more, comma-delimited options following it
 that allow you to modify the way in which Devmon will display the data. These
 options can have values assigned to them if they are not boolean ('nonhtml',
 for example, is boolean, while 'border' is not boolean).
 
-The TABLE options
-
-- nonhtml
-
-Don't use HTML tags when displaying the table. Instead all columns will
-be separated by a colon (:). This is useful for doing NCV rrd graphing
-in hobbit.
-
-- plain
-
-Don't do any formatting. This allows repeater data (each item on it's own
-line), without colons or HTML tables. One use of this option is to format
-repeater data with compatibility with a format Hobbit already understands. An
-example is available in the disk test for the linux-openwrt template.
-
-- noalarmsmsg
-
-Prevent Devmon from displaying the 'Alarming on' header at the top of a
-table.
-
-- alarmsonbottom
-
-Cause Devmon to display the 'Alarming on' message at the bottom of the table
-data, as opposed to the top.
-
-- border=n
-
-Set the HTML table border size that Devmon will use
-(a value of 0 will disable the border)
-
-- pad=n
-
-Set the HTML table cellpadding size that Devmon will use
-
-- rrd
-
-See the GRAPHING document in this directory for explanation
-
-An example of some TABLE options in use:
+### The TABLE options
+Example:
 ```
 TABLE: alarmsonbottom,border=0,pad=10
 ```
-The STATUS: key allows you to extend the first line of the status message
-that Devmon sends to BB/Hobbit/Xymon. For example, if you need to get data
-to a Xymon rrd collector module that evaluates data in the first line of the
-message (such as the Hobbit la collector which expects "up: <time>, %d
-users, %d procs load=%d.%d" you can use this key as follows to get a load
-average graph:
+- nonhtml: Don't use HTML tags when displaying the table. Instead all columns will
+  be separated by a colon (:). This is useful for doing NCV rrd graphing in Xymon.
+- plain: Don't do any formatting. This allows repeater data (each item on it's own
+  line), without colons or HTML tables. One use of this option is to format
+  repeater data with compatibility with a format Hobbit already understands. An
+  example is available in the disk test for the linux-openwrt template.
+- noalarmsmsg: Prevent Devmon from displaying the 'Alarming on' header at the top of a table.
+- alarmsonbottom: Cause Devmon to display the 'Alarming on' message at the bottom of the table
+  data, as opposed to the top.
+- border=n: Set the HTML table border size that Devmon will use (a value of 0 will disable the border)
+- pad=n: Set the HTML table cellpadding size that Devmon will use
+- rrd: See [GRAPHING](GRAPHING.md) 
+
+### Special Keyword
+- `STATUS`: key allows you to extend the first line of the status message
+that Devmon sends to Xymon. For example, if you need to get data to a Xymon rrd
+collector module that evaluates data in the first line of the message (such as 
+the Xymon `la` collector which expects "up: <time>, %d users, %d procs load=%d.%d" 
+you can use this key as follows to get a load average graph:
 ```
 STATUS: up: load={laLoadFloat2}
 ```
