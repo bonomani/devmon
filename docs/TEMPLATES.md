@@ -562,7 +562,7 @@ The messages file consolidates data from various template files.
 - It allows the use of HTML.
 - iT enables the rendering of a message that can be understood by Xymon.
 
-### Non-repeater OIDs example:
+### Simple example: only with non-repeater OIDs:
 ```
 {upsStatus.errors}
 {upsBattStat.errors}
@@ -608,7 +608,7 @@ special flag attached, indicating to Devmon that you want more than just their v
   - The syntax for the thresh flag is {oid.thresh:<color>}
   - Print the theshold value that corresponds with the supplied color. 
 
-### Repeater OID - Table example
+### Example with table - repeater OIDs
 if_stat test:
 ```
 TABLE:
