@@ -557,10 +557,10 @@ Notes:
   your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
 
 ## The messages file
-The messages file consolidates data from various template files. It operates 
-as a templating engine containing special keywords for specific functionalities 
-and allows the use of HTML. This enables the rendering of a message that can 
-be understood by Xymon.
+The messages file consolidates data from various template files. 
+- It operates as a templating engine containing special keywords for specific functionalities 
+- It allows the use of HTML.
+- iT enables the rendering of a message that can be understood by Xymon.
 
 ### Non-repeater OIDs example:
 ```
