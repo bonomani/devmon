@@ -113,9 +113,9 @@ Key points:
 - There are multiple results, one per line, with each being stored in the `target OID` as 
   key-value pairs.
 - Each line contains two pieces of information:
-  - The `index` acts as the key and must remain unique. It's a sequence of integers, like a numeric OID, often simply represented by a single integer.
+  - The `index` acts as the key and must remain unique. It's a sequence of integers, like a numeric OID, often simply a single integer.
   - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP
-- In a `leaf`, as the targetOID is a scalar:
+- In a `leaf`, as it is a scalar:
   - There is **no** `index`
   - There is only **one** `value`
      
