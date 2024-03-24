@@ -88,18 +88,19 @@ Notes:
 - If the **same target OID is used in multiple tests** within a template, **the line with the target OID MUST 
 be duplicated** in those tests to avoid inconsistent results.
 - The **numeric OID** cannot be replaced with its equivalent **textual OID alias**, as defined in MIBs, because Devmon does not load MIBs. 
+- Prefer using the terms `repeater` and `non-repeater` over `branch` and `leaf` as they are self-explanatory.
 
 ### OIDs or Object Identifiers
 - In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
 - In Devmon, OIDs are classified as either `branch` and `leaf` OIDs.
 
 The relationship between them is as follows:
-- A `branch` OID corresponds to an SNMP `table` OID
-- A `leaf` OID can represent either:
+- A `repeater` OID corresponds to an SNMP `table` OID
+- A `non-repeater` OID can represent either:
   - A SNMP `scalar` OID (does end with .0)
   - An `element` of a SNMP `table` OID (which does not end with .0)
 
-Let's execute and analyze an SNMP request to a `branch` numeric OID: 
+Let's execute and analyze an SNMP request to numeric OID of type `repeater`: 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
 ```
@@ -115,16 +116,16 @@ Key points:
 - Each line contains two pieces of information:
   - The `index` acts as the key and must remain unique. It's a sequence of integers, like a numeric OID, often simply a single integer.
   - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP
-- In a `leaf`, as it is a scalar:
+- In a `non-repeater`, as it is a scalar:
   - There is **no** `index`
   - There is only **one** `value`
      
 Notes: 
 - The terminology surrounding OIDs can be confusiong as the term `OID` is used to refer to the `target OID`,
   the `numeric OID` and also the `index`.
-- If a `leaf` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
-  in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
-- Prefer using the terms `repeater` and `non-repeater` over `branch` and `leaf` as they are self-explanatory.
+- If a `non-repeater` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
+  in getting the parent OID that is of type `repeater`. This behavior is part of SNMP's design...
+
 
 ## The transforms file
 The transforms file describes manipulations on SNMP data.
