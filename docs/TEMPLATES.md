@@ -124,7 +124,7 @@ Notes:
   the `numeric OID` and also the `index`.
 - If a `leaf` OID does not end with `.0`, indicating it is not a real SNMP scalar, retrieving it results 
   in getting the parent OID that is of type `branch`. This behavior is part of SNMP's design...
-- Prefer using the terms 'repeater' and 'non-repeater' over 'branch' and 'leaf' as they are self-explanatory.
+- Prefer using the terms `repeater` and `non-repeater` over `branch` and `leaf` as they are self-explanatory.
 
 ## The transforms file
 The transforms file describes manipulations on SNMP data.
@@ -139,9 +139,7 @@ sysUpTimeSecs   : MATH          : {sysUpTime} / 100
 UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
 Three values per line:
-1. The **targetOID** (case sensitive): unique name compared to those in the 'oids' file. For example, 
-'sysUpTimeSecs' originates from 'sysUpTime' in the oids file, gathering SNMP data. 
-Throughout, 'alias' refers to either SNMP-collected or transformed data.  
+1. The **target OID** (case sensitive): MUST be unique name compared to those in the 'oids' file and other target OIDs in the `transform` file 
 2. The **transform** (case insensitive): e.g. MATH or math.
 3. The **input data**: a string with **one or more sourceOID(s)** which sould be enclosed in {}.
 
