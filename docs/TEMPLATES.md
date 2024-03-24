@@ -144,7 +144,6 @@ Three values per line:
 3. The **input data**: a string with **one or more source OID(s)** which sould be enclosed in {}.
 
 Notes:
-- In the context of transforms, it's preferable to use the terms `repeater/non-repeater` rather than `branch/leaf` 
 - The **primary OID**, typically **source OID1**, is the first `repeater` source OID found from left to right
 - The **target OID** has the **same indexes** as the **primary OID**
 - Mixing repeater and non-repeater type result in a repeater type OID.
@@ -542,8 +541,8 @@ The thresholds file comprises one entry per line, each containing three to four 
 - The third field: contains threshold values
   - Cannot use OIDs (this is feature request, vote for it!)
 - The fourth field: is the threshold message, that is a string that can contains OIDs, enclosed in {}
-  - If the message contains an OID of type 'branch': They have to share indexes with the first field
-  - And the message can also contain an OID of type 'leaf'
+  - If the message contains an OID of type 'repeater': They have to share indexes with the first field
+  - And the message can also contain an OID of type 'non-repeater'
 
 ### The evaluation order
 2 levels: the precision level is evaluated first  
@@ -637,7 +636,7 @@ Devmon not to display any rows with a primary alias that has a value that
 behind with Nu (a Null interface) or Vl (A VLAN interface).
 
 
-## The 'messages' file
+## The messages file
 
 The messages file is what brings all the data collected from the other files
 in the template together in a single cohesive entry. It is basically a web
