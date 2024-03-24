@@ -81,8 +81,8 @@ Three values per line, from left to right:
 - The **target OID** (case sensitive):  a **textual OID alias** (not required to be from MIBs). Contains the response to the SNMP query.
 - The **numeric OID**: the OID requested in the SNMP query
 - The **type**:
-  - `branch`= a **repeater** type oid
-  - `leaf`  = a **non-repeater** (a scalar) type oid.
+  - `branch`= a **repeater** type OID
+  - `leaf`  = a **non-repeater** (a scalar) type OID.
 
 Notes:
 - Prefer using the terms **repeater/non-repeater** over **branch/leaf** as they are self-explanatory and closer to SNMP terminology
