@@ -685,13 +685,12 @@ display for any OIDs even if they do not exist for some OIDs. A `non-repeater` O
 
 ### The TABLE options
 The `TABLE:` keyword can have one or more, comma-delimited options following it. These
-options can have values assigned to them if they are not boolean ('nonhtml',
-for example, is boolean, while 'border' is not boolean).
+options can have values assigned to them if they are not boolean:
 - `nonhtml`: Don't use HTML tags when displaying the table. Instead all columns will
   be separated by a colon (:). This is useful for doing NCV rrd graphing in Xymon.
 - `plain`: Don't do any formatting. This allows repeater data (each item on it's own
   line), without colons or HTML tables. One use of this option is to format
-  repeater data with compatibility with a format Hobbit already understands. An
+  repeater data with compatibility with a format Xymon already understands. An
   example is available in the disk test for the linux-openwrt template.
 - `noalarmsmsg`: Prevent Devmon from displaying the `Alarming on` header at the top of a table.
 - `alarmsonbottom`: Cause Devmon to display the `Alarming on` message at the bottom of the table
