@@ -595,7 +595,7 @@ Notes:
 ## The exceptions file
 The exceptions file contains rules that are only applied to the primary OID of tables in the `messages` file
 
-Example
+### Format
 ```
 ifName : alarm  : Gi.+
 ifName : ignore : Nu.+|Vl.+
@@ -621,7 +621,8 @@ The message file consolidates data from the other template files.
 - It allows the use of HTML.
 - It enables the rendering of a message that can be understood by Xymon.
 
-### Simple example with only with non-repeater OIDs
+### Format
+Simple example with only with non-repeater OIDs:
 ```
 {upsStatus.errors}
 {upsBattStat.errors}
@@ -646,30 +647,15 @@ Voltage out:         {upsVoltageOut}v
 Last failure due to: {upsFailCause}
 Time on battery:     {upsSecsOnBatt} secs
 ```
-
 This file mainly consists of OIDs enclosed in {}, with a couple of exceptions. 
 These OIDs are simply replaced with their values. However, at the top of the file, 
 you'll see some OIDs that end in ".errors". These are regular data aliases with a 
 special flag attached, indicating to Devmon that you want more than just their value.
 
-### The OIDs flags
-- `color` 
-  - Prints the alarm color of the OID in a format recognized by Xymon.
-  - Modifies the global color of the page, if not used in a 'best' transform.
-- `errors` (deprecated)
-  - Prints the alarm message of the OID and at the top/bottom of the message 
-  - Modifies the global color of the page, if not used in a 'best' transform.
-- `msg`
-  - Prints the alarm message of the OID and at the top/bottom of the message 
-  - Modifies the global color of the page, if not used in a 'best' transform.
-- `thresh` 
-  - The syntax for the thresh flag is {oid.thresh:<color>}
-  - Print the theshold value that corresponds with the supplied color. 
-
-### Example with table - repeater OIDs
+Example with table - repeater OIDs:
 if_stat test:
 ```
-TABLE:
+TABLE:alarmsonbottom,border=0,pad=10
 Ifc name|Ifc speed|Ifc status
 {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
 ```
@@ -686,15 +672,24 @@ Other OIDs in the row are linked to the primary OID, by their indexes (key). For
 OID has leaves indexed as '100,101,102,103,104', the table will have five rows, theses indexes will be
 display for any OIDs even if they do not exist for some OIDs. A `non-repeater` OID in the table will be constant in all rows. 
 
+### The OIDs flags
+- `color` 
+  - Prints the alarm color of the OID in a format recognized by Xymon.
+  - Modifies the global color of the page, if not used in a 'best' transform.
+- `errors` (deprecated: use msg)
+  - Prints the alarm message of the OID and at the top/bottom of the message 
+  - Modifies the global color of the page, if not used in a 'best' transform.
+- `msg`
+  - Prints the alarm message of the OID and at the top/bottom of the message 
+  - Modifies the global color of the page, if not used in a 'best' transform.
+- `thresh` 
+  - The syntax for the thresh flag is {oid.thresh:<color>}
+  - Print the theshold value that corresponds with the supplied color. 
+
 ### The TABLE options
 The `TABLE:` keyword can have one or more, comma-delimited options following it. These
 options can have values assigned to them if they are not boolean ('nonhtml',
 for example, is boolean, while 'border' is not boolean).
-
-Example:
-```
-TABLE:alarmsonbottom,border=0,pad=10
-```
 - `nonhtml`: Don't use HTML tags when displaying the table. Instead all columns will
   be separated by a colon (:). This is useful for doing NCV rrd graphing in Xymon.
 - `plain`: Don't do any formatting. This allows repeater data (each item on it's own
