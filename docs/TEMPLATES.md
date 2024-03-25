@@ -451,7 +451,7 @@ The transformed value is `Cisco master`
 ```
 switchName : SUBSTR : {systemName} 6
 ```
-The transformed value `master switch`
+The transformed value is `master switch`
 
 ### SWITCH transform
 The switch transform substitutes one data value with another. It's often used to convert a numeric 
