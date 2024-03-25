@@ -624,10 +624,10 @@ The message file consolidates data from the other template files.
 ### Format
 Example#1: with only **non-repeater OIDs**:
 ```
-{upsStatus.errors}
-{upsBattStat.errors}
-{upsLoadOut.errors}
-{upsBattRep.errors}
+{upsStatus.msg}
+{upsBattStat.msg}
+{upsLoadOut.msg}
+{upsBattRep.msg}
 
 UPS status:
 
@@ -647,17 +647,14 @@ Voltage out:         {upsVoltageOut}v
 Last failure due to: {upsFailCause}
 Time on battery:     {upsSecsOnBatt} secs
 ```
-This file mainly consists of OIDs enclosed in {}, with a couple of exceptions. 
-These OIDs are simply replaced with their values. However, at the top of the file, 
-you'll see some OIDs that end in ".errors". These are regular data aliases with a 
-special flag attached, indicating to Devmon that you want more than just their value.
+- This file mainly consists of OIDs enclosed in {}, that are replaced with their values.
+- Some OIDs have a special flag attached: `.msg` indicating to Devmon a speciale behaviour.
 
-Example#2: with table - **repeater OIDs**:
-if_stat test:
+Example#2: The TABLE keyword for **repeater OIDs**:
 ```
 TABLE:alarmsonbottom,border=0,pad=10
 Ifc name|Ifc speed|Ifc status
-{ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
+{ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.msg}
 ```
 - The first line: The special keyword `TABLE:`(case sensitive, no leading whitespace allowed) alerts Devmon that 
 the we are in a table definition. Devmon will constructs an HTML table. Table options MUST be set immediately 
