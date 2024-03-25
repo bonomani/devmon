@@ -671,18 +671,18 @@ Example:
 ```
 TABLE:alarmsonbottom,border=0,pad=10
 ```
-- nonhtml: Don't use HTML tags when displaying the table. Instead all columns will
+- `nonhtml`: Don't use HTML tags when displaying the table. Instead all columns will
   be separated by a colon (:). This is useful for doing NCV rrd graphing in Xymon.
-- plain: Don't do any formatting. This allows repeater data (each item on it's own
+- `plain`: Don't do any formatting. This allows repeater data (each item on it's own
   line), without colons or HTML tables. One use of this option is to format
   repeater data with compatibility with a format Hobbit already understands. An
   example is available in the disk test for the linux-openwrt template.
-- noalarmsmsg: Prevent Devmon from displaying the 'Alarming on' header at the top of a table.
-- alarmsonbottom: Cause Devmon to display the 'Alarming on' message at the bottom of the table
+- `noalarmsmsg`: Prevent Devmon from displaying the `Alarming on` header at the top of a table.
+- `alarmsonbottom`: Cause Devmon to display the `Alarming on` message at the bottom of the table
   data, as opposed to the top.
-- border=n: Set the HTML table border size that Devmon will use (a value of 0 will disable the border)
-- pad=n: Set the HTML table cellpadding size that Devmon will use
-- rrd: See [GRAPHING](GRAPHING.md) 
+- `border=n`: Set the HTML table border size that Devmon will use (a value of 0 will disable the border)
+- `pad=n`: Set the HTML table cellpadding size that Devmon will use
+- `rrd`: See [GRAPHING](GRAPHING.md) 
 
 ### Special Keyword
 - `STATUS`: key allows you to extend the first line of the status message
