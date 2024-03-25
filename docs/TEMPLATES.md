@@ -622,7 +622,7 @@ The message file consolidates data from the other template files.
 - It enables the rendering of a message that can be understood by Xymon.
 
 ### Format
-Simple example with only with non-repeater OIDs:
+1. Simple example with only with non-repeater OIDs:
 ```
 {upsStatus.errors}
 {upsBattStat.errors}
@@ -652,7 +652,7 @@ These OIDs are simply replaced with their values. However, at the top of the fil
 you'll see some OIDs that end in ".errors". These are regular data aliases with a 
 special flag attached, indicating to Devmon that you want more than just their value.
 
-Example with table - repeater OIDs:
+2. Example with table - repeater OIDs:
 if_stat test:
 ```
 TABLE:alarmsonbottom,border=0,pad=10
