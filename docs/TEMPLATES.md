@@ -59,13 +59,9 @@ expression) pattern should match the SNMP system description, ensuring the class
 ```
 vendor   : cisco
 model    : 2950
-snmpver  : 2 (deprecated)
+snmpver  : 2 (**deprecated**)
 sysdesc  : C2950
 ```
-Notes:
-- The `snmpver` variable is no longer in use and has been deprecated. It 
-can be safely removed from all templates.
-
 
 ## The oids file 
 The `oids` file contains the SNMP OIDS to query and their type. 
@@ -343,11 +339,11 @@ supplied data. It can use the following mathematical operators:
 '%'           (Modulo or Remainder)
 '&'           (bitwise AND)
 '|'           (bitwise OR)
-' . '         (string concatenation - note white space each side) (deprecated)
+' . '         (string concatenation - note white space each side) (**deprecated**)
 '(' and ')'   (Expression nesting)
 ```
 This transform is not whitespace sensitive, except in the case of ' . ', which 
-will be deprecated soon.     
+will be **deprecated**.     
 The mathematical expressions you can perform can be quite complex, such as:
 ```
 ((({sysUpTime}/100) ^ 2 ) x 15) + 10
@@ -584,9 +580,9 @@ The operator `precision` is evaluated **first**: A higher precision holds higher
 Notes:
 - Numeric operators are evaluated first.
 - Some operators, like Smart match, only apply to non-numeric values. 
-- If no operator is specified in the threshold field, Devmon assumes it's a `greater than`
+- If **no operator** is specified in the threshold field, Devmon assumes it's a `greater than`
   threshold. If the SNMP value exceeds this threshold, Devmon treats it as met. 
-  This behavior is deprecated: Use the `>` operator for clarity and self-documentation.
+  This behavior is **deprecated**: Use the `>` operator for clarity and self-documentation.
   (TODO: Add a deprecation notice)
 - Regular expressions in threshold matches are non-anchored. If you want to ensure
   your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
