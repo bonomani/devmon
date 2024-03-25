@@ -591,6 +591,30 @@ Notes:
 - Regular expressions in threshold matches are non-anchored. If you want to ensure
   your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
 
+
+## The exceptions file
+The exceptions file contains rules that are only applied to the primary OID of tables in the `messages` file
+
+Example
+```
+ifName : alarm  : Gi.+
+ifName : ignore : Nu.+|Vl.+
+```
+Three fields:
+- Field #1: The `primary OID` against which the exception is applied. 
+- Field #2: The exception type. Applied in the following order:
+  - `ignore`: Do not display rows that match the regexp  
+  - `only`: Only display rows that match the regexp
+  - `alarm`: Only generate alarms for rows that match the regexp
+  - `noalarm`: Do not generate alarms for rows that match the regexp
+- Field #3: The regular expression used to match the primary OID. Regexp is 
+  anchored and must match exactly.
+
+In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
+- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
+- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
+
+
 ## The message file
 The message file consolidates data from the other template files. 
 - It operates as a templating engine containing special keywords for specific functionalities 
@@ -693,25 +717,3 @@ you can use this key as follows to get a load average graph:
 ```
 STATUS: up: load={laLoadFloat2}
 ```
-
-## The exceptions file
-The exceptions file contains rules that are only applied to the primary OID of tables in the `messages` file
-
-Example
-```
-ifName : alarm  : Gi.+
-ifName : ignore : Nu.+|Vl.+
-```
-Three fields:
-- Field #1: The `primary OID` against which the exception is applied. 
-- Field #2: The exception type. Applied in the following order:
-  - `ignore`: Do not display rows that match the regexp  
-  - `only`: Only display rows that match the regexp
-  - `alarm`: Only generate alarms for rows that match the regexp
-  - `noalarm`: Do not generate alarms for rows that match the regexp
-- Field #3: The regular expression used to match the primary OID. Regexp is 
-  anchored and must match exactly.
-
-In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
-- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
-- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
