@@ -228,7 +228,7 @@ Two arguments:
 - an `OID` 
 - a conversion type: `hex` or `oct`
 
-To convert the hex string '07d6' to its decimal equivalent (2006, as it so happens):
+To convert the hex string `07d6` to its decimal equivalent `2006`:
 ```
 intYear : CONVERT: {hexYear} hex
 ```
@@ -367,11 +367,11 @@ padded with zeros if necessary (e.g., 300549.3420). By default, it has 2 precisi
 characters. To eliminate decimals entirely, specify a value of 0.
 
 ### UNPACK transform 
-The inverse of the 'PACK' transform.
+The inverse of the `PACK` transform.
 
 ### REGSUB transform
 The regsub transform is a powerful yet complex technique that allows you to 
-replace segments of a single `source OID` using regular expressions (the leading 's'
+replace segments of a single `source OID` using regular expressions (the leading `s`
 for the expression should be left off). For example:
 ```
 ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
@@ -422,7 +422,7 @@ AScalar  : MATH   : 123
 ### SPEED transform
 
 This transform converts speed values in bits to the largest whole speed measurement. 
-For example, 1200 would become '1.2 Kbps', and 13000000 would become '13 Mbps'.
+For example, `1200` would become `1.2 Kbps`, and `13000000` would become `13 Mbps`.
 
 
 ### STATISTIC transform
@@ -471,8 +471,8 @@ upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
 ```
 dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
 ```
-The format for the tests are as follows (assuming 'n','a' and 'b' are
-floating point numerical value [i.e. 1, 5.33, 0.001, etc], and 's' is a
+The format for the tests are as follows (assuming `n`,`a` and `b` are
+floating point numerical value i.e. `1`, `5.33`, `0.001`, ... and `s` is a
 alphanumeric string):
 ```
     n       : Source alias is equal to this amount
@@ -557,13 +557,13 @@ upsBattRep  : red     : replacing : {upsBattRep}
 ```
 
 The thresholds file comprises one entry per line, each containing three to four fields separated by colons:
-- The first field: The OID for which the threshold is applied
-- The second field: The color assigned if the threshold is met
+- The first field: The `OID` for which the threshold is applied
+- The second field: The `color` assigned if the threshold is met
 - The third field: contains threshold values
-  - Cannot currently use OIDs (this is a feature request, please vote for it!)
-- The fourth field: is the threshold message, that is a string that can contains OIDs, enclosed in {}
-  - If the message contains an OID of type 'repeater': They have to share indexes with the first field
-  - And the message can also contain an OID of type 'non-repeater'
+  - **OID templating is not supported** (this is a feature request, please vote for it!)
+- The fourth field: is the threshold message: a string that can contains OIDs, enclosed in {}
+  - If the message contains an OID of type `repeater`: They have to share indexes with the first field
+  - The alarm message can also contain an OID of type `non-repeater`
 
 ### The evaluation order
 The operator `precision` is evaluated **first**: A higher precision holds higher priority.
@@ -611,8 +611,8 @@ Three fields:
   anchored and must match exactly.
 
 In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
-- Trigger alarms only for repeater table rows starting with 'Gi' (Gigabit interfaces) 
-- Exclude rows starting with 'Nu' (Null interfaces) or 'Vl' (VLAN interfaces).
+- Trigger alarms only for repeater table rows starting with `Gi` (Gigabit interfaces) 
+- Exclude rows starting with `Nu` (Null interfaces) or `Vl` (VLAN interfaces).
 
 
 ## The message file
@@ -658,27 +658,27 @@ Ifc name|Ifc speed|Ifc status
 ```
 - The first line: The special keyword `TABLE:`(case sensitive, no leading whitespace allowed) alerts Devmon that 
 the we are in a table definition. Devmon will constructs an HTML table. Table options MUST be set immediately 
-after the 'TABLE:' tag on the same line.  
+after the `TABLE:` tag on the same line.  
 
-- The next line is `table header line`: The column separator is '|'.  By default, column content is 
-left-aligned. To align content on the right side, use '|>' instead of '|'. Note that the leftmost 
+- The next line is `table header line`: The column separator is `|`.  By default, column content is 
+left-aligned. To align content on the right side, use `|>` instead of `|`. Note that the leftmost 
 column cannot be right-aligned in this way.
   
 - The next line is the `table content`. The row contains one or more OIDs. The first is the `primary OID`. 
 Other OIDs in the row are linked to the primary OID, by their indexes (key). For example, if the primary 
-OID has leaves indexed as '100,101,102,103,104', the table will have five rows, theses indexes will be
+OID has leaves indexed as `100,101,102,103,104`, the table will have five rows, theses indexes will be
 display for any OIDs even if they do not exist for some OIDs. A `non-repeater` OID in the table will be constant in all rows. 
 
 ### The OIDs flags
 - `color` 
   - Prints the alarm color of the OID in a format recognized by Xymon.
-  - Modifies the global color of the page, if not used in a 'best' transform.
-- `errors` (deprecated: use msg)
+  - Modifies the global color of the page, if not used in a `BEST` transform.
+- `errors` (**deprecated**: use msg)
   - Prints the alarm message of the OID and at the top/bottom of the message 
-  - Modifies the global color of the page, if not used in a 'best' transform.
+  - Modifies the global color of the page, if not used in a `BEST` transform.
 - `msg`
   - Prints the alarm message of the OID and at the top/bottom of the message 
-  - Modifies the global color of the page, if not used in a 'best' transform.
+  - Modifies the global color of the page, if not used in a `BEST` transform.
 - `thresh` 
   - The syntax for the thresh flag is {oid.thresh:<color>}
   - Print the theshold value that corresponds with the supplied color. 
