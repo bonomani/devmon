@@ -28,7 +28,8 @@ service devmon status
 
 ## Run in foreground
 - Logs are sent to the console, not to the log file (by default)
-- Xymon messages are copied to the console (but also sent to the Xymon server to be able see the result)
+- Xymon messages are copied to the console (but also sent to the Xymon server to be able see the 
+  result)
 - Graphing information are not sent to the Xymon (by default, to not mess rrd)
 - You do not need to stop Xymon running in background 
 ```bash
@@ -42,7 +43,8 @@ service devmon status
 - Keep an eye on Devmon's child PIDs. Changes indicate unexpected restarts: `ps -aux | grep devmon`
 - Verify if your device reports the new SNMP tests.
 - Check logs: `tail -f /var/log/devmon/devmon.log` 
-- Verify the server running Devmon (usually the Xymon server) reports a 'dm' test that displays SNMP statistics.
+- Verify the server running Devmon (usually the Xymon server) reports a 'dm' test that displays SNMP
+  statistics.
 
 ## Options
 Within the `hosts.cfg`, you can configure the `DEVMON` tag with various options:
@@ -56,8 +58,8 @@ Within the `hosts.cfg`, you can configure the `DEVMON` tag with various options:
 - [thresh()](#thresh) to override default test thresholds
 - [except()](#except) to override default test exceptions
 
-Options are case-sensitive and should follow the `DEVMON` tag without any whitespace, separated by commas if multiple are used.  
-For instance following options are valid:
+Options are case-sensitive and should follow the `DEVMON` tag without any whitespace, separated by 
+commas if multiple are used. For instance following options are valid:
 ```
 10.0.0.1        myrouter      # DEVMON:cid(mysnmpid)
 10.0.0.1        myrouter      # DEVMONtests(cpu,power)
@@ -120,7 +122,8 @@ DEVMON:thresh(foo;opt1;r:95;y:60)
 DEVMON:thresh(foo;opt1;r:80,foo;opt2;r:90)
 ```
 
-Thresholds can be numeric or non-numeric, with non-numeric thresholds treated as **regular expressions**.
+Thresholds can be numeric or non-numeric, with non-numeric thresholds treated as **regular 
+expressions**.
 
 ### except()
 
@@ -129,7 +132,8 @@ For repeater type OIDs, there are four exception types, each with its abbreviati
 - 'Only' (abbreviated as 'o'): Displays only rows with matching primary OIDs.
 - 'Ignore' (abbreviated as 'i'): Shows only rows without matching primary OIDs.
 - 'Alarm on' (abbreviated as 'ao'): Enables rows with matching primary OIDs to generate alarms.
-- 'No alarm' (abbreviated as 'na'): Allows only rows without matching primary OIDs to generate alarms.
+- 'No alarm' (abbreviated as 'na'): Allows only rows without matching primary OIDs to generate 
+  alarms.
 
 ```
 
@@ -139,5 +143,5 @@ DEVMON:except(all;ifName;ao:Gi0/[1-2])
 
 ```
 
-Exceptions use **regular expressions** and are **anchored**, meaning they must match the OID value **exactly**.  
-For more information on [templates](TEMPLATES.md)
+Exceptions use **regular expressions** and are **anchored**, meaning they must match the OID value 
+**exactly**. For more information on [templates](TEMPLATES.md)
