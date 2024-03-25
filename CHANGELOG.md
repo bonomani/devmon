@@ -1,7 +1,13 @@
 # Changelog  
 Contributors of specific features/patches are listed in parenthesis next to the respective entry.
+
+## Devmon v0.24.03
+- Convert, simplify and update documentation in Markdown
+- Bug fixes:
+  - Discovery process sometime fails
+
 ## Devmon v0.23.09
-- **New Table Alignment Feature**: Credit to W. Nelis
+- **Right Table Alignment Feature**: (W. Nelis)
 - Bug fixes
 
 ## Devmon v0.23.07
@@ -9,7 +15,8 @@ Contributors of specific features/patches are listed in parenthesis next to the 
   - Prevent memory leaks, by eliminating fork failures.
   - Better control the SNMP oid walking process by using low level "snmpgetbulk" queries
   - Speeds up monitoring, particularly for slower devices 
-  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) as new logic not implemented for NET-SNMP 
+  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) as new logic not 
+    implemented for NET-SNMP 
 - Bug fixes
   
 ## Devmon v0.21.09
@@ -29,13 +36,12 @@ Contributors of specific features/patches are listed in parenthesis next to the 
 - Update wiki (mainly for devmon dev)
 - Tidy code (start to have best practice)
 - Update logs
-- Fix bugs
+- Bug fixes
 
 ## Devmon v0.21.07
-Changes since v0.21.06
-  No new Feature, nor bug resolved
-  Move Wiki (Github Wikis are not indexed by Google)
-  Update README and CHANGELOG 
+- No new Feature, nor bug resolved
+- Move Wiki (Github Wikis are not indexed by Google)
+- Update README and CHANGELOG 
 
 ## Devmon v0.21.06
 - New features
@@ -45,15 +51,13 @@ Changes since v0.21.06
   - Threshold automatch acccept multiple value
      - We can have not multiple empty (automatch) threshold for an oid
      - Empty threshold of the current color is prefered
-- Bug resolved
+- Bug fixes
   - MATH transform with constant (without other deps oids)
   - TSWITCH calc
   - Perl 5.28 compatibility (thanks to Stef Coene)
   - Threshold calculation
   - Custom threshold in hosts.cfg should overide other
   - BEST threshold can override herited error
-
-!!Some change are missing here!!
 
 ## Devmon v0.16.12 
 - Changes since v0.3.1-beta1
@@ -179,41 +183,39 @@ Changes since v0.21.06
   - Add negated regexp threshold (Nathan Hand)
   - Poll each leaf separately (Francois Lacroix)
   - Add 'plain' table option, allowing unformatted repeaters
-  - Ignore rows which have empty values for one of the repeaters (to avoid
-      some of the sub-interfaces on Cisco ATM interfaces making the page clear)
+  - Ignore rows which have empty values for one of the repeaters (to avoid some of the 
+    sub-interfaces on Cisco ATM interfaces making the page clear)
   - Template changes
-     Tests for fans, power, temp, log added to compaq-server (Buchan Milne)
-     Add ciscocpu.pl-compatible lines to cpu message files for cisco
-       devices to get cpu graphs from Hobbit
-     Alarm/graph on any device name that is not explicitly ignored (so Fa.+ 
-       works on 6509, S.+ works on 7600 using 6509 template etc.)
-     Add temp test for cisco-6509
+    - Tests for fans, power, temp, log added to compaq-server (Buchan Milne)
+    - Add ciscocpu.pl-compatible lines to cpu message files for cisco devices to get cpu graphs from
+      Hobbit
+     - Alarm/graph on any device name that is not explicitly ignored (so Fa.+ works on 6509, 
+       S.+ works on 7600 using 6509 template etc.)
+     - Add temp test for cisco-6509
   
   Added:
   - Documentation on graphing (Francois Lacroix and Buchan Milne)
   - Hobbit rrd collector module for devmon (do_devmon.c) (Buchan Milne)
   - Perl extra-script equivalent (Francois Lacroix and Buchan Milne)
-  - Patch for Hobbit, to enable devmon rrd collector, ensure devmon graphs
-      work better by default (use multigraphs for if_load, avoid extra broken
-      graphs etc.)
-  - Hobbit graph definitions for some devmon RRD-enabled tests (if_load,if_dsc,
-      temp) and one for the connects test (for NCV)
+  - Patch for Hobbit, to enable devmon rrd collector, ensure devmon graphs work better by default 
+    (use multigraphs for if_load, avoid extra broken graphs etc.)
+  - Hobbit graph definitions for some devmon RRD-enabled tests (if_load,if_dsc, temp) and one for 
+    the connects test (for NCV)
   - New Templates:
-     dell-poweredge for Dell PowerEdge servers running OMSA (Buchan Milne)
-     ibm-rsa2 for IBM Remote Server Adapters (Simeon Berkley)
-     apc-9617 (Simeon Berkley)
-     f5-bigip-lite and f5-bigip (Francois Lacroix)
-     cisco-asa for ASA or PIX with IOS 7.x, or FWSM 3.x (Francois Lacroix)
-     cisco-pix for PIX 6.x (Buchan Milne)
-     linux-openwrt, to demonstrate use of 'plain' option (Buchan Milne)
-     cisco-4500, cisco-msfc2, cisco-5500, cisco-6506, cisco-2811,
-       cisco-3640 (Francois Lacroix)
-     dell-perc for older Dell PowerEdge servers running percsnmp (Buchan Milne)
+    - dell-poweredge for Dell PowerEdge servers running OMSA (Buchan Milne)
+    - ibm-rsa2 for IBM Remote Server Adapters (Simeon Berkley)
+    - apc-9617 (Simeon Berkley)
+    - f5-bigip-lite and f5-bigip (Francois Lacroix)
+    - cisco-asa for ASA or PIX with IOS 7.x, or FWSM 3.x (Francois Lacroix)
+    - cisco-pix for PIX 6.x (Buchan Milne)
+    - linux-openwrt, to demonstrate use of 'plain' option (Buchan Milne)
+    - cisco-4500, cisco-msfc2, cisco-5500, cisco-6506, cisco-2811, cisco-3640 (Francois Lacroix)
+    - dell-perc for older Dell PowerEdge servers running percsnmp (Buchan Milne)
 
   Bugfixes:
   - Fix numeric thresholds on branch OIDs (Francois Lacroix)
-  - Allow FQDN in NODENAME, and use unstripped FQDN by default (so dm
-      test for devmon node works where hostname is FQDN) (Buchan Milne)
+  - Allow FQDN in NODENAME, and use unstripped FQDN by default (so dm test for devmon node works 
+    where hostname is FQDN) (Buchan Milne)
 
 
 ## Changes since 0.2.2
