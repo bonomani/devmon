@@ -73,10 +73,10 @@ sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
 sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
-Three values per line, from left to right:
-- The **target OID** (case sensitive):  a **textual OID alias** (not required to be from MIBs). Contains the response to the SNMP query.
-- The **numeric OID**: the OID requested in the SNMP query
-- The **type**:
+
+- Field #1: The **target OID** (case sensitive):  a **textual OID alias** (not required to be from MIBs). Contains the response to the SNMP query.
+- Field #2: The **numeric OID**: the OID requested in the SNMP query
+- Field #3: The **type**:
   - `branch`= a **repeater** type OID
   - `leaf`  = a **non-repeater** (a scalar) type OID.
 
@@ -138,11 +138,10 @@ Example:
 sysUpTimeSecs   : MATH          : {sysUpTime} / 100
 UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
 ```
-Three values per line:
-1. The **target OID** (case sensitive): MUST be unique name compared to those in the 'oids' file
-   and other target OIDs in the `transform` file 
-3. The **transform** (case insensitive): e.g. MATH or math.
-4. The **input data**: a string with **one or more source OID(s)** which sould be enclosed in {}.
+- Field #1: The **target OID** (case sensitive): MUST be unique name compared to those in the `oids` file
+  and other target OIDs in the `transform` file 
+- Field #2: The **transform** (case insensitive): e.g. MATH or math.
+- Field #3: The **input data**: a string with **one or more source OID(s)** enclosed in `{}`.
 
 Notes:
 - The **primary OID**, typically `source_OID1`, is the first `source OID` of type `repeater` found
@@ -596,7 +595,6 @@ The exceptions file contains rules that are only applied to the primary OID of t
 ifName : alarm  : Gi.+
 ifName : ignore : Nu.+|Vl.+
 ```
-Three fields:
 - Field #1: The `primary OID` against which the exception is applied. 
 - Field #2: The exception type. Applied in the following order:
   - `ignore`: Do not display rows that match the regexp  
@@ -643,8 +641,8 @@ Voltage out:         {upsVoltageOut}v
 Last failure due to: {upsFailCause}
 Time on battery:     {upsSecsOnBatt} secs
 ```
-- This file mainly consists of OIDs enclosed in {}, that are replaced with their values.
-- Some OIDs have a special flag attached: `.msg` indicating to Devmon a speciale behaviour.
+- OIDs enclosed in `{}` are replaced with their values.
+- Some OIDs have a special flag attached: `.msg` indicating to Devmon a special behaviour.
 
 Example#2: The TABLE keyword for **repeater OIDs**:
 ```
@@ -652,15 +650,14 @@ TABLE:alarmsonbottom,border=0,pad=10
 Ifc name|Ifc speed|Ifc status
 {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.msg}
 ```
-- The first line: The special keyword `TABLE:`(case sensitive, no leading whitespace allowed) alerts Devmon that 
-the we are in a table definition. Devmon will constructs an HTML table. Table options MUST be set immediately 
-after the `TABLE:` tag on the same line.  
+- Line #1: Start with the keyword `TABLE:`(case sensitive, no leading whitespace allowed) which alerts Devmon that 
+the we are in a table definition. Table options MUST be set immediately after the `TABLE:` tag on the same line.  
 
-- The next line is `table header line`: The column separator is `|`.  By default, column content is 
+- Line #2: The `table header`: The column separator is `|`.  By default, column content is 
 left-aligned. To align content on the right side, use `|>` instead of `|`. Note that the leftmost 
 column cannot be right-aligned in this way.
   
-- The next line is the `table content`. The row contains one or more OIDs. The first is the `primary OID`. 
+- Line #3: The `table content`. The row contains one or more OIDs. The first is the `primary OID`. 
 Other OIDs in the row are linked to the primary OID, by their indexes (key). For example, if the primary 
 OID has leaves indexed as `100,101,102,103,104`, the table will have five rows, theses indexes will be
 display for any OIDs even if they do not exist for some OIDs. A `non-repeater` OID in the table will be constant in all rows. 
