@@ -171,7 +171,7 @@ The first error that can occur is an SNMP error involving `getting no response f
 Occurs when the result is impossible. For example for a numerical result the value is set to `NaN`
 
 #### Handling error as alarm
-Errors trigger a "clear" alarm status color, defined as "no report" in Xymon
+Errors trigger a `clear` alarm status color, defined as `no report` in Xymon
 During threshold processing, the color (severity) and the error are set as follows:
 - If yellow, red, or clear: the error is set to true, and generally, a message is associated (and 
   will be raised).
@@ -698,8 +698,8 @@ have values assigned to them if they are not boolean:
 ### Special Keyword
 - `STATUS`: key allows you to extend the first line of the status message that Devmon sends to 
   Xymon. For example, if you need to get data to a Xymon rrd collector module that evaluates data in
-  the first line of the message (such as the Xymon `la` collector which expects "up: <time>, 
-  %d users, %d procs load=%d.%d". You can use this keyword as follows to get a load average graph:
+  the first line of the message (such as the Xymon `la` collector which expects `up: <time>, 
+  %d users, %d procs load=%d.%d`. You can use this keyword as follows to get a load average graph:
 ```
 STATUS: up: load={laLoadFloat2}
 ```
