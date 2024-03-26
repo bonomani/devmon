@@ -160,7 +160,7 @@ Alarm and error are propagated from source oids to targets oids. If the error `f
 threshold processing is skipped and the error, the color and the message are just copied to be 
 target OID.
 
-#### Connectivity error
+#### Polling error
 The first error that can occur is an SNMP error involving `getting no response from the device`
 - If the OID is not defined in the device, it results in a global value of the OID being set to 
   `NoOID`.
