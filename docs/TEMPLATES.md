@@ -419,7 +419,7 @@ This transform converts speed values in bits to the largest whole speed measurem
 
 
 ### STATISTIC transform
-This transformation computes statistics. The result type is a non-repeater.
+This transformation computes statistics. The result type is a `non-repeater`.
 
 Example:  
 The average temperature in a device with multiple temperature sensors is to be monitored, the 
