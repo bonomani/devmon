@@ -468,18 +468,18 @@ dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
 The format for the tests are as follows (assuming `n`,`a` and `b` are floating point numerical value
 i.e. `1`, `5.33`, `0.001`, ... and `s` is a alphanumeric string):
 ```
-    n       : Source alias is equal to this amount
-    >n      : Source alias is greater than this amount
-    >=n     : Source alias is greater than or equal to this amount
-    <n      : Source alias is less than this amount
-    <=n     : Source alias is less than or equal to this amount
-    a - b   : Source alias is between 'a' and 'b', inclusive
-    's'     : Source alias matches this string exactly (case sensitive)
-    "s"     : Source alias matches this regular expression (non-anchored)
+    n       : Source OID is equal to this amount
+    >n      : Source OID is greater than this amount
+    >=n     : Source OID is greater than or equal to this amount
+    <n      : Source OID is less than this amount
+    <=n     : Source OID is less than or equal to this amount
+    a - b   : Source OID is between 'a' and 'b', inclusive
+    's'     : Source OID matches this string exactly (case sensitive)
+    "s"     : Source OID matches this regular expression (non-anchored)
               ".*" match anything! (similar to default: prefer it)
-    default : Default value for the target alias, used in case of undefined
+    default : Default value for the target OID, used in case of undefined
               values or any unmatch statement (specially usefull for incomplet
-              oids, prefer ".*" if there is no reason to use it!
+              OIDs, prefer ".*" if there is no reason to use it!
 ```
 The switch statement can use values from other OIDs, like this:
 ```
