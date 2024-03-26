@@ -108,16 +108,16 @@ Outputs:
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
 <-numOID-> <- index-> = <- value ->
 ```
-Key points:
-- There are multiple results, one per line, with each being stored in the `target OID` as
+
+- **There are multiple results**, one per line, with each being stored in the `target OID` as
   `key-value` pairs.
-- Each result line contains '2' new elements:
+- **Each result line** contains **2** new elements:
   - The `index` acts as the `key` and must remain `unique`. It's a sequence of integers, separated 
     by dots, like a numeric OID. Often it is simply a single integer.
-  - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP
+  - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP.
 - In a `non-repeater`, as it is a scalar:
-  - There is **no** `index`
-  - There is only **one** `value`
+  - There is **no** `index`.
+  - There is only **one** `value`.
    
 Notes: 
 - In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`, 
