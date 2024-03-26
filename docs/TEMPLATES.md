@@ -24,7 +24,7 @@ Notes:
 ### The vendor-model folders
 - Inside the `templates` folder, there are subfolders for each `vendor-model`, 
 like `Cisco 2950` or `Cisco 3750`. 
-- This folder's name don't matter.  Each test have a `specs` file that specifies the template.
+- This **folder's name don't matter**.  Each test have a `specs` file that specifies the template.
 
 ### The test folders
 - Inside the `vendor-model` folder there are subfolders for each `test`.
@@ -48,7 +48,7 @@ Notes:
 
 
 ## The specs file
-The `specs` file holds data specific to the vendor-model. This file is used in the discovery process
+The `specs` file holds data specific to the `vendor-model`. This file is used in the discovery process
 `./devmon -readhostscfg`, where Devmon identifies the hosts it should handle by using the `sysdesc` 
 variable. This (non-anchored regular expression) pattern should match the SNMP system description, 
 ensuring the classification.
@@ -111,7 +111,7 @@ Outputs:
 Key points:
 - There are multiple results, one per line, with each being stored in the `target OID` as
   `key-value` pairs.
-- Each line contains two pieces of information:
+- Each result line contains '2' new elements:
   - The `index` acts as the `key` and must remain `unique`. It's a sequence of integers, separated 
     by dots, like a numeric OID. Often it is simply a single integer.
   - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP
