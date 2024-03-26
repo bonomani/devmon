@@ -50,8 +50,7 @@ Notes:
 ## The specs file
 The `specs` file holds data specific to the `vendor-model`. This file is used in the discovery process
 `./devmon -readhostscfg`, where Devmon identifies the hosts it should handle by using the `sysdesc` 
-variable. This (non-anchored regular expression) pattern should match the SNMP system description, 
-ensuring the classification.
+variable. This (non-anchored regular expression) pattern should match, ensuring the classification.
 
 ### Format
 ```
