@@ -20,7 +20,7 @@ Devmon upgrades Xymon with advanced SNMP monitoring capabilities, enabling compr
 - [Overview](docs/OVERVIEW.md): A global overview on how it works
 - [Templates](docs/TEMPLATES.md): How to create or update your device templates
 - [Graphing](docs/GRAPHING.md): Add graphing on your tests
-- [Roadmap](discussions/94): What we are working on 
+- [Roadmap](https://github.com/bonomani/devmon/discussions/94): What we are working on 
 - [Wiki](http://wiki.ubiquitous-network.ch/doku.php?id=en:devmon): Developers best practices
 - [Contributing](docs/CONTRIBUTING.md)
   

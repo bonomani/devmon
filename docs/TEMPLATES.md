@@ -1,718 +1,504 @@
 # TEMPLATES
  
-## A core component
+## Custom Templates Made Easy
+Devmon's templates allow you to effortlessly craft your own monitoring templates using declarative
+configuration files. This means there's no need for complex coding! Some knowledge of 
+[regular expressions](http://www.regular-expressions.info) can boost your skills.
 
-Devmon's templates enable :
+To begin crafting your custom templates, get ready to:
 
-- Defines specific OIDs
-- Transform received data
-- Define thresholds and alarm message
-- Custom Xymon output messages.
+- Select the SNMP OIDs to query
+- Transform data gathered through SNMP
+- Define thresholds and alarm messages
+- Define how tests are displayed in Xymon (output message)
 
-## Rolling your own
-Creating a Devmon template is easy. No coding required. Knowing regular 
-expressions helps: http://www.regular-expressions.info/
+### The templates folder
+Template configuration files are stored in the `templates` folder of your Devmon installation. For a
+single server, the folder is read regularly; for multiple servers, the database is utilized.
 
-Let's explore template structure. Template data is stored in the "templates" 
-folder of your Devmon installation. For a single server, the folder is read 
-regularly; for multiple servers, the database is utilized.
+Notes: 
+- If you have multiple servers, it's best to keep only one copy of your templates folder, preferably
+  on your main server. Remove any extra template folders on your other servers. This avoids 
+  confusion when syncing templates to your database, making sure everything matches up.
 
-Inside the "templates" folder, there are subfolders for each vendor and model, 
-like "Cisco 2950" or "Cisco 3750." The names of these folders don't matter much, 
-as the vendor and model are specified in another file called 'specs.' But it's 
-helpful to name them in a way that's easy to understand.
+### The vendor-model folders
+- Inside the `templates` folder, there are subfolders for each `vendor-model`, 
+like `Cisco 2950` or `Cisco 3750`. 
+- This **folder's name don't matter**.  Each test have a `specs` file that specifies the template.
 
-Note: If you have multiple servers, it's best to keep only one copy of your 
-templates folder, preferably on your main server. Remove any extra template 
-folders on your other servers. This avoids confusion when syncing templates 
-to your database, making sure everything matches up.
+### The test folders
+- Inside the `vendor-model` folder there are subfolders for each `test`.
+- The **name** of each `test` folder **matters** as they are the test names displayed on your Xymon 
+  server.
 
-## The 'specs' file
-Each vendor-model directory must contain a file named 'specs' for specifications.
-Additionally, there can be one or more subdirectories within each directory,
-each representing a specific test for that vendor-model. The 'specs' file 
-holds data specific to the vendor-model
+### Example
+A `cpu` test on a `Cisco 2950` requires:
+```
+templates/cisco-2950/specs  
+templates/cisco-2950/cpu/oids  
+templates/cisco-2950/cpu/transforms  
+templates/cisco-2950/cpu/thresholds  
+templates/cisco-2950/cpu/exceptions  
+templates/cisco-2950/cpu/message  
+```
+Notes: 
+- The thresholds, transforms and exceptions files can be empty.
+- A line beginning with `#` is a comment. Comments are supported by all these files except the 
+  `message` file.
 
-The 'specs' file should look something like this:
 
-<!--start file--------------------------->
+## The specs file
+The `specs` file holds data specific to the `vendor-model`. This file is used in the discovery process
+`./devmon -readhostscfg`, where Devmon identifies the hosts it should handle by using the `sysdesc` 
+variable. This (non-anchored regular expression) pattern should match, ensuring the classification.
+
+### Format
 ```
 vendor   : cisco
 model    : 2950
-snmpver  : 2
+snmpver  : 2 (**deprecated**)
 sysdesc  : C2950
 ```
-<!----end file--------------------------->
 
-Note: Variable names and their corresponding values are listed separately, 
-each on a new line and separated by colons. This format is consistent across 
-most, if not all, files in the Devmon template structure.
+## The oids file 
+The `oids` file contains the SNMP OIDS to query and their type. 
 
-For this particular device type, the variables 'vendor' and 'model' are 
-unique and should not have the same values in any other specs file within 
-the template tree. If duplicates are found, Devmon will detect them as 
-attempts to redefine a template and will reject the second occurrence.
-
-The 'snmpver' variable is no longer in use and has been deprecated. It 
-can be safely removed from all templates.
-
-The 'sysdesc' variable is utilized in Devmon's discovery process 
-when reading the host from the Xymon hosts.cfg file (especially when using 
-the '-readhostscfg' command line argument). This value should be distinct 
-from those in other templates and can accommodate complex patterns since 
-it is interpreted as a regular expression.
-
-## Test directory
-
-Each subdirectory of the vendor-model directory represents an individual
-test. The name of the directory is significant, as it is what determines the
-name of the test reported to your display server! So the subdirectory in your
-vendor-model directory named 'cpu' defines the cpu test, the one named
-'if_err' defines the if_err test, etc.
-
-Under each test subdirectory, there are five files:
-- oids
-- transforms
-- thresholds
-- exceptions
-- message
-
-All five files MUST be present for the template to be read successfully,
-although the thresholds, transforms and exceptions files can all be empty.
-So, a quick list of files needed for a 'cpu' test on a Cisco 2950 should look
-as follows:
-
-- .../devmon/templates/cisco-2950/specs
-- .../devmon/templates/cisco-2950/cpu/oids
-- .../devmon/templates/cisco-2950/cpu/transforms
-- .../devmon/templates/cisco-2950/cpu/thresholds
-- .../devmon/templates/cisco-2950/cpu/exceptions
-- .../devmon/templates/cisco-2950/cpu/message
-
-Note that all of these files except for the message file can contain
-comments. Any line that starts with a pound symbol (#) is treated as a
-comment by Devmon, and ignored.
-
-Now we'll go over each of these files in detail...
-
-
-## The 'oids' file 
-
-The oids file contains, you guessed it, the oids that you want to SNMP query
-for this type of device. It should look something like this:
-
-<!--start file--------------------------->
+### Format
 ```
 sysDescr        : .1.3.6.1.2.1.1.1.0               : leaf
 sysReloadReason : .1.3.6.1.4.1.9.2.1.2.0           : leaf
 sysUpTime       : .1.3.6.1.2.1.1.3.0               : leaf
 CPUTotal5Min    : .1.3.6.1.4.1.9.9.109.1.1.1.1.5.1 : leaf
 ```
-<!----end file--------------------------->
 
-Note that there are three values per line; the first value is the alias that
-Devmon uses throughout the rest of the template files, the second value is
-the *NUMERIC* value for the oid, the third is the repeater type ('leaf',
-which is a non-repeater type oid, vs 'branch' which is a repeater type).
+- Field #1: The **target OID** (case sensitive):  a **textual OID alias** (not required to be from 
+  MIBs). Contains the response to the SNMP query.
+- Field #2: The **numeric OID**: the OID requested in the SNMP query
+- Field #3: The **type**:
+  - `branch`= a **repeater** type OID
+  - `leaf`  = a **non-repeater** (a scalar) type OID.
 
-Its important that you use the numeric version of an oid for the second value
-in this file. Devmon will not map the string version of an OID to its numeric
-version before it does a query, which means that your SNMP query will fail if
-you use an alphanumeric oid instead of a numeric one (i.e. 'sysDescr' is
-alphanumeric, '.1.3.6.1.2.1.1.1.0' is numeric). I chose to do this because it
-is a pain to keep all the various MIBs installed on all of the nodes in a multi-
-node cluster, and it was just easier to specify them once here. Note that the
-oid aliases are case sensitive: 'SysDescr' is treated as a separate alias
-from 'sysDescr'.
-
-Also important to note is that OIDs are shared between tests on the same
-template. So if you specify OID aliases with identical names (they are case
-sensitive, remember) in multiple tests in a template, there is only going to
-be a single value stored in memory, which both OID aliases point to. The
-upshot of this is, if you use the same OID alias in multiple tests (and this
-is recommended, as it will make your template run faster), then they *MUST*
-have the numeric OID value. If they dont, you are going to get inconsistent
-results, as the value stored in memory might arbitrarily be from one SNMP
-variable or another.
+Notes:
+- Prefer using the terms **repeater/non-repeater** over **branch/leaf** as they are self-explanatory
+  and closer to SNMP terminology
+- If the **same target OID** is used **in multiple tests** within a template, **the line** with the 
+  target OID **MUST be duplicated** in those tests to avoid inconsistent results.
+- The **numeric OID** cannot be replaced with its equivalent **textual OID alias**, as defined in 
+  MIBs, because Devmon does not load MIBs. 
 
 
-## The 'OID' concept
+### OIDs or Object Identifiers
+- In SNMP, OIDs are categorized into `table` and `scalar` OIDs.
+- In Devmon, OIDs are classified as either `repeater` and `non-repeater` OIDs.
 
-More explaination of the 'OID' term as it is a key concept that should be
-well understood.
+The relationship between them is as follows:
+- A `repeater` OID corresponds to an SNMP `table` OID
+- A `non-repeater` OID can is either:
+  - A SNMP `scalar` (Its numeric OID does end with .0)
+  - An `instance` (an element) of a SNMP `table` (Its numeric OID does not end with .0)
 
-SNMP standard and Devmon:
-
-- In SNMP, we have 'table' OIDs and 'scalar' OIDs
-- In Devmon, we have OIDs of type 'branch' and 'leaf'
-
-The relation between the both is:
-
-- A 'branch' OID is a snmp 'table'
-- A 'leaf' OID can be:
-  - A snmp 'scalar' OID (end with 0)
-  - An instance of a snmp 'table' OID (do not end with 0, normally...)
-
-
-How it works:
-<!-- A query from the shell -->
+Let's execute and analyze an SNMP request to numeric OID of type `repeater`: 
 ```
 snmpwalk -v2c -c public MYDEVICE .1.3.4.6.9
+```
+Outputs:
+```
 .1.3.4.6.9.4.3.1.20.3 = 8732588786
 .1.3.4.6.9.4.3.1.20.4 = 5858738454
+<-numOID-> <- index-> = <- value ->
 ```
 
-Let's analyse the answer:
+- **There are multiple results**, one per line, with each being stored in the `target OID` as
+  `key-value` pairs.
+- **Each result line** contains **2** new elements:
+  - The `index` acts as the `key` and must remain `unique`. It's a sequence of integers, separated 
+    by dots, like a numeric OID. Often it is simply a single integer.
+  - The `value` which can be of various types: String, Integer, numeric OID, etc. as defined in SNMP.
+- In a `non-repeater`, as it is a scalar:
+  - There is **no** `index`.
+  - There is only **one** `value`.
+   
+Notes: 
+- In Devmon, the term `OID` is abused: `OID alias`, `target OID`, `numeric OID`, `index`, 
+  `repeater OID`,... all can be simply designated by the name `OID`.
+- If a `non-repeater OID` does not end with `.0`, indicating it is not a real SNMP scalar, 
+  retrieving it results in getting the `parent OID` that is of type `repeater`. This behavior is 
+  part of SNMP's design...
+
+## The transforms file
+The transforms file describes manipulations on SNMP data.
+
+### Format
 ```
-.1.3.4.6.9.4.3.1.20.3 = 8732588786
-<-  oid -> <- index-> = <-result->
+target_OID      : TRANSFORM     : {source_OID1} ... {source_OID2} ...
 ```
+Example:
+```
+sysUpTimeSecs   : MATH          : {sysUpTime} / 100
+UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
+```
+- Field #1: The **target OID** (case sensitive): MUST be unique name compared to those in the `oids`
+  file and other target OIDs in the `transform` file 
+- Field #2: The **transform** (case insensitive): e.g. MATH or math.
+- Field #3: The **input data**: a string with **one or more source OID(s)** enclosed in `{}`.
 
-There are 2 information on each line:
+Notes:
+- The **primary OID**, typically `source_OID1`, is the first `source OID` of type `repeater` found
+  from left to right
+- The **target OID** have the **same indexes** as the **primary OID**
+- Mixing `repeater` and `non-repeater` type result in a `repeater` type.
+- Like for the `oid` file, the same consideration for `target OID` across multiple tests should be
+  taken (duplicate the line!)
 
-- The 'result' can be of different types: String, Integer, OID, ...
-- The 'index' has type: OID (most of the time it is an Integer)
+### Errors
+Catching errors and determining their origins is essential. Errors generated by thresholds are 
+indeed just `alarms`, well identify by the color value. They are no need for an error value in this 
+case. But real errors can also exists.
 
-So depending on the type of our OID we have:
+Alarm and error are propagated from source oids to targets oids. If the error `flag' set true, the 
+threshold processing is skipped and the error, the color and the message are just copied to be 
+target OID.
 
-    Branch: result[idx] = snmp(oid)    ->  n indexes (n>=0) -> n results
-    Leaf  : result      = snmp(oid)    ->  1 result (but no index)
+#### Polling error
+The first error that can occur is an SNMP error involving `getting no response from the device`
+- If the OID is not defined in the device, it results in a global value of the OID being set to 
+  `NoOID`.
+- In the event of partial SNMP polling failure, this leads to some (if not all) values of the OIDs 
+  being set to `NoOID`, there indexes are based on the previous successful polling.
 
-The meaning of the OID can be confusiong as it is the variable to be polled
-AND the polling 'result'.
+#### Computational error: 
+Occurs when the result is impossible. For example for a numerical result the value is set to `NaN`
 
-    oid(idx) = snmp(oid)   
-    oid      = snmp(oid)
+#### Handling error as alarm
+Errors trigger a `clear` alarm status color, defined as `no report` in Xymon
+During threshold processing, the color (severity) and the error are set as follows:
+- If yellow, red, or clear: the error is set to true, and generally, a message is associated (and 
+  will be raised).
+- If green or blue: no error is raised.
+- Default thresholds like `clear` or `blue` can be overridden, just having a threshold that match 
+  the value as soon as possible.
 
-Note: If a leaf OID is an instance (element) of an OID. Try to transform it
-       to a 'branch'!
-
-- it's more scalable
-- it's probably be more efficient (TODO: add an example like: hp- ilo/cpu_dm).
-
-The OID term is also use in Devmon to designate the result of a transform:
-- oidT=transform{oidS} 
-
-Note that in Devmon a transform can have multiple oids:
-- oidT = transform {oidS1, oidS2, ... }
-- the 'primary oid' is the 'first' source oids : oidS1 
-- The resulting oidT have the same indexes as the carefuilyl chosen 'primary oid': oidS1 
-- 'source oid(s)' is/are what is polled or transformed
-- 'target oid' is the result after a transformation
-
-## The 'transforms' file
-
-The most complicated file in your template, the transforms file lays out the
-different data transformations that Devmon needs to perform on the collected
-SNMP data before it applies thresholds and renders the final message.
-
-The cisco 2950 cpu test uses a very simple transforms file:
-
-<!--start file--------------------------->
-
-    sysUpTimeSecs   : MATH          : {sysUpTime} / 100
-    UpTimeTxt       : ELAPSED       : {sysUpTimeSecs}
-
-<!----end file--------------------------->
-
-Like the oids file, it has three values per line, separated by colons.
-
-The first value is the OID alias. Note that this should be a unique value
-compared to any of the aliases defined in the 'oids' file. Notice in this
-example that the 'sysUpTimeSecs' alias is a transformed version of the
-'sysUpTime' alias, which was defined in the oids file and whose data is
-collected via SNMP. For the rest of this help file, we use the term 'alias'
-to interchangeably refer to either a variable containing data collected via
-SNMP or containing data from a translation.
-
-The second value in the line is the name of the type of transform. These are
-case insensitive (i.e. 'MATH' is the same as 'math') but we refer to them in
-the uppercase form to distinguish them from other functions.
-
-The third value defines the 'data input' for the transform specified by the
-second value. The result of this data put through the specified transform
-will be stored in the alias defined by the first value. Note that any aliases
-supplied in this field are encased in curly braces (e.g. {sysUpTime}). This
-tells Devmon that this is an alias containing an snmp or translated value,
-and not just a normal string.
-
-The data input for a transform can (depending on the transform type) consist
-of one or more OID aliases defined elsewhere. These aliases don't have to
-necessarily be defined in a line prior the transform that they are used in,
-Devmon is smart enough to figure out the hierarchy in which they should be
-used. If you have a dependency loop somewhere, Devmon will point that out to
-you, as well.
-
-Also, note that if you use a non-repeater type data alias as the input for
-a transform, the transformed alias will also be a non-repeater. Likewise
-for a repeater type data alias. If you mix repeater and non-repeater type
-data aliases in the transform input, the resulting transformed alias will
-be a repeater.
-
-With regard to duplicated OID aliases across multiple tests in a single
-template, transformed OID aliases have the same rules as non-transformed
-aliases: if you use the same transformed OID alias in multiple tests (which
-is recommended as this cuts down on the time Devmon spends running test
-logic) then their transform rules *must be identical*, as must all OID
-aliases that your transformed alias depends on. So, for example, if you have
-this defined in your if_load test on your cisco-2950 template:
-
-    ifInBps         : MATH          : {ifInOps} x 8
-
-and this defined in your if_stat test on your cisco-2950 template:
-
-    ifInBps         : MATH          : {ifInOctets} x {time} x 8
-
-you are going to be in trouble, because the 'time' OID alias might not even
-exist in the if_load test. So try to keep your duplicated OID aliases as
-simple as possible, so you dont have your tests stepping on each others toes
-(although if you do have two transformed OIDs doing the same transform on the
-same data, you should by all means duplicate them, as this will make your
-tests run much faster).
-
-There are a number of different types of transforms, which we will discuss
-below: (listed in alphabetical order)
 
 ### BEST transform
- This transform takes two data aliases as input, and stores
- the values for the one with the 'best' alarm color (green being the 'best'
- and red being the 'worst') in the transformed data alias. The oids can either
- be comma or space delimited.
-
+- The BEST transform selects the OID that has the **best alarm color** (green as `best`, red as 
+`worst`)  
+- Mainly use in the `message` file with its color and msg flags only : {target_OID.color} 
+{target_OID.msg}  
+```
+target_OID  : BEST    : {source_OID1} {source_OID2}
+```
+Notes:
+- `Source OIDs` present in the BEST transform **are excluded from the globale page color 
+  calculation** (the worst color of the page)
 
 ### CHAIN transform
+Sometimes, a device saves a numeric SNMP identifier as a string under a different OID, resulting has
+**having 2 OIDs** to poll to reach the values. The CHAIN transform combines these 2 OIDs:
+```
+target_OID   : CHAIN    : {source_OID1} {source_OID2}
+```
 
- Occasionally a device will store a numeric SNMP oid (AKA the 'data' oid) as a
- string value under another OID (the 'leaf' oid). The CHAIN transform will
- create a third 'transformed' oid, containing the leaves of the 'leaf' oid and
- the values of the 'data' oid. A quick example:
+Example: In your oids file, you have defined:
+```
+source_OID1  : .1.1.2     : branch
+source_OID2  : .1.1.3     : branch
+```
 
- In your oids file, you have defined:
+Walking the OID1 and OID2 return the values and results when combining to:
+```
+source_OID1:
+.1.1.2.1 = .1.1.3.1194
+.1.1.2.2 = .1.1.3.2342
+ 
+source_OID2:
+            .1.1.3.1194 = CPU is above nominal temperature
+            .1.1.3.2342 = System fans are non-operational
 
-    leafOid  : .1.1.2     : branch
-    dataOid  : .1.1.3     : branch
-
- After walking leafOid and dataOid, they return the values:
-
-    .1.1.2.1 = '.1.1.3.1194'
-    .1.1.2.2 = '.1.1.3.2342'
-
- and
-
-    .1.1.3.1194 = 'CPU is above nominal temperature'
-    .1.1.3.2342 = 'System fans are non-operational'
-
- Chances are that you won't know what leaf values will be returned for
- .1.1.3, but you know that .1.1.2 returns consistent values. You can use the
- CHAIN transform to 'chain' these two oids together to make the data more
- accessible. The format for the CHAIN transform is:
-
-    chainedOid   : CHAIN    : {leafOd} {dataOid}
-
- If you used the above transform with the previously mentioned data, you
- would end up with:
-
-    chainedOid.1 = 'CPU is above nominal temperature'
-    chainedOid.2 = 'System fans are non-operational'
-
+target_OID:
+.1.1.2.1                = CPU is above nominal temperature
+.1.1.2.2                = System fans are non-operational
+```
 
 ### CONVERT transform
+**Convert** a string in **hexadecimal** or **octal** to the **decimal** equivalent.
 
- Convert a string in either hexadecimal or octal to its decimal equivalent.
- Takes two arguments, a target OID alias and a conversion type, which must be
- either 'hex' or 'oct'.
+Requires:
+- an `OID` 
+- a conversion type: `hex` or `oct`
 
- For instance, to convert the hex string '07d6' to its decimal equivalent
- (2006, as it so happens), do this:
-
-    intYear : CONVERT: {hexYear} hex
-
+To convert the hex string `07d6` to its decimal equivalent `2006`:
+```
+intYear : CONVERT: {hexYear} hex
+```
 
 ### DELTA transform
+The DELTA transform **compares** the **previous values** to the **current one** changes **over the 
+time** and shows the change in **unit per second** rate.  
+  
+- You can set a maximum value (upper limit) to prevent incorrect results that may occur when OID 
+  values reset in the device. Without a specified limit, the system will automatically choose a 
+  suitable maximum based on whether it's handling 32-bit or 64-bit data.
+- This transform takes at least `two poll cycles` to return meaningful data. In the mean time you 
+  will get a `wait` result stored in the `target OID`.
 
- The DELTA transform performs a 'change over time' calculation on the
- supplied data. It takes a single data alias, with an optional 'upper limit'
- (separated from the alias by whitespace) as input.
-
- The change over time calculation will be performed between one poll interval
- and the next, and returns a measurement of data units per second.
-
- The limit is used as the maximum value of the data alias, and comes in to
- play when the value from supplied data alias from the last polling cycle is
- more than the value from your current polling cycle.
-
- This typically occurs when you have counter-wrap issues in SNMP (as most
- counters are still 32 bit; an interface with heavy traffic can wrap its
- ifOctet counters in less than two minutes).
-
- If you don't specify a limit and Devmon detects a counter- wrap, it will use
- either the 32bit or 64bit upper limit, accordingly.
-
- The upshot of this is that you CANNOT MEASURE NEGATIVE DELTAS WITH THIS
- TRANSFORM. If you really really need to, please contact the software author
- and make a feature request.
-
- Delta examples:
-
-    changeInValue  : DELTA : {value}
-
- or
-
-    changeInValue  : DELTA : {value} 2543456983
-
- Keep in mind that the DELTA transform takes at least two poll cycles to
- return meaningful data, so in the mean time you will get a 'wait' result
- stored in the target OID alias (as well as in aliases that are transformed
- based off the target alias).
-
+Examples:
+```
+changeInValue  : DELTA : {value}
+changeInValue  : DELTA : {value} 2543456983
+```
+Notes:
+- This trasnform doesn't allow for measuring decreases (negative changes) in the data.
 
 ### DATE transform
-
- This transform takes a single data alias as input, the value of which Devmon
- assumes to be seconds in "Unix time" (i.e. seconds since the Epoch [00:00:00
- GMT, January 1, 1970]) It then stores in the transformed data alias a text
- string containing the date corresponding to the number of seconds input, in
- the format CCYY-MM-DD, HH:MM:SS (24 hour time).
-
+This transform converts Unix time (seconds since January 1, 1970, 00:00:00 GMT) into a readable date
+and time format. It changes the input of seconds into a text string that shows the date and time as 
+`YYYY-MM-DD, HH:MM:SS` (using 24-hour time).
 
 ### ELAPSED transform
-
- This transform takes a single data alias as input, the value of which Devmon
- assumes to be in seconds. It then stores a text string in the transformed
- data alias containing the number of years, days, hours, minutes and seconds
- equal to the number of seconds provided as input to the transform.
-
+This transform converts a given number of seconds into a text string that shows the equivalent 
+amount of time in years, days, hours, minutes, and seconds.
 
 ### INDEX transform
-
- This transform allows you to access the index part of a numerical OID in a
- repeater OID.
-
- For example, in the cdpCache table for the Cisco CDP MIB, walking the
- cdpCacheDevicePort OID will return values such as:
-
-    CISCO-CDP-MIB::cdpCacheDevicePort.4.3 = STRING: GigabitEthernet4/41
-    CISCO-CDP-MIB::cdpCacheDevicePort.9.1 = STRING: GigabitEthernet2/16
-    CISCO-CDP-MIB::cdpCacheDevicePort.12.14 = STRING: Serial2/2
-
- The value is the interface on the remote side, and there is no OID for the
- interface on the local side. To get the interface on the local side, you must
- use the last value in the index (e.g. 3 for GigabitEthernet4/41) and look in
- the ifTable:
-
-    IF-MIB::ifName.3 = STRING: Fa0/0
-
- The index transform allows you to get the index value (4.3 in this case) as
- an OID value. Any operations you need to do on the index value should be
- possible with existing transforms.
+This transform allows you to access the index part of repeater OID. For example, walking the 
+`cdpCacheDevicePort` OID returns :
+```
+CISCO-CDP-MIB::cdpCacheDevicePort.4.3 = STRING: GigabitEthernet4/41
+CISCO-CDP-MIB::cdpCacheDevicePort.9.1 = STRING: GigabitEthernet2/16
+CISCO-CDP-MIB::cdpCacheDevicePort.12.14 = STRING: Serial2/2
+```
+The value is the interface on the remote side. To get the interface on the local side, you must use 
+the last value in the index (e.g. 3 for GigabitEthernet4/41) and look in the ifTable:
+```
+IF-MIB::ifName.3 = STRING: Fa0/0
+```
+The index transform allows you to get the index value `4.3` as an OID value. You can use the REGSUB 
+transform to further extract the `3` value.
 
 ### MATCH transform
+This transform allow the `target OID` to have :
+- A `new index`: An `incremental index`, starting from `1`   
+- A `value` that is the `index` of the matched `source OID` value
 
- In some badly designed MIBs multiple types of information are presented in a
- single table with two columns (branches), often in just a name, value format.
- This transform makes it possible to split such a combined table out into
- separate tables, or to reformat the table so that it has multiple columns.
+This transform addresses an issue found in MIBs that mix different data types in just two columns. 
+It either separates these mixed tables into distinct ones or rearranges them to have more columns.   
 
- For example, the MIB for the TRIDIUM building management system has a table
- with outputName and outputValue, data returned looks as follows:
+Example: 
+The MIB for the TRIDIUM building management system contains a table 
+with two columns: outputName and outputValue.
+```
+TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
+TRIDIUM-MIB::outputName.2  = STRING: "I_Inc4_VaN"
 
-    TRIDIUM-MIB::outputName.1  = STRING: "I_Inc4_Freq"
-    TRIDIUM-MIB::outputName.2  = STRING: "I_Inc4_VaN"
-    TRIDIUM-MIB::outputName.3  = STRING: "I_Inc4_VbN"
-    TRIDIUM-MIB::outputName.4  = STRING: "I_Inc4_VcN"
-    ...
-    TRIDIUM-MIB::outputValue.1 = STRING: "50.06"
-    TRIDIUM-MIB::outputValue.2 = STRING: "232.91"
-    TRIDIUM-MIB::outputValue.3 = STRING: "233.39"
-    TRIDIUM-MIB::outputValue.4 = STRING: "233.98"
+TRIDIUM-MIB::outputValue.1 = STRING: "50.06"
+TRIDIUM-MIB::outputValue.2 = STRING: "232.91"
 
- To split the frequences out as a separate repeater, use:
+```
+To split the frequences and the voltage out as a separate repeater, use:
+```
+outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
+outputVaNRow   : MATCH  : {outputName} /.*_VaN$/
+```  
+- `outputFreqRow` will contains 1,... as `values`  
+- `outputVaNRow` will contains 2,... as `values`  
+- There indexes start from 1  
 
-    outputFreqRow  : MATCH  : {outputName} /.*_Freq$/
-    outputVaRow    : MATCH  : {outputName} /.*_VaN$/
-    ...
+To construct a table, use the chain transform to create repeaters using the matched indexes:
+```
+outputNameFreq      : CHAIN  : {outputFreqRow} {outputName}
+outputValueFreq     : CHAIN  : {outputFreqRow} {outputValue}
+outputNameVaN       : CHAIN  : {outputVaNRow} {outputName}
+outputValueVaN      : CHAIN  : {outputVaNRow} {outputValue}
+```
+A table created as follows:
+```
+Freq Name       |Frequency (Hz)   |Voltage Name   |Voltage A
+{outputNameFreq}|{outputValueFreq}|{outputNameVaN}|{outputValueVaN}
+```
+Outputs: 
+```
+Freq Name  |Frequency (Hz)|Voltage Name|Voltage A
+I_Inc4_Freq|         50.06|  I_Inc4_VaN|   232.91   
+```
+You can further improve it for example not repeating I_Inc4 and to have:
+```
+Name  |Frequency (Hz)|Voltage A
+I_Inc4|         50.06|   232.91   
+```
 
- outputFreqRow will now contain the indexes of outputName that matched the
- regular expression, e.g. 1,5,9 etc. , outputVaRow will contain 2,6,10. To
- construct a table, use the chain transform to create repeaters using the
- matched indexes:
 
-    outputFreq     : CHAIN  : {outputFreqRow} {outputValue}
-    outputVa       : CHAIN  : {outputVaRow} {outputValue}
-    ...
+### MATH transform:
+The MATH transform performs a mathematical expression defined by the supplied data. It can use the 
+following mathematical operators:
+```
+'+'           (Addition)
+'-'           (Subtraction)
+'*'           (Muliplication)
+'/'           (Division)
+'^'           (Exponentiation)
+'%'           (Modulo or Remainder)
+'&'           (bitwise AND)
+'|'           (bitwise OR)
+' . '         (string concatenation - note white space each side) (**deprecated**)
+'(' and ')'   (Expression nesting)
+```
+This transform is not whitespace sensitive, except in the case of ' . ', which is **deprecated**.     
+The mathematical expressions you can perform can be quite complex, such as:
+```
+((({sysUpTime}/100) ^ 2 ) x 15) + 10
+```
+Notes:
+The MATH transform syntax isn't rigorously checked upon template loading. Any errors will only 
+surface when you first use the template, logged in the devmon.log file.
 
- To create the primary repeater for a table, we do the same on outputName:
+Decimal precision can also be controlled via an additional variable seperated from the main 
+expression via a colon:
+```
+transTime : MATH : ((({sysUpTime}/100) ^ 2 ) x 15) + 10 : 4 
+```
 
-    IncomerRowName : CHAIN  : {outputFreqRow} {outputName}   
-
- In this case, it is preferable to clean up the outputFreq for display:
-
-    IncomerName    : REGSUB : {IncomerRowName} /(.*)_Freq/$1/
-
- A table created as follows:
-
-    Incomer|Frequency (Hz)|Voltage A|Voltage B|Voltage C
-
- Would now contain in its first row:
-
-    I_Inc4|50.06|232.91|233.39|233.98   
-
- 'MATH' transform:
-
- The MATH transform performs a mathematical expression defined by the
- supplied data. It can use the following mathematical operators:
-
-    '+'           (Addition)
-    '-'           (Subtraction)
-    '*'           (Muliplication)
-    ' x '         (Multiplication - note white space on each side) (deprecated)
-    '/'           (Division)
-    '^'           (Exponentiation)
-    '%'           (Modulo or Remainder)
-    '&'           (bitwise AND)
-    '|'           (bitwise OR)
-    ' . '         (string concatenation - note white space each side)
-    '(' and ')'   (Expression nesting)
-
- This transform is not whitespace sensitive, except in the case of ' x ' and
- ' . ' , so both:
-
-    {sysUpTime} / 100
-
- and
-
-    {sysUpTime}/100
-
- ...would be accepted, and are functionally equivalent. However:
-
-    {ifInOps} x 8
-
- will work, while:
-
-    {ifInOps}x8
-
- will not. This is to avoid problems with oid names containing the character
- 'x'. New templates should rather use the '*' operator to avoid problems, e.g.:
-
-    {ifInOps}*8
-
- The mathematical expressions you can perform can be
- quite complex, such as:
-
-    ((({sysUpTime}/100) ^ 2 ) x 15) + 10
-
- Note that the syntax of the MATH transform is not stringently checked at
- the time the template is loaded, so if there are any logic errors, they
- will not be apparent until you attempt to use the template for the first
- time (any errors will be dumped to the devmon.log file on the node that
- they occurred on).
-
- Decimal precision can also be controlled via an additional variable seperated
- from the main expression via a colon:
-
-     transTime : MATH : ((({sysUpTime}/100) ^ 2 ) x 15) + 10 : 4 
-
- This would ensure that the transTime alias would have a precision value (zero
- padded, if needed) of exactly 4 characters (i.e. 300549.3420). The default
- value is 2 precision characters. To remove the decimal characters
- alltogether, specify a value of 0.
+This ensures that the transTime OID has a precision of exactly 4 characters, padded with zeros if 
+necessary (e.g., 300549.3420). By default, it has 2 precision characters. To eliminate decimals 
+entirely, specify a value of 0.
 
 ### UNPACK transform 
-  
- The inverse of the 'PACK' transform.
+The inverse of the `PACK` transform.
 
 ### REGSUB transform
-
- One of the most powerful and complicated transforms, the regsub transform
- allows you to perform a regular expression substitution against a single data
- alias input. The data input for a regsub transform should consist of a single
- data alias, followed by a regular expression substitution (the leading 's'
- for the expression should be left off). For example:
-
-    ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
-
- The transform above takes the input from the ifAlias data alias and, assuming
- that it is not an empty string (ifAlias has to have at least one non-
- whitespace character in it) it puts square braces around the value and puts a
- space in front of it. This example is used by all of the Cisco interface
- templates included with Devmon, to include the ifAlias information for an
- interface, but only if it has a value defined. A very powerful, but easily
- misused transform. If you are interested in using it but don't know much
- about substitution, you might want to google 'regular expression
- substitution' and try reading up on it.
+The regsub transform is a powerful yet complex technique that allows you to replace segments of a 
+single `source OID` using regular expressions (the leading `s` for the expression should be left 
+off). For example:
+```
+ifAliasBox : REGSUB  : {ifAlias} /(\S+.*)/ [$1]/
+```
+If `ifAlias` contain at least one non-whitespace character, square brackets are added around its 
+value with a space in front. This example is used in all Cisco interface templates in Devmon to 
+include `ifAlias` information for an interface, but only if it's defined. If you're unfamiliar with 
+substitution, consider looking up `regular expression substitution` for more information.
 
 ### SET transform
+The SET transform generates a `repeater` OID with preset values. 
+- Each value's index starts from 1.
+- Each value's MUST be separated by commas optionally surrounded by spaces.
+- At least one constant MUST be provided, which can be either a number or a character  string 
+  excluding `,{}`. Leading and trailing spaces are ignored.
 
- The SET transform creates a repeater-type OID, and presets it with a sequence
- of constants. The indexes of the individual values of the OID created by SET
- are numbered starting from 1. The constants are defined in the third field.
- The constants are separated by a comma, optionally surrounded by zero or more
- spaces. Leading and trailing spaces in the list of constants are ignored. At
- least one constant must be specified. A constant is either a number or a
- string of characters, which should not include ',', '{' or '}'. It is not
- possible to define spaces at the start or at the end of the string.
+For example, in the McAfee MEB 4500 MIB, there's a section detailing file systems. Each file system 
+includes space utilization, size, free space, i-node utilization, total i-nodes, and free i-nodes. A
+more organized approach is to represent this information in a table with 6 columns. The provided 
+configuration accomplishes this by mapping the single column into 6 columns.
+```
+fsInfo    : .1.3.6.1.4.1.1230.2.4.1.2.3.1 : branch
 
- Like the MATCH transform, the SET transform is meant to be used for a badly
- designed MIB. While MATCH is used if two branches are used, containing the
- name and the value, SET is used if only one branch is used, containing a list
- of values.
+fsiUtil   : SET    : 11.0,17.0,23.0,29.0,35.0,41.0
+fsiSize   : SET    : 12.0,18.0,24.0,30.0,36.0,42.0
+fsiFree   : SET    : 13.0,19.0,25.0,31.0,37.0,43.0
+fsiIUtil  : SET    : 14.0,20.0,26.0,32.0,38.0,44.0
+fsiISize  : SET    : 15.0,21.0,27.0,33.0,39.0,45.0
+fsiIFree  : SET    : 16.0,22.0,28.0,34.0,40.0,46.0
 
- For example, the MIB for the McAfee MEB 4500 contains a section describing (a
- part of) the file systems. For each file system, the utilisation of space,
- the size, the free space, the utilisation of the i-nodes, the total number of
- i-nodes and the number of free i-nodes are available. A better representation
- is a table with 6 columns. The following configuration is used to map the
- single column onto 6 columns.
+fsbName   : SET    : deferred,quaratine,scandir,logs,var,working
+fsbUtil   : CHAIN  : {fsiUtil} {fsInfo}
+fsbSize   : CHAIN  : {fsiSize} {fsInfo}
+fsbFree   : CHAIN  : {fsiFree} {fsInfo}
+fsbIUtil  : CHAIN  : {fsiIUtil} {fsInfo}
+fsbISize  : CHAIN  : {fsiISize} {fsInfo}
+fsbIFree  : CHAIN  : {fsiIFree} {fsInfo}
+```
 
-     fsInfo    : .1.3.6.1.4.1.1230.2.4.1.2.3.1 : branch
-
-     fsiUtil   : SET    : 11.0,17.0,23.0,29.0,35.0,41.0
-     fsiSize   : SET    : 12.0,18.0,24.0,30.0,36.0,42.0
-     fsiFree   : SET    : 13.0,19.0,25.0,31.0,37.0,43.0
-     fsiIUtil  : SET    : 14.0,20.0,26.0,32.0,38.0,44.0
-     fsiISize  : SET    : 15.0,21.0,27.0,33.0,39.0,45.0
-     fsiIFree  : SET    : 16.0,22.0,28.0,34.0,40.0,46.0
-
-     fsbName   : SET    : deferred,quaratine,scandir,logs,var,working
-     fsbUtil   : CHAIN  : {fsiUtil} {fsInfo}
-     fsbSize   : CHAIN  : {fsiSize} {fsInfo}
-     fsbFree   : CHAIN  : {fsiFree} {fsInfo}
-     fsbIUtil  : CHAIN  : {fsiIUtil} {fsInfo}
-     fsbISize  : CHAIN  : {fsiISize} {fsInfo}
-     fsbIFree  : CHAIN  : {fsiIFree} {fsInfo}
-
- The OIDs named fsb.+ can be used in transforms and in the TABLE directive in
- file 'message'.
-
- From a theoretical stand point, the SET transform complements the set of
- transforms. There was already the possibility to set a leaf-type OID to a
- constant value, using a statement like:
-
-    AScalar  : MATH   : 123
-
- The SET transform introduces the same possibility for a repeater-type OID.
+There is the possibility to set a `non-repeater` OID to constant value
+```
+AScalar  : MATH   : 123
+```
 
 
 ### SPEED transform
 
- This transform takes a single data alias as input, which it assumes to be a
- speed in bits. It then stores a value in the transformed data alias,
- corresponding to the largest whole speed measurement. So a value of 1200
- would render the string '1.2 Kbps', a value of 13000000 will return a value
- of '13 Mbps', etc.
+This transform converts speed values in bits to the largest whole speed measurement. For example, 
+`1200` would become `1.2 Kbps`, and `13000000` would become `13 Mbps`.
+
 
 ### STATISTIC transform
+This transformation computes statistics. The result type is a `non-repeater`.
 
- This transform takes a repeater type data alias as the input for the
- transform and computes a non-repeater type data alias. The STATISTIC
- transform can compute the minimum value, the maximum value, the average value
- and the sum of the values of the repeater type data alias. Moreover it can
- count the number of values of the repeater type data alias.
-
- If the input is a non-repeater data alias, the transform returns the value of
- the input data. However, if the number of values is to be counted the
- returned value is 1.
-
- If for example the average temperature in a device with multiple temperature
- sensors is to be monitored, the transformation could be:
-
-    TempAvg : STATISTIC : {ciscoEnvMonTemperatureStatusValue} AVG
-
- As the example shows, the last keyword determines the value to be returned.
- The possible keywords are:
-
-    AVG : Average value
-    CNT : Number of values
-    MAX : Maximum value
-    MIN : Minimum value
-    SUM : Sum of the values
+Example:  
+The average temperature in a device with multiple temperature sensors is to be monitored, the 
+transformation could be:
+```
+TempAvg : STATISTIC : {ciscoEnvMonTemperatureStatusValue} AVG
+```
+As the example shows, the last keyword determines the value to be returned. The possible keywords 
+are:
+- `AVG` : Average value
+- `CNT` : Number of values
+- `MAX` : Maximum value
+- `MIN` : Minimum value
+- `SUM` : Sum of the values
 
 ### SUBSTR transform
+The substr transform extracts a portion of text  
+Requires:
+- an `OID`, 
+- a `starting position` (zero-based)
+- a `length` value (optional). If not provided, substr copies until the end of the string.
 
- The substr transform is used to extract a portion of the text (aka a
- 'substring') stored in the target OID alias. This transform takes as
- arguments: a target alias, a starting position (zero based, i.e. the first
- position is 0, not 1), and an optional length value. If a length value is
- not specified, substr will copy up to the end of the target string.
-
- So, if you had an OID alias 'systemName' that contained the value 'Cisco
- master switch', you could do the following:
-
-    switchName : SUBSTR : {systemName} 0 12
-
- stores 'Cisco master' in the 'switchName' alias, or
-
-    switchName : SUBSTR : {systemName} 6
-
- stores 'master switch' in the 'switchName' alias
-
+Example:  
+systemName contains `Cisco master switch`
+```
+switchName : SUBSTR : {systemName} 0 12
+```
+The transformed value is `Cisco master` 
+```
+switchName : SUBSTR : {systemName} 6
+```
+The transformed value is `master switch`
 
 ### SWITCH transform
+The switch transform substitutes one data value with another. It's often used to convert a numeric 
+value from an SNMP query to its corresponding text. The statements are applied in a left to right
+order.
 
- The switch transform transposes one data value for another. This is most
- commonly used to transform a numeric value returned by an snmp query into its
- textual equivalent. The first argument in the transform input should be the
- oid to be transformed. Following this should be a list of comma- delimited
- pairs of values, with each pair of values being separated by an equals sign.
-
- For example: 
-
-    upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
-
- So this transform would take the input from the 'upsBattRepNum'
- data alias and compare it to its list of switch values. If
- the value of upsBattRepNum was 1, it would store a 'Battery OK'
- value in the 'upsBattRep' data alias. 
-
- You can use simple mathematical tests on the values of the source OID
- alias, as well as assigning values for different OIDs to the target alias.
- For instance:
-
-    dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
-
- The format for the tests are as follows (assuming 'n','a' and 'b' are
- floating point numerical value [i.e. 1, 5.33, 0.001, etc], and 's' is a
- alphanumeric string):
-
-    n       : Source alias is equal to this amount
-    >n      : Source alias is greater than this amount
-    >=n     : Source alias is greater than or equal to this amount
-    <n      : Source alias is less than this amount
-    <=n     : Source alias is less than or equal to this amount
-    a - b   : Source alias is between 'a' and 'b', inclusive
-    's'     : Source alias matches this string exactly (case sensitive)
-    "s"     : Source alias matches this regular expression (non-anchored)
+Examples: 
+```
+upsBattRep : SWITCH : {battRepNum} 1 = Battery OK, 2 = Replace battery
+```
+```
+dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = DHCP available
+```
+The format for the tests are as follows (assuming `n`,`a` and `b` are floating point numerical value
+i.e. `1`, `5.33`, `0.001`, ... and `s` is a alphanumeric string):
+```
+    n       : Source OID is equal to this amount
+    >n      : Source OID is greater than this amount
+    >=n     : Source OID is greater than or equal to this amount
+    <n      : Source OID is less than this amount
+    <=n     : Source OID is less than or equal to this amount
+    a - b   : Source OID is between 'a' and 'b', inclusive
+    's'     : Source OID matches this string exactly (case sensitive)
+    "s"     : Source OID matches this regular expression (non-anchored)
               ".*" match anything! (similar to default: prefer it)
-    default : Default value for the target alias, used in cas of undefined
+    default : Default value for the target OID, used in case of undefined
               values or any unmatch statement (specially usefull for incomplet
-              oids, prefer ".*" if there is no reason to use it!
-
- Note that switch statements are applied in a left to right order; so if you
- have a value that matches the source value on multiple switch statements, the
- leftmost statement will be the one applied.
-
- The switch statement can also assign values from another OID to the target
- OID alias, depending on the value of the source OID alias, like this:
-
-    dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
-
- This would assign the value 'No DHCP' to the 'dhcpStatus' alias if and only
- if the 'dhcpPoolSize' alias contained a value equal to zero. Otherwise, the
- value of the 'dhcpAvail' alias would be assigned to dhcpStatus. 
+              OIDs, prefer ".*" if there is no reason to use it!
+```
+The switch statement can use values from other OIDs, like this:
+```
+dhcpStatus : SWITCH : {dhcpPoolSize} 0 = No DHCP, >0 = {dhcpAvail}
+```
+This would assign the value `No DHCP` to `dhcpStatus` if and only if the `dhcpPoolSize` contained a 
+value equal to zero. Otherwise, the value of the `dhcpAvail`  would be assigned to `dhcpStatus`. 
 
 ### UNPACK transform
+The unpack transform is used to unpack binary data into any one of a number of different data types.  
+This transform requires
+- an OID 
+- unpack type (case sensitive), separated by a space.
 
- The unpack transform is used to unpack binary data into any one of a number
- of different data types (all of which are eventually stored as a string by
- Devmon). This transform requires a target OID alias and an unpack type (case
- sensitive), separated by a space.
-
- As an example, to unpack a hex string (high nybble first), try this:
-
-    hexString : UNPACK : {binaryHex} H
-
- The unpack types are as follows:
-
+As an example, to unpack a hex string (high nybble first):
+```
+hexString : UNPACK : {binaryHex} H
+```
+The unpack types are as follows:
+```
     Type  |  Description              
     ---------------------------------------------------
        a  | ascii string, null padded
@@ -737,382 +523,182 @@ below: (listed in alphabetical order)
        V  | long integer in little-endian order
        u  | uuencoded string
        x  | null byte
-       
+```       
 
 ### WORST transform
+The transform takes two `source OIDs` and stores the value associated with the worst alarm color 
+(red as the worst, green as the best) in the `target oid`.
 
- This transform takes two data aliases as input, and stores the values for the
- one with the 'worst' alarm color (red being the 'worst' and green being the
- 'best') in the transformed data alias. The oids can either be comma or space
- delimited.
+## The thresholds file
+Specify `threshold` limits for the OIDs, including their corresponding alarm `color` levels and 
+`messages`
 
+### Format
+```
+upsLoadOut  : red     : 90          : UPS load is very high
+upsLoadOut  : yellow  : 70          : UPS load is high
 
-## The 'thresholds' file
+upsBattStat : red     : Battery low : Battery time remaining is low
+upsBattStat : yellow  : Unknown     : Battery status is unknown
 
-The thresholds file defines the limits against which the various data aliases
-that you have created in your 'oids' and 'transforms' files are measured
-against. An example thresholds file is as follows:
+upsOutStat  : red     : On battery|Off|Bypass              : {upsOutStat}
+upsOutStat  : yellow  : Unknown|voltage|Sleeping|Rebooting : {upsOutStat}
 
--<start file>-----------------------------
+upsBattRep  : red     : replacing : {upsBattRep}
+```
 
-    upsLoadOut  : red     : 90          : UPS load is very high
-    upsLoadOut  : yellow  : 70          : UPS load is high
-
-    upsBattStat : red     : Battery low : Battery time remaining is low
-    upsBattStat : yellow  : Unknown     : Battery status is unknown
-
-    upsOutStat  : red     : On battery|Off|Bypass              : {upsOutStat}
-    upsOutStat  : yellow  : Unknown|voltage|Sleeping|Rebooting : {upsOutStat}
-
-    upsBattRep  : red     : replacing : {upsBattRep}
-
--<end file>-------------------------------
-
-As you can see, the thresholds file consists of one entry per line, with each
-entry consisting of three to four fields separated by colons. The first field
-in an entry is the data alias that the threshold is to be applied against.
-The second field is the color that will be assigned to the data alias should
-it match this threshold. The third field has the threshold values, which are
-the values that the data alias in the first field will be compared against.
-You can have multiple values, delimited by vertical bars, in the third field.
-The fourth field is the threshold message, which will be assigned to the data
-alias in the first field if it matches this threshold.
-
-The threshold message can contain other data alias(es) (oids): if they are of a 
-branch type they have to share indexes with the first field. If they are leafs
-they do not need as there is only one value. The threshold field cannot use
-data aliases (oids) value (this is feature request). 
+The thresholds file comprises one entry per line, each containing three to four fields separated by 
+colons:
+- The first field: The `OID` for which the threshold is applied
+- The second field: The `color` assigned if the threshold is met
+- The third field: contains threshold values
+  - **OID templating is not supported** (this is a feature request, please vote for it!)
+- The fourth field: is the threshold message: a string that can contains OIDs, enclosed in {}
+  - If the message contains an OID of type `repeater`: They have to share indexes with the first 
+    field
+  - The alarm message can also contain an OID of type `non-repeater`
 
 ### The evaluation order
-2 levels: the precision level is evaluated first  
-#### A 'precise' threshold has a higher priority
-- Priority 7: =, eq
-- Priority 6: > >= < >=
-- Priority 5: ~= (smart match)
-- Priority 4: !~  (negative smart match)
-- Priority 3: !=, ne
-- Priority 2: _AUTOMATCH_
-- Priority 1: (empty)
+The operator `precision` is evaluated **first**: A higher precision holds higher priority.
+- Priority 7: `=` `eq`
+- Priority 6: `>` `>=` `<` `>=`
+- Priority 5: `~=` (smart match)
+- Priority 4: `!~`  (negative smart match)
+- Priority 3: `!=` `ne`
+- Priority 2: `_AUTOMATCH_`
+- Priority 1: `(empty)`
  
-#### A 'highest severity' has a higher priority 
-- Priority from higher to lower:  red->yellow->clear->green 
-
-One thing to note about thresholds is that they are lumped into one of two
-categories: numeric and non-numeric
-- Some operateur like Smart match only appy to non-numeric. 
-- Numeric operator are evaluated first
-
-If no math operator is defined in the threshold, Devmon assumes that it is a
-'greater than' type threshold. That is, if the value obtained via SNMP is
-greater than this threshold value, the threshold is considered to be met
-and Devmon will deal with it accordingly. This is ambiguous with '='. This 
-should be avoid and replace with the '>' operator. (Should raised a warning 
-TODO: make a deprecation notice)
-
-If a threshold value contains even one non-numeric character (other than the
-math operators illustrated above), it is considered a non-numeric threshold.
-
-Regular expressions in threshold matches are non-anchored, which means they
-can match any substring of the compared data. So be careful how you define
-your thresholds, as you could match more than you intend to! If you want to
-make sure your pattern matches explicitly, precede it with a '^' and
-terminate it with a '$'.
-
-
-## The 'exceptions' file
-
-The exceptions file is contains rules which are only applied against repeater
-type data aliases.
-
-An example of a exceptions file is as follows:
-
--<start file>-----------------------------
-
-    ifName : alarm  : Gi.+
-    ifName : ignore : Nu.+|Vl.+
-
--<end file>-------------------------------
-
-You can see that each entry is on its on line, with three fields separated by
-colons. The first field is the primary data alias that the exception should
-be applied against. The second field is the exception type, and the third
-field is the regular expression that the primary alias is matched against.
-Exception regular expressions (unlike non-numeric thresholds) ARE anchored,
-and thus need to match the primary oid EXACTLY.
-
-Exceptions are only applied against the first (primary) alias in a repeater
-table (which is described below). There are four types of exceptions types
-that you can use, they are:
-
-- ignore
-
-The 'ignore' exception type causes Devmon to not display rows in a repeater
-table which have a primary oid that matches the exception regexp.
-
-- only
-
-The 'only' exception type causes Devmon to only display rows in a repeater
-table which have a primary oid that matches the exception regexp.
-
-- alarm
-
-The 'alarm' exception causes Devmon to only generate alarms for rows in a
-repeater table that have a primary oid that matches the exception regexp.
-
-- noalarm
-
-The 'noalarm' exception causes Devmon to not generate alarms for rows in a
-repeater table that have a primary oid that matches the exception regexp.
-
-The exceptions are applied in the order above, and one primary alias can
-match multiple exceptions. So if you have a primary alias that matches both
-an 'ignore' and an 'alarm' exception, no alarm will be generated (in fact,
-the row won't even be displayed in the repeater table).
-
-The example file listed above, from a cisco 2950 if_stat test, tells Devmon
-to only alarm on repeater table rows which have a primary oid (in this case,
-ifName) that starts with 'Gi' and has any number of characters after that
-(which will match any Gigabit interfaces on the switch). Also, it tells
-Devmon not to display any rows with a primary alias that has a value that
-behind with Nu (a Null interface) or Vl (A VLAN interface).
-
-
-## The 'messages' file
-
-The messages file is what brings all the data collected from the other files
-in the template together in a single cohesive entry. It is basically a web
-page (indeed, you can add html to it, if you like) with some special macros
-embedded in it.
-
-An example of a simple messages file is as follows:
-
--<start file>-----------------------------
-
-    {upsStatus.errors}
-    {upsBattStat.errors}
-    {upsLoadOut.errors}
-    {upsBattRep.errors}
-
-    UPS status:
-
-    Vendor:              apc
-    Model:               {upsModel}
-
-    UPS Status:          {upsOutStat}
-    Battery Status:      {upsBattStat}
-
-    Runtime Remaining:   {upsMinsRunTime} minutes
-    Battery Capacity:    {upsBattCap}%
-    UPS Load:            {upsLoadOut}%
-
-    Voltage in:          {upsVoltageIn}v
-    Voltage out:         {upsVoltageOut}v
-
-    Last failure due to: {upsFailCause}
-    Time on battery:     {upsSecsOnBatt} secs
-
--<end file>-------------------------------
-
-You can see in this file that it is just a bunch of data aliases, with one or
-two special exceptions. Most of these will just be replaced with their
-corresponding values. You can see at the top of the file, however, that there
-are a few weird looking data aliases (the ones that end in .errors). These
-are just normal data aliases with a special flag appended to them, that lets
-Devmon know that you want something from them than just their data value.
-
-Here are all of the alias flags, and their functions:
-
-- color
-
-This flag will print out the bb/hobbit/xymon color string assigned to this
-data alias by the thresholds (this string looks like '&red' or '&green',
-etc). This color string will be interpreted by xymon as a colored icon, which
-makes alarm conditions much easier to recognize. Like the 'errors' flag, it
-will also modify the global color.
-
-- errors 
-
-The errors flag on a data alias will list any errors on this data alias. In
-this case, 'errors' refers to the message assigned to the alias from a non-
-green threshold match (the message is the value assigned in the fourth field
-of an entry in the thresholds file, remember?). If the value assigned to a
-data alias is green, then the value that replaces this flag will be blank.
-
-Error messages will always be printed at the TOP of the message file,
-regardless of where they are defined within it. This is done to make sure
-that the user sees any errors that might have occurred, which they might miss
-if the messages file is too long.
-
-The errors flag will also modify the global color of the message. So if this
-error flag reports a yellow error, and the global color is currently green,
-it will increase the global color to yellow. If the error flag reports a red
-error, it will increase the global color to red. The global color of a
-message defaults to green, and is modified upwards (if you consider more
-severe colors to be 'up') depending on the contents of the 'error' and
-'color' flags.
- 
-Starting with the github version of devmon, we decide to 'propagate' errors
-and their messages from a transform to the next one. Why? 
-- There is a need to : tswitch was aleardy doing so 
-- We would like to catch also other errors and see were they come from 
-Errors generated by threshold are in fact just alarms. But we have also:
-- Connectivity error: Not any value or some "undefined" value -> Undef 
-- Computational error: Impossible result                      -> NaN
-- Impcompaible matrix: holes in a table                       -> n/a
-About the severity: 
-- During the threshold processing, the color(=severityi) and the error are set 
-  - if yellow, red, clear: the error is set (and will be raised)
-  - if green or blue: no error are raised
-- if error is set: furher transform will bypass the threshold processing 
-- Transform usually just transforms data, but if a problem is detected it can:
-  - Set a severity (without setting the error), usually yellow (minor) 
-  - The threshold processing is done, so the severity can be override
-  - If not overriden, the error is set at the end of the threshold processing
-- A connectivity error is currently put in severity = 'gray' or 'no report'
-- A processing error is currenty put in 'yellow' and set the value to 'NaN'
- 
-- msg
-
-The msg flag prints out the message assigned to the data alias by its
-threshold. Unlike the errors flag, it prints the message even if the data
-alias matches a green threshold and it also does NOT modify the global color
-of the message.
-
-- thresh
-
-The syntax for the thresh flag is {oid.thresh:<color>}. It displays the value
-in the threshold file (or custom threshold) that corresponds with the
-supplied color. So, {CPUTotal5Min.thresh:yellow} would display the template
-value for the yellow threshold for the CPUTotal5Min oid, or a per-device
-custom threshold if one was defined.
-
-A more complicated message file is this one, taken from a Cisco 2950 switch
-if_stat test:
-
-
--<begin file------------------------------
-      TABLE:
-      Ifc name|Ifc speed|Ifc status
-      {ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.errors}
-
--<end file>-------------------------------
-
-In this message file, we are using a repeater table. Repeater tables are used
-to display repeater-type data aliases (which ultimately stem from 'branch'
-type snmp oids). The 'TABLE:' keyword (case sensitive, no leading whitespace
-allowed) is what alerts Devmon that the next one to two lines are a repeater
-table definition.
-
-Devmon basically just builds an HTML table out of the repeater data. It can
-have an optional header, which should be specified on the line immediately
-after the 'TABLE:' tag. If no table header is desired, the line after the
-table tag should be the row data identifier. The column separator in the
-header line is a '|'. By default the content of a column will be left
-aligned. If the content should be aligned on the right side, use '|>' rather
-than '|' as the separator. Note that the leftmost column cannot be right
-aligned in this way.
-
-The row data identifier is the one that contains one or more data aliases.
-The first of these aliases is referred to as the 'primary' alias, and must be
-a repeater-type alias. Any other repeater type aliases in the row will be
-keyed off the primary alias; that is, if the primary aliases has leaves
-numbered '100,101,102,103,104', the table will have five rows, with the first
-row having all repeater aliases using leaf 100, the second row having all
-repeaters using leaf 101, etc. Any non-repeaters defined in the table will
-have a constant value throughout all of the rows.
-
-The TABLE: key can have one or more, comma-delimited options following it
-that allow you to modify the way in which Devmon will display the data. These
-options can have values assigned to them if they are not boolean ('nonhtml',
-for example, is boolean, while 'border' is not boolean).
-
-The TABLE options
-
-- nonhtml
-
-Don't use HTML tags when displaying the table. Instead all columns will
-be separated by a colon (:). This is useful for doing NCV rrd graphing
-in hobbit.
-
-- plain
-
-Don't do any formatting. This allows repeater data (each item on it's own
-line), without colons or HTML tables. One use of this option is to format
-repeater data with compatibility with a format Hobbit already understands. An
-example is available in the disk test for the linux-openwrt template.
-
-- noalarmsmsg
-
-Prevent Devmon from displaying the 'Alarming on' header at the top of a
-table.
-
-- alarmsonbottom
-
-Cause Devmon to display the 'Alarming on' message at the bottom of the table
-data, as opposed to the top.
-
-- border=n
-
-Set the HTML table border size that Devmon will use
-(a value of 0 will disable the border)
-
-- pad=n
-
-Set the HTML table cellpadding size that Devmon will use
-
-- rrd
-
-See the GRAPHING document in this directory for explanation
-
-An example of some TABLE options in use:
-
-   TABLE: alarmsonbottom,border=0,pad=10
-
-The STATUS: key allows you to extend the first line of the status message
-that Devmon sends to BB/Hobbit/Xymon. For example, if you need to get data
-to a Xymon rrd collector module that evaluates data in the first line of the
-message (such as the Hobbit la collector which expects "up: <time>, %d
-users, %d procs load=%d.%d" you can use this key as follows to get a load
-average graph:
-
-    STATUS: up: load={laLoadFloat2}
-
-
-### Done!
-
-That's it! Once you've completed the five files mentioned above, you should,
-in theory, have a working template. I would recommend building the template
-under a separate 'test' installation of Devmon, as the single-node version
-of Devmon re-reads the template directory once per poll period, and having
-an incomplete or broken template will cause Devmon to throw error messages
-into its log.
-
-Try extracting the Devmon tarball to somewhere like "/usr/local/devmontest",
-and fiddle with the templates from there. Run Devmon from this directory in
-single-node mode, using a dummy bb-hosts file (even if your production Devmon
-cluster runs in multi-node mode, running the test Devmon in single node mode
-prevents you from having to create an additional database for your Devmon
-"test" installation). With the -vv and -p flags (i.e. devmon -vv -p), you
-will get verbose output from Devmon, and if you have a host in the bb-hosts
-file that matches the sysdesc in the specs file of the the model-vendor for
-the new template you created, you will also get textual output of your new
-template! (The -p flag causes Devmon to not run in the background and to
-print messages to STDOUT as opposed to sending them to the display server,
-and the -vv flag causes Devmon to log verbosely.)
-
-Once you are satisfied that your template is working correctly, you can put
-it to work in your production installation. In a single-node installation,
-this is as simple as copying the template directory to the appropriate
-subdirectory of your templates/ dir. On the next poll cycle, Devmon will pick
-up the new template, and any new hosts discovered by your readbbhosts cron
-job will be added to the Devmon database using this new template.
-
-In a multinode installation, adding a new template is only slightly more
-difficult. Copy the template directory to the appropriate place on the
-machine where you keep all your templates (earlier we recommended using your
-display server, and deleting all the template directories on the node
-machines). Once you have it in place, run devmon with the --synctemplates
-flag. This will read in the templates, update the database as necessary, and
-then notify all the Devmon nodes that they need to reload their templates. A
-full template reload on all your machines can take up to twice the interval
-of your polling cycle, so be patient!
+ `Severity` is evaluated **second**, from highest to lowest severity..
+- `red`
+- `yellow`
+- `clear`
+- `green` 
+
+Notes:
+- Numeric operators are evaluated first.
+- Some operators, like Smart match, only apply to non-numeric values. 
+- If **no operator** is specified in the threshold field, Devmon assumes it's a `greater than`
+  threshold. If the SNMP value exceeds this threshold, Devmon treats it as met. 
+  This behavior is **deprecated**: Use the `>` operator for clarity and self-documentation.
+  (TODO: Add a deprecation notice)
+- Regular expressions in threshold matches are non-anchored. If you want to ensure
+  your pattern matches explicitly, precede it with a `^` and terminate it with a `$`.
+
+
+## The exceptions file
+The exceptions file contains rules that are only applied to the primary OID of tables in the 
+`messages` file
+
+### Format
+```
+ifName : alarm  : Gi.+
+ifName : ignore : Nu.+|Vl.+
+```
+- Field #1: The `primary OID` against which the exception is applied. 
+- Field #2: The exception type. Applied in the following order:
+  - `ignore`: Do not display rows that match the regexp  
+  - `only`: Only display rows that match the regexp
+  - `alarm`: Only generate alarms for rows that match the regexp
+  - `noalarm`: Do not generate alarms for rows that match the regexp
+- Field #3: The regular expression used to match the primary OID. Regexp is 
+  anchored and must match exactly.
+
+In the example above, from a cisco 2950 if_stat test, it tells Devmon to:
+- Trigger alarms only for repeater table rows starting with `Gi` (Gigabit interfaces) 
+- Exclude rows starting with `Nu` (Null interfaces) or `Vl` (VLAN interfaces).
+
+
+## The message file
+The message file consolidates data from the other template files. 
+- It operates as a templating engine containing special keywords for specific functionalities 
+- It allows the use of HTML.
+- It enables the rendering of a message that can be understood by Xymon.
+
+### Format
+Example#1: with only **non-repeater OIDs**:
+```
+{upsStatus.msg}
+{upsBattStat.msg}
+{upsLoadOut.msg}
+{upsBattRep.msg}
+
+UPS status:
+
+Vendor:              apc
+Model:               {upsModel}
+
+UPS Status:          {upsOutStat}
+Battery Status:      {upsBattStat}
+
+Runtime Remaining:   {upsMinsRunTime} minutes
+Battery Capacity:    {upsBattCap}%
+UPS Load:            {upsLoadOut}%
+
+Voltage in:          {upsVoltageIn}v
+Voltage out:         {upsVoltageOut}v
+
+Last failure due to: {upsFailCause}
+Time on battery:     {upsSecsOnBatt} secs
+```
+- OIDs enclosed in `{}` are replaced with their values.
+- Some OIDs have a special flag attached: `.msg` indicating to Devmon a special behaviour.
+
+Example#2: The TABLE keyword for **repeater OIDs**:
+```
+TABLE:alarmsonbottom,border=0,pad=10
+Ifc name|Ifc speed|Ifc status
+{ifName}{ifAliasBox}|{ifSpeed}|{ifStat.color}{ifStat}{ifStat.msg}
+```
+- Line #1: Start with the keyword `TABLE:`(case sensitive, no leading whitespace allowed) which 
+  alerts Devmon that the we are in a table definition. Table options MUST be set immediately after 
+  the `TABLE:` tag on the same line.  
+
+- Line #2: The `table header`: The column separator is `|`.  By default, column content is 
+  left-aligned. To align content on the right side, use `|>` instead of `|`. Note that the leftmost 
+  column cannot be right-aligned in this way.
+  
+- Line #3: The `table content`. The row contains one or more OIDs. The first is the `primary OID`. 
+  Other OIDs in the row are linked to the primary OID, by their indexes (key). For example, if the 
+  primary OID has leaves indexed as `100,101,102,103,104`, the table will have five rows, theses 
+  indexes will be display for any OIDs even if they do not exist for some OIDs. A `non-repeater` OID
+  in the table will be constant in all rows. 
+
+### The OIDs flags
+- `color` 
+  - Prints the alarm color of the OID in a format recognized by Xymon.
+  - Modifies the global color of the page, if not used in a `BEST` transform.
+- `errors` (**deprecated**: use msg)
+  - Prints the alarm message of the OID and at the top/bottom of the message 
+  - Modifies the global color of the page, if not used in a `BEST` transform.
+- `msg`
+  - Prints the alarm message of the OID and at the top/bottom of the message 
+  - Modifies the global color of the page, if not used in a `BEST` transform.
+- `thresh` 
+  - The syntax for the thresh flag is {oid.thresh:<color>}
+  - Print the theshold value that corresponds with the supplied color. 
+
+### The TABLE options
+The `TABLE:` keyword can have one or more, comma-delimited options following it. These options can 
+have values assigned to them if they are not boolean:
+- `nonhtml`: Don't use HTML tags when displaying the table. Instead all columns will be separated by
+  a colon (:). This is useful for doing NCV rrd graphing in Xymon.
+- `plain`: Don't do any formatting. This allows repeater data (each item on it's own line), without 
+  colons or HTML tables. One use of this option is to format repeater data with compatibility with a
+  format Xymon already understands. An example is available in the disk test for the `linux-openwrt` 
+  template.
+- `noalarmsmsg`: Prevent Devmon from displaying the `Alarming on` header at the top of a table.
+- `alarmsonbottom`: Cause Devmon to display the `Alarming on` message at the bottom of the table
+  data, as opposed to the top.
+- `border=n`: Set the HTML table border size that Devmon will use (a value of 0 will disable the 
+  border)
+- `pad=n`: Set the HTML table cellpadding size that Devmon will use
+- `rrd`: See [GRAPHING](GRAPHING.md) 
+
+### Special Keyword
+- `STATUS`: key allows you to extend the first line of the status message that Devmon sends to 
+  Xymon. For example, if you need to get data to a Xymon rrd collector module that evaluates data in
+  the first line of the message (such as the Xymon `la` collector which expects `up: <time>, 
+  %d users, %d procs load=%d.%d`. You can use this keyword as follows to get a load average graph:
+```
+STATUS: up: load={laLoadFloat2}
+```
