@@ -98,8 +98,9 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 
 ## Git Notes
 ### Problem: `git pull` blocked: (abandon)
-An update of devmon.cfg from the github repo and locally excluded devmon.cfg are blocking the `git pull`  
-Recommended: copy the complete devmon folder elsewhere (so you have a backup in case somthing goes wrong)  
+An update of devmon.cfg from the github repo and locally excluded devmon.cfg are blocking `git pull`  
+Recommended: copy the complete devmon folder elsewhere (to have a backup)
+
 ```bash
 cp -rf devmon devmon-dateYYMMDD
 ```
@@ -137,12 +138,11 @@ git stash apply
 
 ## Obsolete or additional steps 
 
-### If xymon hosts.cfg change (Obsolete, should be adjusted as reload do not make a discovery anymore)
-Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg, in folder: devmon/extra
+### If xymon hosts.cfg change (Obsolete: as `reload` do not make a discovery anymore)
+Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg, 
+in folder: devmon/extra
 
 ### Devmon Purple (Obsolete)
 For systemd (tested for CentOS only): in folder `devmon/extra/systemd`.
-
-
 
 
