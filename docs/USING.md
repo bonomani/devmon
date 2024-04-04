@@ -8,10 +8,10 @@ Add the `DEVMON` tag in the Xymon `hosts.cfg` file:
 
 ## Discover 
 Devmon should discover and identify the device's vendor and model, determining which test templates to apply.  
-Run a Discovery (optionally in debug mode) and look at the result:
+Run a Discovery (optionally in debug mode) and look at the result: (from the devmon application dir). 
 ```bash
-./devmon -read -de 
-less hosts.db
+./bin/devmon -read -d 
+less ./var/db/hosts.db
 ```
 
 ## Run in background with Systemd
@@ -33,10 +33,11 @@ service devmon status
 - Graphing information are not sent to the Xymon (by default, to not mess rrd)
 - You do not need to stop Xymon running in background 
 ```bash
-./devmon -f -no1                # Similar as running in background
-./devmon -de                    # In debug mode, will stop after 1 cycle (automatically in foreground)
-./devmon -de -no1 -p myrouter   # In debug mode, only for device: myrouter
-./devmon -de -p myrouter=fans   # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
+./bin/devmon -f -no1                # Similar as running in background
+./bin/devmon -d                    # In debug mode, will stop after 1 cycle (automatically in foreground)
+./bin/devmon -t                    # In trace mode, will stop after 1 cycle (automatically in foreground)
+./bin/devmon -d -no1 -p myrouter   # In debug mode, only for device: myrouter
+./bin/devmon -d -p myrouter=fans   # In debug mode, 1 cycle only,only for device: myrouter and only for test:fan
 ```
 
 ## Verify Devmon is running correctly
