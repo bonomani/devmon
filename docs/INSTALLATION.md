@@ -97,7 +97,7 @@ Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 - include /var/xymon/server/etc/graphs.d/devmon-graphs.cfg
 
 ## Git Notes
-### Problem: `git pull` blocked: (abandon)
+### Problem: `git pull` blocked: (the abandon error)
 An update of devmon.cfg from the github repo and locally excluded devmon.cfg are blocking `git pull`  
 Recommended: copy the complete devmon folder elsewhere (to have a backup)
 
