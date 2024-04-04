@@ -9,10 +9,6 @@ require Exporter;
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
 #
-#    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/modules/dm_templates.pm $
-#    $Revision: 246 $
-#    $Id: dm_templates.pm 246 2014-11-27 13:19:01Z buchanmilne $
-#
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -148,13 +144,14 @@ sub read_template_db {
 sub read_template_files {
 
     # Get all dirs in templates subdir
-    my $template_dir = $g{homedir} . "/templates";
-    opendir TEMPLATES, $template_dir
+    #my $template_dir = $g{homedir} . "/templates";
+    my $templates_dir = $g{templates_dir};
+    opendir TEMPLATES, $templates_dir
         or log_fatal( "Template error: Unable to open template directory ($!)", 1 );
 
     my @dirs;
     for my $entry ( readdir TEMPLATES ) {
-        my $dir = "$template_dir/$entry";
+        my $dir = "$templates_dir/$entry";
         do_log( "Folder $dir is not readable, skipping this template", ERROR )
             and next
             if !-r $dir;

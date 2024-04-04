@@ -16,7 +16,8 @@ use warnings;
 
 # Devmon specific modules
 use FindBin;
-use lib "$FindBin::Bin/modules";
+use lib "$FindBin::Bin/../lib";
+#use lib "../lib";
 use dm_config;
 use dm_templates;
 use dm_config qw(FATAL ERROR WARN INFO DEBUG TRACE);

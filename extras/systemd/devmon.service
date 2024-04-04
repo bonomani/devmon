@@ -1,25 +1,21 @@
 # Contents of /etc/systemd/system/devmon.service
 
 [Unit]
-Description=Devmon
-After=xymon.target network.target
+Description=Devmon Service
+After=network.target
+
+[Service]
+Type=simple
+User=devmon
+Group=devmon
+ExecStartPre=/bin/mkdir -p /var/log/devmon /var/run/devmon
+ExecStartPre=/bin/chown -R devmon:devmon /var/log/devmon /var/run/devmon
+ExecStart=/usr/lib/xymon/server/ext/devmon/bin/devmon
+WorkingDirectory=/usr/lib/xymon/server/ext/devmon/bin/
+RuntimeDirectory=devmon
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+PIDFile=/var/run/devmon/devmon.pid
 
 [Install]
 WantedBy=multi-user.target
-
-
-[Service]
-PIDFile=/var/run/devmon/devmon.pid
-User=xymon
-Group=xymon
-# Run ExecStartPre with root-permissions
-PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/mkdir -p /var/run/devmon
-ExecStartPre=-/usr/bin/mkdir -p /var/log/devmon
-ExecStartPre=/usr/bin/chown xymon:xymon /var/run/devmon/
-ExecStartPre=/usr/bin/chown xymon:xymon /var/log/devmon/
-
-# Change the devmon folder according to you settings !
-ExecStart=/usr/lib/xymon/server/ext/devmon/devmon
-
-Type=simple

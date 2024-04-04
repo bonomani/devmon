@@ -8,10 +8,6 @@ require Exporter;
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007 Francois Lacroix
 #
-#    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/modules/dm_tests.pm $
-#    $Revision: 251 $
-#    $Id: dm_tests.pm 251 2015-06-02 15:28:36Z buchanmilne $
-#
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or

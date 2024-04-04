@@ -10,10 +10,6 @@ require Exporter;
 #    Copyright (C) 2005-2006  Eric Schwimmer
 #    Copyright (C) 2007  Francois Lacroix
 #
-#    $URL: svn://svn.code.sf.net/p/devmon/code/trunk/modules/dm_config.pm $
-#    $Revision: 254 $
-#    $Id: dm_config.pm 254 2016-03-11 11:45:44Z buchanmilne $
-#
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation; either version 2 of the License, or
@@ -41,7 +37,13 @@ use FindBin;
 use Getopt::Long;
 use Net::Domain qw(hostfqdn);
 use Time::HiRes qw(time gettimeofday);
-use POSIX qw(strftime);
+use POSIX qw(strftime setuid setgid getpwuid getgrgid);
+
+use Cwd qw(abs_path);
+use File::Basename;
+use File::Path qw(make_path);
+use File::Spec::Functions qw(catfile);
+use English;
 
 use Data::Dumper;
 $Data::Dumper::Sortkeys = 1;    # Sort the keys in the output
@@ -49,15 +51,27 @@ $Data::Dumper::Deepcopy = 1;    # Enable deep copies of structures
 $Data::Dumper::Indent   = 1;    # Output in a reasonable style (but no array indexes)
 
 # Load initial program values; only called once at program init
+#my $file="../devmon.cfg";
+#my @file_info = stat($file);
+#my $mode = $file_info[2] & 07777;
+#print "$mode\n";
 sub initialize {
     autoflush STDOUT 1;
     %g = (
 
         # General variables
-        'version'       => $_[0],                        # set in main script now
-        'homedir'       => $FindBin::Bin,
-        'configfile'    => "$FindBin::Bin/devmon.cfg",
-        'dbfile'        => "$FindBin::Bin/hosts.db",
+        'version'     => $_[0],                                           # set in main script now
+        'user'        => 'devmon',
+        'app_name'    => 'devmon',
+        'config_file' => 'devmon.cfg',
+        'db_file'     => '',
+        'home_dir'    => abs_path(dirname($0)) =~ s|/bin$||r,
+        'var_dir'     => '',
+
+        #        'db_dir'        => '',
+        'templates_dir' => '',
+
+        #        'cache_dir'     => '',
         'foreground'    => 0,
         'initialized'   => 0,
         'mypid'         => 0,
@@ -68,8 +82,8 @@ sub initialize {
         'output'        => undef,
         'shutting_down' => 0,
         'active'        => '',
-        'pidfile'       => '',
-        'logfile'       => '',
+        'pid_file'      => '',
+        'log_file'      => '',
         'hostscfg'      => '',
         'xymontag'      => '',
         'XYMONNETWORK'  => '',
@@ -226,15 +240,39 @@ sub initialize {
             'set'     => 0,
             'case'    => 1
         },
-        'pidfile' => {
-            'default' => '/var/run/devmon/devmon.pid',
-            'regex'   => '.+',
+        'user' => {
+            'default' => $g{user},
+            'regex'   => '^[a-zA-Z_][a-zA-Z0-9_.-]{0,31}$',
             'set'     => 0,
             'case'    => 1
         },
-        'logfile' => {
+        'pid_file' => {
+            'default' => '/var/run/devmon/devmon.pid',
+            'regex'   => '^/[^\0\n]+$',
+            'set'     => 0,
+            'case'    => 1
+        },
+        'log_file' => {
             'default' => '/var/log/devmon/devmon.log',
-            'regex'   => '.*',
+            'regex'   => '^/[^\0\n]+$',
+            'set'     => 0,
+            'case'    => 1
+        },
+        'db_file' => {
+            'default' => 'hosts.db',
+            'regex'   => '^[^\0\n]+$',
+            'set'     => 0,
+            'case'    => 1
+        },
+        'var_dir' => {
+            'default' => '',
+            'regex'   => '^/[^\0\n]+$',
+            'set'     => 0,
+            'case'    => 1
+        },
+        'templates_dir' => {
+            'default' => '',
+            'regex'   => '^/[^\0\n]+$',
             'set'     => 0,
             'case'    => 1
         },
@@ -371,20 +409,18 @@ sub initialize {
     my ( %match, $hostonly, $poll, $outputs_ref, $logger_ref );
 
     GetOptions(
-        "help|?"                   => \&help,
-        "v"                        => sub { $g{verbose} = 1 },
-        "vv"                       => sub { $g{verbose} = 2 },
-        "vvv"                      => sub { $g{verbose} = 3 },
-        "vvvv"                     => sub { $g{verbose} = 4 },
-        "vvvvv"                    => sub { $g{verbose} = 5 },
-        "noverbose"                => sub { $g{verbose} = 0 },
-        "configfile=s"             => \$g{configfile},
-        "dbfile=s"                 => \$g{dbfile},
-        "foreground"               => \$g{foreground},
-        "output:s@"                => \$outputs_ref,
-        "1!"                       => \$g{oneshot},
-        "match=s%"                 => sub { push( @{ $match{ $_[1] } }, $_[2] ) },
-        "hostonly=s"               => \$hostonly,
+        "help|?"        => \&help,
+        "v"             => sub { $g{verbose} = 1 },
+        "vv"            => sub { $g{verbose} = 2 },
+        "vvv"           => sub { $g{verbose} = 3 },
+        "vvvv"          => sub { $g{verbose} = 4 },
+        "vvvvv"         => sub { $g{verbose} = 5 },
+        "noverbose"     => sub { $g{verbose} = 0 },
+        "config_file=s" => \$g{config_file},
+        "foreground" => \$g{foreground},
+        "output:s@"  => \$outputs_ref,
+        "1!"         => \$g{oneshot},
+        "match=s%"   => sub { push( @{ $match{ $_[1] } }, $_[2] ) },
         "poll=s"                   => \$poll,
         "debug"                    => \$g{debug},
         "log_match:s@"             => \$g{log_match_ref},
@@ -397,8 +433,8 @@ sub initialize {
     ) or usage();
 
     # Check for non-option args
-    if (@ARGV) {
-        usage("Non-option arguments are not accepted '@ARGV'");
+    if ( @ARGV ) {
+        usage( "Non-option arguments are not accepted '@ARGV'" );
     }
 
     # Debug mode
@@ -418,15 +454,175 @@ sub initialize {
 
     # Check mutually exclusive option
     if ( $syncconfig + $synctemps + $resetowner + $readhosts > 1 ) {
-        print "Can't have more than one mutually exclusive option\n\n";
+        print "Can't have more than one mutually exclusive option.\n";
         usage();
     }
 
     # Now read in our local config info from our file
+    my @config_dir = ( "/etc/$g{app_name}", "$g{home_dir}/etc", "$g{home_dir}" );
+    ( $g{config_file}, my $valid_user ) = can_read_user_from_config( $g{user}, $g{config_file}, @config_dir );
+    my $config_is_valid = 1;
+
+    if ( defined $g{config_file} ) {
+        print "Config file '$g{config_file}' can be read with user '$valid_user'.\n" if $g{debug};
+    } else {
+        print "Not valid config file $g{config_file} can be read with user '$valid_user'.\n";
+    }
     read_local_config();
 
     # Open the log file
-    open_log();
+    # Check first if log file is writable
+
+    my ( $filename, $dir ) = fileparse( $g{log_file} );
+    my $perm       = 'w';
+    my $valid_path = find_dir( $g{user}, parent1_dir_perm_str( $perm ), $dir );    # Check the folder
+    if ( defined $valid_path ) {
+        $g{log_file} = $valid_path . '/' . $filename;
+        if ( -e $g{log_file} ) {                                                   # check if file exists
+            $valid_path = find_file( $g{user}, $filename, $perm, $valid_path );    # Check the file
+            if ( defined $valid_path ) {
+                $g{log_file} = $valid_path;
+                open_log();
+                do_log( "Log file '$g{log_file}'", WARN );
+            } else {
+                print( "Log file '$g{log_file}' not accessible with user '$g{user}' with permission '$perm'.\n" );
+                $config_is_valid = 0;
+            }
+        } else {
+            open_log();
+            do_log( "Log file '$g{log_file}'", WARN );
+        }
+    } else {
+        print( "Log dir '$dir' not found or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.\n" );
+        $config_is_valid = 0;
+    }
+
+    # Set and check var, templates, db dir, pid file or die!
+    # Common parts
+    my @var_dir;
+    if ( $g{var_dir} ) {
+        push @var_dir, $g{var_dir};
+    } else {
+        my %seen;
+        push @var_dir, grep { !$seen{$_}++ } "/var/local/lib/$g{app_name}", "/var/lib/$g{app_name}", "$g{home_dir}/var";
+    }
+    $perm = 'x';
+    do_log( "Searching a valid var dir in '" . ( join ' ', @var_dir ) . "'.", DEBUG );
+    $valid_path = find_dir( $g{user}, $perm, @var_dir );
+    my @templates_dir;
+    my @db_dir;
+    my $db_filename;
+    {
+        if ( defined $valid_path ) {
+            do_log( "Var dir '$valid_path'", DEBUG );
+            if ( $g{templates_dir} ne '' ) {
+                @templates_dir = ( $g{templates_dir} );
+            } else {
+                my %seen;
+                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates","$g{home_dir}/var/templates", "$g{home_dir}/templates";
+            }
+            if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
+                $db_filename = $g{db_file};
+                my %seen;
+                push @db_dir, grep { !$seen{$_}++ } "$valid_path/db", "$g{home_dir}/var/db", "$g{home_dir}";
+                do_log( "Searching a valid db dir in '" . ( join ' ', @db_dir ) . "'.", DEBUG );
+            } else {
+                ( $db_filename, $dir ) = fileparse( $g{db_file} );
+                @db_dir = ( $dir );
+            }
+
+        } else {
+            do_log( "Var dir not valid", DEBUG );
+            if ( $g{templates_dir} ne '' ) {
+                @templates_dir = ( $g{templates_dir} );
+            } else {
+                my %seen;
+                push @templates_dir, grep { !$seen{$_}++ } "/var/share/$g{app_name}/templates", "$g{home_dir}/var/templates", "$g{home_dir}/templates";
+            }
+            if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
+                $db_filename = $g{db_file};
+                my %seen;
+                push @db_dir, grep { !$seen{$_}++ } "$g{home_dir}/var/db", "$g{home_dir}";
+                do_log( "Searching a valid db dir in '" . ( join ' ', @db_dir ) . "'.", DEBUG );
+            } else {
+                ( $db_filename, $dir ) = fileparse( $g{db_file} );
+                @db_dir = ( $dir );
+            }
+        }
+    }
+
+    # Find templates folder
+    $perm = 'x';
+
+    #@templates_dir = ( $g{templates_dir} ) if $g{templates_dir} ne '';
+    do_log( "Searching a valid templates dir in '" . ( join ' ', @templates_dir ) . "'.", DEBUG );
+    $valid_path = find_dir( $g{user}, $perm, @templates_dir );
+
+    if ( defined $valid_path ) {
+        $g{templates_dir} = $valid_path;
+        do_log( "Templates dir '$g{templates_dir}'", DEBUG );
+    } else {
+        do_log( "Templates dir '" . ( join ' ', @templates_dir ) . "' not valid or not accessible with user '$g{user}' with permission '$perm'. The parent folder should have permission '" . parent1_dir_perm_str( $perm ) . "'.", ERROR );
+        $config_is_valid = 0;
+    }
+
+    # Find db file or folder
+    $perm       = 'rw';
+    $valid_path = find_dir( $g{user}, parent1_dir_perm_str( $perm ), @db_dir );    # Check the folder
+    if ( defined $valid_path ) {
+        $g{db_file} = $valid_path . '/' . $db_filename;
+        if ( -e $g{db_file} ) {                                                    # check if file exists
+
+            $valid_path = find_file( $g{user}, $g{db_file}, $perm );
+            if ( defined $valid_path ) {
+                $g{db_file} = $valid_path;
+                do_log( "DB file '$g{db_file}'", DEBUG );
+            } else {
+                do_log( "DB file '$g{db_file}' not accessible with user '$g{user}' with permission '$perm'", ERROR );
+                $config_is_valid = 0;
+            }
+        } else {
+            if ($readhosts) {
+            do_log( "DB dir '$valid_path', and running './devmon -read' to discover devices", DEBUG );
+            } else {
+            do_log( "DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service", DEBUG );
+            $config_is_valid = 0 ;
+           }
+        }
+    } else {
+        do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
+        $config_is_valid = 0;
+    }
+
+    # Find pid file or folder
+    ( $filename, $dir ) = fileparse( $g{pid_file} );
+    $perm       = 'rw';
+    $valid_path = find_dir( $g{user}, parent1_dir_perm_str( $perm ), $dir );    # Check the folder
+    if ( defined $valid_path ) {
+        $g{pid_file} = $valid_path . '/' . $filename;
+        if ( -e $g{pid_file} ) {                                                # check if file exists
+            $valid_path = find_file( $g{user}, $filename, $perm, $valid_path );    # Check the file
+            if ( defined $valid_path ) {
+                $g{pid_file} = $valid_path;
+                do_log( "PID file '$g{pid_file}' exists, but should not now", DEBUG );
+            } else {
+                do_log( "PID file '$g{pid_file}' not accessible with user '$g{user}' with permission '$perm'", ERROR );
+                $config_is_valid = 0;
+            }
+        } else {
+            do_log( "PID file '$g{pid_file}'", DEBUG );
+        }
+    } else {
+        do_log( "PID dir '$dir' not found or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
+        $config_is_valid = 0;
+    }
+
+    # Exit if config is not runnable
+    unless ( $config_is_valid ) {
+        print( "Config files are not set up correctly, quitting.\n" );
+        do_log( "Config files are not set up correctly, quitting.", ERROR );
+        exit;
+    }
 
     # Autodetect our nodename on user request
     if ( $g{nodename} eq 'HOSTNAME' ) {
@@ -442,7 +638,7 @@ sub initialize {
     die "Unable to determine nodename!\n" if !defined $g{nodename} and $g{nodename} =~ /^\S+$/;
 
     # Set up DB handle
-    db_connect(1);
+    db_connect( 1 );
 
     # Connect to the cluster
     cluster_connect();
@@ -484,35 +680,35 @@ sub initialize {
         for my $output ( @{$outputs_ref} ) {
             usage( "Duplicate output '" . $output . "'" ) if ( exists $g{output}{$output} );
             ( $g{output}{$output}{protocol}, $g{output}{$output}{target} ) = split '://', $output;
-            usage("Invalid output -o (only)")                           if not defined $g{output}{$output}{protocol};
-            usage("Unknown protocol '$g{output}{ $output }{protocol}'") if $g{output}{$output}{protocol} !~ '^xymon$';
-            usage( "Invalid target in '" . $output . "'" )              if not defined $g{output}{$output}{target};
+            usage( "Invalid output -o (only)" )                           if not defined $g{output}{$output}{protocol};
+            usage( "Unknown protocol '$g{output}{ $output }{protocol}'" ) if $g{output}{$output}{protocol} !~ '^xymon$';
+            usage( "Invalid target in '" . $output . "'" )                if not defined $g{output}{$output}{target};
             if ( $g{output}{$output}{target} eq 'stdout' ) {
             }
         }
     }
 
     # hostonly mode (deprecated by poll)
-    if ($hostonly) {
-        do_log( "hostonly is deprecated use '-p[oll]' instead", ERROR );
-        if ( defined $poll or %match ) {
-            usage("hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only");
-        } else {
-            $poll = $hostonly if not defined $poll;
-        }
-    }
+    #if ( $hostonly ) {
+    #    do_log( "hostonly is deprecated use '-p[oll]' instead", ERROR );
+    #    if ( defined $poll or %match ) {
+    #        usage( "hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only" );
+    #    } else {
+    #        $poll = $hostonly if not defined $poll;
+    #    }
+    #}
 
     #  Poll mode
-    if ($poll) {
+    if ( $poll ) {
         ( my $match_iphost, my $match_test ) = split '=', $poll;
         if ( exists $match{$match_iphost} ) {
-            usage("Conflit o=$poll -m iphost=$match_iphost");
+            usage( "Conflit o=$poll -m iphost=$match_iphost" );
         } else {
             push @{ $match{iphost} }, $match_iphost;
         }
         if ( defined $match_test ) {
             if ( exists $match{$match_test} ) {
-                usage("Conflit o=$poll -m test=$match_test");
+                usage( "Conflit o=$poll -m test=$match_test" );
             } else {
                 push @{ $match{test} }, $match_test;
             }
@@ -521,7 +717,7 @@ sub initialize {
     }
 
     #  Match filter mode
-    if (%match) {
+    if ( %match ) {
         foreach my $match_key ( keys %match ) {
             if ( $match_key eq 'ip' ) {
                 $g{match_ip} = join( '|', map {"(?:$_)"} @{ $match{ip} } );
@@ -535,24 +731,24 @@ sub initialize {
                 for my $output ( @{ $match{rrd} } ) {
                     if ( exists $g{output}{$output} ) {
                         if ( defined $g{output}{$output}{rrd} ) {
-                            usage("Duplicate -m rrd=$output");
+                            usage( "Duplicate -m rrd=$output" );
                         } else {
                             $g{output}{$output}{rrd} = 1;
                         }
                     } else {
-                        usage("$output is not a defined output, set it with -o=$output");
+                        usage( "$output is not a defined output, set it with -o=$output" );
                     }
                 }
             } elsif ( $match_key eq 'stat' ) {
                 for my $output ( @{ $match{stat} } ) {
                     if ( exists $g{output}{$output} ) {
                         if ( defined $g{output}{$output}{stat} ) {
-                            usage("Duplicate -m stat=$output");
+                            usage( "Duplicate -m stat=$output" );
                         } else {
                             $g{output}{$output}{stat} = 1;
                         }
                     } else {
-                        usage("$output is not a defined output, set it with -o=$output");
+                        usage( "$output is not a defined output, set it with -o=$output" );
                     }
                 }
             } else {
@@ -617,14 +813,14 @@ sub initialize {
     if ( !$g{foreground} ) {
 
         # Check to see if a pid file exists
-        if ( -e $g{pidfile} ) {
+        if ( -e $g{pid_file} ) {
 
             # One exists, let see if its stale
-            my $pid_handle = new IO::File $g{pidfile}, 'r'
-                or log_fatal( "Can't read from pid file '$g{pidfile}' ($!).", 0 );
+            my $pid_handle = new IO::File $g{pid_file}, 'r'
+                or log_fatal( "Can't read from pid file '$g{pid_file}' ($!).", 0 );
 
             # Read in the old PID
-            my ($old_pid) = <$pid_handle>;
+            my ( $old_pid ) = <$pid_handle>;
             chomp $old_pid;
             $pid_handle->close;
 
@@ -632,16 +828,15 @@ sub initialize {
             log_fatal( "Devmon already running, quitting.", 1 ) if kill 0, $old_pid;
         }
 
-        # Now write our pid to the pidfile
-        my $pid_handle = new IO::File $g{pidfile}, 'w'
-            or log_fatal( "Can't write to pidfile $g{pidfile} ($!)", 0 );
+        # Now write our pid to the pid_file
+        my $pid_handle = new IO::File $g{pid_file}, 'w'
+            or log_fatal( "Can't write to pid file $g{pid_file} ($!)", 0 );
         $pid_handle->print( $g{mypid} );
         $pid_handle->close;
     }
 
     # Throw out a little info to the log
     do_log( "---Initializing Devmon v$g{version}, pid=$g{mypid}, log level=$g{verbose}---", $g{verbose} );
-    do_log( "Logging to $g{logfile}",                                                       WARN ) unless $g{logfile} =~ /^\s*$/ or $g{foreground};
     do_log( "Node#$g{my_nodenum}",                                                          INFO );
 
     # Dump some configs in debug mode
@@ -663,10 +858,10 @@ sub check_snmp_config {
     # Check SNMP Engine: auto, snmp(first), session(fallback)
     if ( $g{snmpeng} eq 'auto' ) {
         eval { require SNMP; };
-        if ($@) {
+        if ( $@ ) {
             do_log( "Net-SNMP is not installed: $@ yum install net-snmp-perl or apt install libsnmp-perl, trying to fallback to SNMP_Session", WARN );
             eval { require SNMP_Session; };
-            if ($@) {
+            if ( $@ ) {
                 log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
             } else {
                 $g{snmpeng} = 'session';
@@ -676,7 +871,7 @@ sub check_snmp_config {
         } else {
             do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
             eval { require SNMP_Session; };
-            if ($@) {
+            if ( $@ ) {
                 do_log( "SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", ERROR );
                 $g{snmpeng} = 'snmp';
             } else {
@@ -685,14 +880,14 @@ sub check_snmp_config {
         }
     } elsif ( $g{snmpeng} eq 'snmp' ) {
         eval { require SNMP; };
-        if ($@) {
+        if ( $@ ) {
             log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp-perl or apt install libsnmp-perl, exiting...", 1 );
         } else {
             do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
         }
     } elsif ( $g{snmpeng} eq 'session' ) {
         eval { require SNMP_Session; };
-        if ($@) {
+        if ( $@ ) {
             log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
         } else {
             do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 and SNMPv2c", INFO );
@@ -726,11 +921,11 @@ sub time_test {
     if ( $exceeded > 1 ) {
         do_log( "Exceeded cycle time ($poll_time seconds).", WARN );
         $g{sleep_time} = 0;
-        quit(0) if $g{oneshot};
+        quit( 0 ) if $g{oneshot};
 
         # Otherwise calculate our sleep time
     } else {
-        quit(0) if $g{oneshot};
+        quit( 0 ) if $g{oneshot};
         $g{sleep_time} = -$exceeded;
         $g{sleep_time} = 0 if $g{sleep_time} < 0;    # just in case!
         do_log( "Sleeping for $g{sleep_time} seconds.", INFO );
@@ -750,14 +945,14 @@ sub sync_servers {
     # If we are multinode='no', just load our tests and return
     if ( $g{multinode} ne 'yes' ) {
         my %devices = read_hosts();
-        if (%devices) {
+        if ( %devices ) {
             for my $device ( keys %devices ) {
                 for my $device_h_key ( keys %{ $devices{$device} } ) {
                     $g{devices}{$device}{$device_h_key} = $devices{$device}{$device_h_key};
                 }
             }
         } else {
-            usage("Cannot find any machting host in local db '$g{dbfile}'");
+            usage( "Cannot find any machting host in local db '$g{db_file}'" );
         }
         return;
     }
@@ -792,22 +987,22 @@ sub sync_servers {
     $total_tests  = 0;
 
     # Read in all custom thresholds
-    my @threshs = db_get_array('host,test,oid,color,val from custom_threshs');
-    for my $this_thresh (@threshs) {
+    my @threshs = db_get_array( 'host,test,oid,color,val from custom_threshs' );
+    for my $this_thresh ( @threshs ) {
         my ( $host, $test, $oid, $color, $val ) = @$this_thresh;
         $custom_threshs{$host}{$test}{$oid}{$color} = $val;
     }
 
     # Read in all custom exceptions
-    my @excepts = db_get_array('host,test,oid,type,data from custom_excepts');
-    for my $this_except (@excepts) {
+    my @excepts = db_get_array( 'host,test,oid,type,data from custom_excepts' );
+    for my $this_except ( @excepts ) {
         my ( $host, $test, $oid, $type, $data ) = @$this_except;
         $custom_excepts{$host}{$test}{$oid}{$type} = $data;
     }
 
     # Read in all tests for all nodes
-    my @tests = db_get_array('name,ip,vendor,model,tests,cid,owner from devices');
-    for my $this_test (@tests) {
+    my @tests = db_get_array( 'name,ip,vendor,model,tests,cid,owner from devices' );
+    for my $this_test ( @tests ) {
         my ( $device, $ip, $vendor, $model, $tests, $cid, $owner ) = @$this_test;
 
         # Make sure we disable our init if someone already has a test
@@ -863,12 +1058,12 @@ sub sync_servers {
         db_do( "update nodes set need_tests=$num_tests_needed " . "where node_num=$g{my_nodenum}" );
 
         # Lets see if we need to init, along with the other nodes
-        if ($need_init) {
+        if ( $need_init ) {
             do_log( "Initializing test database", INFO );
 
             # Now we need all other nodes waiting for init before we can proceed
             do_log( "Waiting for all nodes to synchronize", INFO );
-        INIT_WAIT: while (1) {
+        INIT_WAIT: while ( 1 ) {
 
                 # Make sure our heart beats while we wait
                 db_do( "update nodes set heartbeat='" . time . "' where node_num='$g{my_nodenum}'" );
@@ -904,13 +1099,13 @@ sub sync_servers {
             $avg_tests_node   = int $total_tests / $num_active_nodes;
 
             my $this_node = 0;
-            for my $device (@available) {
+            for my $device ( @available ) {
 
                 # Skip any test unless the count falls on our node num
                 if ( $active_nodes[ $this_node++ ] == $g{my_nodenum} ) {
 
                     # Make it ours, baby!
-                    my $result = db_do("update devices set owner=$g{my_nodenum} where name='$device' and owner=0");
+                    my $result = db_do( "update devices set owner=$g{my_nodenum} where name='$device' and owner=0" );
 
                     # Make sure out DB update went through
                     next if !$result;
@@ -942,7 +1137,7 @@ sub sync_servers {
                     last if $my_num_tests > $avg_tests_node;
 
                     # Lets try and take this test
-                    my $result = db_do("update devices set owner=$g{my_nodenum} where name='$device'");
+                    my $result = db_do( "update devices set owner=$g{my_nodenum} where name='$device'" );
                     next if !$result;
 
                     # We got it!  Lets add it to our test_data hash
@@ -967,14 +1162,14 @@ sub sync_servers {
 
                     # Now lets try and get the history for it, if it exists
                     my @hist_arr = db_get_array( 'ifc,test,time,val from test_data ' . "where host='$device'" );
-                    for my $hist (@hist_arr) {
+                    for my $hist ( @hist_arr ) {
                         my ( $ifc, $test, $time, $val ) = @$hist;
                         $g{dev_hist}{$device}{$ifc}{$test}{val}  = $val;
                         $g{dev_hist}{$device}{$ifc}{$test}{time} = $time;
                     }
 
                     # Now delete it from the history table
-                    db_do("delete from test_data where host='$device'");
+                    db_do( "delete from test_data where host='$device'" );
                 }
             }
         }
@@ -990,7 +1185,7 @@ sub sync_servers {
         my $biggest_test_needed = 0;
 
         # Read in the number of needy nodes
-        for my $this_node (@active_nodes) {
+        for my $this_node ( @active_nodes ) {
             next if $this_node == $g{my_nodenum};
             my $this_node_needs = $g{node_status}{nodes}{$this_node}{need_tests};
             $tests_they_need += $this_node_needs;
@@ -1034,7 +1229,7 @@ sub update_nodes {
     %{ $g{node_status} } = ();
     my @nodes = db_get_array( 'name,node_num,active,heartbeat,need_tests,' . 'read_temps from nodes' );
 
-NODE: for my $node (@nodes) {
+NODE: for my $node ( @nodes ) {
         my ( $name, $node_num, $active, $heartbeat, $need_tests, $read_temps ) = @$node;
         $g{node_status}{nodes}{$node_num} = {
             'name'       => $name,
@@ -1087,9 +1282,9 @@ sub cluster_connect {
     my %nodes;
 
     # First pull down all our node info to make sure we exist in the table
-    my @nodeinfo = db_get_array("name,node_num from nodes");
+    my @nodeinfo = db_get_array( "name,node_num from nodes" );
 
-    for my $row (@nodeinfo) {
+    for my $row ( @nodeinfo ) {
         my ( $name, $num ) = @$row;
         $nodes{$num} = $name;
         $nodenum = $num if $name eq $nodename;
@@ -1105,7 +1300,7 @@ sub cluster_connect {
         }
 
         # Do the db add
-        db_do("insert into nodes values ('$nodename',$nodenum,'y',$now,0,'n')");
+        db_do( "insert into nodes values ('$nodename',$nodenum,'y',$now,0,'n')" );
 
         # If we are in the table, update our activity and heartbeat columns
     } else {
@@ -1129,21 +1324,24 @@ sub read_global_config {
 sub read_local_config {
 
     # Open config file (assuming we can find it)
-    my $file = $g{configfile};
+    my $file = $g{config_file};
+
+    #my $file = $g{locals}{configfile}{default};
     &usage if !defined $file;    # WHY USAGE, WHY OTHER Test next 3!
 
-    if ( $file !~ /^\/.+/ and !-e $file ) {
-        my $local_file = $FindBin::Bin . "/$file";
-        $file = $local_file if -e $local_file;
-    }
+    #if ( $file !~ /^\/.+/ and !-e $file ) {
+    #    my $local_file = $FindBin::Bin . "/$file";
+    #    $file = $local_file if -e $local_file;
+    #}
+    #can_read_config( $file ) or die;
 
-    log_fatal( "Can't find config file $file ($!)", 0 ) if !-e $file;
-    open FILE, $file or log_fatal( "Can't read config file $file ($!)", 0 );
+    #log_fatal( "Can't find config file $file ($!)", 0 ) if !-e $file;
+    open FILE, $file or die "Can't read config file $file ($!)";
 
-    do_log( "Reading local options from '$file'", DEBUG ) if $g{debug};
+    print "Reading local options.\n" if $g{debug};
 
     # Parse file text
-    for my $line (<FILE>) {
+    for my $line ( <FILE> ) {
 
         # Skip empty lines and comments
         next if $line =~ /^\s*(#.*)?$/;
@@ -1151,7 +1349,7 @@ sub read_local_config {
         my ( $option, $value ) = split /\s*=\s*/, $line, 2;
 
         # Make sure we have option and value
-        log_fatal( "Syntax error in config file at line $.", 0 )
+        die "Syntax error in config file at line $."
             if !defined $option or !defined $value;
 
         # Options are case insensitive
@@ -1166,7 +1364,7 @@ sub read_local_config {
             $value = lc $value if !$g{locals}{$option}{case};
 
             # Compare to regex, make sure value is valid
-            log_fatal( "Invalid value '$value' for '$option' in config file, " . "line $.", 0 )
+            die "Invalid value '$value' for '$option' in config file, line $."
                 if $value !~ /^$g{locals}{$option}{regex}$/;
 
             # Assign the value to our option
@@ -1176,7 +1374,7 @@ sub read_local_config {
         } else {
 
             # Warn if this option is unknown
-            do_log( "Unknown option '$option' in config file, line $.", WARN );
+            print "Unknown option '$option' in config file, line $..\n";
         }
 
     }
@@ -1185,10 +1383,10 @@ sub read_local_config {
     # Log any options not set
     for my $opt ( sort keys %{ $g{locals} } ) {
         if ( $g{locals}{$opt}{set} == 1 ) {
-            do_log( "Option '$opt' locally set to: $g{$opt}", DEBUG ) if $g{debug};
+            print "Option '$opt' locally set to: $g{$opt}\n" if $g{trace};
             next;
         } else {
-            do_log( "Option '$opt' defaulting to: $g{locals}{$opt}{default}", DEBUG ) if $g{debug};
+            print "Option '$opt' defaulting to: $g{locals}{$opt}{default}\n" if $g{debug};
             $g{$opt} = $g{locals}{$opt}{default};
             $g{locals}{$opt}{set} = 1;
         }
@@ -1202,15 +1400,15 @@ sub read_local_config {
 sub read_global_config_file {
 
     # Open config file (assuming we can find it)
-    my $file = $g{configfile};
+    my $file = $g{config_file};
     log_fatal( "Can't find config file $file ($!)", 0 ) if !-e $file;
 
     open FILE, $file or log_fatal( "Can't read config file $file ($!)", 0 );
 
-    do_log( "Reading global options from '$file'", DEBUG ) if $g{debug};
+    do_log( "Reading global options.", DEBUG ) if $g{debug};
 
     # Parse file text
-    for my $line (<FILE>) {
+    for my $line ( <FILE> ) {
 
         # Skip empty lines and comments
         next if $line =~ /^\s*(#.*)?$/;
@@ -1265,8 +1463,8 @@ sub read_global_config_db {
         $g{globals}{$opt}{set} = 0;
     }
 
-    my @variable_arr = db_get_array('name,val from global_config');
-    for my $variable (@variable_arr) {
+    my @variable_arr = db_get_array( 'name,val from global_config' );
+    for my $variable ( @variable_arr ) {
         my ( $opt, $val ) = @$variable;
         do_log( "Unknown option '$opt' read from global DB", WARN ) and next
             if !defined $g{globals}{$opt};
@@ -1307,7 +1505,7 @@ sub rewrite_config {
     my @file_text = <FILE>;
     close FILE;
 
-    for my $line (@file_text) {
+    for my $line ( @file_text ) {
         next if $line !~ /^\s*(\S+)=(.+)$/;
         my ( $opt, $val ) = split '=', $line;
         my $new_val = $g{$opt};
@@ -1318,7 +1516,7 @@ sub rewrite_config {
     open FILE, ">$file"
         or log_fatal( "Can't write to config file $file ($!)", 0 )
         if !-e $file;
-    for my $line (@text_out) { print FILE $line }
+    for my $line ( @text_out ) { print FILE $line }
     close FILE;
 }
 
@@ -1326,15 +1524,15 @@ sub rewrite_config {
 sub open_log {
 
     # Don't open the log if we are not in daemon mode
-    return if $g{logfile} =~ /^\s*$/ or $g{foreground};
-    $g{log} = new IO::File $g{logfile}, 'a'
-        or log_fatal( "ERROR: Unable to open logfile $g{logfile} ($!)", 1 );
-    $g{log}->autoflush(1);
+    return if $g{log_file} =~ /^\s*$/ or $g{foreground};
+    $g{log} = new IO::File $g{log_file}, 'a'
+        or log_fatal( "ERROR: Unable to open log file $g{log_file} ($!)", 1 );
+    $g{log}->autoflush( 1 );
 }
 
 # Allow Rotation of log files
 sub reopen_log {
-    my ($signal) = @_;
+    my ( $signal ) = @_;
     if ( $g{parent} ) {
         do_log( "Sending signal $signal to forks", DEBUG ) if $g{debug};
         for my $fork ( keys %{ $g{forks} } ) {
@@ -1348,11 +1546,11 @@ sub reopen_log {
         undef $g{log};
         &open_log;
     }
-    do_log( "Re-opened log file $g{logfile}", DEBUG ) if $g{debug};
+    do_log( "Re-opened log file $g{log_file}", DEBUG ) if $g{debug};
     return 1;
 }
 
-# Sub to log data to a logfile and print to screen if verbose
+# Sub to log data to a log file and print to screen if verbose
 sub do_log {
     my ( $msg, $verbosity, $fork_num ) = @_;
     $verbosity = 2 if !defined $verbosity;
@@ -1363,7 +1561,7 @@ sub do_log {
             $package = $package . "($fork_num)" if defined $fork_num;
         }
         my ( $sec, $frac ) = gettimeofday;
-        my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . ( sprintf "%03d", $frac / 1000 ) . '%z', localtime($sec) );
+        my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . ( sprintf "%03d", $frac / 1000 ) . '%z', localtime( $sec ) );
         $msg = $dateISO8601 . "|" . ( sprintf "%-5s", $g{log_level}[$verbosity] ) . '|' . ( sprintf "%-9s", $package ) . '|' . ( sprintf "%5s", $$ ) . '|' . ( sprintf "%4s", $line ) . "|" . $msg;
         my $matched = 1;
         if ( $g{log_match_ref} and not( @{ $g{log_match_ref} } == 1 and $g{log_match_ref}->[0] eq '' ) ) {
@@ -1383,9 +1581,9 @@ sub do_log {
                 }
             }
         }
-        if ($matched) {
+        if ( $matched ) {
             if ( defined $g{log} and $g{log} ne '' ) {
-                $g{log}->print("$msg\n") if $g{verbose} >= $verbosity;
+                $g{log}->print( "$msg\n" ) if $g{verbose} >= $verbosity;
             } else {
                 print "$msg\n" if $g{verbose} >= $verbosity;
             }
@@ -1399,7 +1597,7 @@ sub log_fatal {
     my ( $msg, $verbosity, $exitcode ) = @_;
 
     do_log( $msg, $verbosity );
-    quit(1);
+    quit( 1 );
 }
 
 # Sub to make a nice timestamp
@@ -1410,7 +1608,7 @@ sub ts {
 
 # Connect/recover DB connection
 sub db_connect {
-    my ($silent) = @_;
+    my ( $silent ) = @_;
 
     # Don't need this if we are not in multinode mode
     return if $g{multinode} ne 'yes';
@@ -1440,16 +1638,16 @@ sub db_connect {
 
 # Sub to query DB, return results, die if error
 sub db_get {
-    my ($query) = @_;
+    my ( $query ) = @_;
     do_log( "DEBUG CONF DB: select $query", 4 ) if $g{debug};
     my @results;
-    my $a = $g{dbh}->selectall_arrayref("select $query")
+    my $a = $g{dbh}->selectall_arrayref( "select $query" )
         or do_log( "DB query '$query' failed; reconnecting", ERROR )
         and db_connect()
-        and return db_get($query);
+        and return db_get( $query );
 
-    for my $b (@$a) {
-        for my $c (@$b) {
+    for my $b ( @$a ) {
+        for my $c ( @$b ) {
             push @results, $c;
         }
     }
@@ -1458,28 +1656,28 @@ sub db_get {
 
 # Sub to query DB, return resulting array, die if error
 sub db_get_array {
-    my ($query) = @_;
+    my ( $query ) = @_;
     do_log( "Select $query", DEBUG ) if $g{debug};
-    my $results = $g{dbh}->selectall_arrayref("select $query")
+    my $results = $g{dbh}->selectall_arrayref( "select $query" )
         or do_log( "DB query '$query' failed; reconnecting", WARN )
         and db_connect()
-        and return db_get_array($query);
+        and return db_get_array( $query );
 
     return @$results;
 }
 
 # Sub to write to db, die if error
 sub db_do {
-    my ($cmd) = @_;
+    my ( $cmd ) = @_;
 
     # Make special characters mysql safe
     $cmd =~ s/\\/\\\\/g;
 
     do_log( "DB $cmd", DEBUG ) if $g{debug};
-    my $result = $g{dbh}->do("$cmd")
+    my $result = $g{dbh}->do( "$cmd" )
         or do_log( "DB write '$cmd' failed; reconnecting", ERROR )
         and db_connect()
-        and return db_do($cmd);
+        and return db_do( $cmd );
 
     return $result;
 }
@@ -1490,9 +1688,9 @@ sub reset_ownerships {
         if $g{multinode} ne 'yes';
 
     db_connect();
-    db_do('update devices set owner=0');
+    db_do( 'update devices set owner=0' );
     db_do( 'update nodes set heartbeat=4294967295,need_tests=0 ' . 'where active="y"' );
-    db_do('delete from test_data');
+    db_do( 'delete from test_data' );
 
     die "Database ownerships reset.  Please run all active nodes.\n\n";
 }
@@ -1513,18 +1711,18 @@ sub sync_global_config {
     do_log( "Updating global config", INFO );
 
     # Clear our global config
-    db_do("delete from global_config");
+    db_do( "delete from global_config" );
 
     # Now go through our options and write them to the DB
     for my $opt ( sort keys %{ $g{globals} } ) {
         my $val = $g{$opt};
-        db_do("insert into global_config values ('$opt','$val')");
+        db_do( "insert into global_config values ('$opt','$val')" );
     }
 
     do_log( "Done", INFO );
 
     # Now quit
-    &quit(0);
+    &quit( 0 );
 }
 
 # Read in from the hosts.cfg file, snmp query hosts to discover their
@@ -1570,10 +1768,11 @@ sub read_hosts_cfg {
     log_fatal( "FATAL CONF: No hosts.cfg file", 0 ) unless @hostscfg;
 
     my $etcdir = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
-    $etcdir = $g{homedir} if !defined $etcdir;
+
+    #$etcdir = $g{homedir} if !defined $etcdir;
     my $loop_idx = 0;
 
-FILEREAD: while (@hostscfg) {
+FILEREAD: while ( @hostscfg ) {
         ++$loop_idx;
         my $hostscfg = shift @hostscfg;
         next if !defined $hostscfg;    # In case next FILEREAD bypasses the while
@@ -1593,7 +1792,7 @@ FILEREAD: while (@hostscfg) {
             next if $line =~ /^\s*#/;
             chomp $line;
 
-            while ( $line =~ s/\\$// and !eof(HOSTSCFG) ) {
+            while ( $line =~ s/\\$// and !eof( HOSTSCFG ) ) {
                 $line .= <HOSTSCFG>;    # Merge with next line
                 chomp $line;
             }    # of while
@@ -1659,7 +1858,7 @@ FILEREAD: while (@hostscfg) {
                     if ( $ip eq '0.0.0.0' ) {
                         $hosts_cfg{$host}{resolution} = 'dns';
                         my ( undef, undef, undef, undef, @addrs ) = gethostbyname $host;
-                        if (@addrs) {
+                        if ( @addrs ) {
                             $ip = join '.', unpack( 'C4', $addrs[0] );    # Use first address
                         } else {
 
@@ -1712,7 +1911,7 @@ FILEREAD: while (@hostscfg) {
                                 if scalar @args < 3;
                             my $test = shift @args;
                             my $oid  = shift @args;
-                            for my $valpair (@args) {
+                            for my $valpair ( @args ) {
                                 my ( $sc, $val ) = split /:/, $valpair, 2;
                                 my $type = $exc_sc{$sc};    # Process shortcut text
                                 do_log( "Unknown exception shortcut '$sc' for $host", ERROR ) and next
@@ -1730,7 +1929,7 @@ FILEREAD: while (@hostscfg) {
                                 if scalar @args < 3;
                             my $test = shift @args;
                             my $oid  = shift @args;
-                            for my $valpair (@args) {
+                            for my $valpair ( @args ) {
                                 my ( $sc, $thresh_list, $thresh_msg ) = split /:/, $valpair, 3;
                                 my $color = $thr_sc{$sc};    # Process shortcut text
                                 do_log( "Unknown exception shortcut '$sc' for $host", ERROR ) and next if !defined $color;
@@ -1820,7 +2019,7 @@ FILEREAD: while (@hostscfg) {
                     or $authproto eq ''
                     or $authpass eq ''
                     or $privproto eq ''
-                    or length($privpass) < 8 );
+                    or length( $privpass ) < 8 );
             }
         }
 
@@ -1942,7 +2141,7 @@ OLDHOST: for my $host ( keys %snmp_input ) {
 
     # Now go into a discovery process: try each version from the least secure to the most with fallback to v1 which do not support some mibs
     my @snmpvers = ( 2, 3, 1 );
-    for my $snmpver (@snmpvers) {
+    for my $snmpver ( @snmpvers ) {
 
         # Quit if we don't have any hosts left to query
         last if $hosts_left < 1;
@@ -2221,7 +2420,7 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                                     }
                                     if ( $seclevel eq 'authPriv' ) {
                                         next PRIVPROTO if $privproto eq '';
-                                        next PRIVPASS  if length($privpass) < 8;
+                                        next PRIVPASS  if length( $privpass ) < 8;
 
                                     }
 
@@ -2429,7 +2628,7 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                 # Only update if something changed
                 if ( $changes ne '' ) {
                     chop $changes;
-                    db_do("update devices set $changes where name='$host'");
+                    db_do( "update devices set $changes where name='$host'" );
                 }
 
                 # Go through our custom threshes and exceptions, update as needed
@@ -2473,7 +2672,7 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                             do_log( "Checking for stale exception types $_ on host $host test $test oid $oid", DEBUG )
                                 if $g{debug};
                             if ( not defined $new_hosts{$host}{except}{$test}{$oid}{$_} ) {
-                                db_do("delete from custom_excepts where host='$host' and test='$test' and type='$_' and oid='$oid'");
+                                db_do( "delete from custom_excepts where host='$host' and test='$test' and type='$_' and oid='$oid'" );
                             }
                         }
                     }
@@ -2481,15 +2680,15 @@ OLDHOST: for my $host ( keys %snmp_input ) {
 
                 # If it wasn't pre-existing, go ahead and insert it
             } else {
-                db_do("delete from devices where name='$host'");
-                db_do("insert into devices values ('$host','$ip','$vendor','$model','$tests','$cid',0)");
+                db_do( "delete from devices where name='$host'" );
+                db_do( "insert into devices values ('$host','$ip','$vendor','$model','$tests','$cid',0)" );
 
                 # Insert new thresholds
                 for my $test ( keys %{ $new_hosts{$host}{thresh} } ) {
                     for my $oid ( keys %{ $new_hosts{$host}{thresh}{$test} } ) {
                         for my $color ( keys %{ $new_hosts{$host}{thresh}{$test}{$oid} } ) {
                             my $val = $new_hosts{$host}{thresh}{$test}{$oid}{$color};
-                            db_do("insert into custom_threshs values ('$host','$test','$oid','$color','$val')");
+                            db_do( "insert into custom_threshs values ('$host','$test','$oid','$color','$val')" );
                         }
                     }
                 }
@@ -2499,7 +2698,7 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                     for my $oid ( keys %{ $new_hosts{$host}{except}{$test} } ) {
                         for my $type ( keys %{ $new_hosts{$host}{except}{$test}{$oid} } ) {
                             my $val = $new_hosts{$host}{except}{$test}{$oid}{$type};
-                            db_do("insert into custom_excepts values ('$host','$test','$oid','$type','$val')");
+                            db_do( "insert into custom_excepts values ('$host','$test','$oid','$type','$val')" );
                         }
                     }
                 }
@@ -2510,20 +2709,20 @@ OLDHOST: for my $host ( keys %snmp_input ) {
         for my $host ( keys %old_hosts ) {
             next if defined $new_hosts{$host};
             do_log( "Removing stale host '$host' from DB", INFO );
-            db_do("delete from devices where name='$host'");
-            db_do("delete from custom_threshs where host='$host'");
-            db_do("delete from custom_excepts where host='$host'");
+            db_do( "delete from devices where name='$host'" );
+            db_do( "delete from custom_threshs where host='$host'" );
+            db_do( "delete from custom_excepts where host='$host'" );
         }
 
-        # Or write it to our dbfile if we aren't in multinode mode
+        # Or write it to our db_file if we aren't in multinode mode
     } else {
 
         # Textual abbreviations
         my %thr_sc = ( 'red'    => 'r', 'yellow' => 'y', 'green' => 'g',  'clear'   => 'c', 'purple' => 'p', 'blue' => 'b' );
         my %exc_sc = ( 'ignore' => 'i', 'only'   => 'o', 'alarm' => 'ao', 'noalarm' => 'na' );
-        do_log( "DBFILE: $g{dbfile}", INFO );
-        open HOSTFILE, ">$g{dbfile}"
-            or log_fatal( "Unable to write to dbfile '$g{dbfile}' ($!)", 1 );
+        do_log( "DBFILE: $g{db_file}", INFO );
+        open HOSTFILE, ">$g{db_file}"
+            or log_fatal( "Unable to write to db file '$g{db_file}' ($!)", 1 );
 
         for my $host ( sort keys %new_hosts ) {
             my $ip         = $new_hosts{$host}{ip};
@@ -2583,7 +2782,7 @@ OLDHOST: for my $host ( keys %snmp_input ) {
     }
 
     # Now quit
-    &quit(0);
+    &quit( 0 );
 }
 
 # Read hosts.cfg in from mysql DB in multinode mode, or else from disk
@@ -2595,8 +2794,8 @@ sub read_hosts {
     # Multinode
     if ( $g{multinode} eq 'yes' ) {
         do_log( "DB Multimode server", DEBUG ) if $g{debug};
-        my @arr = db_get_array("name,ip,vendor,model,tests,cid from devices");
-        for my $host (@arr) {
+        my @arr = db_get_array( "name,ip,vendor,model,tests,cid from devices" );
+        for my $host ( @arr ) {
             my ( $name, $ip, $vendor, $model, $tests, $cid ) = @$host;
 
             # Filter if requested
@@ -2626,15 +2825,15 @@ sub read_hosts {
             do_log( "Host in DB $ip $vendor $model $tests $cid $port", DEBUG ) if $g{debug};
         }
 
-        @arr = db_get_array("host,test,oid,type,data from custom_excepts");
-        for my $except (@arr) {
+        @arr = db_get_array( "host,test,oid,type,data from custom_excepts" );
+        for my $except ( @arr ) {
             my ( $name, $test, $oid, $type, $data ) = @$except;
             $hosts{$name}{except}{$test}{$oid}{$type} = $data
                 if defined $hosts{$name};
         }
 
-        @arr = db_get_array("host,test,oid,color,val from custom_threshs");
-        for my $thresh (@arr) {
+        @arr = db_get_array( "host,test,oid,color,val from custom_threshs" );
+        for my $thresh ( @arr ) {
             my ( $name, $test, $oid, $color, $val ) = @$thresh;
             $hosts{$name}{thresh}{$test}{$oid}{$color} = $val
                 if defined $hosts{$name};
@@ -2645,7 +2844,7 @@ sub read_hosts {
         do_log( "DB Single mode server", DEBUG ) if $g{debug};
 
         # Check if the hosts file even exists
-        return %hosts if !-e $g{dbfile};
+        return %hosts if !-e $g{db_file};
 
         # Hashes containing textual shortcuts for Xymon exception & thresholds
         my %thr_sc = ( 'r' => 'red',    'y' => 'yellow', 'g'  => 'green', 'c'  => 'clear', 'p' => 'purple', 'b' => 'blue' );
@@ -2656,11 +2855,11 @@ sub read_hosts {
         my $numtests = 0;
 
         # Open and read in data
-        open DBFILE, $g{dbfile}
-            or log_fatal( "Unable to open host file: $g{dbfile} ($!)", 0 );
+        open DBFILE, $g{db_file}
+            or log_fatal( "Unable to open host file: $g{db_file} ($!)", 0 );
 
         my $linenumber = 0;
-    FILELINE: for my $line (<DBFILE>) {
+    FILELINE: for my $line ( <DBFILE> ) {
             chomp $line;
             my ( $name, $ip, $port, $resolution, $vendor, $model, $ver, $cid, $secname, $seclevel, $authproto, $authpass, $privproto, $privpass, $tests, $thresholds, $excepts ) = split /\e/, $line;
             do_log( "DB $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", TRACE ) if $g{debug};
@@ -2703,7 +2902,7 @@ sub read_hosts {
                     my @args = split /;/, $threshes, 4;
                     my $test = shift @args;
                     my $oid  = shift @args;
-                    for my $valpair (@args) {
+                    for my $valpair ( @args ) {
                         my ( $sc, $thresh_list, $thresh_msg ) = split /:/, $valpair, 3;
                         my $color = $thr_sc{$sc};
                         $hosts{$name}{thresh}{$test}{$oid}{$color}{$thresh_list} = undef;
@@ -2717,7 +2916,7 @@ sub read_hosts {
                     my @args = split /;/, $except, 4;
                     my $test = shift @args;
                     my $oid  = shift @args;
-                    for my $valpair (@args) {
+                    for my $valpair ( @args ) {
                         my ( $sc, $val ) = split /:/, $valpair, 2;
                         my $type = $exc_sc{$sc};
                         $hosts{$name}{except}{$test}{$oid}{$type} = $val;
@@ -2766,9 +2965,9 @@ sub daemonize {
     umask 0;
 
     # Close open file descriptors
-    my $openmax = POSIX::sysconf(&POSIX::_SC_OPEN_MAX);
+    my $openmax = POSIX::sysconf( &POSIX::_SC_OPEN_MAX );
     $openmax = 64 if !defined $openmax or $openmax < 0;
-    for my $i ( 0 .. $openmax ) { POSIX::close($i) }
+    for my $i ( 0 .. $openmax ) { POSIX::close( $i ) }
 
     # Reopen stderr, stdout, stdin to /dev/null
     open( STDIN,  "+>/dev/null" );
@@ -2809,77 +3008,542 @@ sub na { $a <=> $b }
 # Sub called by sort, returns results numerically descending
 sub nd { $b <=> $a }
 
+sub user_has_file_permissions {
+    my ( $file_path, $user, $permissions ) = @_;
+    my ( $part_before, $part_after ) = $file_path =~ /^(.*)\/(.*)$/;
+
+    # Check if a parent folder exists
+    if ( $part_before ne '' ) {
+        my $p = user_has_file_permissions( $part_before, $user, 'r' );
+        unless ( $p ) {
+            return $p;
+        }
+    } else {
+        return 1;
+    }
+
+    my ( $file_mode, $file_uid, $file_gid ) = ( stat( $file_path ) )[ 2, 4, 5 ];
+    my $mode     = $file_mode & 07777;
+    my $user_uid = ( getpwnam( $user ) )[2];
+    return 0 if not defined $user_uid;
+
+    # Root user has all permissions to anyfile
+    if ( $user eq 'root' ) {
+        return 1;
+    }
+
+    # Test owner
+    if ( $file_uid == $user_uid ) {
+        return 1 if ( $permissions eq 'r' && ( $mode & 0400 ) ) || ( $permissions eq 'rw' && ( $mode & 0400 ) && ( $mode & 0200 ) );    # 6 is for read-write(=rw)
+    }
+
+    # Test groups
+    foreach my $user_gid ( get_group_ids_from_uid( $user_uid ) ) {
+        if ( $user_gid == $file_gid ) {
+            return 1 if ( $permissions eq 'r' && ( $mode & 0040 ) ) || ( $permissions eq 'rw' && ( $mode & 0040 ) && ( $mode & 0020 ) );
+            last;                                                                                                                       # Exit loop early if match found
+        }
+    }
+
+    # Test other
+    return ( $permissions eq 'r' && ( $mode & 0004 ) ) || ( $permissions eq 'rw' && ( $mode & 0004 ) && ( $mode & 0002 ) );
+}
+
+sub perm_str_to_num {
+    my $perm_str = shift;
+
+    # Directly calculate numeric value based on permission string
+    my $perm_num = 0;
+    $perm_num += 4 if index( $perm_str, 'r' ) != -1;
+    $perm_num += 2 if index( $perm_str, 'w' ) != -1;
+    $perm_num += 1 if index( $perm_str, 'x' ) != -1;
+
+    return $perm_num;
+}
+
+sub perm_num_to_str {
+    my $perm_num = shift;
+
+    my $perm_str = '';
+    $perm_str .= 'r' if $perm_num & 4;
+    $perm_str .= 'w' if $perm_num & 2;
+    $perm_str .= 'x' if $perm_num & 1;
+
+    return $perm_str;
+}
+
+sub parent1_dir_perm_num {
+
+    # Comput the parent folder permission to have
+    # To check if a file is readable:
+    #
+    # Permissions on Target File: r (read) or 4
+    # Permissions on Parent Folder: rx (read and execute) or 5
+    # Permissions on Next Parent Folder: x (execute) or 1
+    #
+    # To check if a file is read-writable:
+    #
+    # Permissions on Target File: rw (read and write) or 6
+    # Permissions on Parent Folder: rwx (read, write, and execute) or 7
+    # Permissions on Next Parent Folder: x (execute) or 1
+    #
+    # To check if a folder is readable:
+
+    # Permissions on Target Folder: rx (read and execute) or 5
+    # Permissions on Parent Folder: x (execute) or 1
+    # Permissions on Next Parent Folder: x (execute) or 1
+    #
+    # To check if a folder is read-writable:
+
+    # Permissions on Target Folder: rwx (read, write, and execute) or 7
+    # Permissions on Parent Folder: x (execute) or 1
+    # Permissions on Next Parent Folder: x (execute) or 1
+    #
+    # General rule
+    # if perm is even add 1 to it
+    # if perm is odd set it to 1
+
+    my $perm_num = shift;
+    return $perm_num % 2 == 0 ? $perm_num + 1 : 1;
+}
+
+sub parent2_dir_perm_num {
+    return parent1_dir_perm_num( parent1_dir_perm_num( shift ) );
+}
+
+sub parent1_dir_perm_str {
+    return perm_num_to_str( parent1_dir_perm_num( perm_str_to_num( shift ) ) );
+}
+
+sub parent2_dir_perm_str {
+    return perm_num_to_str( parent2_dir_perm_num( perm_str_to_num( shift ) ) );
+}
+
+sub user_has_file_perm_str {
+    my ( $file_path, $user, $perm_str ) = @_;
+    return user_has_file_perm_num( $file_path, $user, perm_str_to_num( $perm_str ) );
+}
+
+sub user_has_file_perm_num {
+    my ( $file_path, $user, $perm_num ) = @_;
+    my ( $part_before, $part_after ) = $file_path =~ /^(.*)\/(.*)$/;
+
+    # Check if a parent folder exists
+    if ( $part_before ne '' ) {
+        my $p = user_has_file_perm_num( $part_before, $user, parent1_dir_perm_num( $perm_num ) );
+        unless ( $p ) {
+            return $p;
+        }
+    } else {
+        return 1;
+    }
+    my ( $file_mode, $file_uid, $file_gid ) = ( stat( $file_path ) )[ 2, 4, 5 ];    #// return 0;
+                                                                                    #my $mode = $file_mode & 07777;
+    return 0 unless defined $file_mode;
+    my $user_uid = ( getpwnam( $user ) )[2];
+    return 0 if not defined $user_uid;
+
+    # Root user has all permissions to anyfile
+    if ( $user eq 'root' ) {
+        return 1;
+    }
+
+    # Test owner
+    if ( $file_uid == $user_uid ) {
+
+        my $owner_perm_num = $perm_num << 6;
+        return 1 if ( $file_mode & $owner_perm_num ) == $owner_perm_num;
+    }
+
+    # Test groups
+    foreach my $user_gid ( get_group_ids_from_uid( $user_uid ) ) {
+        if ( $user_gid == $file_gid ) {
+
+            my $group_perm_num = $perm_num << 3;
+            return 1 if ( $file_mode & $group_perm_num ) == $group_perm_num;
+            last;    # Exit loop early if match found
+        }
+    }
+
+    # Test other
+    return ( $file_mode & $perm_num ) == $perm_num;
+}
+
+sub get_group_ids_from_uid {
+    my $uid = shift;
+
+    ( my $user_name, my $user_primary_gid ) = ( getpwuid( $uid ) )[ 0, 3 ];
+
+    # Get supplementary groups
+    my %group_ids = ( $user_primary_gid => 1 );    # Use a hash to avoid duplicates
+    setgrent();                                    # Start from the beginning of the group file
+    while ( ( my $gid, my $members ) = ( getgrent() )[ 1, 3 ] ) {
+
+        my @members = split /,/, $members;
+        if ( grep { $_ eq $user_name } @members ) {
+            $group_ids{$gid} = 1;
+        }
+    }
+    endgrent();                                    # Close the group file
+
+    # Return the unique group IDs
+    return keys %group_ids;
+}
+
+sub find_dir {
+    my ( $user, $permission, @folders ) = @_;
+
+    foreach my $folder ( @folders ) {
+        if ( user_has_file_perm_str( $folder, $user, $permission ) ) {
+            return abs_path( $folder );
+
+        }
+    }
+
+    # Warn if the directory is not found or does not have the required permissions
+    #if ( $permission eq 'rw' ) {
+    #    warn "Writable directory not found. Searched in the following locations:\n";
+    #} elsif ( $permission eq 'r' ) {
+    #    warn "Readable directory not found. Searched in the following locations:\n";
+    #}
+    #warn "$_\n" for @folders;
+
+    return;    # Return undef if directory not found or does not have required permissions
+}
+
+sub find_file {
+    my ( $user, $filename, $permission, @folders ) = @_;
+    if ( @folders ) {
+        foreach my $folder ( @folders ) {
+            my $file_path = "$folder/$filename";
+
+            #if ( user_has_file_permissions( $file_path, $user, $permission ) ) {
+            if ( user_has_file_perm_str( $file_path, $user, $permission ) ) {
+                return $file_path;
+            }
+        }
+    } else {    # @folder is empty
+                #if ( user_has_file_permissions( $filename, $user, $permission ) ) {
+        if ( user_has_file_perm_str( $filename, $user, $permission ) ) {
+            return $filename;
+        } else {
+
+            #warn "File $filename not found or not accessible with user '$user' with permission '$permission', its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
+            return;
+        }
+    }
+
+    # Warn if the file is not found or does not have the required permissions
+    # warn "File $filename not found or not accessible with user '$user'  with permission '$permission' in folder " . ( join ' ', ( map { abs_path( $_ ) } @folders ) ) . ", its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
+    return;
+}
+
+sub read_user_from_config_file {
+    my ( $config_file ) = @_;
+
+    # Open the config file for reading
+    open( my $fh, '<', $config_file ) or die "Cannot open $config_file: $!";
+
+    # Read the file line by line
+    while ( my $line = <$fh> ) {
+        chomp( $line );
+
+        # Search for lines containing the User directive
+        if ( $line =~ /^\s*user\s*=\s*(\S+)/ ) {
+
+            # Close the file handle
+            close( $fh );
+
+            # Extract and return the user if defined
+            return $1;
+        }
+    }
+
+    # Close the file handle
+    close( $fh );
+
+    # If User directive not found, return undef
+    return;
+}
+
+sub normalize_and_verify_config_path {
+    my ( $user, $config_file, @config_folders ) = @_;
+
+    if ( $config_file =~ m{[/\\]} ) {
+
+        # If config_file includes a directory path
+        my ( $filename, $folder ) = fileparse( $config_file );
+        $folder = abs_path( $folder );
+        unless ( defined $folder ) {
+            warn "Bad folder: $config_file";
+            return;
+        }
+        $config_file = catfile( $folder, $filename );
+        unless ( find_file( $user, $config_file, 'r', $folder ) ) {
+            warn "No readable config file: $config_file";
+            return;
+        }
+    } else {
+
+        # If config_file is just a filename, search for it in @config_folders
+        my $folder_filename = find_file( $user, $config_file, 'r', @config_folders );
+        if ( defined $folder_filename ) {
+            $config_file = abs_path( $folder_filename );
+        } else {
+
+            #warn "Config file '$config_file' not found in specified folders.";
+            return;
+        }
+    }
+    return $config_file;    # Return the normalized and verified config file path
+}
+
+sub can_read_user_from_config {
+    my ( $user, $config_file, @config_folders ) = @_;
+
+    # Check if the config file is readable
+    my $valid_config_file = normalize_and_verify_config_path( $user, $config_file, @config_folders );
+    my $current_user      = getpwuid( $< );
+    my $valid_user;
+    if ( defined $valid_config_file ) {
+
+        # Read the config file for user or use default one
+        my $configured_user = read_user_from_config_file( $valid_config_file );
+
+        if ( not defined $configured_user ) {
+            $valid_user = $user;
+        } elsif ( $user ne $configured_user ) {
+            my $new_valid_config_file = normalize_and_verify_config_path( $configured_user, $config_file, @config_folders );
+            if ( defined $new_valid_config_file ) {
+                if ( $valid_config_file ne $new_valid_config_file ) {
+                    die "The user '$configured_user' configured can read another config file found at: $new_valid_config_file. Check your permissions.";
+                } else {
+                    $valid_user = $configured_user;
+                }
+            } else {
+                die "The configured user '$configured_user' MUST exist and be able to read the config file '$valid_config_file'";
+            }
+        } else {
+            $valid_user = $configured_user;
+        }
+
+    } else {
+
+        #my $configured_user;
+
+        # if not, check if the config file is readable by current user
+        $valid_config_file = normalize_and_verify_config_path( $current_user, $config_file, @config_folders );
+        if ( defined $valid_config_file ) {
+
+            my $configured_user = read_user_from_config_file( $valid_config_file );
+            if ( not defined $configured_user ) {
+                die "The current user '$current_user' MUST be configured in the config file '$valid_config_file' for a valid configuration.\n";
+            } elsif ( $configured_user ne $current_user ) {
+                my $new_valid_config_file = normalize_and_verify_config_path( $configured_user, $config_file, @config_folders );
+                if ( defined $new_valid_config_file ) {
+                    if ( $valid_config_file ne $new_valid_config_file ) {
+                        die "The user '$configured_user' configured can read another config file found at: $new_valid_config_file. Check your permissions.\n";
+                    } else {
+                        $valid_user = $configured_user;
+                    }
+                } else {
+                    die "The configured user '$configured_user' MUST exists and be able to read the config file '$valid_config_file'.\n";
+                }
+            } else {
+                $valid_user = $configured_user;
+            }
+
+        }
+    }
+
+    # Check if user matches the current user
+    unless ( $valid_user eq $current_user ) {
+
+        ( my $user_uid, my $user_gid ) = ( getpwnam( $valid_user ) )[ 2, 3 ];
+        setgid( $user_gid ) or die "Failed to set GID to $user_gid: $!";
+        setuid( $user_uid ) or die "Failed to set UID to $user_uid: $!";
+        print "Process user changed to '$valid_user' (UID: $user_uid, GID: $user_gid).\n", if $g{debug};
+
+    }
+
+    return ( $valid_config_file, $valid_user );
+}
+
+sub can_read_config {
+    my ( $config_file ) = @_;
+
+    $g{user} = get_user_from_config( $config_file ) || $g{user};
+    my ( $new_uid ) = ( getpwnam( $g{user} ) )[2] // die "User '$g{user}' does not exist or cannot be switched to.\n";
+
+    my $current_uid = $<;    # Get the current UID
+
+    return 1 if $current_uid == $new_uid;
+
+    setuid( $new_uid ) or die "Failed to set UID to $new_uid: $!";
+
+    is_readable( $config_file ) or die "Config file '$config_file' is not readable with UID: '$new_uid'\n";
+
+    return 1;
+}
+
+sub change_file_ownership {
+    my ( $file, $new_owner_uid, $new_owner_gid ) = @_;
+
+    # Attempt to change the ownership of the file
+    unless ( chown $new_owner_uid, $new_owner_gid, $file ) {
+        warn "Failed to change ownership of $file: $!\n";
+        return 0;    # Return false if failed to change ownership
+    }
+
+    return 1;        # Return true if ownership changed successfully
+}
+
+sub create_var_subfolders {
+
+    # Define the list of folders to create
+    my @var_subfolders = ( "db", "cache", );
+
+    foreach my $subfolder ( @var_subfolders ) {
+        if ( -e "$g{var_dir}/$subfolder" && -d "$g{var_dir}/$subfolder" ) {
+
+            # Folder exists, no need to create
+            print "Folder $g{var_dir}/$subfolder already exists.\n";
+        } else {
+
+            # Folder doesn't exist, create it
+            make_path( "$g{var_dir}/$subfolder" ) or die "Failed to create folder $g{var_dir}/$subfolder: $!";
+            print "Folder $g{var_dir}/$subfolder created.\n";
+        }
+        $g{$subfolder} = "$g{var_dir}/$subfolder";
+    }
+}
+
+sub create_subfolder_and_set_owner {
+    my ( $subfolder_name, $user ) = @_;
+
+    # Assuming $g{var_dir} is your base directory defined somewhere in your script
+    my $full_path = "$g{var_dir}/$subfolder_name";
+
+    if ( -e $full_path && -d $full_path ) {
+        print "Folder $full_path already exists.\n";
+    } else {
+        make_path( $full_path ) or die "Failed to create folder $full_path: $!";
+        print "Folder $full_path created.\n";
+    }
+
+    my $uid = getpwnam( $user )        or die "User $user not found";
+    my $gid = ( getgrnam( $user ) )[2] or die "Group for $user not found";
+
+    chown $uid, $gid, $full_path or die "Failed to change owner of $full_path to $user";
+    print "Changed ownership of $full_path to $user.\n";
+
+    $g{$subfolder_name} = $full_path;
+}
+
+sub get_user_from_config {
+    my ( $config_file ) = @_;
+
+    # Open the config file for reading
+    open( my $fh, '<', $config_file ) or die "Cannot open $config_file: $!";
+
+    # Read the file line by line
+    while ( my $line = <$fh> ) {
+        chomp( $line );
+
+        # Search for lines containing the User directive
+        if ( $line =~ /^\s*User\s*=\s*(\S+)/ ) {
+
+            # Close the file handle
+            close( $fh );
+
+            # Extract and return the user if defined
+            return $1;
+        }
+    }
+
+    # Close the file handle
+    close( $fh );
+
+    # Return undef if User directive not found
+    return;
+}
+
+sub is_readable {
+    my ( $file_or_folder ) = @_;
+    return -e $file_or_folder && -r _ ? 1 : 0;
+}
+
 # Print help
 sub usage {
     use File::Basename;
-    if (@_) {
-        my ($msg) = @_;
-        chomp($msg);
+    if ( @_ ) {
+        my ( $msg ) = @_;
+        chomp( $msg );
         say STDERR "Devmon v$g{version}: $msg";
     }
 
-    my $prog = basename($0);
+    my $prog = basename( $0 );
     say STDERR "Try '$prog -?' for more information.";
-    exit(1);
+    exit( 1 );
 }
 
 sub help {
     use File::Basename;
-    my $prog = basename($0);
+    my $prog = basename( $0 );
     print <<"EOF";
 Devmon v$g{version}, a device monitor for Xymon
 Usage:
   $prog [options]
-  $prog -? -he[lp] 
+  $prog -? -h[elp] 
 
 Template development:
   $prog -p iphost=test                           run devmon for only 1 test on 1 host
-  $prog -p iphost=test -de                       debug 
+  $prog -p iphost=test -d                        debug 
   $prog -p iphost=test -t                        trace
   $prog -p iphost=test -m rrd=xymon://localhost  send rrd data to xymon only for graph rendering 
 
- -c[onfigfile]     Specify config file location  
- -db[file]         Specify database file location  
- -de[bug] -t[race] Print debug or trace 
- -v -vv -nov       Verbose mode: 0 -> quiet, 1 -> error, 2 -> warning(default), 3 -> info, 4 -> debug, 5 -> trace            
+ -c[onfigfile]       Specify config file location  
+ -d[ebug]            Print debug (witout sentitive info) 
+ -t[race]            Print trace, extensive debug, (with sensitive info) 
+ -v -vv -nov[erbose] Verbose mode: 0 -> quiet, 1 -> error, 2 -> warning(default), 3 -> info, 4 -> debug, 5 -> trace            
 
- -f[oreground]     Run in foreground (fg). Prevents running in daemon mode  
- -o[utput]         Send message to defined output(s)  
-                    Format             : -o=protocol1://target1 -o=protocol2://target2 (or short format -o only, see below) 
-                    Default            : -o=xymon://localhost 
-                    Short: -o (alone)  : -o=xymon://localhost -o=xymon://stdout
- -1                Oneshot: run only 1 times and exit (default: -no1)
+ -f[oreground]       Run in foreground (fg). Prevents running in daemon mode  
+ -o[utput]           Send message to defined output(s)  
+                      Format             : -o=protocol1://target1 -o=protocol2://target2 (or short format -o only, see below) 
+                      Default            : -o=xymon://localhost 
+                      Short: -o (alone)  : -o=xymon://localhost -o=xymon://stdout
+ -1                  Oneshot: run only 1 times and exit (default: -no1)
 
 Template building facility options:
- -p[oll]           Poll iphost(s) for test(s) that match host and test regexp,
-                    Same as            : -m iphost={ip|hostname} -m test={test}   
- -m[atch]          Poll multiple pattern and report that match:
-                    Format by keyword : -m host=host1 -m host=host2
-                                      : -m ip=1.1.1.1
-                                      : -m iphost=2.2.2.2
-                                      : -m test=fan
-                                      : -m stat=xymon://localhost (default: no stat)
-                                      : -m rrd=xymon://localhost  (default: rrd=xymon://stdout), if set overides default)  
-                    Imply: -1 -o
-                    Warning: if ip(s) and host(s) are used together, both should match (different that iphost)
--log_m[atch]       Log only if keywords match
-                    Format            : -log_m="|snmp" -log_m="|test" -log_m=ERROR -log_m=WARN
--log_f[ilter]      Filter keywords from log (after log_match)
-                    Format            : -log_m="| 123" -log_m="|msg"
+ -p[oll]             Poll iphost(s) for test(s) that match host and test regexp,
+                      Same as            : -m iphost={ip|hostname} -m test={test}   
+ -m[atch]            Poll multiple pattern and report that match:
+                      Format by keyword : -m host=host1 -m host=host2
+                                        : -m ip=1.1.1.1
+                                        : -m iphost=2.2.2.2
+                                        : -m test=fan
+                                        : -m stat=xymon://localhost (default: no stat)
+                                        : -m rrd=xymon://localhost  (default: rrd=xymon://stdout), if set overides default)  
+                      Imply: -1 -o
+                      Warning: if ip(s) and host(s) are used together, both should match (different that iphost)
+-log_m[atch]         Log only if keywords match
+                      Format            : -log_m="|snmp" -log_m="|test" -log_m=ERROR -log_m=WARN
+-log_f[ilter]        Filter keywords from log (after log_match)
+                      Format            : -log_m="| 123" -log_m="|msg"
 
 Mutually exclusive options:  
- -rea[dhostscfg]   Read in data from the Xymon hosts.cfg file  
- -syncc[onfig]     Update multinode DB with the global config options configured on this local node  
- -synct[emplates]  Update multinode device templates with the template data on this local node  
- -res[etowners]    Reset multinode device ownership data.  This will
-                   cause all nodes to recalculate ownership data
+ -rea[dhostscfg]     Read in data from the Xymon hosts.cfg file  
+ -syncc[onfig]       Update multinode DB with the global config options configured on this local node  
+ -synct[emplates]    Update multinode device templates with the template data on this local node  
+ -res[etowners]      Reset multinode device ownership data.  This will
+                     cause all nodes to recalculate ownership data
 EOF
-    exit(1);
+    exit( 1 );
 }
 
 # Sub to call when we quit, be it normally or not
 sub quit {
-    my ($retcode) = @_;
+    my ( $retcode ) = @_;
     $retcode = 0 if ( !defined $retcode );
     if ( $retcode !~ /^\d*$/ ) {
         if ( $g{parent} ) {
@@ -2895,7 +3559,7 @@ sub quit {
     # Only run this if we are the parent process
     if ( $g{parent} ) {
         do_log( "Shutting down", INFO ) if $g{initialized};
-        unlink $g{pidfile}    if $g{initialized} and -e $g{pidfile};
+        unlink $g{pid_file}   if $g{initialized} and -e $g{pid_file};
         $g{log}->close        if defined $g{log} and $g{log} ne '';
         $g{dbh}->disconnect() if defined $g{dbh} and $g{dbh} ne '';
 
