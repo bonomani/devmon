@@ -51,9 +51,8 @@ mv devmon-main devmon
 
 ### Update ownership and group
 ```
-# According to the user that will run Devmon (here xymon)
-chown -R xymon ./devmon
-chgrp -R xymon ./devmon
+# According to the user that will run Devmon (here devmon, the default user)
+chown -R devmon:devmon ./devmon
 ```
 
 ## Configure Devmon (Single-node)
@@ -73,6 +72,7 @@ systemctl daemon-reload
 systemctl enable devmon
 systemctl start devmon
 ```
+The should start devmon, but you will need to discover you device before devmon can run in deamon mode
 ### Init.d  
 - See [/extras/devmon.initd.redhat](/extras/devmon.initd.redhat)  
 ## Prepare Xymon 
@@ -140,7 +140,7 @@ git stash apply
 
 ### If xymon hosts.cfg change (Obsolete: as `reload` do not make a discovery anymore)
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg, 
-in folder: devmon/extra
+in folder: devmon/extras
 
 ### Devmon Purple (Obsolete)
 For systemd (tested for CentOS only): in folder `devmon/extra/systemd`.
