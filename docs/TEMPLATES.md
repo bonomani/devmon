@@ -61,7 +61,7 @@ sysdesc  : C2950
 ```
 
 ## The oids file 
-The `oids` file contains the SNMP OIDS to query and their type. 
+The `oids` file contains the SNMP OIDs to query and their types. 
 
 ### Format
 ```
