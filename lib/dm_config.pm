@@ -60,13 +60,13 @@ sub initialize {
     %g = (
 
         # General variables
-        'version'     => $_[0],                                           # set in main script now
-        'user'        => 'devmon',
-        'app_name'    => 'devmon',
-        'config_file' => 'devmon.cfg',
-        'db_file'     => '',
-        'install_dir'    => abs_path(dirname($0)) =~ s|/bin$||r,
-        'var_dir'     => '',
+        'version'       => $_[0],                                     # set in main script now
+        'user'          => 'devmon',
+        'app_name'      => 'devmon',
+        'config_file'   => 'devmon.cfg',
+        'db_file'       => '',
+        'install_dir'   => abs_path( dirname( $0 ) ) =~ s|/bin$||r,
+        'var_dir'       => '',
         'templates_dir' => '',
         'foreground'    => 0,
         'initialized'   => 0,
@@ -121,7 +121,6 @@ sub initialize {
         'avgpolltime'  => [],
 
         # SNMP variables
-#<<<<<<< Updated upstream:lib/dm_config.pm
         'snmp_try_small_timeout' => 0,
         'snmp_try_timeout'       => 0,
         'snmp_try_small_maxcnt'  => 0,
@@ -133,18 +132,6 @@ sub initialize {
         'authpasss'              => '',
         'privprotos'             => '',
         'privpasss'              => '',
-#=======
-#        'snmp_discover_timeout' => 0,
-#        'snmp_try_timeout'      => 0,
-#        'snmp_try_max'          => 0,
-#        'snmpcids'              => '',
-#        'secnames'              => '',
-#        'seclevels'             => '',
-#        'authprotos'            => '',
-#        'authpasss'             => '',
-#        'privprotos'            => '',
-#        'privpasss'             => '',
-#>>>>>>> Stashed changes:modules/dm_config.pm
 
         # Now our global data subhashes
         'templates'    => {},
@@ -381,19 +368,8 @@ sub initialize {
             'set'     => 0,
             'case'    => 0
         },
-#<<<<<<< Updated upstream:lib/dm_config.pm
         'snmp_try_small_timeout' => {
             'default' => 4,       # for short request
-#=======
-#        'snmp_discover_timeout' => {
-#            'default' => 4,       # 5 Seems enough to poll 1 oid!
-#            'regex'   => '\d+',
-#            'set'     => 0,
-#            'case'    => 0
-#        },
-#        'snmp_try_timeout' => {
-#            'default' => 15,      # 2 Seems the very mininum, 4 if you use ilo
-#>>>>>>> Stashed changes:modules/dm_config.pm
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -429,18 +405,18 @@ sub initialize {
     my ( %match, $hostonly, $poll, $outputs_ref, $logger_ref );
 
     GetOptions(
-        "help|?"        => \&help,
-        "v"             => sub { $g{verbose} = 1 },
-        "vv"            => sub { $g{verbose} = 2 },
-        "vvv"           => sub { $g{verbose} = 3 },
-        "vvvv"          => sub { $g{verbose} = 4 },
-        "vvvvv"         => sub { $g{verbose} = 5 },
-        "noverbose"     => sub { $g{verbose} = 0 },
-        "config_file=s" => \$g{config_file},
-        "foreground" => \$g{foreground},
-        "output:s@"  => \$outputs_ref,
-        "1!"         => \$g{oneshot},
-        "match=s%"   => sub { push( @{ $match{ $_[1] } }, $_[2] ) },
+        "help|?"                   => \&help,
+        "v"                        => sub { $g{verbose} = 1 },
+        "vv"                       => sub { $g{verbose} = 2 },
+        "vvv"                      => sub { $g{verbose} = 3 },
+        "vvvv"                     => sub { $g{verbose} = 4 },
+        "vvvvv"                    => sub { $g{verbose} = 5 },
+        "noverbose"                => sub { $g{verbose} = 0 },
+        "config_file=s"            => \$g{config_file},
+        "foreground"               => \$g{foreground},
+        "output:s@"                => \$outputs_ref,
+        "1!"                       => \$g{oneshot},
+        "match=s%"                 => sub { push( @{ $match{ $_[1] } }, $_[2] ) },
         "poll=s"                   => \$poll,
         "debug"                    => \$g{debug},
         "log_match:s@"             => \$g{log_match_ref},
@@ -539,7 +515,7 @@ sub initialize {
                 @templates_dir = ( $g{templates_dir} );
             } else {
                 my %seen;
-                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates","$g{install_dir}/var/templates", "$g{install_dir}/templates";
+                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates", "$g{install_dir}/var/templates", "$g{install_dir}/templates";
             }
             if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
                 $db_filename = $g{db_file};
@@ -602,12 +578,12 @@ sub initialize {
                 $config_is_valid = 0;
             }
         } else {
-            if ($readhosts) {
-            do_log( "DB dir '$valid_path', and running './devmon -read' to discover devices", DEBUG );
+            if ( $readhosts ) {
+                do_log( "DB dir '$valid_path', and running './devmon -read' to discover devices", DEBUG );
             } else {
-            do_log( "DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service", DEBUG );
-            $config_is_valid = 0 ;
-           }
+                do_log( "DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service", DEBUG );
+                $config_is_valid = 0;
+            }
         }
     } else {
         do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
@@ -2056,27 +2032,18 @@ FILEREAD: while ( @hostscfg ) {
             $snmp_input{$host}{ip} = $hosts_cfg{$host}{ip};
         }
 
-        $snmp_input{$host}{authpass}   = $authpass;
-        $snmp_input{$host}{authproto}  = $authproto;
-        $snmp_input{$host}{cid}        = $cid;
-        $snmp_input{$host}{dev}        = $host;
-        $snmp_input{$host}{port}       = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
-        $snmp_input{$host}{privpass}   = $privpass;
-        $snmp_input{$host}{privproto}  = $privproto;
-        $snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
-        $snmp_input{$host}{seclevel}   = $seclevel;
-        $snmp_input{$host}{secname}    = $secname;
-#<<<<<<< Updated upstream:lib/dm_config.pm
-        $snmp_try_maxcnt{$host}        = $g{snmp_try_small_maxcnt};
-
-        #$snmp_input{$host}{snmp_try_timeout} = 3;
+        $snmp_input{$host}{authpass}         = $authpass;
+        $snmp_input{$host}{authproto}        = $authproto;
+        $snmp_input{$host}{cid}              = $cid;
+        $snmp_input{$host}{dev}              = $host;
+        $snmp_input{$host}{port}             = exists $hosts_cfg{$host}{port} ? $hosts_cfg{$host}{port} : 161;
+        $snmp_input{$host}{privpass}         = $privpass;
+        $snmp_input{$host}{privproto}        = $privproto;
+        $snmp_input{$host}{resolution}       = $hosts_cfg{$host}{resolution};
+        $snmp_input{$host}{seclevel}         = $seclevel;
+        $snmp_input{$host}{secname}          = $secname;
+        $snmp_try_maxcnt{$host}              = $g{snmp_try_small_maxcnt};
         $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
-#=======
-#        $snmp_try_max{$host}           = 1;
-#
-#        #$snmp_input{$host}{snmp_try_timeout} = 3;
-#        $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
-#>>>>>>> Stashed changes:modules/dm_config.pm
         $snmp_input{$host}{ver}              = $ver;
 
         # Add our sysdesc oid
@@ -2198,21 +2165,12 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                 do_log( "Trying valid host:$host with custom cid:'$hosts_cfg{$host}{cid}' trying snmp v$snmpver", INFO );
 
                 # Throw together our query data
-                $snmp_input{$host}{cid}  = $hosts_cfg{$host}{cid};
-                $snmp_input{$host}{dev}  = $host;
-                $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-                $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-#<<<<<<< Updated upstream:lib/dm_config.pm
-                $snmp_try_maxcnt{$host}  = $g{snmp_try_small_maxcnt};
-
-                #$snmp_input{$host}{snmp_try_timeout} = 3;
+                $snmp_input{$host}{cid}              = $hosts_cfg{$host}{cid};
+                $snmp_input{$host}{dev}              = $host;
+                $snmp_input{$host}{ip}               = $hosts_cfg{$host}{ip};
+                $snmp_input{$host}{port}             = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
+                $snmp_try_maxcnt{$host}              = $g{snmp_try_small_maxcnt};
                 $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
-#=======
-#                $snmp_try_max{$host}     = 1;
-#
-#                #$snmp_input{$host}{snmp_try_timeout} = 3;
-#                $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
-#>>>>>>> Stashed changes:modules/dm_config.pm
                 $snmp_input{$host}{ver}              = $snmpver;
 
                 # Add our sysdesc oid
@@ -2336,25 +2294,12 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                         do_log( "Trying valid host:$host", INFO );
                     }
 
-                    $snmp_input{$host}{cid}  = $cid;
-                    $snmp_input{$host}{dev}  = $host;
-                    $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-                    $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-                    $snmp_try_maxcnt{$host}  = $g{snmp_try_small_maxcnt};
-
-#<<<<<<< Updated upstream:lib/dm_config.pm
-                    #$snmp_input{$host}{snmp_try_timeout} = 3;
+                    $snmp_input{$host}{cid}              = $cid;
+                    $snmp_input{$host}{dev}              = $host;
+                    $snmp_input{$host}{ip}               = $hosts_cfg{$host}{ip};
+                    $snmp_input{$host}{port}             = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
+                    $snmp_try_maxcnt{$host}              = $g{snmp_try_small_maxcnt};
                     $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
-#=======
-#                    $snmp_input{$host}{cid}  = $cid;
-#                    $snmp_input{$host}{dev}  = $host;
-#                    $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
-#                    $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
-#                    $snmp_try_max{$host}     = 1;
-#
-#                    #$snmp_input{$host}{snmp_try_timeout} = 3;
-#                    $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
-#>>>>>>> Stashed changes:modules/dm_config.pm
                     $snmp_input{$host}{ver}              = $snmpver;
 
                     # Add our sysdesc oid
@@ -2500,25 +2445,18 @@ OLDHOST: for my $host ( keys %snmp_input ) {
 
                                         #do_log( "Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
 
-                                        $snmp_input{$host}{authpass}  = $authpass;
-                                        $snmp_input{$host}{authproto} = $authproto;
-                                        $snmp_input{$host}{cid}       = '';
-                                        $snmp_input{$host}{dev}       = $host;
-                                        $snmp_input{$host}{ip}        = $hosts_cfg{$host}{ip};
-                                        $snmp_input{$host}{port}      = $hosts_cfg{$host}{port};
-                                        $snmp_input{$host}{privpass}  = $privpass;
-                                        $snmp_input{$host}{privproto} = $privproto;
-                                        $snmp_input{$host}{seclevel}  = $seclevel;
-                                        $snmp_input{$host}{secname}   = $secname;
-                                        $snmp_try_maxcnt{$host}       = $g{snmp_try_small_maxcnt};
-
-                                        #$snmp_input{$host}{snmptimeout}   = $g{snmptimeout};
-                                        #$snmp_input{$host}{snmp_try_timeout} = 3;
-#<<<<<<< Updated upstream:lib/dm_config.pm
+                                        $snmp_input{$host}{authpass}         = $authpass;
+                                        $snmp_input{$host}{authproto}        = $authproto;
+                                        $snmp_input{$host}{cid}              = '';
+                                        $snmp_input{$host}{dev}              = $host;
+                                        $snmp_input{$host}{ip}               = $hosts_cfg{$host}{ip};
+                                        $snmp_input{$host}{port}             = $hosts_cfg{$host}{port};
+                                        $snmp_input{$host}{privpass}         = $privpass;
+                                        $snmp_input{$host}{privproto}        = $privproto;
+                                        $snmp_input{$host}{seclevel}         = $seclevel;
+                                        $snmp_input{$host}{secname}          = $secname;
+                                        $snmp_try_maxcnt{$host}              = $g{snmp_try_small_maxcnt};
                                         $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
-#=======
-#                                        $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
-#>>>>>>> Stashed changes:modules/dm_config.pm
                                         $snmp_input{$host}{ver}              = $snmpver;
 
                                         # Add our sysdesc oid
