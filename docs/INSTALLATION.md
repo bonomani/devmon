@@ -32,6 +32,8 @@ apt install snmp
 cd ...xymon/server/ext
 mkdir devmon
 cd devmon
+mkdir server
+cd server
 git clone https://github.com/bonomani/devmon.git
 # Exclude your devmon.cfg to be tracked by git (to revert show git notes below)
 git update-index --assume-unchanged devmon.cfg
@@ -40,19 +42,21 @@ git update-index --assume-unchanged devmon.cfg
 ## Download and unpack Devmon with wget or curl
 ```bash
 cd ...xymon/server/ext
+mkdir devmon
+cd devmon
 # with wget
 wget --no-check-certificate --content-disposition -O devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 # or with curl
 curl -LJ -o devmon.zip https://github.com/bonomani/devmon/archive/refs/heads/main.zip
 # Extract and rename
 unzip devmon.zip
-mv devmon-main devmon
+mv devmon-main server
 ```
 
 ### Update ownership and group
 ```
 # According to the user that will run Devmon (here devmon, the default user)
-chown -R devmon:devmon ./devmon
+chown -R devmon:devmon .
 ```
 
 ## Configure Devmon (Single-node)
@@ -64,7 +68,7 @@ chown -R devmon:devmon ./devmon
  
 ### Systemd
 ```bash
-cp /usr/lib/xymon/server/ext/devmon/extras/systemd/devmon.service /etc/systemd/system/devmon.service
+cp /usr/lib/xymon/server/ext/devmon/server/extras/systemd/devmon.service /etc/systemd/system/devmon.service
 ```
 Edit the /etc/systemd/system/devmon.service file and adjust the executable path as needed
 ```bash
@@ -90,7 +94,7 @@ NCV_dm="*:GAUGE"
 Add Devmon graphs configuration file:
 ```
 mkdir /var/xymon/server/etc/graphs.d
-cp /var/xymon/server/ext/devmon/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
+cp /var/xymon/server/ext/devmon/server/extras/devmon-graphs.cfg /var/xymon/server/etc/graphs.d/.
 ```
 Ensure `graph.cfg` include devmon-graphs.cfg by a directive like
 - directory /var/xymon/server/etc/graphs.d
@@ -102,7 +106,7 @@ An update of devmon.cfg from the github repo and locally excluded devmon.cfg are
 Recommended: copy the complete devmon folder elsewhere (to have a backup)
 
 ```bash
-cp -rf devmon devmon-dateYYMMDD
+cp -rf server server-dateYYMMDD
 ```
 
 Take a backup of your local config and pull all modifs including devmon.cfg  
@@ -140,9 +144,9 @@ git stash apply
 
 ### If xymon hosts.cfg change (Obsolete: as `reload` do not make a discovery anymore)
 Look at reload_devmon_if_hosts.cfg_changed and reload_devmon_if_hosts.cfg_changed.cfg, 
-in folder: devmon/extras
+in folder: devmon/server/extras
 
 ### Devmon Purple (Obsolete)
-For systemd (tested for CentOS only): in folder `devmon/extra/systemd`.
+For systemd (tested for CentOS only): in folder `devmon/server/extra/systemd`.
 
 
