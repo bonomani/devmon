@@ -65,13 +65,9 @@ sub initialize {
         'app_name'    => 'devmon',
         'config_file' => 'devmon.cfg',
         'db_file'     => '',
-        'home_dir'    => abs_path(dirname($0)) =~ s|/bin$||r,
+        'install_dir'    => abs_path(dirname($0)) =~ s|/bin$||r,
         'var_dir'     => '',
-
-        #        'db_dir'        => '',
         'templates_dir' => '',
-
-        #        'cache_dir'     => '',
         'foreground'    => 0,
         'initialized'   => 0,
         'mypid'         => 0,
@@ -459,7 +455,7 @@ sub initialize {
     }
 
     # Now read in our local config info from our file
-    my @config_dir = ( "/etc/$g{app_name}", "$g{home_dir}/etc", "$g{home_dir}" );
+    my @config_dir = ( "/etc/$g{app_name}", "$g{install_dir}/etc", "$g{install_dir}" );
     ( $g{config_file}, my $valid_user ) = can_read_user_from_config( $g{user}, $g{config_file}, @config_dir );
     my $config_is_valid = 1;
 
@@ -504,7 +500,7 @@ sub initialize {
         push @var_dir, $g{var_dir};
     } else {
         my %seen;
-        push @var_dir, grep { !$seen{$_}++ } "/var/local/lib/$g{app_name}", "/var/lib/$g{app_name}", "$g{home_dir}/var";
+        push @var_dir, grep { !$seen{$_}++ } "/var/local/lib/$g{app_name}", "/var/lib/$g{app_name}", "$g{install_dir}/var";
     }
     $perm = 'x';
     do_log( "Searching a valid var dir in '" . ( join ' ', @var_dir ) . "'.", DEBUG );
@@ -519,12 +515,12 @@ sub initialize {
                 @templates_dir = ( $g{templates_dir} );
             } else {
                 my %seen;
-                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates","$g{home_dir}/var/templates", "$g{home_dir}/templates";
+                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates","$g{install_dir}/var/templates", "$g{install_dir}/templates";
             }
             if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
                 $db_filename = $g{db_file};
                 my %seen;
-                push @db_dir, grep { !$seen{$_}++ } "$valid_path/db", "$g{home_dir}/var/db", "$g{home_dir}";
+                push @db_dir, grep { !$seen{$_}++ } "$valid_path/db", "$g{install_dir}/var/db", "$g{install_dir}";
                 do_log( "Searching a valid db dir in '" . ( join ' ', @db_dir ) . "'.", DEBUG );
             } else {
                 ( $db_filename, $dir ) = fileparse( $g{db_file} );
@@ -537,12 +533,12 @@ sub initialize {
                 @templates_dir = ( $g{templates_dir} );
             } else {
                 my %seen;
-                push @templates_dir, grep { !$seen{$_}++ } "/var/share/$g{app_name}/templates", "$g{home_dir}/var/templates", "$g{home_dir}/templates";
+                push @templates_dir, grep { !$seen{$_}++ } "/var/share/$g{app_name}/templates", "$g{install_dir}/var/templates", "$g{install_dir}/templates";
             }
             if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
                 $db_filename = $g{db_file};
                 my %seen;
-                push @db_dir, grep { !$seen{$_}++ } "$g{home_dir}/var/db", "$g{home_dir}";
+                push @db_dir, grep { !$seen{$_}++ } "$g{install_dir}/var/db", "$g{install_dir}";
                 do_log( "Searching a valid db dir in '" . ( join ' ', @db_dir ) . "'.", DEBUG );
             } else {
                 ( $db_filename, $dir ) = fileparse( $g{db_file} );
