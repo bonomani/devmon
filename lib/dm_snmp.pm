@@ -438,7 +438,11 @@ sub snmp_query {
                         if ( $expected > $received ) {
 
                             if ( ( time() - $polltime + $snmp_input->{$device}{snmp_try_timeout} ) < $g{maxpolltime} ) {
+#<<<<<<< Updated upstream:lib/dm_snmp.pm
                                 if ( $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_maxcnt}{val} ) {
+#=======
+#                                if ( $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} < $g{devices}{$device}{oids}{snmp_perm}{snmp_try_max}{val} ) {
+#>>>>>>> Stashed changes:modules/dm_snmp.pm
                                     push @devices, $device;
                                     $g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} += 1;
                                     do_log( "Device: $device Try:$g{devices}{$device}{oids}{snmp_temp}{snmp_try_cnt}{val} Msg:snmp polling enqueue", INFO );
