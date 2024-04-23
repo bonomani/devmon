@@ -121,6 +121,7 @@ sub initialize {
         'avgpolltime'  => [],
 
         # SNMP variables
+#<<<<<<< Updated upstream:lib/dm_config.pm
         'snmp_try_small_timeout' => 0,
         'snmp_try_timeout'       => 0,
         'snmp_try_small_maxcnt'  => 0,
@@ -132,6 +133,18 @@ sub initialize {
         'authpasss'              => '',
         'privprotos'             => '',
         'privpasss'              => '',
+#=======
+#        'snmp_discover_timeout' => 0,
+#        'snmp_try_timeout'      => 0,
+#        'snmp_try_max'          => 0,
+#        'snmpcids'              => '',
+#        'secnames'              => '',
+#        'seclevels'             => '',
+#        'authprotos'            => '',
+#        'authpasss'             => '',
+#        'privprotos'            => '',
+#        'privpasss'             => '',
+#>>>>>>> Stashed changes:modules/dm_config.pm
 
         # Now our global data subhashes
         'templates'    => {},
@@ -368,8 +381,19 @@ sub initialize {
             'set'     => 0,
             'case'    => 0
         },
+#<<<<<<< Updated upstream:lib/dm_config.pm
         'snmp_try_small_timeout' => {
             'default' => 4,       # for short request
+#=======
+#        'snmp_discover_timeout' => {
+#            'default' => 4,       # 5 Seems enough to poll 1 oid!
+#            'regex'   => '\d+',
+#            'set'     => 0,
+#            'case'    => 0
+#        },
+#        'snmp_try_timeout' => {
+#            'default' => 15,      # 2 Seems the very mininum, 4 if you use ilo
+#>>>>>>> Stashed changes:modules/dm_config.pm
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -2042,10 +2066,17 @@ FILEREAD: while ( @hostscfg ) {
         $snmp_input{$host}{resolution} = $hosts_cfg{$host}{resolution};
         $snmp_input{$host}{seclevel}   = $seclevel;
         $snmp_input{$host}{secname}    = $secname;
+#<<<<<<< Updated upstream:lib/dm_config.pm
         $snmp_try_maxcnt{$host}        = $g{snmp_try_small_maxcnt};
 
         #$snmp_input{$host}{snmp_try_timeout} = 3;
         $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
+#=======
+#        $snmp_try_max{$host}           = 1;
+#
+#        #$snmp_input{$host}{snmp_try_timeout} = 3;
+#        $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
+#>>>>>>> Stashed changes:modules/dm_config.pm
         $snmp_input{$host}{ver}              = $ver;
 
         # Add our sysdesc oid
@@ -2171,10 +2202,17 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                 $snmp_input{$host}{dev}  = $host;
                 $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
                 $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
+#<<<<<<< Updated upstream:lib/dm_config.pm
                 $snmp_try_maxcnt{$host}  = $g{snmp_try_small_maxcnt};
 
                 #$snmp_input{$host}{snmp_try_timeout} = 3;
                 $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
+#=======
+#                $snmp_try_max{$host}     = 1;
+#
+#                #$snmp_input{$host}{snmp_try_timeout} = 3;
+#                $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
+#>>>>>>> Stashed changes:modules/dm_config.pm
                 $snmp_input{$host}{ver}              = $snmpver;
 
                 # Add our sysdesc oid
@@ -2304,8 +2342,19 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                     $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
                     $snmp_try_maxcnt{$host}  = $g{snmp_try_small_maxcnt};
 
+#<<<<<<< Updated upstream:lib/dm_config.pm
                     #$snmp_input{$host}{snmp_try_timeout} = 3;
                     $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
+#=======
+#                    $snmp_input{$host}{cid}  = $cid;
+#                    $snmp_input{$host}{dev}  = $host;
+#                    $snmp_input{$host}{ip}   = $hosts_cfg{$host}{ip};
+#                    $snmp_input{$host}{port} = $hosts_cfg{$host}{port} if defined $hosts_cfg{$host}{port};
+#                    $snmp_try_max{$host}     = 1;
+#
+#                    #$snmp_input{$host}{snmp_try_timeout} = 3;
+#                    $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
+#>>>>>>> Stashed changes:modules/dm_config.pm
                     $snmp_input{$host}{ver}              = $snmpver;
 
                     # Add our sysdesc oid
@@ -2465,7 +2514,11 @@ OLDHOST: for my $host ( keys %snmp_input ) {
 
                                         #$snmp_input{$host}{snmptimeout}   = $g{snmptimeout};
                                         #$snmp_input{$host}{snmp_try_timeout} = 3;
+#<<<<<<< Updated upstream:lib/dm_config.pm
                                         $snmp_input{$host}{snmp_try_timeout} = $g{snmp_try_small_timeout};
+#=======
+#                                        $snmp_input{$host}{snmp_try_timeout} = $g{snmp_discover_timeout};
+#>>>>>>> Stashed changes:modules/dm_config.pm
                                         $snmp_input{$host}{ver}              = $snmpver;
 
                                         # Add our sysdesc oid
