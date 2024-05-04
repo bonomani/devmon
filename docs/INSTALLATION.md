@@ -15,7 +15,7 @@ yum install perl-SNMP_Session.noarch
 yum install net-snmp net-snmp-devel net-snmp-utils
 ```
 
-### Debian
+### Debian/Ubuntu
 
 ```bash
 apt install libsnmp-session-perl
