@@ -1,5 +1,0 @@
-
-Thermal sensors:
-TABLE:rrd(DS:ds0:temperatureProbeReadingCelsius:GAUGE)
-Sensor Location|Temp|Threshold-|Threshold+|Condition
-{temperatureProbeLocationName}|{temperatureProbeReadingCelsius}|{temperatureProbeLowerCriticalThreshold}|{temperatureProbeUpperCriticalThresholdCelsius}|{temperatureProbeStatusTxt.color}{temperatureProbeStatusTxt}
