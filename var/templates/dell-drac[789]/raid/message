@@ -1,15 +1,14 @@
-
 Controllers
 TABLE: noalarmsmsg
-ID|Slot|Type|Firmware|Cache|Phys Drv|Log Drv|Status
-{controllerNumber}|{controllerPCISlot}|{controllerVendor} {controllerName}|{controllerFWVersion}|{controllerCacheSizeInMB}MB|{controllerPhysicalDeviceCount}|{controllerLogicalDeviceCount}|{controllerRollUpStatusTxt.color}{controllerRollUpStatusTxt}
+ID|Name|Device Description|PCIe Slot|Firmware Version|Driver Version|Cache|Status
+{controllerNumber}|{controllerName}|{controllerDisplayName}|{controllerPCISlot}|{controllerFWVersion}|{controllerDriverVersion}|{controllerCacheSizeInMB}MB|{controllerRollUpStatusTxt.color}{controllerRollUpStatusTxt}
 
 Logical drive status:
 TABLE: noalarmsmsg
-ID|Name|Fault Tolerance|Size|OS name|Pysical IDs|Spare IDs|Status
-{virtualDiskNumber}|{virtualDiskName}|{virtualDiskLayoutTxt}|{virtualDiskLengthInMB}mb|{virtualDiskDeviceName}|&nbsp;|&nbsp;|{virtualDiskRollUpStatusTxt.color}{virtualDiskRollUpStatusTxt}
+ID|Name|State|Layout|Size|Write Policy|Status
+{virtualDiskNumber}|{virtualDiskName}|{virtualDiskStateEnum}|{virtualDiskLayoutTxt}|{virtualDiskSizeInGB}GB|{virtualDiskWritePolicyEnum}|{virtualDiskComponentStatusEnum.color}{virtualDiskComponentStatusEnum}
 
 Physical drive status:
 TABLE: noalarmsmsg
-ID Controller:Bay|Model|Firmware Rev|Speed|Size|Serial|Status
-{arrayDiskNumber} {arrayDiskName}|{arrayDiskVendor} {arrayDiskProductID}|{arrayDiskRevision}|&nbsp;|{arrayDiskLengthInMB}mb|{arrayDiskSerialNo}|{arrayDiskRollUpStatusTxt.color}{arrayDiskRollUpStatusTxt}
+ID|Name|State|Vendor|Model|Firmware Rev|Size|Serial|Status
+{physicalDiskNumber}|{physicalDiskName}|{physicalDiskStateTxt}|{physicalDiskManufacturer}|{physicalDiskProductID}|{physicalDiskRevision}|{physicalDiskCapacityInGB}GB|{physicalDiskSerialNo}|{physicalDiskComponentStatusEnum.color}{physicalDiskComponentStatusEnum}

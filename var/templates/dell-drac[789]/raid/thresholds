@@ -1,11 +1,19 @@
-controllerStateTxt	: green		: Ready|Online : Normal
-controllerStateTxt	: yellow	: Degraded : Degraded
-controllerStateTxt	: red		: Failed|Offline : Failed or Offline
+#controllerStateTxt              : green	 : Ready|Online                          : Normal
+#controllerStateTxt              : yellow : Degraded                              : Degraded
+#controllerStateTxt              : red	 : Failed|Offline                        : Failed or Offline
 
-arrayDiskStateTxt	: green		: Ready|Online	: Normal
-arrayDiskStateTxt	: yellow	: Degraded|Recovering|Resyncing|Rebuild	: Degraded or recovering/resyncing/rebuilding
-arrayDiskStateTxt	: red		: Failed|Offline	: Failed or Offline
+physicalDiskStateTxt            : green	 : Ready|Online	                         : Normal
+physicalDiskStateTxt            : yellow : Degraded|Recovering|Resyncing|Rebuild : Degraded or recovering/resyncing/rebuilding
+physicalDiskStateTxt            : red	 : Failed|Offline	                 : Failed or Offline
 
-virtualDiskStateTxt	: green		: Ready|Online	: Normal
-virtualDiskStateTxt	: yellow	: Degraded|Verifying|Resyncing|Rebuild|Formatting|Reconstructing|Initializing	: Degraded or recovering/resyncing/rebuilding
-virtualDiskStateTxt	: red		: Failed|Offline	: Failed or Offline
+physicalDiskComponentStatusEnum : green  : OK
+physicalDiskComponentStatusEnum : red    : Critical                              : Critical Drive Status
+physicalDiskComponentStatusEnum : yellow :                                       : Warning
+
+virtualDiskStateEnum            : green	 : Online	                         : Normal
+virtualDiskStateEnum            : yellow : Degraded	                         : Degraded or recovering/resyncing/rebuilding
+virtualDiskStateEnum            : red	 :       	                         : Failed or Offline
+
+virtualDiskComponentStatusEnum  : green   : OK
+virtualDiskComponentStatusEnum  : red     : Critical                             : Critical Drive Status
+virtualDiskComponentStatusEnum  : yellow  :                                      : Warning

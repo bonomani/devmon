@@ -2,4 +2,4 @@ systemStateCoolingUnitStatusRedundancyTxt : SWITCH : {systemStateCoolingUnitStat
 systemStateCoolingDeviceStatusCombinedTxt : SWITCH : {systemStateCoolingDeviceStatusCombined} 1=Other,2=Unkown,3=OK, 4=Non Critical, 5=Critical, 6=Non Recoverable
 
 coolingDeviceStatusTxt                    : SWITCH : {coolingDeviceStatus} 1=Other,2=Unknown,3=OK,4=NonCriticalUpper,5=CriticalUpper,6=nonRecoverableUpper,7=nonCriticalLower,8=criticalLower,9=nonRecoverableLower,10=Failed
-coolingDeviceTypeEnum                     : SWITCH : {coolingDeviceType} 1=Other,2=Unkown,3=Fan,4=Centrifugal Blower,5=Cabinet Fan,6=Power Supply Fan,7=Heat Pipe,8=Integrated Refrigeration Unit,9=Active Cooling Device, 10=Passive Cooling Device 
+coolingDeviceTypeEnum                     : SWITCH : {coolingDeviceType} 1=Other,2=Unkown,3=Fan,4=Centrifugal Blower,5=Cabinet Fan,6=Power Supply Fan,7=Heat Pipe,8=Integrated Refrigeration Unit,9=Active Cooling Device, 10=Passive Cooling Device
