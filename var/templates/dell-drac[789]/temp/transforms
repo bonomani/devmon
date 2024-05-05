@@ -1,0 +1,4 @@
+temperatureProbeStatusTxt                     :	SWITCH	: {temperatureProbeStatus} 1=Other,2=Unknown,3=OK,4=Non-critical,5=Critical,6=nonRecoverable
+temperatureProbeReadingCelsius                :	MATH	: {temperatureProbeReading} / 10
+temperatureProbeLowerCriticalThresholdCelsius :	MATH	: {temperatureProbeLowerCriticalThreshold} / 10
+temperatureProbeUpperCriticalThresholdCelsius :	MATH	: {temperatureProbeUpperCriticalThreshold} / 10

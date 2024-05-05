@@ -1,0 +1,4 @@
+vendor	: dell
+model	: drac789
+snmpver	: 2
+sysdesc : drac

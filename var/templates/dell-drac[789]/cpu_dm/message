@@ -1,0 +1,22 @@
+<b>Hostname            : {sysHostname}</b>
+Description         : {racShortName}
+Type                : {racTypeTxt}
+Version             : {racVersion}
+Product Name        : {systemModelName}
+Service Tag         : {systemServiceTag}
+Node Id             : {systemNodeID}
+Express Service Code: {systemExpressServiceCode}
+System Id           : {systemSystemID}
+Lock Down Mode      : {systemLockdownModeTxt}
+
+Managed Host        : {systemFQDN}
+OS                  : {systemOSName}
+Version             : {systemOSVersion}
+
+
+
+
+
+TABLE:noalarmsmsg
+IP Adresses
+{ipAdEntAddr}
