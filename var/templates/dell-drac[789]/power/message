@@ -1,7 +1,7 @@
 
 Power supplies:
 TABLE: noalarmsmsg,
-Power Supply Bay|Power Supply Name|Status
+ID|Location Name|Status
 {powerSupplyIndex}|{powerSupplyLocationName}|{powerSupplyStatusTxt.color}{powerSupplyStatusTxt}
 
 
