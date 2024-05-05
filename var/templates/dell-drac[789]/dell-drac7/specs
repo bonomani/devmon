@@ -1,4 +1,0 @@
-vendor	: dell
-model	: drac7
-snmpver	: 2
-sysdesc : Dell

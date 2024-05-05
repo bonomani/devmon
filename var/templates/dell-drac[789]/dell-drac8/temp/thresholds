@@ -1,3 +1,0 @@
-temperatureProbeStatusTxt: green		: OK	: Temperature OK
-temperatureProbeStatusTxt: yellow	: Non-critical|Unknown|Other	: Temperature non-critical, unknown or otehr
-temperatureProbeStatusTxt: red		: Critical : Temperature Critical

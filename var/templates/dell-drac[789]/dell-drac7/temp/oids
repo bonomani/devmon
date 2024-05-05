@@ -1,7 +1,0 @@
-temperatureProbechassisIndex:   1.3.6.1.4.1.674.10892.5.4.700.20.1.1	: branch
-temperatureProbeIndex:      1.3.6.1.4.1.674.10892.5.4.700.20.1.2	: branch
-temperatureProbeLocationName: 1.3.6.1.4.1.674.10892.5.4.700.20.1.8	: branch
-temperatureProbeReading:    1.3.6.1.4.1.674.10892.5.4.700.20.1.6		: branch
-temperatureProbeLowerCriticalThreshold:     1.3.6.1.4.1.674.10892.5.4.700.20.1.13	: branch
-temperatureProbeUpperCriticalThreshold:     1.3.6.1.4.1.674.10892.5.4.700.20.1.10	: branch
-temperatureProbeStatus:     1.3.6.1.4.1.674.10892.5.4.700.20.1.5		: branch
