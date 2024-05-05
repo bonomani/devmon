@@ -1,0 +1,27 @@
+sysHostname               : 1.3.6.1.2.1.1.5.0                : leaf
+racShortName              : 1.3.6.1.4.1.674.10892.5.1.1.2.0  : leaf
+racVersion 	          : 1.3.6.1.4.1.674.10892.5.1.1.5.0  : leaf
+racType                   : 1.3.6.1.4.1.674.10892.5.1.1.7.0  : leaf
+ipAddrTable               : 1.3.6.1.2.1.4.20                 : branch
+
+systemFQDN 	          : 1.3.6.1.4.1.674.10892.5.1.3.1.0  : leaf
+systemServiceTag 	  : 1.3.6.1.4.1.674.10892.5.1.3.2.0  : leaf
+systemExpressServiceCode  : 1.3.6.1.4.1.674.10892.5.1.3.3.0  : leaf
+#systemAssetTag 	          : 1.3.6.1.4.1.674.10892.5.1.3.4.0  : leaf
+#systemBladeSlotNumber     : 1.3.6.1.4.1.674.10892.5.1.3.5.0  : leaf
+systemOSName              : 1.3.6.1.4.1.674.10892.5.1.3.6.0  : leaf
+#systemFormFactor          : 1.3.6.1.4.1.674.10892.5.1.3.7.0  : leaf
+#systemDataCenterName      : 1.3.6.1.4.1.674.10892.5.1.3.8.0  : leaf
+#systemAisleName           : 1.3.6.1.4.1.674.10892.5.1.3.9.0  : leaf
+#systemRackName 	          : 1.3.6.1.4.1.674.10892.5.1.3.10.0 : leaf
+#systemRackSlot            : 1.3.6.1.4.1.674.10892.5.1.3.11.0 : leaf
+systemModelName           : 1.3.6.1.4.1.674.10892.5.1.3.12.0 : leaf
+systemSystemID            : 1.3.6.1.4.1.674.10892.5.1.3.13.0 : leaf
+systemOSVersion           : 1.3.6.1.4.1.674.10892.5.1.3.14.0 : leaf
+#systemRoomName            : 1.3.6.1.4.1.674.10892.5.1.3.15.0 : leaf
+#systemChassisSystemHeight : 1.3.6.1.4.1.674.10892.5.1.3.16.0 : leaf
+#systemBladeGeometry       : 1.3.6.1.4.1.674.10892.5.1.3.17.0 : leaf
+systemNodeID              : 1.3.6.1.4.1.674.10892.5.1.3.18.0 : leaf
+#systemOEMOSVersion        : 1.3.6.1.4.1.674.10892.5.1.3.19.0 : leaf
+systemLockdownMode        : 1.3.6.1.4.1.674.10892.5.1.3.20.0 : leaf
+

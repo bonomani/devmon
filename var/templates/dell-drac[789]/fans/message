@@ -1,0 +1,6 @@
+Cooling Status:   {systemStateCoolingDeviceStatusCombinedTxt}
+Redundancy Status: {systemStateCoolingUnitStatusRedundancyTxt}
+
+TABLE: noalarmsmsg
+ID|Sensor Location|Type|Fan Speed|Low Critical|Low Warning|High Critical|Status
+{coolingDeviceIndex}|{coolingDeviceLocationName}|{coolingDeviceTypeEnum}|{coolingDeviceReading}|{coolingDeviceLowerCriticalThreshold}|{coolingDeviceLowerNonCriticalThreshold}|{coolingDeviceUpperCriticalThreshold}|{coolingDeviceStatusTxt.color}{coolingDeviceStatusTxt}

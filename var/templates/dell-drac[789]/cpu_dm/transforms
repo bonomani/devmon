@@ -1,0 +1,5 @@
+racTypeTxt            : SWITCH : {racType} 1=Other, 2=Unknown, 48=iDRAC9 Monolithic, 49=iDRAC9 Modular, 50=iDRAC9 DCS, 64=iDRAC9.15 Monolithic, 65=iDRAC9.15 Modular, 66=iDRAC9.15 DCS 
+systemLockdownModeTxt : SWITCH : {systemLockdownMode} 0=Disable, 1=Enable, 2=Unknown
+ipAddrTableIdx        : INDEX  : {ipAddrTable}
+ipAdEntAddrIdx        : MATCH  : {ipAddrTableIdx} /\.1\./
+ipAdEntAddr           : CHAIN  : {ipAdEntAddrIdx} {ipAddrTable}

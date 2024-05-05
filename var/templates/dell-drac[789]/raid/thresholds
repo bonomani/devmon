@@ -1,0 +1,11 @@
+controllerStateTxt	: green		: Ready|Online : Normal
+controllerStateTxt	: yellow	: Degraded : Degraded
+controllerStateTxt	: red		: Failed|Offline : Failed or Offline
+
+arrayDiskStateTxt	: green		: Ready|Online	: Normal
+arrayDiskStateTxt	: yellow	: Degraded|Recovering|Resyncing|Rebuild	: Degraded or recovering/resyncing/rebuilding
+arrayDiskStateTxt	: red		: Failed|Offline	: Failed or Offline
+
+virtualDiskStateTxt	: green		: Ready|Online	: Normal
+virtualDiskStateTxt	: yellow	: Degraded|Verifying|Resyncing|Rebuild|Formatting|Reconstructing|Initializing	: Degraded or recovering/resyncing/rebuilding
+virtualDiskStateTxt	: red		: Failed|Offline	: Failed or Offline

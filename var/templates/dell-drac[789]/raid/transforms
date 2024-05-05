@@ -1,0 +1,16 @@
+controllerTypeTxt            : SWITCH : {controllerType} 1=SCSI,2=PV660F,3=PV662F,4=IDE,5=SATA,6=SAS
+controllerStateTxt           : SWITCH : {controllerState} 1=Ready,2=Failed,3=Online,4=Offline,5=Degraded
+#controllerC0BatteryStateTxt:	SWITCH	: {controllerC0BatteryState} 1=OK,2=Failed,3=Reconditioning,9=High,10=Low,12=Charging,21=Missing
+controllerRollUpStatusTxt    : SWITCH : {controllerRollUpStatus} 1=Other,2=Unknown,3=OK,4=Non-critical,5=Critical,6=Non-recoverable
+
+arrayDiskStateTxt            : SWITCH : {arrayDiskState} 1=Ready,2=Failed,3=Online,4=Offline,6=Degraded,7=Recovering,11=Removed,15=Resyncing,24=Rebuild,25=NoMedia,26=Formatting,28=Diagnostics,34=PredictiveFailure,35=Initializing,39=Foreign,40=Clear,41=Unsupported,53=Incompatible
+
+arrayDiskBusTypeTxt          : SWITCH : {arrayDiskBusType} 1=SCSI,2=IDE,3=Fibre,4=SSA,6=USB,7=SATA,8=SAS
+arrayDiskRollUpStatusTxt     : SWITCH : {arrayDiskRollUpStatus} 1=Other,2=Unknown,3=OK,4=Non-critical,5=Critical,6=Non-recoverable
+
+virtualDiskStateTxt          : SWITCH : {virtualDiskState} 1=Ready,2=Failed,3=Online,4=Offline,6=Degraded,7=Verifying,15=Resyncing,18=FailedRedundancy,24=Rebuild,26=Formatting,32=Reconstructing,35=Initializing,52=PermanentylDegraded
+virtualDiskWritePolicyTxt    : SWITCH : {virtualDiskWritePolicy} 1=Enabled,2=Disabled,3=WriteBack,4=WriteThrough,5=EnabledAlways,6=EnabledWlawaysSAS
+virtualDiskReadPolicyTxt     : SWITCH : {virtualDiskReadPolicy} 1=Enabled,2=Disabled,3=ReadAhead,4=AdaptiveReadAhead,5=NoReadAhead
+virtualDiskLayoutTxt         : SWITCH : {virtualDiskLayout} 1=Concat,2=RAID-0,3=RAID-1,7=RAID-5,10=RAID-10,19=Concat RAID-1
+virtualDiskCurStripeSizeInKB : MATH   : {virtualDiskCurStripeSizeInBytes} / 1024
+virtualDiskRollUpStatusTxt   : SWITCH : {virtualDiskRollUpStatus} 1=Other,2=Unknown,3=OK,4=Non-critical,5=Critical,6=Non-recoverable
