@@ -1,5 +1,6 @@
 <!DOCTYPE markdown>
-# The folder structure
+# Installation
+## The folder structure
 (Was reorganized in 2024: was needed to improve installation)
 - **$devmon_home**
   - **/server**
@@ -19,8 +20,6 @@
         - hosts.db
       - **/template**
         - ...
-     
-# Installation
 ## Prerequisits
 - Perl v5.10.0
 - SNMP_Session (Perl module)
