@@ -1,6 +1,6 @@
 <!DOCTYPE markdown>
-# Introduction
-The folder structure (reorganized in 2024)
+# The folder structure
+(Was reorganized in 2024: was needed to improve installation)
 - **$devmon_home**
   - **/server**
     - devmon.cfg (the config file)
