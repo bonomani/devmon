@@ -563,30 +563,45 @@ sub initialize {
     }
 
     # Find db file or folder
-    $perm       = 'rw';
-    $valid_path = find_dir( $g{user}, parent1_dir_perm_str( $perm ), @db_dir );    # Check the folder
-    if ( defined $valid_path ) {
-        $g{db_file} = $valid_path . '/' . $db_filename;
-        if ( -e $g{db_file} ) {                                                    # check if file exists
+    $perm = 'rw';
+    my $best_valid_db_dir;
+    foreach my $db_dir ( @db_dir ) {
+        $valid_path = find_dir( $g{user}, parent1_dir_perm_str( $perm ), $db_dir );    # Check the folder
+        $best_valid_db_dir //= $valid_path;
+        if ( defined $valid_path ) {
+            $g{db_file} = $valid_path . '/' . $db_filename;
+            if ( -e $g{db_file} ) {                                                    # check if file exists
 
-            $valid_path = find_file( $g{user}, $g{db_file}, $perm );
-            if ( defined $valid_path ) {
-                $g{db_file} = $valid_path;
-                do_log( "DB file '$g{db_file}'", DEBUG );
+                $valid_path = find_file( $g{user}, $g{db_file}, $perm );
+                if ( defined $valid_path ) {
+                    do_log( "DB file found but not in your best db folder: $best_valid_db_dir, next discovery will not use it! Add 'DB_FILE=$valid_path' in your config file if you want remove this warning", WARN ) unless $valid_path eq ( $best_valid_db_dir . '/' . $db_filename );
+                    $g{db_file} = $valid_path;
+                    do_log( "DB file '$g{db_file}'", DEBUG );
+                    $config_is_valid = 1;
+                    last;
+                } else {
+                    do_log( "DB file '$g{db_file}' not accessible with user '$g{user}' with permission '$perm'", ERROR );
+
+                    #$config_is_valid = 0;
+                }
             } else {
-                do_log( "DB file '$g{db_file}' not accessible with user '$g{user}' with permission '$perm'", ERROR );
-                $config_is_valid = 0;
+                if ( $readhosts ) {
+                    do_log( "DB dir '$valid_path', and running './devmon -read' to discover devices", DEBUG );
+                    $config_is_valid = 1;
+                    last;
+                } else {
+                    do_log( "DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service", DEBUG );
+
+                    #$config_is_valid = 0;
+                }
             }
         } else {
-            if ( $readhosts ) {
-                do_log( "DB dir '$valid_path', and running './devmon -read' to discover devices", DEBUG );
-            } else {
-                do_log( "DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service", DEBUG );
-                $config_is_valid = 0;
-            }
+            do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
+
+            #$config_is_valid = 0;
         }
-    } else {
-        do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
+
+        #$is_best_valid_db_dir=0;
         $config_is_valid = 0;
     }
 
