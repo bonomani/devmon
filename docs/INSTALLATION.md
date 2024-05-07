@@ -1,4 +1,25 @@
 <!DOCTYPE markdown>
+# Introduction
+The folder structure (reorganized in 2024)
+- **$devmon_home**
+  - **/server**
+    - devmon.cfg (the config file)
+    - **/bin**
+      - devmon (the main software)
+    - **/docs**
+    - **/extras**
+    - **/lib**
+       - dm_config.pm
+       - dm_msg.pm
+       - dm_snmp.pm
+       - dm_templates.pm
+       - dm_snmp.pm
+    - **/var**
+      - **/db**
+        - hosts.db
+      - **/template**
+        - ...
+     
 # Installation
 ## Prerequisits
 - Perl v5.10.0
