@@ -406,7 +406,7 @@ sub initialize {
         },
 
         'snmp_try_maxcnt' => {          # 6 try (5 retries) should be enough
-            'default' => 10,
+            'default' => 6,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -3237,13 +3237,11 @@ sub find_file {
         foreach my $folder ( @folders ) {
             my $file_path = "$folder/$filename";
 
-            #if ( user_has_file_permissions( $file_path, $user, $permission ) ) {
             if ( user_has_file_perm_str( $file_path, $user, $permission ) ) {
                 return $file_path;
             }
         }
     } else {    # @folder is empty
-                #if ( user_has_file_permissions( $filename, $user, $permission ) ) {
         if ( user_has_file_perm_str( $filename, $user, $permission ) ) {
             return $filename;
         } else {
@@ -3269,7 +3267,7 @@ sub read_user_from_config_file {
         chomp( $line );
 
         # Search for lines containing the User directive
-        if ( $line =~ /^\s*user\s*=\s*(\S+)/ ) {
+        if ( $line =~ /^\s*user\s*=\s*(\S+)/i ) {
 
             # Close the file handle
             close( $fh );
