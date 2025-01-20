@@ -381,19 +381,19 @@ sub initialize {
             'case'    => 0
         },
         'snmp_getbulk_timeout' => {
-            'default' => 4,      
+            'default' => 4,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
         },
         'snmp_get_timeout' => {
-            'default' => 1,      
+            'default' => 1,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
         },
         'snmp_getnext_timeout' => {
-            'default' => 4,      
+            'default' => 4,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0

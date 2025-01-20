@@ -59,8 +59,8 @@ sub read_template_db {
     do_log( 'Reading template data from DB', INFO );
 
     # Read in our model index
-    my @models = db_get_array('id,vendor,model,sysdesc from template_models');
-    for my $row (@models) {
+    my @models = db_get_array( 'id,vendor,model,sysdesc from template_models' );
+    for my $row ( @models ) {
         my ( $id, $vendor, $model, $sysdesc ) = @$row;
         $model_index{$id} = {
             'vendor' => $vendor,
@@ -70,8 +70,8 @@ sub read_template_db {
     }
 
     # Read in our test index
-    my @tests = db_get_array('id,mod_id,test from template_tests');
-    for my $row (@tests) {
+    my @tests = db_get_array( 'id,mod_id,test from template_tests' );
+    for my $row ( @tests ) {
         my ( $id, $mod_id, $test ) = @$row;
         $test_index{$id} = {
             'vendor' => $model_index{$mod_id}{vendor},
@@ -81,9 +81,9 @@ sub read_template_db {
     }
 
     # Read oids from the database
-    my @results = db_get_array('test_id,name,num,`repeat`,t_type,t_data from template_oids');
+    my @results = db_get_array( 'test_id,name,num,`repeat`,t_type,t_data from template_oids' );
 
-    for my $oid_row (@results) {
+    for my $oid_row ( @results ) {
         my ( $id, $name, $num, $repeat, $trans_type, $trans_data ) = @$oid_row;
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
@@ -96,9 +96,9 @@ sub read_template_db {
     }
 
     # Read thresholds from the database
-    @results = db_get_array('test_id,oid,color,thresh,msg from template_thresholds');
+    @results = db_get_array( 'test_id,oid,color,thresh,msg from template_thresholds' );
 
-    for my $oid_row (@results) {
+    for my $oid_row ( @results ) {
         my ( $id, $oid, $color, $threshes, $msg ) = @$oid_row;
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
@@ -109,9 +109,9 @@ sub read_template_db {
     }
 
     # Read exceptions from the database
-    @results = db_get_array('test_id,oid,type,data from template_exceptions');
+    @results = db_get_array( 'test_id,oid,type,data from template_exceptions' );
 
-    for my $oid_row (@results) {
+    for my $oid_row ( @results ) {
         my ( $id, $oid, $type, $data ) = @$oid_row;
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
@@ -121,9 +121,9 @@ sub read_template_db {
     }
 
     # Read messages from database
-    @results = db_get_array('test_id,msg from template_messages');
+    @results = db_get_array( 'test_id,msg from template_messages' );
 
-    for my $oid_row (@results) {
+    for my $oid_row ( @results ) {
         my ( $id, $msg ) = @$oid_row;
         my $vendor = $test_index{$id}{vendor};
         my $model  = $test_index{$id}{model};
@@ -137,7 +137,7 @@ sub read_template_db {
     }
 
     # Now update our read_temps flag in the node config DB
-    db_do("update nodes set read_temps='n' where node_num=$g{my_nodenum}");
+    db_do( "update nodes set read_temps='n' where node_num=$g{my_nodenum}" );
 }
 
 # Read in user-definable templates from disk
@@ -159,11 +159,11 @@ sub read_template_files {
     }
 
     # Go through each directory
-MODEL: for my $dir (@dirs) {
+MODEL: for my $dir ( @dirs ) {
         my $tmpl = {};
 
         # Read in our specs file
-        my ( $vendor, $model, $sysdesc ) = read_specs_file($dir);
+        my ( $vendor, $model, $sysdesc ) = read_specs_file( $dir );
 
         # No info? Go to the next one
         next MODEL if !defined $vendor or !defined $model or !defined $sysdesc;
@@ -212,7 +212,7 @@ MODEL: for my $dir (@dirs) {
 
             # Read the template file: at least a oids or transform file is needed
             $critic_tmpl_valid = read_oids_file( $testdir, $tmpl ) + read_transforms_file( $testdir, $tmpl );
-            if ($critic_tmpl_valid) {
+            if ( $critic_tmpl_valid ) {
                 read_thresholds_file( $testdir, $tmpl );
                 my $oids_file   = "$testdir/oids";
                 my $trans_file  = "$testdir/transforms";
@@ -324,7 +324,7 @@ sub post_template_load {
                                 $cases->{$case_num}{then}   = $then;
 
                             } else {
-                                do_log( "Could not parse $dep_oid : " . uc($trans_type) . " option '$val_pair'", ERROR );
+                                do_log( "Could not parse $dep_oid : " . uc( $trans_type ) . " option '$val_pair'", ERROR );
                                 next PTL_OID;
                             }
                         }
@@ -343,7 +343,7 @@ sub post_template_load {
 
 # Read in 'type' file
 sub read_specs_file {
-    my ($dir) = @_;
+    my ( $dir ) = @_;
     no strict 'refs';
 
     # Define the file; make sure it exists and is readable
@@ -411,7 +411,7 @@ sub read_oids_file {
     if ( !-e $oids_file ) {
         do_log( "Missing 'oids' file in $dir, skipping this test.", ERROR );
         return 0;    #
-    } elsif ( ( defined $tmpl->{file}{$oids_file}{mtime} ) and ( stat($oids_file) )[9] == $tmpl->{file}{$oids_file}{mtime} ) {
+    } elsif ( ( defined $tmpl->{file}{$oids_file}{mtime} ) and ( stat( $oids_file ) )[9] == $tmpl->{file}{$oids_file}{mtime} ) {
 
         # File did not change so we do not need to reparse it
         $tmpl->{file}{$oids_file}{changed} = 0;
@@ -421,7 +421,7 @@ sub read_oids_file {
         or do_log( "Failed to open $oids_file ($!), skipping this test.", ERROR )
         and return 0;
     delete $tmpl->{file}{$oids_file};
-    $tmpl->{file}{$oids_file}{mtime} = ( stat($oids_file) )[9];
+    $tmpl->{file}{$oids_file}{mtime} = ( stat( $oids_file ) )[9];
     do_log( "Parsing file $oids_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
@@ -514,7 +514,7 @@ sub read_transforms_file {
     if ( !-e $trans_file ) {
         do_log( "Missing 'transforms' file in $dir, skipping this test.", ERROR );
         return 0;
-    } elsif ( ( defined $tmpl->{file}{$trans_file}{mtime} ) and ( stat($trans_file) )[9] == $tmpl->{file}{$trans_file}{mtime} ) {
+    } elsif ( ( defined $tmpl->{file}{$trans_file}{mtime} ) and ( stat( $trans_file ) )[9] == $tmpl->{file}{$trans_file}{mtime} ) {
 
         # File did not change so we do not need to reparse it but check that if the 'oids file' was changed there are not redefined oids
         $tmpl->{file}{$trans_file}{changed} = 0;
@@ -525,7 +525,7 @@ sub read_transforms_file {
         and return 0;
 
     delete $tmpl->{file}{$trans_file};
-    $tmpl->{file}{$trans_file}{mtime} = ( stat($trans_file) )[9];
+    $tmpl->{file}{$trans_file}{mtime} = ( stat( $trans_file ) )[9];
     do_log( "Parsing file $trans_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
@@ -630,7 +630,7 @@ LINE: while ( my $line = shift @text ) {
 
             $func_type eq 'convert' and do {
                 $temp =~ s/^\{\S+\}\s+(hex|oct)(?:\s*\d*)//i;
-                my ($type) = ($1);    #??
+                my ( $type ) = ( $1 );    #??
                 do_log( "CONVERT transform uses only a single oid, a valid conversion type & an option pad length at $trans_file, line $l_num", ERROR )
                     and next LINE
                     if $temp ne '';
@@ -691,8 +691,8 @@ LINE: while ( my $line = shift @text ) {
                 $temp =~ s/\s*//;
                 do_log( "MATH transform uses only math/numeric symbols and an optional precision number, $temp did not pass, at $trans_file, line $l_num", ERROR )
                     and next LINE
-	            unless $temp eq ''; # Check if temp is not empty
-		    #if $temp !~ /^\s*$/;
+                    unless $temp eq '';    # Check if temp is not empty
+                                           #if $temp !~ /^\s*$/;
                 last CASE;
             };
 
@@ -728,12 +728,14 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'set' and do {
-		my $pattern = qr/(\{[^}]*\}|\"[^\"]*\"|\d+(\.\d+)?([eE][+-]?\d+)?)(?=\s*,|\s*$)/;
+                my $pattern = qr/(\{[^}]*\}|\"[^\"]*\"|\d+(\.\d+)?([eE][+-]?\d+)?)(?=\s*,|\s*$)/;
                 do_log( "SET transform requires a non-empty list of constant values at $trans_file, line $l_num", ERROR )
                     and next LINE
-	            unless (($temp =~ s/$pattern//g)         # Remove Patten
-			    && ($temp =~ s/\s*,\s*//g)   # Remove Comma
-			    && ($temp =~ /^\s*$/));      # Remove white space
+                    unless (
+                    ( $temp =~ s/$pattern//g )    # Remove Patten
+                    && ( $temp =~ s/\s*,\s*//g )  # Remove Comma
+                    && ( $temp =~ /^\s*$/ )
+                    );                            # Remove white space
                 last CASE;
             };
 
@@ -771,7 +773,7 @@ LINE: while ( my $line = shift @text ) {
                 for my $val ( split /\s*,\s*/, $temp ) {
                     my ( $if, $then );
                     ( $if, $then ) = ( $1, $2 ) if $val =~ s/^\s*(["'].*["'])\s*=\s*(.*?)\s*$//;
-                    if ( !defined($if) ) {
+                    if ( !defined( $if ) ) {
                         ( $if, $then ) = ( $1, $2 ) if $val =~ s/^\s*([><]?.+?)\s*=\s*(.*?)\s*$//;
                     }
                     do_log( "Bad SWITCH value pair ($val) at $trans_file, line $l_num", ERROR )
@@ -1061,24 +1063,24 @@ sub sort_oids2 {
         $nb_infls{$node} = keys %{ $infls->{$node} };
     }
 
-NODE: foreach my $node (@list) {
-        do_log("stage1 Start with $node and list: @sorted_list");
+NODE: foreach my $node ( @list ) {
+        do_log( "stage1 Start with $node and list: @sorted_list" );
         if ( !exists $treated{$node} ) {
 
-            do_log("stage2 $node is not treated");
+            do_log( "stage2 $node is not treated" );
             push @stack, $node;
             $treated{$node} = ();
 
-            while (@stack) {
+            while ( @stack ) {
 
-                my $stack = shift(@stack);
-                do_log("stage3 Unstack $stack, $nb_deps{$stack} dependencies");
+                my $stack = shift( @stack );
+                do_log( "stage3 Unstack $stack, $nb_deps{$stack} dependencies" );
 
                 foreach my $stack_dep ( keys %{ $deps->{$stack} } ) {
-                    do_log("stage4 Start with dependency $stack_dep");
+                    do_log( "stage4 Start with dependency $stack_dep" );
 
                     if ( !exists $treated{$stack_dep} ) {
-                        do_log("stage5 $stack_dep is not treated, put it on the stack");
+                        do_log( "stage5 $stack_dep is not treated, put it on the stack" );
                         unshift @stack, $stack_dep;
 
                         # Modify version of the DFG algo to contain parent
@@ -1087,26 +1089,26 @@ NODE: foreach my $node (@list) {
                 }
 
                 # I think I have to creat a tree with the depencies
-                do_log("stage6 $stack has $nb_infls{$stack} influences");
+                do_log( "stage6 $stack has $nb_infls{$stack} influences" );
                 foreach my $stack_infl ( keys %{ $infls->{$stack} } ) {
-                    do_log("stage7 node $stack influences $stack_infl");
+                    do_log( "stage7 node $stack influences $stack_infl" );
                     $nb_deps{$stack_infl}--;
                     if ( exists $deps->{$stack_infl}{$stack} ) {
-                        do_log("stage8 decrement node $stack_infl");
+                        do_log( "stage8 decrement node $stack_infl" );
                         $nb_deps{$stack_infl}--;
                         if ( $nb_deps{$stack_infl} == 0 ) {
-                            do_log("stage9 $stack_infl has no more dependcies, put it on the sorted list");
+                            do_log( "stage9 $stack_infl has no more dependcies, put it on the sorted list" );
                             push @sorted_list, $stack_infl;
                         } elsif ( $nb_deps{$stack_infl} == -1 ) {
-                            do_log("Loop detected :@sorted_list $stack_infl");
+                            do_log( "Loop detected :@sorted_list $stack_infl" );
                         }
                     }
                 }
             }
-            do_log("stage10 @sorted_list");
+            do_log( "stage10 @sorted_list" );
         }
     }
-    do_log("stage11 @sorted_list");
+    do_log( "stage11 @sorted_list" );
     return @sorted_list;
 }
 
@@ -1125,7 +1127,7 @@ sub read_thresholds_file {
         do_log( "Missing 'thresholds' file in $dir, skipping this test.", ERROR );
         return 0;
 
-    } elsif ( ( defined $tmpl->{file}{$thresh_file}{mtime} ) and ( stat($thresh_file) )[9] == $tmpl->{file}{$thresh_file}{mtime} ) {
+    } elsif ( ( defined $tmpl->{file}{$thresh_file}{mtime} ) and ( stat( $thresh_file ) )[9] == $tmpl->{file}{$thresh_file}{mtime} ) {
 
         # File did not change so we do not need to reparse it
         $tmpl->{file}{$thresh_file}{changed} = 0;
@@ -1136,7 +1138,7 @@ sub read_thresholds_file {
         and return 0;
 
     delete $tmpl->{file}{$thresh_file};
-    $tmpl->{file}{$thresh_file}{mtime} = ( stat($thresh_file) )[9];
+    $tmpl->{file}{$thresh_file}{mtime} = ( stat( $thresh_file ) )[9];
     do_log( "Parsing file $thresh_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
@@ -1225,7 +1227,7 @@ sub read_exceptions_file {
     if ( !-e $except_file ) {
         do_log( "Missing 'exceptions' file in $dir, skipping this test.", ERROR );
         return 0;
-    } elsif ( ( defined $tmpl->{file}{$except_file}{mtime} ) and ( stat($except_file) )[9] == $tmpl->{file}{$except_file}{mtime} ) {
+    } elsif ( ( defined $tmpl->{file}{$except_file}{mtime} ) and ( stat( $except_file ) )[9] == $tmpl->{file}{$except_file}{mtime} ) {
 
         # File did not change so we do not need to reparse it
         $tmpl->{file}{$except_file}{changed} = 0;
@@ -1236,7 +1238,7 @@ sub read_exceptions_file {
         or do_log( "Failed to open $except_file ($!), skipping this test.", ERROR )
         and return 0;
     delete $tmpl->{file}{$except_file};
-    $tmpl->{file}{$except_file}{mtime} = ( stat($except_file) )[9];
+    $tmpl->{file}{$except_file}{mtime} = ( stat( $except_file ) )[9];
     do_log( "Parsing file $except_file", TRACE ) if $g{debug};
 
     # Go through file, read in oids
@@ -1320,7 +1322,7 @@ sub read_message_file {
     if ( !-e $msg_file ) {
         do_log( "Missing 'message' file in $dir, skipping this test.", ERROR );
         return 0;
-    } elsif ( ( defined $tmpl->{file}{$msg_file}{mtime} ) and ( stat($msg_file) )[9] == $tmpl->{file}{$msg_file}{mtime} ) {
+    } elsif ( ( defined $tmpl->{file}{$msg_file}{mtime} ) and ( stat( $msg_file ) )[9] == $tmpl->{file}{$msg_file}{mtime} ) {
 
         # File did not change so we do not need to reparse it
         $tmpl->{file}{$msg_file}{changed} = 0;
@@ -1331,13 +1333,13 @@ sub read_message_file {
         or do_log( "Failed to open $msg_file ($!), skipping this test.", ERROR )
         and return 0;
     delete $tmpl->{file}{$msg_file};
-    $tmpl->{file}{$msg_file}{mtime} = ( stat($msg_file) )[9];
+    $tmpl->{file}{$msg_file}{mtime} = ( stat( $msg_file ) )[9];
     do_log( "Parsing file $msg_file", TRACE );
 
     # Go through file, read in oids
     my $table_at = 0;
     my $header   = 0;
-    for my $line (<FILE>) {
+    for my $line ( <FILE> ) {
 
         # Skip comments
         next if $line =~ /^\s*#.*$/;
@@ -1357,7 +1359,7 @@ sub read_message_file {
         }
 
         # If we have seen a table header, try and read in the info
-        if ($table_at) {
+        if ( $table_at ) {
 
             # Skip whitespace
             next if $line =~ /^\s*$/;
@@ -1513,22 +1515,22 @@ sub sync_templates {
     db_connect();
 
     # Erase our model index
-    db_do("delete from template_models");
+    db_do( "delete from template_models" );
 
     # Erase our tests index
-    db_do("delete from template_tests");
+    db_do( "delete from template_tests" );
 
     # Erase our oids DB
-    db_do("delete from template_oids");
+    db_do( "delete from template_oids" );
 
     # Now erase our thresholds DB
-    db_do("delete from template_thresholds");
+    db_do( "delete from template_thresholds" );
 
     # Now erase our exceptions DB
-    db_do("delete from template_exceptions");
+    db_do( "delete from template_exceptions" );
 
     # Erase our messages DB
-    db_do("delete from template_messages");
+    db_do( "delete from template_messages" );
 
     # Create our template index
     for my $vendor ( sort keys %{ $g{templates} } ) {
@@ -1542,7 +1544,7 @@ sub sync_templates {
             my $sysdesc = $g{templates}{$vendor}{$model}{sysdesc};
 
             # Make the sysdesc mysql-safe
-            db_do("insert into template_models values ($model_id, '$vendor','$model','$sysdesc')");
+            db_do( "insert into template_models values ($model_id, '$vendor','$model','$sysdesc')" );
 
             # Now go through all our tests and add them
             for my $test ( sort keys %{ $g{templates}{$vendor}{$model}{tests} } ) {
@@ -1551,7 +1553,7 @@ sub sync_templates {
                 ++$test_id;
 
                 # Add our test index info
-                db_do("insert into template_tests values ($test_id, $model_id,'$test')");
+                db_do( "insert into template_tests values ($test_id, $model_id,'$test')" );
 
                 # Template shortcut
                 my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
@@ -1604,13 +1606,13 @@ sub sync_templates {
                 $msg =~ s/\\n/~~n/;
                 $msg =~ s/\n/\\n/;
 
-                db_do("insert into template_messages values ($test_id, '$msg')");
+                db_do( "insert into template_messages values ($test_id, '$msg')" );
             }
         }
     }
 
     # Update our nodes DB to let all nodes know to reload template data
-    db_do("update nodes set read_temps='y'");
+    db_do( "update nodes set read_temps='y'" );
 
     # Now quit
     do_log( "Template synchronization complete", INFO );

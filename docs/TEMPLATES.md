@@ -379,7 +379,7 @@ substitution, consider looking up `regular expression substitution` for more inf
 The SET transform generates a `repeater` OID with preset values. 
 - Each value's index starts from 1.
 - Each value's MUST be separated by commas optionally surrounded by spaces.
-- At least one constant MUST be provided, which can be either a number or a character  string 
+- At least one constant MUST be provided, which can be either a number or a double quoted string 
   excluding `,{}`. Leading and trailing spaces are ignored.
 
 For example, in the McAfee MEB 4500 MIB, there's a section detailing file systems. Each file system 
@@ -396,7 +396,7 @@ fsiIUtil  : SET    : 14.0,20.0,26.0,32.0,38.0,44.0
 fsiISize  : SET    : 15.0,21.0,27.0,33.0,39.0,45.0
 fsiIFree  : SET    : 16.0,22.0,28.0,34.0,40.0,46.0
 
-fsbName   : SET    : deferred,quaratine,scandir,logs,var,working
+fsbName   : SET    : "deferred","quaratine","scandir",logs","var","working"
 fsbUtil   : CHAIN  : {fsiUtil} {fsInfo}
 fsbSize   : CHAIN  : {fsiSize} {fsInfo}
 fsbFree   : CHAIN  : {fsiFree} {fsInfo}
