@@ -1,0 +1,10 @@
+sensorNumber            : 1.3.6.1.4.1.21317.1.3.1.1  : branch
+sensorReading 		: 1.3.6.1.4.1.21317.1.3.1.2  : branch
+sensorIDString          : 1.3.6.1.4.1.21317.1.3.1.13 : branch
+# Critcal, Non-Critical Non-Recoverable threshold
+lncThreshold            : 1.3.6.1.4.1.21317.1.3.1.5  : branch
+lcThreshold             : 1.3.6.1.4.1.21317.1.3.1.6  : branch
+lnrThreshold            : 1.3.6.1.4.1.21317.1.3.1.7  : branch
+uncThreshold            : 1.3.6.1.4.1.21317.1.3.1.8  : branch
+ucThreshold             : 1.3.6.1.4.1.21317.1.3.1.9  : branch
+unrThreshold            : 1.3.6.1.4.1.21317.1.3.1.10  : branch

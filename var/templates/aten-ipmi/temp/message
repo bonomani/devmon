@@ -1,0 +1,3 @@
+TABLE:
+Idx|Name|Temp C°|lnc/lc/lnr/unc/uc/unr Threshold|Status
+{sensorNumberTemp}|{sensorIDStringTemp}|{sensorReadingTemp}|{lncThresholdTemp}/{lcThresholdTemp}/{lnrThresholdTemp}/{uncThresholdTemp}/{ucThresholdTemp}/{unrThresholdTemp}|{statusTemp.color}{statusTemp}{statusTemp.errors}

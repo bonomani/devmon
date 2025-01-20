@@ -1,0 +1,16 @@
+sensorIDStringSensorVbatIdx     : MATCH  : {sensorIDString} /^VBAT$/
+sensorIDStringSensorPSIdx       : MATCH  : {sensorIDString} /^PS.*$/
+sensorIDStringSensorChassisIdx  : MATCH  : {sensorIDString} /^Chassis Intru$/
+sensorReadingSensorVbat         : CHAIN  : {sensorIDStringSensorVbatIdx}    {sensorReading}
+sensorReadingSensorPS           : CHAIN  : {sensorIDStringSensorPSIdx}      {sensorReading}
+sensorReadingSensorChassis      : CHAIN  : {sensorIDStringSensorChassisIdx} {sensorReading}
+sensorIDStringSensorVbat        : CHAIN  : {sensorIDStringSensorVbatIdx}    {sensorIDString}
+sensorIDStringSensorPS          : CHAIN  : {sensorIDStringSensorPSIdx}      {sensorIDString}
+sensorIDStringSensorChassis     : CHAIN  : {sensorIDStringSensorChassisIdx} {sensorIDString}
+sensorNumberSensorVbat          : CHAIN  : {sensorIDStringSensorVbatIdx}    {sensorNumber}
+sensorNumberSensorPS            : CHAIN  : {sensorIDStringSensorPSIdx}      {sensorNumber}
+sensorNumberSensorChassis       : CHAIN  : {sensorIDStringSensorChassisIdx} {sensorNumber}
+statusSensorVbat                : SWITCH : {sensorReadingSensorVbat}    =2=Battery failed,=4=Battery presence detected
+statusSensorPS                  : SWITCH : {sensorReadingSensorPS}      =0=Not present,=1=Presence detected
+statusSensorChassis             : SWITCH : {sensorReadingSensorChassis} =0=OK,=1=General Chassis Intrusion
+

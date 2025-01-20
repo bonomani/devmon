@@ -1,0 +1,4 @@
+statusTemp                  : blue           : Not Present  :
+statusTemp                  : yellow         : Non-Critical : Non critical Alarm on fan
+statusTemp                  : green          : OK           :
+statusTemp                  : red            :              : Critical Alarm on fan

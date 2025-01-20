@@ -1,0 +1,29 @@
+#Overall fans satus: {cpqHeThermalSystemSensorStatusTxt.color}{cpqHeThermalSystemSensorStatusTxt}
+
+#TABLE:
+#Idx|Name|Speed|lnc/lc/lnr/unc/uc/unr Threshold|Status
+#{sensorNumberSensor}|{sensorIDStringSensor}|{sensorReadingSensor}|{lncThresholdSensor}/{lcThresholdSensor}/{lnrThresholdSensor}/{uncThresholdSensor}/{ucThresholdSensor}/{unrThresholdSensor}|{statusSensor.color}{statusSensor}{statusSensor.errors}
+
+#TABLE:
+#Idx|Name|Speed|lnc/lc/lnr/unc/uc/unr Threshold|Status
+#{sensorNumberSensorVbat}|{sensorIDStringSensorVbat}|{sensorReadingSensorVbat}|{lncThresholdSensorVbat}/{lcThresholdSensorVbat}/{lnrThresholdSensorVbat}/{uncThresholdSensorVbat}/{ucThresholdSensorVbat}/{unrThresholdSensorVbat}|{statusSensorVbat.color}{statusSensorVbat}{statusSensorVbat.errors}
+
+#TABLE:
+#Idx|Name|Speed|lnc/lc/lnr/unc/uc/unr Threshold|Status
+#{sensorNumberSensorPS}|{sensorIDStringSensorPS}|{sensorReadingSensorPS}|{lncThresholdSensorPS}/{lcThresholdSensorPS}/{lnrThresholdSensorPS}/{uncThresholdSensorPS}/{ucThresholdSensorPS}/{unrThresholdSensorPS}|{statusSensorPS.color}{statusSensorPS}{statusSensorPS.errors}
+
+#TABLE:
+#Idx|Name|Speed|lnc/lc/lnr/unc/uc/unr Threshold|Status
+#{sensorNumberSensorChassis}|{sensorIDStringSensorChassis}|{sensorReadingSensorChassis}|{lncThresholdSensorChassis}/{lcThresholdSensorChassis}/{lnrThresholdSensorChassis}/{uncThresholdSensorChassis}/{ucThresholdSensorChassis}/{unrThresholdSensorChassis}|{statusSensorChassis.color}{statusSensorChassis}{statusSensorChassis.errors}
+
+TABLE:
+Idx|Name|Value|Status
+{sensorNumberSensorVbat}|{sensorIDStringSensorVbat}|{sensorReadingSensorVbat}|{statusSensorVbat.color}{statusSensorVbat}{statusSensorVbat.errors}
+
+TABLE:
+Idx|Name|Value|Status
+{sensorNumberSensorPS}|{sensorIDStringSensorPS}|{sensorReadingSensorPS}|{statusSensorPS.color}{statusSensorPS}{statusSensorPS.errors}
+
+TABLE:
+Idx|Name|Value|Status
+{sensorNumberSensorChassis}|{sensorIDStringSensorChassis}|{sensorReadingSensorChassis}|{statusSensorChassis.color}{statusSensorChassis}{statusSensorChassis.errors}

@@ -1,4 +1,4 @@
 vendor	: compaq
 model	: server
 snmpver	: 2
-sysdesc : linux|Linux
+sysdesc : TOBEFIND

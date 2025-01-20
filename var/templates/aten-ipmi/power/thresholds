@@ -1,0 +1,4 @@
+statusPower                  : blue           : Not Present  :
+statusPower                  : yellow         : Non-Critical : Non critical Alarm on fan
+statusPower                  : green          : OK           :
+statusPower                  : red            :              : Critical Alarm on fan

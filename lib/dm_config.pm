@@ -375,7 +375,25 @@ sub initialize {
             'case'    => 0
         },
         'snmp_try_timeout' => {
-            'default' => 15,      # for long request
+            'default' => 40,      # for long request
+            'regex'   => '\d+',
+            'set'     => 0,
+            'case'    => 0
+        },
+        'snmp_getbulk_timeout' => {
+            'default' => 4,      
+            'regex'   => '\d+',
+            'set'     => 0,
+            'case'    => 0
+        },
+        'snmp_get_timeout' => {
+            'default' => 1,      
+            'regex'   => '\d+',
+            'set'     => 0,
+            'case'    => 0
+        },
+        'snmp_getnext_timeout' => {
+            'default' => 4,      
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -388,7 +406,7 @@ sub initialize {
         },
 
         'snmp_try_maxcnt' => {          # 6 try (5 retries) should be enough
-            'default' => 6,
+            'default' => 10,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0

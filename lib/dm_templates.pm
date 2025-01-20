@@ -297,7 +297,8 @@ sub post_template_load {
                             } elsif ( $val_pair =~ /^\s*([><]?.+?)\s*=\s*(.*?)\s*$/ ) {
                                 my ( $if, $then ) = ( $1, $2 );
                                 my $type = '';
-                                if ( $if =~ /^\d+$/ ) {
+                                if ( $if =~ /^=?(\d+)$/ ) {
+                                    $if   = $1;
                                     $type = 'num';
                                 } elsif ( $if =~ /^>\s*([+-]?\d+(?:\.\d+)?)$/ ) {
                                     $if   = $1;
@@ -686,11 +687,12 @@ LINE: while ( my $line = shift @text ) {
 
             $func_type eq 'math' and do {
                 $temp =~ s/:\s*\d+\s*$//;
-                $temp =~ s/\{\S+\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|\d+(?:\.\d+)?|\(|\)//g;
+                $temp =~ s/\{\S+\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|<=?|>=?|!?=|or|and|\|\||$$|\d+(?:\.\d+)?|\(|\)//g;
                 $temp =~ s/\s*//;
                 do_log( "MATH transform uses only math/numeric symbols and an optional precision number, $temp did not pass, at $trans_file, line $l_num", ERROR )
                     and next LINE
-                    if $temp !~ /^\s*$/;
+	            unless $temp eq ''; # Check if temp is not empty
+		    #if $temp !~ /^\s*$/;
                 last CASE;
             };
 
@@ -726,11 +728,12 @@ LINE: while ( my $line = shift @text ) {
             };
 
             $func_type eq 'set' and do {
-                $temp = '{}' if $temp =~ m/^\s*$/;
-                $temp =~ tr/{}//cd;    # Check for OID references
+		my $pattern = qr/(\{[^}]*\}|\"[^\"]*\"|\d+(\.\d+)?([eE][+-]?\d+)?)(?=\s*,|\s*$)/;
                 do_log( "SET transform requires a non-empty list of constant values at $trans_file, line $l_num", ERROR )
                     and next LINE
-                    if $temp ne '';
+	            unless (($temp =~ s/$pattern//g)         # Remove Patten
+			    && ($temp =~ s/\s*,\s*//g)   # Remove Comma
+			    && ($temp =~ /^\s*$/));      # Remove white space
                 last CASE;
             };
 
@@ -775,7 +778,7 @@ LINE: while ( my $line = shift @text ) {
                         and next
                         if !defined $if;
                     my $type;
-                    if ( $if =~ /^\d+$/ ) {
+                    if ( $if =~ /^=?\d+$/ ) {
                         $type = 'num';
                     } elsif ( $if =~ /^>\s*\d+(\.\d+)?$/ ) {
                         $type = 'gt';
