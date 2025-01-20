@@ -1,6 +1,6 @@
 oidInt            : SET           : 1,2,3,4,5,6,7,8,9,10
 oidReal           : SET           : 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.10
-oidTxt            : SET           : a1,bb2,ccc3,dddd4,eeeee5,ffff6,ggg7,hh8,i9,jklmnopq
+oidTxt            : SET           : "a1","b,b2","ccc3","dddd4","eeeee5","ffff6","ggg7","hh8","i9","jklmnopq"
 regsubTest1       : REGSUB        : {oidInt} /(\d*)/$1.$1/
 #regsubCalc1.1     : MATH          : {regsubTest1} - {oidReal}
 #regsubCalc1.2     : REGSUB        : {regsubCalc1.1} /.*/$1 = 0 || 0/

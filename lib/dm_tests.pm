@@ -246,7 +246,7 @@ sub oid_hash {
         # Apply thresholds
         if ( %{$snmp} ) {
             if ( defined $snmp->{$num}{val} ) {
-                if ($repeat) {
+                if ( $repeat ) {
                     for my $leaf ( keys %{ $snmp->{$num}{val} } ) {
 
                         # If we have a non-numeric leaf, make sure to keep track of this!
@@ -275,7 +275,7 @@ sub oid_hash {
         } else {
 
             # No snmp answer
-            if ($repeat) {
+            if ( $repeat ) {
                 if ( defined $rep_val_keys{$oid}{repeat} ) {
                     $oids->{$oid}{repeat} = $rep_val_keys{$oid}{repeat};
 
@@ -330,7 +330,7 @@ sub transform {
             &$trans_sub( $device, $oids, $oid );
             alarm 0;
         };
-        if ($@) {
+        if ( $@ ) {
             if ( $@ eq "Timeout\n" ) {
                 do_log( "Timed out waiting for $trans_type transform on oid $oid for $device to complete", ERROR );
             } else {
@@ -373,7 +373,7 @@ sub trans_delta {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always have a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Check our parent oids for any errors
@@ -417,7 +417,7 @@ sub trans_delta {
                     if ( $last_data > $this_data ) {
 
                         # Check for custom limit, first
-                        if ($limit) {
+                        if ( $limit ) {
                             $delta = ( $this_data + ( $limit - $last_data ) ) / ( $this_time - $last_time );
 
                             # If the last value was less than 2^32, assume the counter was 32bit
@@ -507,7 +507,7 @@ sub trans_delta {
             if ( $last_data > $this_data ) {
 
                 # If the value was less than 2^32, assume the counter was 32bit
-                if ($limit) {
+                if ( $limit ) {
                     $delta = ( $this_data + ( $limit - $last_data ) ) / ( $this_time - $last_time );
                 } elsif ( $last_data < 4294967296 ) {
                     $delta = ( $this_data + ( 4294967296 - $last_data ) ) / ( $this_time - $last_time );
@@ -576,8 +576,8 @@ sub trans_math {
     my $print_mask = '%.' . $precision . 'f';
 
     # Convert our math symbols to their perl equivalents
-    $expr =~ s/\sx\s/ \* /g;    # Multiplication
-    $expr =~ s/\^/**/g;         # Exponentiation
+    $expr =~ s/\sx\s/ \* /g;               # Multiplication
+    $expr =~ s/\^/**/g;                    # Exponentiation
     $expr =~ s/(?<![!<>=])=(?![=])/==/g;
 
     # Extract all our our parent oids from the expression, first
@@ -595,7 +595,7 @@ sub trans_math {
     # Also go through our non-repeaters and replace them in our
     # expression, since they are constant (i.e. not leaf dependent)
     my @repeaters;
-    for my $dep_oid (@dep_oids) {
+    for my $dep_oid ( @dep_oids ) {
         push @repeaters, $dep_oid and next if $oids->{$dep_oid}{repeat};
         if ( ( defined $oids->{$dep_oid}{error} ) and ( $oids->{$dep_oid}{error} ) ) {
             $oid_h->{val}   = $oids->{$dep_oid}{val} if defined $oids->{$dep_oid}{val};
@@ -623,12 +623,12 @@ sub trans_math {
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
             undef @dep_val;
-            for (@repeaters) { push @dep_val, $oids->{$_}{val}{$leaf} }
+            for ( @repeaters ) { push @dep_val, $oids->{$_}{val}{$leaf} }
 
             # Do our eval and set our time
-            my $result = eval($expr);
+            my $result = eval( $expr );
             $oid_h->{time}{$leaf} = time;
-            if ($@) {
+            if ( $@ ) {
                 chomp $@;
                 if ( $@ =~ /^Illegal division by zero/ ) {
                     $oid_h->{val}{$leaf}   = 'NaN';
@@ -651,7 +651,7 @@ sub trans_math {
 
         # All of our non-reps were substituted earlier, so we can just eval
         my $result = eval $expr;
-        if ($@) {
+        if ( $@ ) {
             chomp $@;
             if ( $@ =~ /^Illegal division by zero/ ) {
                 $oid_h->{val}   = 'NaN';
@@ -702,7 +702,7 @@ sub trans_statistic {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Do not use function validate_deps. It will make this oid to be of the
@@ -771,7 +771,7 @@ sub trans_statistic {
                 # value to determine the minimum and the maximum.
                 $leaf   = shift @leaf;
                 $result = $dep_oid_h->{val}{$leaf};
-                for $leaf (@leaf) {
+                for $leaf ( @leaf ) {
                     $val = $dep_oid_h->{val}{$leaf};
                     &{ $comp{$statistic} };    # Perform statistical computation
                 }
@@ -805,7 +805,7 @@ sub trans_substr {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
     validate_deps( $device, $oids, $oid, [$dep_oid] ) or return;
 
@@ -851,7 +851,7 @@ sub trans_pack {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -896,7 +896,7 @@ sub trans_unpack {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -941,7 +941,7 @@ sub trans_convert {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -998,7 +998,7 @@ sub trans_eval {
     # Also go through our non-repeaters and replace them in our
     # expression, since they are constant (i.e. not leaf dependent)
     my @repeaters;
-    for my $dep_oid (@dep_oids) {
+    for my $dep_oid ( @dep_oids ) {
         push @repeaters, $dep_oid and next if $oids->{$dep_oid}{repeat};
         $expr =~ s/\{$dep_oid\}/$oids->{$dep_oid}{val}/g;
     }
@@ -1016,14 +1016,14 @@ sub trans_eval {
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
             my @dep_val;
-            for (@repeaters) { push @dep_val, $oids->{$_}{val}{$leaf} }
+            for ( @repeaters ) { push @dep_val, $oids->{$_}{val}{$leaf} }
 
             # Do our eval and set our time
-            my $result = eval($expr);
+            my $result = eval( $expr );
             $oid_h->{time}{$leaf} = time;
             if ( $@ =~ /^Undefined subroutine/ ) {
                 $result = 0;
-            } elsif ($@) {
+            } elsif ( $@ ) {
                 do_log( "Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)", WARN );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{color}{$leaf} = 'clear';
@@ -1041,7 +1041,7 @@ sub trans_eval {
         $oid_h->{time} = time;
         if ( $@ =~ /^Undefined subroutine/ ) {
             $result = 0;
-        } elsif ($@) {
+        } elsif ( $@ ) {
             do_log( "Failed eval for TRANS_STR on $oid: $expr ($@)", WARN );
             $oid_h->{val}   = 'Failed eval';
             $oid_h->{color} = 'clear';
@@ -1064,7 +1064,7 @@ sub trans_best {
 
     # define primary oid
     my $pri_oid_is_defined = define_pri_oid( $oids, $oid, \@dep_oids );
-    if ($pri_oid_is_defined) {
+    if ( $pri_oid_is_defined ) {
 
         # Use a non-repeater type if we havent set it yet
         $oid_h->{repeat} ||= 0;
@@ -1081,7 +1081,7 @@ sub trans_best {
                 for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
                     # Go through each parent oid for this leaf
-                    for my $dep_oid (@dep_oids) {
+                    for my $dep_oid ( @dep_oids ) {
                         my $dep_oid_h = \%{ $oids->{$dep_oid} };
                         if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
                             if ( !defined $oid_h->{color}{$leaf}
@@ -1160,7 +1160,7 @@ sub trans_best {
             # Otherwise we are a single entry datum
         } else {
 
-            for my $dep_oid (@dep_oids) {
+            for my $dep_oid ( @dep_oids ) {
 
                 my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
@@ -1211,7 +1211,7 @@ sub trans_worst {
     # define primary oid
     my $pri_oid_is_defined = define_pri_oid( $oids, $oid, \@dep_oids );
 
-    if ($pri_oid_is_defined) {
+    if ( $pri_oid_is_defined ) {
 
         # Use a non-repeater type if we havent set it yet
         $oid_h->{repeat} ||= 0;
@@ -1229,10 +1229,11 @@ sub trans_worst {
                 for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
                     # Go through each parent oid for this leaf
-                    for my $dep_oid (@dep_oids) {
+                    for my $dep_oid ( @dep_oids ) {
                         my $dep_oid_h = \%{ $oids->{$dep_oid} };
                         if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
-                            if ( not defined $dep_oid_h->{color}{$leaf} or not defined $oid_h->{color}{$leaf}
+                            if (   not defined $dep_oid_h->{color}{$leaf}
+                                or not defined $oid_h->{color}{$leaf}
                                 or $colors{ $dep_oid_h->{color}{$leaf} } > $colors{ $oid_h->{color}{$leaf} } )
                             {
                                 $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
@@ -1302,7 +1303,7 @@ sub trans_worst {
 
             # Otherwise we are a single entry datum
         } else {
-            for my $dep_oid (@dep_oids) {
+            for my $dep_oid ( @dep_oids ) {
                 my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
                 # Skip if there was a dependency error for this parent oid leaf
@@ -1357,7 +1358,7 @@ sub trans_elapsed {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -1463,7 +1464,8 @@ sub trans_set {
     $oid_h->{val}    = {};    # Empty set of leafes
     $oid_h->{time}   = {};
 
-    @Fields = split( /\s*,\s*/, $oid_h->{trans_data} );
+    #@Fields = split( /\s*,\s*/, $oid_h->{trans_data} );
+    @Fields = split /,(?=(?:[^"]*"[^"]*")*[^"]*$)/, $oid_h->{trans_data};
     for ( $leaf = 1; $leaf <= @Fields; $leaf++ ) {
         $oid_h->{val}{$leaf}  = $Fields[ $leaf - 1 ];
         $oid_h->{time}{$leaf} = time;
@@ -1484,7 +1486,7 @@ sub trans_speed {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -1501,7 +1503,7 @@ sub trans_speed {
 
             # Get largest speed type
             my $speed = 1;    # Start low: 1 bps
-            $speed *= 1000 while abs($bps) >= ( $speed * 1000 );
+            $speed *= 1000 while abs( $bps ) >= ( $speed * 1000 );
             my $unit = $speeds{$speed};
 
             # Measure to 2 decimal places
@@ -1515,7 +1517,7 @@ sub trans_speed {
 
         # Get largest speed type
         my $speed = 1;    # Start low: 1 bps
-        $speed *= 1000 while abs($bps) >= ( $speed * 1000 );
+        $speed *= 1000 while abs( $bps ) >= ( $speed * 1000 );
         my $unit = $speeds{$speed};
 
         # Measure to 2 decimal places
@@ -1540,7 +1542,7 @@ sub trans_switch {
     if ( not define_pri_oid( $oids, $oid, [$dep_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -1556,7 +1558,7 @@ sub trans_switch {
             next if ( ( ( exists $oid_h->{error} ) and ( ref $oid_h->{error} ne 'HASH' ) ) or ( ( exists $oid_h->{error}{$leaf} ) and $oid_h->{error}{$leaf} ) );
             my $val = $dep_oid_h->{val}{$leaf};
             my $num;
-            for my $case (@$case_nums) {
+            for my $case ( @$case_nums ) {
                 my $if   = $cases->{$case}{if};
                 my $type = $cases->{$case}{type};
                 if ( $type eq 'num' ) { $num = $case and last if $val == $if; next }
@@ -1639,7 +1641,7 @@ sub trans_switch {
     } else {
         my $val = $dep_oid_h->{val};
         my $num;
-        for my $case (@$case_nums) {
+        for my $case ( @$case_nums ) {
             my $if   = $cases->{$case}{if};
             my $type = $cases->{$case}{type};
             if ( $type eq 'num' ) { $num = $case and last if $val == $if; next }
@@ -1695,7 +1697,7 @@ sub trans_switch {
             } elsif ( $dep_val eq 'wait' ) {
                 $oid_h->{color} = 'clear';
                 $oid_h->{msg}   = 'wait';
-            } elsif ($dep_error) {
+            } elsif ( $dep_error ) {
 
                 # Find de worst color
                 if ( !defined $oid_h->{color}
@@ -1733,13 +1735,13 @@ sub trans_regsub {
 
     # Extract all our our parent oids from the expression, first
     my @dep_oids = $src_expr =~ /\{(.+?)\}/g;
-    unshift @dep_oids, ($main_oid);
+    unshift @dep_oids, ( $main_oid );
 
     # Define our primary oid
     if ( !define_pri_oid( $oids, $oid, \@dep_oids ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -1751,7 +1753,7 @@ sub trans_regsub {
     # Also go through our non-repeaters and replace them in our
     # expression, since they are constant (i.e. not leaf dependent)
     my @repeaters;
-    for my $dep_oid (@dep_oids) {
+    for my $dep_oid ( @dep_oids ) {
         push @repeaters, $dep_oid and next if $oids->{$dep_oid}{repeat};
         $expr =~ s/\{$dep_oid\}/$oids->{$dep_oid}{val}/g;
     }
@@ -1772,11 +1774,11 @@ sub trans_regsub {
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
             my @dep_val;
-            for (@repeaters) { push @dep_val, $oids->{$_}{val}{$leaf} }
+            for ( @repeaters ) { push @dep_val, $oids->{$_}{val}{$leaf} }
             my $exp_val = $oids->{$main_oid}{val}{$leaf};
             my $result;
             $result = eval "\$exp_val =~ s$expr";
-            if ($@) {
+            if ( $@ ) {
                 do_log( "Failed eval for REGSUB transform on leaf $leaf of $oid on $device ($@)", ERROR );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{color}{$leaf} = 'clear';
@@ -1791,7 +1793,7 @@ sub trans_regsub {
         # All of our non-reps were substituted earlier, so we can just eval
         my $exp_val = $oids->{$main_oid}{val};
         my $result  = eval "\$exp_val =~ s$expr";
-        if ($@) {
+        if ( $@ ) {
             do_log( "Failed eval for REGSUB transform on $oid on $device ($@)", WARN );
             $oid_h->{val}   = 'Failed eval';
             $oid_h->{color} = 'clear';
@@ -1819,7 +1821,7 @@ sub trans_chain {
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies, have to do them seperately
@@ -1921,7 +1923,7 @@ sub trans_coltre {
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies, have to do them seperately
@@ -1934,7 +1936,7 @@ sub trans_coltre {
             my $maxlength = 0;
             my %value_length;
             while ( my ( $key, $value ) = each %{ $trg_h->{val} } ) {
-                $value_length{$key} = length($value);
+                $value_length{$key} = length( $value );
                 if ( $maxlength < $value_length{$key} ) {
                     $maxlength = $value_length{$key};
                 }
@@ -1983,16 +1985,16 @@ sub trans_coltre {
             next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             #TODO CHECK $oid_h->{val}{$src_h}{val}{$leaf}} if it exist
-            if ($isfirst) {
+            if ( $isfirst ) {
                 $oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
                 $isfirst = 0;
             } else {
-                if (defined $oid_h->{val}{ $src_h->{val}{$leaf} } ) {
-                $oid_h->{val}{$leaf} = $oid_h->{val}{ $src_h->{val}{$leaf} } . $separator . $trg_h->{val}{$leaf};
-		} else {
-		$oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
-		}
-	        
+                if ( defined $oid_h->{val}{ $src_h->{val}{$leaf} } ) {
+                    $oid_h->{val}{$leaf} = $oid_h->{val}{ $src_h->{val}{$leaf} } . $separator . $trg_h->{val}{$leaf};
+                } else {
+                    $oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
+                }
+
             }
             $oid_h->{color}{$leaf} = $trg_h->{color}{$leaf};
         }
@@ -2016,13 +2018,13 @@ sub trans_sort {
     $sort = $1 if $expr =~ s/\s+:\s*(num|txt)*//i;
 
     # Extract all our our parent oids from the expression, first
-    my ($src_oid) = $expr =~ /^\{(.+)\}$/;
+    my ( $src_oid ) = $expr =~ /^\{(.+)\}$/;
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
         # We should always ave a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     do_log( "Transforming $src_oid to $oid via 'sort' transform", DEBUG ) if $g{debug};
@@ -2039,8 +2041,8 @@ sub trans_sort {
         if ( $sort eq 'txt' ) {
             my $pad        = 1;
             my @oid_sorted = defined $src_h->{val} ? oid_sort( keys %{ $src_h->{val} } ) : ();
-            if (@oid_sorted) {
-                for my $leaf (@oid_sorted) {
+            if ( @oid_sorted ) {
+                for my $leaf ( @oid_sorted ) {
 
                     # Skip if our source oid is freaky-deaky
                     next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
@@ -2115,14 +2117,14 @@ sub trans_index {
     my $old_oid_h = dclone $oids->{$oid};    # we have to make a real copy (deep)
 
     # Extract our parent oids from the expression, first
-    my ($src_oid) = $oids->{$oid}{trans_data} =~ /^\{(.+)\}$/;
+    my ( $src_oid ) = $oids->{$oid}{trans_data} =~ /^\{(.+)\}$/;
     my $src_h = \%{ $oids->{$src_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
         # We should always have a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # we do not validate our dependencies as we are working on index
@@ -2196,7 +2198,7 @@ sub trans_match {
     if ( not define_pri_oid( $oids, $oid, [$src_oid] ) ) {
 
         # We should always have a primary oid with this transform, so make a fatal error
-        log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
+        log_fatal( "FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'" );
     }
 
     # Validate our dependencies
@@ -2218,7 +2220,7 @@ sub trans_match {
         $oid_h->{repeat} = 2;
         my $idx          = 1;
         my @sorted_leafs = oid_sort( keys %{ $src_h->{val} } );
-        for my $leaf (@sorted_leafs) {
+        for my $leaf ( @sorted_leafs ) {
 
             # Skip if our source oid is freaky-deaky
             next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
@@ -2226,7 +2228,7 @@ sub trans_match {
             my $res;
             my $val    = $src_h->{val}{$leaf};
             my $result = eval "\$res = \$val =~ m$expr";
-            if ($@) {
+            if ( $@ ) {
                 do_log( "Failed eval for MATCH transform on leaf $leaf of $oid on $device ($@)", WARN );
                 $oid_h->{val}{$leaf}   = 'Failed eval';
                 $oid_h->{time}{$leaf}  = time;
@@ -2285,7 +2287,7 @@ sub render_msg {
     do_log( "Rendering $test message for $device", DEBUG ) if $g{debug};
 
     # Build readable timestamp
-    my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
+    my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar( localtime );
 
     # No message template?
     if ( !defined $msg_template ) {
@@ -2388,7 +2390,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     $rrd{$name}{all}    = $all    || 0;
                     $rrd{$name}{do_max} = $do_max || 0;
                     @{ $rrd{$name}{leaves} } = ();
-                    for (@datasets) {
+                    for ( @datasets ) {
                         my ( $ds, $oid, $type, $time, $min, $max ) = split /:/;
                         $ds = $oid if !defined $ds;
                         $type = 'GAUGE' if !defined $type or $type eq '';
@@ -2487,9 +2489,9 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
             # Now go through all oid vals, using the primary's leaves
             if ( !@table_leaves ) {
-                @table_leaves = ('#');    # add a fake oid "#" to have at lease 1 row
+                @table_leaves = ( '#' );    # add a fake oid "#" to have at lease 1 row
             }
-        T_LEAF: for my $leaf (@table_leaves) {
+        T_LEAF: for my $leaf ( @table_leaves ) {
                 my $row_data = $line;
                 my $alarm_int;
 
@@ -2657,7 +2659,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                             # Unknown flag
                         } else {
-                            do_msg("Unknown flag ($flag) for $oid on $device\n");
+                            do_msg( "Unknown flag ($flag) for $oid on $device\n" );
                         }
 
                         # Otherwise just display the oid val
@@ -2882,7 +2884,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 # (some/all of which may be 1 or more levels deep)
 sub leaf_sort {
     my %cache;
-    my ($list) = @_;
+    my ( $list ) = @_;
     return sort { ( $cache{$a} ||= pack "w*", split /\./, $a ) cmp( $cache{$b} ||= pack "w*", split /\./, $b ) } @$list;
 }
 
@@ -3057,11 +3059,11 @@ sub apply_threshold {
         delete $oid_h->{msg}    unless ( defined ${ $oid_r{msg} } );
         delete $oid_h->{error}  unless ( defined ${ $oid_r{error} } );
 
-	if ( not defined  $oid_h->{color} or $oid_h->{color} eq 'clear') {
+        if ( not defined $oid_h->{color} or $oid_h->{color} eq 'clear' ) {
             $oid_h->{error} = 1;
             return;
-	} elsif ( $oid_h->{color} eq 'green' ) {
-	    return
+        } elsif ( $oid_h->{color} eq 'green' ) {
+            return;
         } elsif ( $oid_h->{color} eq 'blue' ) {
             return;
         } elsif ( $oid_h->{color} eq 'yellow' ) {
@@ -3078,7 +3080,7 @@ sub apply_thresh_element {
     my %oid_r                   = %{$oid_r_ref};
     my $oid_color               = ${$oid_color_ref};
     my $thresh_confidence_level = ${$thresh_confidence_level_ref};
-COLOR: for my $color (@color_order) {
+COLOR: for my $color ( @color_order ) {
         next unless defined $thresh_h->{$color};
     TRH_LIST: for my $thresh_list ( keys %{ $thresh_h->{$color} } ) {
             my $thresh_msg;
@@ -3093,7 +3095,7 @@ COLOR: for my $color (@color_order) {
                     # Look for a simple numeric threshold, without a comparison operator.
                     # This is the most common threshold definition and handling it separately
                     # results in a significant performance improvement.
-                    if ( $thresh_confidence_level < 6 and looks_like_number($thresh) ) {
+                    if ( $thresh_confidence_level < 6 and looks_like_number( $thresh ) ) {
                         if ( ${ $oid_r{val} } >= $thresh ) {
                             ${ $oid_r{color} }  = $color;
                             ${ $oid_r{thresh} } = $thresh if defined $thresh;
@@ -3208,7 +3210,7 @@ sub define_pri_oid {
     # set the first one as the primary OID and set the repeat type
     # but very first that it is not already defined as a leaf
     my $pri_oid;
-    for my $dep_oid (@$dep_arr) {
+    for my $dep_oid ( @$dep_arr ) {
         if ( $oids->{$dep_oid}{repeat} ) {
             $pri_oid = $dep_oid;
             last;
@@ -3245,7 +3247,7 @@ sub validate_deps {
     }
 
     # Check first if we have a global error
-    for my $dep_oid (@$dep_arr) {
+    for my $dep_oid ( @$dep_arr ) {
         if ( ( ref $oids->{$dep_oid}{error} ne 'HASH' ) and ( defined $oids->{$dep_oid}{error} ) and $oids->{$dep_oid}{error} ) {
             $oid_h->{color} = 'clear';
             $oid_h->{msg}   = $oids->{$dep_oid}{msg} if defined $oids->{$dep_oid}{msg};
@@ -3271,7 +3273,7 @@ sub validate_deps {
                 $time = time;
             }
             $oid_h->{time}{$leaf} = $time;
-            for my $dep_oid (@$dep_arr) {
+            for my $dep_oid ( @$dep_arr ) {
                 my $dep_oid_h = \%{ $oids->{$dep_oid} };
                 my $dep_val;
                 my $dep_error;
@@ -3306,7 +3308,7 @@ sub validate_deps {
                     $oid_h->{error}{$leaf} = 1;
                     $oid_h->{msg}{$leaf}   = 'wait';
                     next LEAF;
-                } elsif ($dep_error) {
+                } elsif ( $dep_error ) {
                     if ( !defined $oid_h->{color}{$leaf} or ( $colors{$dep_color} > $colors{ $oid_h->{color}{$leaf} } ) ) {
                         $oid_h->{val}{$leaf}   = $dep_val;
                         $oid_h->{color}{$leaf} = $dep_color;
@@ -3344,7 +3346,7 @@ sub validate_deps {
             }
 
             # Check if all leaf deps are valid if yes we have at least 1 leaf valid so the the validationn will succeed!
-            if ($leaf_deps_valid) {
+            if ( $leaf_deps_valid ) {
                 $deps_valid = 1;
             } else {
 
@@ -3365,7 +3367,7 @@ sub validate_deps {
         }
 
         # Parse our parent oids
-        for my $dep_oid (@$dep_arr) {
+        for my $dep_oid ( @$dep_arr ) {
             my $dep_val = $oids->{$dep_oid}{val};
             if ( !defined $oids->{$dep_oid}{val} ) {
                 $oid_h->{val} = undef;
@@ -3419,7 +3421,7 @@ sub validate_deps {
             } else {
                 $deps_valid = 1;
             }
-            unless ($deps_valid) {
+            unless ( $deps_valid ) {
 
                 # Throw one error message
                 do_log( "Dependency '$dep_oid' error for $oid on $device", TRACE );
