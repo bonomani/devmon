@@ -1,6 +1,12 @@
 # Changelog  
 Contributors of specific features/patches are listed in parenthesis next to the respective entry.
 
+## Devmon v0.25.01
+- Bug fixes:
+  - Stabilize snmp polling algo 
+  - Correctly describe Fan in extras/devmon-graphs.cfg (Jezzaaa)
+- Authors: Project officially transfered by the original author (eschwim)  
+
 ## Devmon v0.24.03
 - Convert, simplify and update documentation in Markdown
 - Bug fixes:
