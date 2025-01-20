@@ -1,0 +1,14 @@
+sensorIDStringTempIdx     : MATCH  : {sensorIDString} /.*Temp$/
+sensorReadingTemp         : CHAIN  : {sensorIDStringTempIdx} {sensorReading}
+sensorIDStringTemp        : CHAIN  : {sensorIDStringTempIdx} {sensorIDString}
+sensorNumberTemp          : CHAIN  : {sensorIDStringTempIdx} {sensorNumber}
+lncThresholdTemp          : CHAIN  : {sensorIDStringTempIdx} {lncThreshold}
+lcThresholdTemp           : CHAIN  : {sensorIDStringTempIdx} {lcThreshold}
+lnrThresholdTemp          : CHAIN  : {sensorIDStringTempIdx} {lnrThreshold}
+uncThresholdTemp          : CHAIN  : {sensorIDStringTempIdx} {uncThreshold}
+ucThresholdTemp           : CHAIN  : {sensorIDStringTempIdx} {ucThreshold}
+unrThresholdTemp          : CHAIN  : {sensorIDStringTempIdx} {unrThreshold}
+alarmTemp                 : MATH   : ({sensorReadingTemp} > 0) * (1 + 2 * ({sensorReadingTemp} <= {lncThresholdTemp} or {sensorReadingTemp} >= {uncThresholdTemp}) \
+                                                                  + 4 * ({sensorReadingTemp} <= {lcThresholdTemp}  or {sensorReadingTemp} >= {ucThresholdTemp})  \
+                                                                  + 8 * ({sensorReadingTemp} <= {lnrThresholdTemp} or {sensorReadingTemp} >= {unrThresholdTemp}))
+statusTemp                : SWITCH : {alarmTemp} >=8=Non-Recoverable,>=4=Critical,>=2=Non-Critical,1=OK,0=Not Present

@@ -1,0 +1,26 @@
+UpTime               : MATH    : {hrSystemUptime} / 100
+UpTimeTxt            : ELAPSED : {UpTime}
+
+ipAddrTableIdx       : INDEX   : {ipAddrTable}
+ipAdEntAddrIdx       : MATCH   : {ipAddrTableIdx} /\.1\./
+ipAdEntAddr          : CHAIN   : {ipAdEntAddrIdx} {ipAddrTable}
+
+hrProcessorEntIdx    : INDEX   : {hrProcessor}
+hrProcessorEntLAIdx  : MATCH   : {hrProcessorEntIdx} /\.2\./
+hrProcessorLoad      : CHAIN   : {hrProcessorEntLAIdx} {hrProcessor}
+CPUIndex             : INDEX   : {hrProcessorLoad}
+
+cpuTableIdx          : INDEX   : {cpuTable}
+cpuEntryIdx          : MATCH   : {cpuTableIdx} /\.1\.\d+$/
+cpuNameIdx           : MATCH   : {cpuTableIdx} /\.2\.\d+$/
+cpuSpeedIdx          : MATCH   : {cpuTableIdx} /\.3\.\d+$/
+cpuCoreIdx           : MATCH   : {cpuTableIdx} /\.4\.\d+$/
+cpuCoreActiveIdx     : MATCH   : {cpuTableIdx} /\.5\.\d+$/
+cpuManufacturerIdx   : MATCH   : {cpuTableIdx} /\.6\.\d+$/
+cpuName              : CHAIN   : {cpuNameIdx} {cpuTable}
+cpuSpeed             : CHAIN   : {cpuSpeedIdx} {cpuTable}
+cpuCore              : CHAIN   : {cpuCoreIdx} {cpuTable}
+cpuCoreActive        : CHAIN   : {cpuCoreActiveIdx} {cpuTable}
+cpuManufacturer      : CHAIN   : {cpuManufacturerIdx} {cpuTable}
+cpuIdx               : INDEX   : {cpuName}
+

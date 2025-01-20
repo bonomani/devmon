@@ -1,0 +1,8 @@
+statusSensorVbat                : green   : Battery presence detected	: 
+statusSensorVbat                : red     :      	   		: Critical Alarm on Batterie Voltage
+
+statusSensorPS                  : green   : Presence detected 		:
+statusSensorPS                  : red     :  		      		: Critical Alarm on PS
+
+statusSensorChassis             : green   : OK			        :
+statusSensorChassis             : yellow  : 				: Chassis intrusion detected

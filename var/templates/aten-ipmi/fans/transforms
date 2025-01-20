@@ -1,0 +1,14 @@
+sensorIDStringFanIdx     : MATCH  : {sensorIDString} /^FAN./
+sensorReadingFan         : CHAIN  : {sensorIDStringFanIdx} {sensorReading}
+sensorIDStringFan        : CHAIN  : {sensorIDStringFanIdx} {sensorIDString}
+sensorNumberFan          : CHAIN  : {sensorIDStringFanIdx} {sensorNumber}
+lncThresholdFan          : CHAIN  : {sensorIDStringFanIdx} {lncThreshold}
+lcThresholdFan           : CHAIN  : {sensorIDStringFanIdx} {lcThreshold}
+lnrThresholdFan          : CHAIN  : {sensorIDStringFanIdx} {lnrThreshold}
+uncThresholdFan          : CHAIN  : {sensorIDStringFanIdx} {uncThreshold}
+ucThresholdFan           : CHAIN  : {sensorIDStringFanIdx} {ucThreshold}
+unrThresholdFan          : CHAIN  : {sensorIDStringFanIdx} {unrThreshold}
+alarmFan                 : MATH   : ({sensorReadingFan} > 0) * (1 + 2 * ({sensorReadingFan} <= {lncThresholdFan} or {sensorReadingFan} >= {uncThresholdFan}) \
+                                                                  + 4 * ({sensorReadingFan} <= {lcThresholdFan}  or {sensorReadingFan} >= {ucThresholdFan})  \
+                                                                  + 8 * ({sensorReadingFan} <= {lnrThresholdFan} or {sensorReadingFan} >= {unrThresholdFan}))
+statusFan                : SWITCH : {alarmFan} >=8=Non-Recoverable,>=4=Critical,>=2=Non-Critical,1=OK,0=Not Present

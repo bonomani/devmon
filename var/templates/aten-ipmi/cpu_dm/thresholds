@@ -1,0 +1,10 @@
+hrProcessorLoad         : red          : >99	       : CPU utilization is very high: {cpmCPUTotal5minRev}%
+hrProcessorLoad         : yellow       : >98	       : CPU utilization is high: {hrProcessorLoad}%
+hrProcessorLoad         : green        :	       :
+
+
+UpTime                  : red		: <600         : Device rebooted recently. System uptime: {UpTimeTxt}
+UpTime                  : yellow	: <5000        : Device rebooted recently. System uptime: {UpTimeTxt}
+UpTime                  : green		:	       :
+
+#sysReloadReason         : yellow        : .*Critical.* :

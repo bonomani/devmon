@@ -1,0 +1,5 @@
+#Overall fans satus: {cpqHeThermalSystemFanStatusTxt.color}{cpqHeThermalSystemFanStatusTxt}
+
+TABLE:
+Idx|Name|Speed|lnc/lc/lnr/unc/uc/unr Threshold|Status
+{sensorNumberFan}|{sensorIDStringFan}|{sensorReadingFan}|{lncThresholdFan}/{lcThresholdFan}/{lnrThresholdFan}/{uncThresholdFan}/{ucThresholdFan}/{unrThresholdFan}|{statusFan.color}{statusFan}{statusFan.errors}

@@ -578,6 +578,7 @@ sub trans_math {
     # Convert our math symbols to their perl equivalents
     $expr =~ s/\sx\s/ \* /g;    # Multiplication
     $expr =~ s/\^/**/g;         # Exponentiation
+    $expr =~ s/(?<![!<>=])=(?![=])/==/g;
 
     # Extract all our our parent oids from the expression, first
     my @dep_oids = $expr =~ /\{(.+?)\}/g;
@@ -1231,7 +1232,7 @@ sub trans_worst {
                     for my $dep_oid (@dep_oids) {
                         my $dep_oid_h = \%{ $oids->{$dep_oid} };
                         if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
-                            if ( !defined $oid_h->{color}{$leaf}
+                            if ( not defined $dep_oid_h->{color}{$leaf} or not defined $oid_h->{color}{$leaf}
                                 or $colors{ $dep_oid_h->{color}{$leaf} } > $colors{ $oid_h->{color}{$leaf} } )
                             {
                                 $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
@@ -1986,7 +1987,12 @@ sub trans_coltre {
                 $oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
                 $isfirst = 0;
             } else {
+                if (defined $oid_h->{val}{ $src_h->{val}{$leaf} } ) {
                 $oid_h->{val}{$leaf} = $oid_h->{val}{ $src_h->{val}{$leaf} } . $separator . $trg_h->{val}{$leaf};
+		} else {
+		$oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
+		}
+	        
             }
             $oid_h->{color}{$leaf} = $trg_h->{color}{$leaf};
         }
@@ -3051,11 +3057,11 @@ sub apply_threshold {
         delete $oid_h->{msg}    unless ( defined ${ $oid_r{msg} } );
         delete $oid_h->{error}  unless ( defined ${ $oid_r{error} } );
 
-        if ( $oid_h->{color} eq 'green' ) {
-            return;
-        } elsif ( $oid_h->{color} eq 'clear' ) {
+	if ( not defined  $oid_h->{color} or $oid_h->{color} eq 'clear') {
             $oid_h->{error} = 1;
             return;
+	} elsif ( $oid_h->{color} eq 'green' ) {
+	    return
         } elsif ( $oid_h->{color} eq 'blue' ) {
             return;
         } elsif ( $oid_h->{color} eq 'yellow' ) {

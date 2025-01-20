@@ -1,0 +1,14 @@
+sensorIDStringPowerIdx     : MATCH  : {sensorIDString} /^(12V|.*?VCC|Vcpu|VDimm.*?|.*?VSB|.*?V.*?_PCH)$/
+sensorReadingPower         : CHAIN  : {sensorIDStringPowerIdx} {sensorReading}
+sensorIDStringPower        : CHAIN  : {sensorIDStringPowerIdx} {sensorIDString}
+sensorNumberPower          : CHAIN  : {sensorIDStringPowerIdx} {sensorNumber}
+lncThresholdPower          : CHAIN  : {sensorIDStringPowerIdx} {lncThreshold}
+lcThresholdPower           : CHAIN  : {sensorIDStringPowerIdx} {lcThreshold}
+lnrThresholdPower          : CHAIN  : {sensorIDStringPowerIdx} {lnrThreshold}
+uncThresholdPower          : CHAIN  : {sensorIDStringPowerIdx} {uncThreshold}
+ucThresholdPower           : CHAIN  : {sensorIDStringPowerIdx} {ucThreshold}
+unrThresholdPower          : CHAIN  : {sensorIDStringPowerIdx} {unrThreshold}
+alarmPower                 : MATH   : ({sensorReadingPower} > 0) * (1 + 2 * ({sensorReadingPower} <= {lncThresholdPower} or {sensorReadingPower} >= {uncThresholdPower}) \
+                                                                  + 4 * ({sensorReadingPower} <= {lcThresholdPower}  or {sensorReadingPower} >= {ucThresholdPower})  \
+                                                                  + 8 * ({sensorReadingPower} <= {lnrThresholdPower} or {sensorReadingPower} >= {unrThresholdPower}))
+statusPower                : SWITCH : {alarmPower} >=8=Non-Recoverable,>=4=Critical,>=2=Non-Critical,1=OK,0=Not Present
