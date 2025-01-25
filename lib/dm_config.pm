@@ -363,7 +363,7 @@ sub initialize {
             'case'    => 0
         },
         'maxpolltime' => {
-            'default' => 55,
+            'default' => 52,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -406,7 +406,7 @@ sub initialize {
         },
 
         'snmp_try_maxcnt' => {          # 6 try (5 retries) should be enough
-            'default' => 6,
+            'default' => 10,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
