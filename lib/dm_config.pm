@@ -37,11 +37,11 @@ use FindBin;
 use Getopt::Long;
 use Net::Domain qw(hostfqdn);
 use Time::HiRes qw(time gettimeofday);
-use POSIX qw(strftime setuid setgid getpwuid getgrgid);
+use POSIX       qw(strftime setuid setgid getpwuid getgrgid);
 
 use Cwd qw(abs_path);
 use File::Basename;
-use File::Path qw(make_path);
+use File::Path            qw(make_path);
 use File::Spec::Functions qw(catfile);
 use English;
 
@@ -883,47 +883,76 @@ sub initialize {
 }
 
 sub check_snmp_config {
+    my %snmp_engines = (
+        snmp    => \&check_snmp,
+        session => \&check_snmp_session,
+    );
 
-    # Check SNMP Engine: auto, snmp(first), session(fallback)
+    # Validate the snmpeng option
     if ( $g{snmpeng} eq 'auto' ) {
-        eval { require SNMP; };
-        if ( $@ ) {
-            do_log( "Net-SNMP is not installed: $@ yum install net-snmp-perl or apt install libsnmp-perl, trying to fallback to SNMP_Session", WARN );
-            eval { require SNMP_Session; };
-            if ( $@ ) {
-                log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
-            } else {
-                $g{snmpeng} = 'session';
-                do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 SNMPv2c ", INFO );
-            }
 
+        # Try Net-SNMP first
+        if ( !$snmp_engines{snmp}->() ) {
+
+            # Fallback to SNMP_Session
+            if ( !$snmp_engines{session}->() ) {
+                log_fatal( "ERROR CONF: Neither Net-SNMP nor SNMP_Session are installed. Exiting...", 1 );
+            }
+            $g{snmpeng} = 'session';
         } else {
-            do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
             eval { require SNMP_Session; };
             if ( $@ ) {
-                do_log( "SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", ERROR );
+                do_log( "SNMP_Session not installed: $@. Consider installing 'libsnmp-session-perl'", WARN );
                 $g{snmpeng} = 'snmp';
             } else {
-                do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1", INFO );
+                do_log( "SNMP_Session $SNMP_Session::VERSION is also available, providing SNMPv1", INFO );
             }
         }
-    } elsif ( $g{snmpeng} eq 'snmp' ) {
-        eval { require SNMP; };
-        if ( $@ ) {
-            log_fatal( "ERROR CONF: Net-SNMP is not installed: $@ yum install net-snmp-perl or apt install libsnmp-perl, exiting...", 1 );
-        } else {
-            do_log( "Net-SNMP $SNMP::VERSION is installed and provides SNMPv2c and SNMPv3", INFO );
-        }
-    } elsif ( $g{snmpeng} eq 'session' ) {
-        eval { require SNMP_Session; };
-        if ( $@ ) {
-            log_fatal( "ERROR CONF: SNMP_Session is not installed: $@ yum install perl-SNMP_Session.noarch or apt install libsnmp-session-perl, exiting...", 1 );
-        } else {
-            do_log( "SNMP_Session $SNMP_Session::VERSION is installed and provides SNMPv1 and SNMPv2c", INFO );
+    } elsif ( exists $snmp_engines{ $g{snmpeng} } ) {
+
+        # Check the specified SNMP engine
+        if ( !$snmp_engines{ $g{snmpeng} }->() ) {
+            log_fatal( "ERROR CONF: $g{snmpeng} engine is not installed. Exiting...", 1 );
         }
     } else {
-        do_log( "Bad option for snmpeng, should be: 'auto', 'snmp' (Net-SNMP, in C), 'session' (SNMP_Session, pure perl), exiting...", ERROR );
+        log_fatal( "ERROR CONF: Invalid option for snmpeng: '$g{snmpeng}'. Valid options are 'auto', 'snmp', 'session'.", 1 );
     }
+}
+
+# Check if Net-SNMP is available and valid
+sub check_snmp {
+    eval { require SNMP; };
+    if ( $@ ) {
+        do_log( "Net-SNMP not installed: $@. Install with 'apt install libsnmp-perl' or 'yum install net-snmp-perl'", WARN );
+        return 0;
+    }
+
+    do_log( "DEBUG: Installed Net-SNMP version is $SNMP::VERSION", DEBUG );
+
+    # Handle different version scenarios
+    if ( $SNMP::VERSION lt '5.0903' ) {
+        if ( $SNMP::VERSION ge '5.09' ) {
+            do_log( "WARNING: Net-SNMP version $SNMP::VERSION is installed, which may have known bugs. " . "Consider upgrading to version 5.9.3 or later. It will not be used.", WARN );
+        } else {
+            do_log( "ERROR: Net-SNMP version $SNMP::VERSION is too old and may not function correctly. " . "Upgrade to version 5.9.3 or later. It will not be used.", ERROR );
+        }
+        return 0;    # Skip using Net-SNMP
+    }
+
+    do_log( "Net-SNMP $SNMP::VERSION is installed and meets the requirements, providing SNMPv2c and SNMPv3", INFO );
+    return 1;        # Indicate success
+}
+
+# Check if SNMP_Session is available
+sub check_snmp_session {
+    eval { require SNMP_Session; };
+    if ( $@ ) {
+        do_log( "SNMP_Session not installed: $@. Install with 'apt install libsnmp-session-perl' or 'yum install perl-SNMP_Session.noarch'", WARN );
+        return 0;
+    }
+
+    do_log( "SNMP_Session $SNMP_Session::VERSION is installed, providing SNMPv1 and SNMPv2c", INFO );
+    return 1;
 }
 
 sub check_global_config {
@@ -1911,7 +1940,7 @@ FILEREAD: while ( @hostscfg ) {
                     # See if we have a custom version
                     if ( $options =~ s/(?:,|^)v([1,3]|(?:2c?))// ) {
                         $hosts_cfg{$host}{ver} = substr $1, 0, 1;
-                        $custom_ver = 1;
+                        $custom_ver            = 1;
                     }
 
                     # See if we have a custom port
@@ -2751,14 +2780,14 @@ OLDHOST: for my $host ( keys %snmp_input ) {
             my $vendor     = $new_hosts{$host}{vendor};
             my $model      = $new_hosts{$host}{model};
             my $tests      = $new_hosts{$host}{tests};
-            my $ver        = exists $new_hosts{$host}{ver} ? $new_hosts{$host}{ver} : '';
-            my $cid        = exists $new_hosts{$host}{cid} ? $new_hosts{$host}{cid} : '';
-            my $secname    = exists $new_hosts{$host}{secname} ? $new_hosts{$host}{secname} : '';
-            my $seclevel   = exists $new_hosts{$host}{seclevel} ? $new_hosts{$host}{seclevel} : '';
+            my $ver        = exists $new_hosts{$host}{ver}       ? $new_hosts{$host}{ver}       : '';
+            my $cid        = exists $new_hosts{$host}{cid}       ? $new_hosts{$host}{cid}       : '';
+            my $secname    = exists $new_hosts{$host}{secname}   ? $new_hosts{$host}{secname}   : '';
+            my $seclevel   = exists $new_hosts{$host}{seclevel}  ? $new_hosts{$host}{seclevel}  : '';
             my $authproto  = exists $new_hosts{$host}{authproto} ? $new_hosts{$host}{authproto} : '';
-            my $authpass   = exists $new_hosts{$host}{authpass} ? $new_hosts{$host}{authpass} : '';
+            my $authpass   = exists $new_hosts{$host}{authpass}  ? $new_hosts{$host}{authpass}  : '';
             my $privproto  = exists $new_hosts{$host}{privproto} ? $new_hosts{$host}{privproto} : '';
-            my $privpass   = exists $new_hosts{$host}{privpass} ? $new_hosts{$host}{privpass} : '';
+            my $privpass   = exists $new_hosts{$host}{privpass}  ? $new_hosts{$host}{privpass}  : '';
 
             # Custom thresholds
             my $thresholds = '';
@@ -3061,7 +3090,7 @@ sub user_has_file_permissions {
     foreach my $user_gid ( get_group_ids_from_uid( $user_uid ) ) {
         if ( $user_gid == $file_gid ) {
             return 1 if ( $permissions eq 'r' && ( $mode & 0040 ) ) || ( $permissions eq 'rw' && ( $mode & 0040 ) && ( $mode & 0020 ) );
-            last;                                                                                                                       # Exit loop early if match found
+            last;    # Exit loop early if match found
         }
     }
 
@@ -3577,9 +3606,9 @@ sub quit {
     # Only run this if we are the parent process
     if ( $g{parent} ) {
         do_log( "Shutting down", INFO ) if $g{initialized};
-        unlink $g{pid_file}   if $g{initialized} and -e $g{pid_file};
-        $g{log}->close        if defined $g{log} and $g{log} ne '';
-        $g{dbh}->disconnect() if defined $g{dbh} and $g{dbh} ne '';
+        unlink $g{pid_file}             if $g{initialized} and -e $g{pid_file};
+        $g{log}->close                  if defined $g{log} and $g{log} ne '';
+        $g{dbh}->disconnect()           if defined $g{dbh} and $g{dbh} ne '';
 
         # Clean up our forks if we left any behind, first by killing them nicely
         for my $fork ( keys %{ $g{forks} } ) {

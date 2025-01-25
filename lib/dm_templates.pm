@@ -732,10 +732,10 @@ LINE: while ( my $line = shift @text ) {
                 do_log( "SET transform requires a non-empty list of constant values at $trans_file, line $l_num", ERROR )
                     and next LINE
                     unless (
-                    ( $temp =~ s/$pattern//g )    # Remove Patten
-                    && ( $temp =~ s/\s*,\s*//g )  # Remove Comma
+                    ( $temp =~ s/$pattern//g )      # Remove Patten
+                    && ( $temp =~ s/\s*,\s*//g )    # Remove Comma
                     && ( $temp =~ /^\s*$/ )
-                    );                            # Remove white space
+                    );                              # Remove white space
                 last CASE;
             };
 
