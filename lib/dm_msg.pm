@@ -16,7 +16,7 @@ require Exporter;
 # Modules
 use strict;
 use Socket;
-use POSIX qw/ strftime /;
+use POSIX     qw/ strftime /;
 use dm_config qw(FATAL ERROR WARN INFO DEBUG TRACE);
 use dm_config;
 use Time::HiRes qw(time);
@@ -48,10 +48,10 @@ sub send_xymon_msgs_to_stdout {
     do_log( "Sending $nummsg messages to 'xymon://stdout'", INFO );
     if ( defined $g{test_results} ) {
         my $msg = join "\n", @{ $g{test_results} };
-        $g{sentmsgsize} = length($msg);
+        $g{sentmsgsize} = length( $msg );
         if ( $g{output}{'xymon://stdout'}{stat} ) {
             $g{msgxfrtime} = time - $g{msgxfrtime};
-            $msg .= prepare_xymon_stat_msg('stdout');
+            $msg .= prepare_xymon_stat_msg( 'stdout' );
         } else {
             $g{msgxfrtime} = time - $g{msgxfrtime};
         }
@@ -74,7 +74,7 @@ sub send_xymon_msgs_to_host {
     do_log( "Sending $nummsg messages to 'xymon://$xymon'", INFO );
 
     # Determine the address we are connecting to
-    my $addr = inet_aton($xymon)
+    my $addr = inet_aton( $xymon )
         or do_log( "Can't resolve display server $xymon ($!)", ERROR )
         and return;
     my $p_addr = sockaddr_in( $g{dispport}, $addr );
@@ -99,7 +99,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
         eval {
             local $SIG{ALRM} = sub { die "Socket timed out\n" };
             alarm 10;
-            socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp') )
+            socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname( 'tcp' ) )
                 or do_log( "Failed to create socket ($!)", ERROR )
                 and $g{msgxfrtime} = time - $g{msgxfrtime}
                 and return;
@@ -114,7 +114,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             }
             alarm 0;
         };
-        if ($@) {
+        if ( $@ ) {
             do_log( "Timed out connecting to display server: $!", ERROR );
             return;
         }
@@ -126,7 +126,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             print SOCK "combo\n";
             alarm 0;
         };
-        if ($@) {
+        if ( $@ ) {
             do_log( "Timed out printing to display server: $!", ERROR );
             close SOCK;
             return;
@@ -165,7 +165,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                         do_log( "Finished printing single combo message", DEBUG ) if $g{debug};
                         alarm 0;
                     };
-                    if ($@) {
+                    if ( $@ ) {
                         do_log( "Timed out printing to display server: $@ - $!", ERROR );
                         close SOCK;
                         return;
@@ -206,7 +206,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
                     print SOCK "$msg\n";
                     alarm 0;
                 };
-                if ($@) {
+                if ( $@ ) {
                     do_log( "Timed out printing to display server: $!", ERROR );
                     close SOCK;
                     return;
@@ -225,13 +225,13 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
 
     # Now send our dm status message !
     if ( $g{output}{"xymon://$xymon"}{stat} ) {
-        my $dm_msg  = prepare_xymon_stat_msg($xymon);
+        my $dm_msg  = prepare_xymon_stat_msg( $xymon );
         my $msgsize = length $dm_msg;
         do_log( "Connecting and sending dm message ($msgsize)", DEBUG ) if $g{debug};
         eval {
             local $SIG{ALRM} = sub { die "Connecting and sending dm message timed out\n" };
             alarm 10;
-            socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname('tcp') )
+            socket( SOCK, PF_INET, SOCK_STREAM, getprotobyname( 'tcp' ) )
                 or do_log( "Failed to create socket ($!)", ERROR )
                 and return;
             connect( SOCK, $p_addr )
@@ -241,7 +241,7 @@ SOCKLOOP: while ( @{ $g{test_results} } ) {
             close SOCK;
             alarm 0;
         };
-        if ($@) {
+        if ( $@ ) {
             do_log( "Timed out connecting and sending dm: $!", ERROR );
             close SOCK;
             return;
@@ -288,7 +288,7 @@ sub prepare_xymon_stat_msg {
     $message .= "Clear branches:      $num_clear_branches\n";
     $message .= "Clear leaves:        $num_clear_leaves\n";
     $message .= "Xymon msg xfer size: $g{sentmsgsize}\n\n";
-    $message .= "Cycle time:          " . sprintf( "%6.2f s\n", $g{cycletime} );
+    $message .= "Cycle time:          " . sprintf( "%6.2f s\n",   $g{cycletime} );
     $message .= "Dead time:           " . sprintf( "%6.2f s\n\n", $g{deadtime} );
     $message .= "SNMP test time:      $snmp_poll_time\n";
     $message .= "Test logic time:     $test_time\n";
@@ -339,7 +339,7 @@ sub prepare_xymon_stat_msg {
     # Add the header
     my $xymon_nodename = $g{nodename};
     $xymon_nodename =~ s/\./,/g;    # Don't forget our FQDN stuff
-    my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
+    my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar( localtime );
     $message = "status $xymon_nodename.dm $color $now\n\n$message\n";
 
     return $message;
