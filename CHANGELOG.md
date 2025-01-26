@@ -5,7 +5,7 @@ Contributors of specific features/patches are listed in parenthesis next to the 
 - Bug fixes:
   - Stabilize snmp polling algo 
   - Correctly describe Fan in extras/devmon-graphs.cfg (Jezzaaa)
-- Templates: Aten (Supermico IPMI interface) 
+- New Template: Aten (Supermico IPMI interface) 
 - Authors: Project officially transfered by the original author (eschwim)  
 
 ## Devmon v0.24.03
