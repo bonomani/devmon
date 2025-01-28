@@ -642,45 +642,42 @@ sub initialize {
             do_log( "PID file '$g{pid_file}'", DEBUG );
         }
 
+    } else {
+        do_log( "PID dir '$dir' not found or not writable. Attempting to create.", WARN );
 
-} else {
-    do_log( "PID dir '$dir' not found or not writable. Attempting to create.", WARN );
+        # Declare and initialize variables
+        my $dir  = "/path/to/dir";    # Replace with actual directory
+        my $perm = 0755;              # Replace with actual permissions
+        my ( $uid, $gid );
 
-    # Declare and initialize variables
-    my $dir  = "/path/to/dir";  # Replace with actual directory
-    my $perm = 0755;           # Replace with actual permissions
-    my ( $uid, $gid );
-
-    # Attempt to create the directory if it doesn't exist or isn't writable
-    if ( !-d $dir || !-w $dir ) {
-        if ( mkdir $dir, oct( parent1_dir_perm_str($perm) ) ) {
-            ( $uid, $gid ) = ( getpwnam( $g{user} ) )[ 2, 3 ];
-            if ( defined $uid && defined $gid ) {
-                unless ( chown $uid, $gid, $dir ) {
-                    do_log( "Failed to set ownership for '$dir' to user '$g{user}'.", ERROR );
+        # Attempt to create the directory if it doesn't exist or isn't writable
+        if ( !-d $dir || !-w $dir ) {
+            if ( mkdir $dir, oct( parent1_dir_perm_str( $perm ) ) ) {
+                ( $uid, $gid ) = ( getpwnam( $g{user} ) )[ 2, 3 ];
+                if ( defined $uid && defined $gid ) {
+                    unless ( chown $uid, $gid, $dir ) {
+                        do_log( "Failed to set ownership for '$dir' to user '$g{user}'.", ERROR );
+                    }
                 }
-            }
-            do_log( "Created PID dir '$dir' with permissions '" . parent1_dir_perm_str($perm) . "'.", INFO );
-        } else {
-            do_log( "Failed to create PID dir '$dir'. Trying alternative directory.", WARN );
+                do_log( "Created PID dir '$dir' with permissions '" . parent1_dir_perm_str( $perm ) . "'.", INFO );
+            } else {
+                do_log( "Failed to create PID dir '$dir'. Trying alternative directory.", WARN );
 
-            # Use an alternative writable directory if creation fails
-            my $alt_dir = "/tmp/devmon/";
-            if ( !-d $alt_dir ) {
-                if ( mkdir $alt_dir, 0755 ) {
-                    do_log( "Created alternative PID directory '$alt_dir'.", INFO );
-                } else {
-                    do_log( "Failed to create alternative PID directory '$alt_dir'. Error: $!", ERROR );
-                    $config_is_valid = 0;
-                    return;  # Exit early if no valid directory can be created
+                # Use an alternative writable directory if creation fails
+                my $alt_dir = "/tmp/devmon/";
+                if ( !-d $alt_dir ) {
+                    if ( mkdir $alt_dir, 0755 ) {
+                        do_log( "Created alternative PID directory '$alt_dir'.", INFO );
+                    } else {
+                        do_log( "Failed to create alternative PID directory '$alt_dir'. Error: $!", ERROR );
+                        $config_is_valid = 0;
+                        return;    # Exit early if no valid directory can be created
+                    }
                 }
+                $g{pid_file} = "$alt_dir/$filename";
             }
-            $g{pid_file} = "$alt_dir/$filename";
         }
     }
-}
-
-
 
     # Exit if config is not runnable
     unless ( $config_is_valid ) {
