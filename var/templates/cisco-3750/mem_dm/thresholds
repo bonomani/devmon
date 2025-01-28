@@ -1,3 +1,0 @@
-MemPerUse : red           : >80   : Memory utilization is critical
-MemPerUse : yellow        : >95   : Memory utilization is high
-

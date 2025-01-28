@@ -1,3 +1,0 @@
-TABLE:
-Idx|Descr|Status
-{FanPri}|{FanDescr}|{FanStatus.color}{FanStatus}

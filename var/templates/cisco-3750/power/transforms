@@ -1,2 +1,0 @@
-PsuStatus : SWITCH : {ciscoEnvMonSupplyState} 1=normal,2=warning,3=critical,4=shutdown,5=not present,6=not functioning
-PsuSource : SWITCH : {ciscoEnvMonSupplySource} 1=unknown,2=ac,3=dc,4=external power supply,5=internal redundant
