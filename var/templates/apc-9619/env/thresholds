@@ -1,7 +1,0 @@
-upsEnvTempF	: red		: 105			: Temperature is very high.
-upsEnvTempF	: yellow	: 99			: Temperature is high.
-upsEnvHumidity	: red		: 80			: Humidity is very high.
-upsEnvHumidity	: yellow	: 50			: Humidity is high.
-# Stupid APCs for some reasons return -1 for most humidity tests...
-upsEnvHmdVal	: red		: <0			: n/a
-upsEnvHmdVal	: green		: >=0			: {upsEnvHumidity}%
