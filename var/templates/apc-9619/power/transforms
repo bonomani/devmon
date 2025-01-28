@@ -1,0 +1,13 @@
+
+# Switch our numeric values to their textual equivalents
+upsBattStat 	: SWITCH 	: {upsBattStatNum} 1=Unknown,2=Battery OK,3=Battery low
+upsOutStat 	: SWITCH 	: {upsOutStatNum} 1=Unknown,2=Online,3=On battery,4=Low input voltage,5=Sleeping,6=Software bypass,7=Off,8=Rebooting,9=Switched bypass,10=Hardware failure bypass,11=Sleeping until power returns,12=High input voltage
+upsFailCause	: SWITCH	: {upsFailCauseNum} 1=No transfer,2=High line voltage,3=Brownout,4=Blackout,5=Small momentage voltage sag,6=Deep momentaty voltage sag,7=Small momentary voltage spike,8=Large momentary voltage spike,9=Self test,10=Rate of voltage change
+upsBattRep	: SWITCH	: {upsBattRepNum} 1=Battery OK,2=Battery needs replacing
+
+# Do numeric translations
+upsSecsOnBatt	: MATH		: {upsMsecsOnBatt} / 100
+upsMinsRunTime	: MATH		: {upsMsecsRunTime} / 6000
+
+# Only alarm if this isnt a self test
+upsStatus	: BEST		: {upsOutStat} , {upsFailCause}

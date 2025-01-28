@@ -1,0 +1,19 @@
+upsLoadOut	: red		: 90			: UPS load is very high.
+upsLoadOut	: yellow	: 70			: UPS load is high.
+
+upsBattStat	: red		: Battery low		: Battery time remaning is low.
+upsBattStat	: yellow	: Unknown		: Battery status is unknown.
+
+upsOutStat	: red		: Off|Bypass		: {upsOutStat} ({upsFailCause})
+upsOutStat	: yellow	: On battery|Unknown|Sleeping|Rebooting	: {upsOutStat} ({upsFailCause})
+upsOutStat	: green		: voltage
+
+upsBattRep	: yellow	: replacing		: {upsBattRep}
+
+upsFailCause	: red		: voltage|Brownout|Blackout : {upsOutStat}
+
+upsSecsOnBatt	: red		: 300			: UPS on battery for {upsSecsOnBatt} seconds.
+upsMinsRunTime	: red		: <15			: UPS has less that 15 minutes of runtime remaining.
+
+upsVoltageIn	: red		: 135			: UPS input voltage is extremely high. ({upsVoltageIn})
+upsVoltageIn	: yellow	: >127,<110		: UPS input voltage is abnormal ({upsVoltageIn})
