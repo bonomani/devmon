@@ -1,0 +1,4 @@
+vendor	: apc
+model	: 9205-9606-9617-9619
+snmpver	: 1
+sysdesc : Mod: AP9205|MN: AP9606|MN:9617|9619
