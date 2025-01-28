@@ -478,9 +478,9 @@ sub initialize {
     my $config_is_valid = 1;
 
     if ( defined $g{config_file} ) {
-        print "Config file '$g{config_file}' can be read with user '$valid_user'.\n" if $g{debug};
+        print "Config file '$g{config_file}' can be read by user '$valid_user'.\n" if $g{debug};
     } else {
-        print "Not valid config file $g{config_file} can be read with user '$valid_user'.\n";
+        print "Not valid config file $g{config_file} can be read by user '$valid_user'.\n";
     }
     read_local_config();
 
@@ -499,7 +499,7 @@ sub initialize {
                 open_log();
                 do_log( "Log file '$g{log_file}'", WARN );
             } else {
-                print( "Log file '$g{log_file}' not accessible with user '$g{user}' with permission '$perm'.\n" );
+                print( "Log file '$g{log_file}' not accessible by user '$g{user}' with permission '$perm'.\n" );
                 $config_is_valid = 0;
             }
         } else {
@@ -507,7 +507,7 @@ sub initialize {
             do_log( "Log file '$g{log_file}'", WARN );
         }
     } else {
-        print( "Log dir '$dir' not found or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.\n" );
+        print( "Log dir '$dir' not found or not accessible by user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.\n" );
         $config_is_valid = 0;
     }
 
@@ -576,7 +576,7 @@ sub initialize {
         $g{templates_dir} = $valid_path;
         do_log( "Templates dir '$g{templates_dir}'", DEBUG );
     } else {
-        do_log( "Templates dir '" . ( join ' ', @templates_dir ) . "' not valid or not accessible with user '$g{user}' with permission '$perm'. The parent folder should have permission '" . parent1_dir_perm_str( $perm ) . "'.", ERROR );
+        do_log( "Templates dir '" . ( join ' ', @templates_dir ) . "' not valid or not accessible by user '$g{user}' with permission '$perm'. The parent folder should have permission '" . parent1_dir_perm_str( $perm ) . "'.", ERROR );
         $config_is_valid = 0;
     }
 
@@ -598,7 +598,7 @@ sub initialize {
                     $config_is_valid = 1;
                     last;
                 } else {
-                    do_log( "DB file '$g{db_file}' not accessible with user '$g{user}' with permission '$perm'", ERROR );
+                    do_log( "DB file '$g{db_file}' not accessible by user '$g{user}' with permission '$perm'", ERROR );
 
                     #$config_is_valid = 0;
                 }
@@ -614,7 +614,7 @@ sub initialize {
                 }
             }
         } else {
-            do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
+            do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible by user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder, which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
 
             #$config_is_valid = 0;
         }
@@ -633,18 +633,54 @@ sub initialize {
             $valid_path = find_file( $g{user}, $filename, $perm, $valid_path );    # Check the file
             if ( defined $valid_path ) {
                 $g{pid_file} = $valid_path;
-                do_log( "PID file '$g{pid_file}' exists, but should not now", DEBUG );
+                do_log( "PID file '$g{pid_file}' exists, but should not for now", DEBUG );
             } else {
-                do_log( "PID file '$g{pid_file}' not accessible with user '$g{user}' with permission '$perm'", ERROR );
+                do_log( "PID file '$g{pid_file}' not accessible by user '$g{user}' with permission '$perm'", ERROR );
                 $config_is_valid = 0;
             }
         } else {
             do_log( "PID file '$g{pid_file}'", DEBUG );
         }
-    } else {
-        do_log( "PID dir '$dir' not found or not accessible with user '$g{user}' with permission '" . parent1_dir_perm_str( $perm ) . "' in parent folder which should have permission '" . parent2_dir_perm_str( $perm ) . "'.", ERROR );
-        $config_is_valid = 0;
+
+
+} else {
+    do_log( "PID dir '$dir' not found or not writable. Attempting to create.", WARN );
+
+    # Declare and initialize variables
+    my $dir  = "/path/to/dir";  # Replace with actual directory
+    my $perm = 0755;           # Replace with actual permissions
+    my ( $uid, $gid );
+
+    # Attempt to create the directory if it doesn't exist or isn't writable
+    if ( !-d $dir || !-w $dir ) {
+        if ( mkdir $dir, oct( parent1_dir_perm_str($perm) ) ) {
+            ( $uid, $gid ) = ( getpwnam( $g{user} ) )[ 2, 3 ];
+            if ( defined $uid && defined $gid ) {
+                unless ( chown $uid, $gid, $dir ) {
+                    do_log( "Failed to set ownership for '$dir' to user '$g{user}'.", ERROR );
+                }
+            }
+            do_log( "Created PID dir '$dir' with permissions '" . parent1_dir_perm_str($perm) . "'.", INFO );
+        } else {
+            do_log( "Failed to create PID dir '$dir'. Trying alternative directory.", WARN );
+
+            # Use an alternative writable directory if creation fails
+            my $alt_dir = "/tmp/devmon/";
+            if ( !-d $alt_dir ) {
+                if ( mkdir $alt_dir, 0755 ) {
+                    do_log( "Created alternative PID directory '$alt_dir'.", INFO );
+                } else {
+                    do_log( "Failed to create alternative PID directory '$alt_dir'. Error: $!", ERROR );
+                    $config_is_valid = 0;
+                    return;  # Exit early if no valid directory can be created
+                }
+            }
+            $g{pid_file} = "$alt_dir/$filename";
+        }
     }
+}
+
+
 
     # Exit if config is not runnable
     unless ( $config_is_valid ) {
@@ -3275,13 +3311,13 @@ sub find_file {
             return $filename;
         } else {
 
-            #warn "File $filename not found or not accessible with user '$user' with permission '$permission', its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
+            #warn "File $filename not found or not accessible by user '$user' with permission '$permission', its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
             return;
         }
     }
 
     # Warn if the file is not found or does not have the required permissions
-    # warn "File $filename not found or not accessible with user '$user'  with permission '$permission' in folder " . ( join ' ', ( map { abs_path( $_ ) } @folders ) ) . ", its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
+    # warn "File $filename not found or not accessible by user '$user'  with permission '$permission' in folder " . ( join ' ', ( map { abs_path( $_ ) } @folders ) ) . ", its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
     return;
 }
 
