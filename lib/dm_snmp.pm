@@ -1866,9 +1866,10 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                 $snmpvars{Device}     = $device;
                 $snmpvars{RemotePort} = $data_in{port} // 161;                                                      # Default to 161 if not specified
                 $snmpvars{DestHost}   = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $device;
-                my $snmp_try_timeout = $data_in{snmp_getbulk_timeout};
-                $snmpvars{Timeout}       = ( $snmp_try_timeout // $g{snmp_getbulk_timeout} ) * 1000000;
-                $snmpvars{Retries}       = 0;
+                #my $snmp_try_timeout = $data_in{snmp_getbulk_timeout};
+                #$snmpvars{Timeout}       = ( $snmp_try_timeout // $g{snmp_getbulk_timeout} ) * 1000000;
+                $snmpvars{Timeout}       = 4_000_000;
+                $snmpvars{Retries}       = 4;
                 $snmpvars{UseNumeric}    = 1;
                 $snmpvars{NonIncreasing} = 0;
                 $snmpvars{Version}       = $snmp_ver;
@@ -2240,6 +2241,7 @@ EOF
                         }
                     }
                     send_data( $sock, \%data_out );
+                    undef $session;
                     next DEVICE;
                 }
             }
@@ -2265,6 +2267,20 @@ sub check_forks {
         }
     }
 }
+
+sub check_forks2 {
+    for my $fork ( keys %{ $g{forks} } ) {
+        my $pid = $g{forks}{$fork}{pid};
+        if ( !kill 0, $pid ) {
+            do_log( "Fork $fork with pid $pid died, cleaning up", INFO );
+            #close $g{forks}{$fork}{CS} or do_log( "Closing child socket failed: $!", 2 );
+            #delete $g{forks}{$fork};
+        }
+    }
+}
+
+
+
 
 # Subroutine to send an error message back to the parent process
 sub send_data {

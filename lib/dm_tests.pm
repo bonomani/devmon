@@ -130,10 +130,10 @@ sub tests {
                     LEAF: for my $leaf ( sort keys %{ $oid_h->{val} } ) {
                             if ( $g{trace} ) {
                                 $line = "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
-                                $line .= " c:$oid_h->{color}{$leaf}" if defined $oid_h->{color}{$leaf};
-                                $line .= " e:$oid_h->{error}{$leaf}" if defined $oid_h->{error}{$leaf};
-                                $line .= " m:$oid_h->{msg}{$leaf}"   if defined $oid_h->{msg}{$leaf};
-                                $line .= " t:$oid_h->{time}{$leaf}"  if defined $oid_h->{time}{$leaf};
+                                $line .= " c:$oid_h->{color}{$leaf}" if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{color}{$leaf} ) ;
+                                $line .= " e:$oid_h->{error}{$leaf}" if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{error}{$leaf} );
+                                $line .= " m:$oid_h->{msg}{$leaf}"   if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{msg}{$leaf} );
+                                $line .= " t:$oid_h->{time}{$leaf}"  if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{time}{$leaf} );
                                 do_log( "$line", TRACE );
                             } else {
                                 $line .= "$leaf:" . ( $oid_h->{val}{$leaf} // "undef" ) . " ";
