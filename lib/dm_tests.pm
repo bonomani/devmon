@@ -113,7 +113,6 @@ sub tests {
 
             # Create our oids hash that will be populated by both snmp
             # data and transformed data.  This is done to keep me
-            #
             # from going insane when we start doing transforms
             oid_hash( $oids, $device, $tmpl, $thr );
 
@@ -130,10 +129,10 @@ sub tests {
                     LEAF: for my $leaf ( sort keys %{ $oid_h->{val} } ) {
                             if ( $g{trace} ) {
                                 $line = "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
-                                $line .= " c:$oid_h->{color}{$leaf}" if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{color}{$leaf} ) ;
-                                $line .= " e:$oid_h->{error}{$leaf}" if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{error}{$leaf} );
-                                $line .= " m:$oid_h->{msg}{$leaf}"   if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{msg}{$leaf} );
-                                $line .= " t:$oid_h->{time}{$leaf}"  if (ref($oid_h->{color}) eq 'HASH' && defined $oid_h->{time}{$leaf} );
+                                $line .= " c:$oid_h->{color}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{color}{$leaf} );
+                                $line .= " e:$oid_h->{error}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{error}{$leaf} );
+                                $line .= " m:$oid_h->{msg}{$leaf}"   if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{msg}{$leaf} );
+                                $line .= " t:$oid_h->{time}{$leaf}"  if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{time}{$leaf} );
                                 do_log( "$line", TRACE );
                             } else {
                                 $line .= "$leaf:" . ( $oid_h->{val}{$leaf} // "undef" ) . " ";
@@ -674,7 +673,6 @@ sub trans_math {
 # Extract a statistic from a repeater OID ###################################
 # Extract a statistic from a repeater-type oid, resulting in a leaf-type oid.
 # The statistic is one of 'min', 'avg', 'max', 'cnt' or 'sum'.
-#
 sub trans_statistic {
     my ( $device, $oids, $oid ) = @_;
     my $oid_h = \%{ $oids->{$oid} };
@@ -2758,7 +2756,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 # Get our oid vars
                 my $val   = $oid_h->{val};
                 my $color = $oid_h->{color};
-                $val   = 'Undef' if !defined $val;
+                $val   = 'NoOID' if !defined $val;
                 $color = 'clear' if !defined $color;
 
                 # See if we have a valid flag, if so, replace the
@@ -2838,7 +2836,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
                 } else {
                     my $val = $oid_h->{val};
-                    $val = "Undef" if !defined $val;
+                    $val = "NoOID" if !defined $val;
                     $line =~ s/\{$root\}/$val/;
                 }
             }
