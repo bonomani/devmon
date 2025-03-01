@@ -51,10 +51,6 @@ $Data::Dumper::Deepcopy = 1;    # Enable deep copies of structures
 $Data::Dumper::Indent   = 1;    # Output in a reasonable style (but no array indexes)
 
 # Load initial program values; only called once at program init
-#my $file="../devmon.cfg";
-#my @file_info = stat($file);
-#my $mode = $file_info[2] & 07777;
-#print "$mode\n";
 sub initialize {
     autoflush STDOUT 1;
     %g = (
@@ -387,7 +383,7 @@ sub initialize {
             'case'    => 0
         },
         'snmp_get_timeout' => {
-            'default' => 1,
+            'default' => 2,
             'regex'   => '\d+',
             'set'     => 0,
             'case'    => 0
@@ -749,16 +745,6 @@ sub initialize {
             }
         }
     }
-
-    # hostonly mode (deprecated by poll)
-    #if ( $hostonly ) {
-    #    do_log( "hostonly is deprecated use '-p[oll]' instead", ERROR );
-    #    if ( defined $poll or %match ) {
-    #        usage( "hostonly cannot be set with poll or match, use '-p[oll]' or '-m[atch] only" );
-    #    } else {
-    #        $poll = $hostonly if not defined $poll;
-    #    }
-    #}
 
     #  Poll mode
     if ( $poll ) {
@@ -1416,19 +1402,8 @@ sub read_local_config {
 
     # Open config file (assuming we can find it)
     my $file = $g{config_file};
-
-    #my $file = $g{locals}{configfile}{default};
     &usage if !defined $file;    # WHY USAGE, WHY OTHER Test next 3!
-
-    #if ( $file !~ /^\/.+/ and !-e $file ) {
-    #    my $local_file = $FindBin::Bin . "/$file";
-    #    $file = $local_file if -e $local_file;
-    #}
-    #can_read_config( $file ) or die;
-
-    #log_fatal( "Can't find config file $file ($!)", 0 ) if !-e $file;
     open FILE, $file or die "Can't read config file $file ($!)";
-
     print "Reading local options.\n" if $g{debug};
 
     # Parse file text
@@ -1851,6 +1826,20 @@ sub read_hosts_cfg {
         }
         do_log( "Saw $num_vendor vendors, $num_model models, $num_descs sysdescs & $num_temps templates", DEBUG );
     }
+
+    my @regex_vendor_model;
+
+    # Collect regex, vendor, and model into an array
+    for my $vendor ( keys %{ $g{templates} } ) {
+        for my $model ( keys %{ $g{templates}{$vendor} } ) {
+            my $regex = $g{templates}{$vendor}{$model}{sysdesc} // '';
+            push @regex_vendor_model, [ $regex, $vendor, $model ];
+        }
+    }
+
+    # Sort by regex length (descending)
+    @regex_vendor_model = sort { length( $b->[0] ) <=> length( $a->[0] ) } @regex_vendor_model;
+
     do_log( "Reading hosts.cfg ", INFO );
 
     # Now open the hosts.cfg file and read it in
@@ -1858,9 +1847,7 @@ sub read_hosts_cfg {
     my @hostscfg = ( $g{hostscfg} );
     log_fatal( "FATAL CONF: No hosts.cfg file", 0 ) unless @hostscfg;
 
-    my $etcdir = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
-
-    #$etcdir = $g{homedir} if !defined $etcdir;
+    my $etcdir   = $1 if $g{hostscfg} =~ /^(.+)\/.+?$/;
     my $loop_idx = 0;
 
 FILEREAD: while ( @hostscfg ) {
@@ -2186,47 +2173,50 @@ OLDHOST: for my $host ( keys %snmp_input ) {
             next OLDHOST;
         }
 
-        # Okay, we have a sysdesc, lets see if it matches any of our templates
-    OLDVENDOR: for my $vendor ( keys %{ $g{templates} } ) {
-        OLDMODEL: for my $model ( keys %{ $g{templates}{$vendor} } ) {
-                my $regex = $g{templates}{$vendor}{$model}{sysdesc};
+        # Iterate over sorted entries
+        for my $entry ( @regex_vendor_model ) {
 
-                # Careful /w those empty regexs
-                do_log( "Regex for $vendor/$model appears to be empty.", WARN )
-                    and next
-                    if !defined $regex;
+            #for my $entry ( @entries ) {
+            my ( $regex, $vendor, $model ) = @$entry;
 
-                # Skip if this host doesn't match the regex
-                if ( $sysdesc !~ /$regex/ ) {
-                    do_log( "$host did not match $vendor / $model : $regex", TRACE ) if $g{debug};
-                    next OLDMODEL;
-                }
+            # Careful /w those empty regexs
+            do_log( "Regex for $vendor/$model appears to be empty.", WARN )
+                and next
+                if !defined $regex;
 
-                # We got a match, assign the pertinent data
-                %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
-                $new_hosts{$host}{vendor}    = $vendor;
-                $new_hosts{$host}{model}     = $model;
-                $new_hosts{$host}{ver}       = $snmp_input{$host}{ver};
-                $new_hosts{$host}{cid}       = $snmp_input{$host}{cid};
-                $new_hosts{$host}{port}      = $snmp_input{$host}{port};
-                $new_hosts{$host}{secname}   = $snmp_input{$host}{secname};
-                $new_hosts{$host}{seclevel}  = $snmp_input{$host}{seclevel};
-                $new_hosts{$host}{authproto} = $snmp_input{$host}{authproto};
-                $new_hosts{$host}{authpass}  = $snmp_input{$host}{authpass};
-                $new_hosts{$host}{privproto} = $snmp_input{$host}{privproto};
-                $new_hosts{$host}{privpass}  = $snmp_input{$host}{privpass};
-                --$hosts_left;
-
-                if ( $g{trace} ) {
-
-                    do_log( "Discovered $host as a $vendor / $model with sysdesc=$sysdesc", INFO );
-                } else {
-                    do_log( "Discovered $host as a $vendor / $model", INFO );
-                }
-                last OLDVENDOR;
+            # Skip if this host doesn't match the regex
+            if ( $sysdesc !~ /$regex/ ) {
+                do_log( "$host did not match $vendor / $model : $regex", TRACE ) if $g{debug};
+                next;
             }
+
+            # We got a match, assign the pertinent data
+            %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
+            $new_hosts{$host}{vendor}    = $vendor;
+            $new_hosts{$host}{model}     = $model;
+            $new_hosts{$host}{ver}       = $snmp_input{$host}{ver};
+            $new_hosts{$host}{cid}       = $snmp_input{$host}{cid};
+            $new_hosts{$host}{port}      = $snmp_input{$host}{port};
+            $new_hosts{$host}{secname}   = $snmp_input{$host}{secname};
+            $new_hosts{$host}{seclevel}  = $snmp_input{$host}{seclevel};
+            $new_hosts{$host}{authproto} = $snmp_input{$host}{authproto};
+            $new_hosts{$host}{authpass}  = $snmp_input{$host}{authpass};
+            $new_hosts{$host}{privproto} = $snmp_input{$host}{privproto};
+            $new_hosts{$host}{privpass}  = $snmp_input{$host}{privpass};
+            --$hosts_left;
+
+            if ( $g{trace} ) {
+
+                do_log( "Discovered $host as a $vendor / $model with sysdesc=$sysdesc", INFO );
+            } else {
+                do_log( "Discovered $host as a $vendor / $model", INFO );
+            }
+
+            last;
         }
     }
+
+    #    }
 
     # Now go into a discovery process: try each version from the least secure to the most with fallback to v1 which do not support some mibs
     my @snmpvers = ( 2, 3, 1 );
@@ -2305,41 +2295,42 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                     next NEWHOST;
                 }
 
-                # Try and match sysdesc
-            NEWVENDOR: for my $vendor ( keys %{ $g{templates} } ) {
-                NEWMODEL: for my $model ( keys %{ $g{templates}{$vendor} } ) {
+                for my $entry ( @regex_vendor_model ) {
 
-                        # Skip if this host doesn't match the regex
-                        my $regex = $g{templates}{$vendor}{$model}{sysdesc};
-                        if ( $sysdesc !~ /$regex/ ) {
-                            do_log( "$host did not match $vendor / $model : $regex", DEBUG ) if $g{debug};
-                            next NEWMODEL;
-                        }
+                    #for my $entry ( @entries ) {
+                    my ( $regex, $vendor, $model ) = @$entry;
 
-                        # We got a match, assign the pertinent data
-                        %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
-                        $new_hosts{$host}{vendor} = $vendor;
-                        $new_hosts{$host}{model}  = $model;
-                        $new_hosts{$host}{ver}    = $snmpver;
-                        --$hosts_left;
+                    # Skip if this host doesn't match the regex
+                    if ( $sysdesc !~ /$regex/ ) {
+                        do_log( "$host did not match $vendor / $model : $regex", DEBUG ) if $g{debug};
 
-                        # If they are an old host, they probably changed models...
-                        if ( defined $old_hosts{$host} ) {
-                            my $old_vendor = $old_hosts{$host}{vendor};
-                            my $old_model  = $old_hosts{$host}{model};
-                            if ( $vendor ne $old_vendor or $model ne $old_model ) {
-                                do_log( "$host changed from a $old_vendor / $old_model to a $vendor / $model", INFO );
-                            }
-                        } else {
-                            if ( $g{trace} ) {
-
-                                do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
-                            } else {
-                                do_log( "Discovered $host as a $vendor $model", INFO );
-                            }
-                        }
-                        last NEWVENDOR;
+                        next;
                     }
+
+                    # We got a match, assign the pertinent data
+                    %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
+                    $new_hosts{$host}{vendor} = $vendor;
+                    $new_hosts{$host}{model}  = $model;
+                    $new_hosts{$host}{ver}    = $snmpver;
+                    --$hosts_left;
+
+                    # If they are an old host, they probably changed models...
+                    if ( defined $old_hosts{$host} ) {
+                        my $old_vendor = $old_hosts{$host}{vendor};
+                        my $old_model  = $old_hosts{$host}{model};
+                        if ( $vendor ne $old_vendor or $model ne $old_model ) {
+                            do_log( "$host changed from a $old_vendor / $old_model to a $vendor / $model", INFO );
+                        }
+                    } else {
+                        if ( $g{trace} ) {
+
+                            do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
+                        } else {
+                            do_log( "Discovered $host as a $vendor $model", INFO );
+                        }
+                    }
+
+                    last;
                 }
 
                 # Make sure we were able to get a match
@@ -2435,42 +2426,42 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                         next CUSTOMHOST;
                     }
 
-                    # Try and match sysdesc
-                CUSTOMVENDOR: for my $vendor ( keys %{ $g{templates} } ) {
-                    CUSTOMMODEL: for my $model ( keys %{ $g{templates}{$vendor} } ) {
+                    for my $entry ( @regex_vendor_model ) {
 
-                            # Skip if this host doesn't match the regex
-                            my $regex = $g{templates}{$vendor}{$model}{sysdesc};
-                            if ( $sysdesc !~ /$regex/ ) {
-                                do_log( "$host did not match $vendor / $model : $regex", INFO )
-                                    if $g{debug};
-                                next CUSTOMMODEL;
-                            }
+                        #for my $entry ( @entries ) {
+                        my ( $regex, $vendor, $model ) = @$entry;
 
-                            # We got a match, assign the pertinent data
-                            %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
-                            $new_hosts{$host}{cid}    = $cid;
-                            $new_hosts{$host}{vendor} = $vendor;
-                            $new_hosts{$host}{model}  = $model;
-                            $new_hosts{$host}{ver}    = $snmpver;
-                            --$hosts_left;
+                        # Skip if this host doesn't match the regex
+                        if ( $sysdesc !~ /$regex/ ) {
+                            do_log( "$host did not match $vendor / $model : $regex", INFO )
+                                if $g{debug};
+                            next;
 
-                            # If they are an old host, the host is updated
-                            if ( defined $old_hosts{$host} ) {
-                                do_log( "$host updated with new settings",                               INFO );
-                                do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
-                                do_log( "NEW: $vendor, $model, ...",                                     INFO );
-                            } else {
-                                if ( $g{trace} ) {
-
-                                    do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
-                                } else {
-                                    do_log( "Discovered $host as a $vendor $model", INFO );
-                                }
-
-                            }
-                            last CUSTOMVENDOR;
                         }
+
+                        # We got a match, assign the pertinent data
+                        %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
+                        $new_hosts{$host}{cid}    = $cid;
+                        $new_hosts{$host}{vendor} = $vendor;
+                        $new_hosts{$host}{model}  = $model;
+                        $new_hosts{$host}{ver}    = $snmpver;
+                        --$hosts_left;
+
+                        # If they are an old host, the host is updated
+                        if ( defined $old_hosts{$host} ) {
+                            do_log( "$host updated with new settings",                                INFO );
+                            do_log( "OLD1: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
+                            do_log( "NEW1: $vendor, $model, ...",                                     INFO );
+                        } else {
+                            if ( $g{trace} ) {
+
+                                do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
+                            } else {
+                                do_log( "Discovered $host as a $vendor $model", INFO );
+                            }
+
+                        }
+                        last;
                     }
 
                     # Make sure we were able to get a match
@@ -2600,47 +2591,48 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                                         }
 
                                         # Try and match sysdesc
-                                    CUSTOMVENDOR: for my $vendor ( keys %{ $g{templates} } ) {
-                                        CUSTOMMODEL: for my $model ( keys %{ $g{templates}{$vendor} } ) {
+                                        for my $entry ( @regex_vendor_model ) {
 
-                                                # Skip if this host doesn't match the regex
-                                                my $regex = $g{templates}{$vendor}{$model}{sysdesc};
-                                                if ( $sysdesc !~ /$regex/ ) {
-                                                    do_log( "$host did not match $vendor / $model : $regex", DEBUG )
-                                                        if $g{debug};
-                                                    next CUSTOMMODEL;
-                                                }
+                                            #for my $entry ( @entries ) {
+                                            my ( $regex, $vendor, $model ) = @$entry;
 
-                                                # We got a match, assign the pertinent data
-                                                %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
-                                                $new_hosts{$host}{ver}       = $snmpver;
-                                                $new_hosts{$host}{cid}       = '';
-                                                $new_hosts{$host}{secname}   = $secname;
-                                                $new_hosts{$host}{seclevel}  = $seclevel;
-                                                $new_hosts{$host}{authproto} = $authproto;
-                                                $new_hosts{$host}{authpass}  = $authpass;
-                                                $new_hosts{$host}{privproto} = $privproto;
-                                                $new_hosts{$host}{privpass}  = $privpass;
-                                                $new_hosts{$host}{vendor}    = $vendor;
-                                                $new_hosts{$host}{model}     = $model;
-                                                --$hosts_left;
-
-                                                # If they are an old host, the host is updated
-                                                if ( defined $old_hosts{$host} ) {
-                                                    do_log( "$host updated with new settings",                               INFO );
-                                                    do_log( "OLD: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
-                                                    do_log( "NEW: $vendor, $model, ...",                                     INFO );
-                                                } else {
-                                                    if ( $g{trace} ) {
-
-                                                        do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
-                                                    } else {
-                                                        do_log( "Discovered $host as a $vendor $model", INFO );
-                                                    }
-
-                                                }
-                                                last CUSTOMVENDOR;
+                                            # Skip if this host doesn't match the regex
+                                            if ( $sysdesc !~ /$regex/ ) {
+                                                do_log( "$host did not match $vendor / $model : $regex", DEBUG )
+                                                    if $g{debug};
+                                                next;
                                             }
+
+                                            # We got a match, assign the pertinent data
+                                            %{ $new_hosts{$host} } = %{ $hosts_cfg{$host} };
+                                            $new_hosts{$host}{ver}       = $snmpver;
+                                            $new_hosts{$host}{cid}       = '';
+                                            $new_hosts{$host}{secname}   = $secname;
+                                            $new_hosts{$host}{seclevel}  = $seclevel;
+                                            $new_hosts{$host}{authproto} = $authproto;
+                                            $new_hosts{$host}{authpass}  = $authpass;
+                                            $new_hosts{$host}{privproto} = $privproto;
+                                            $new_hosts{$host}{privpass}  = $privpass;
+                                            $new_hosts{$host}{vendor}    = $vendor;
+                                            $new_hosts{$host}{model}     = $model;
+                                            --$hosts_left;
+
+                                            # If they are an old host, the host is updated
+                                            if ( defined $old_hosts{$host} ) {
+                                                do_log( "$host updated with new settings",                                INFO );
+                                                do_log( "OLD2: $old_hosts{$host}{vendor}, $old_hosts{$host}{model}, ...", INFO );
+                                                do_log( "NEW2: $vendor, $model, ...",                                     INFO );
+                                            } else {
+                                                if ( $g{trace} ) {
+
+                                                    do_log( "Discovered $host as a $vendor $model with sysdesc=$sysdesc", INFO );
+                                                } else {
+                                                    do_log( "Discovered $host as a $vendor $model", INFO );
+                                                }
+
+                                            }
+
+                                            last;
                                         }
 
                                         # Make sure we were able to get a match
@@ -3282,14 +3274,6 @@ sub find_dir {
         }
     }
 
-    # Warn if the directory is not found or does not have the required permissions
-    #if ( $permission eq 'rw' ) {
-    #    warn "Writable directory not found. Searched in the following locations:\n";
-    #} elsif ( $permission eq 'r' ) {
-    #    warn "Readable directory not found. Searched in the following locations:\n";
-    #}
-    #warn "$_\n" for @folders;
-
     return;    # Return undef if directory not found or does not have required permissions
 }
 
@@ -3308,13 +3292,10 @@ sub find_file {
             return $filename;
         } else {
 
-            #warn "File $filename not found or not accessible by user '$user' with permission '$permission', its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
             return;
         }
     }
 
-    # Warn if the file is not found or does not have the required permissions
-    # warn "File $filename not found or not accessible by user '$user'  with permission '$permission' in folder " . ( join ' ', ( map { abs_path( $_ ) } @folders ) ) . ", its folder should have permission '".perm_num_to_str(parent1_dir_perm_num(perm_str_to_num($permission)))."'.\n";
     return;
 }
 
@@ -3408,8 +3389,6 @@ sub can_read_user_from_config {
         }
 
     } else {
-
-        #my $configured_user;
 
         # if not, check if the config file is readable by current user
         $valid_config_file = normalize_and_verify_config_path( $current_user, $config_file, @config_folders );

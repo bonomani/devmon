@@ -270,10 +270,12 @@ sub prepare_xymon_stat_msg {
     for my $device ( keys %{ $g{devices} } ) {
         for my $oid ( keys %{ $g{devices}{$device}{oids} } ) {
             if ( ( defined $g{devices}{$device}{oids}{$oid}{color} ) and ( ref $g{devices}{$device}{oids}{$oid}{color} ne 'HASH' ) and ( $g{devices}{$device}{oids}{$oid}{color} eq "clear" ) ) {
-                if ( $g{devices}{$device}{oids}{$oid}{repeat} == 0 ) {
-                    ++$num_clear_leaves;
-                } else {
-                    ++$num_clear_branches;
+                if ( defined $g{devices}{$device}{oids}{$oid}{repeat} ) {
+                    if ( $g{devices}{$device}{oids}{$oid}{repeat} == 0 ) {
+                        ++$num_clear_leaves;
+                    } else {
+                        ++$num_clear_branches;
+                    }
                 }
             }
         }

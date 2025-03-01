@@ -897,7 +897,7 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                     # The oid or its a parent already exists!
                     # add it to its list !
                     $poll_rep_oid{$poid}{oids}{$oid} = undef;
-                    $oid{$oid}{poll_oid} = $poid;                #
+                    $oid{$oid}{poll_oid} = $poid;
                 } elsif ( scalar( keys %coid ) ) {
 
                     # The hash has alread child oid defined
@@ -973,7 +973,7 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
 
                         # If we dont have it, we take the parent as this is the best we can do.
                         my $pvl_oid;
-                        $pvl_oid = $oid{$oid}{prev_lex_oid} if exists $oid{$oid}{prev_lex_oid};
+                        $pvl_oid = $oid{$oid}{prev_lex_oid} if exists $oid{$oid}{prev_lex_oid};    #this never match?
                         if ( defined $pvl_oid ) {
 
                             $poll_nrep_oid{$pvl_oid} = $oid;
@@ -1005,7 +1005,6 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
             my @allrep_oids;
             @allrep_oids = keys %poll_rep_oid;
 
-            #$session->{use_getbulk}    = 1;
             $SNMP_Session::use_getbulk = 1;
             $SNMP_Session::pdu_buffer  = 16384;
 
@@ -1408,7 +1407,7 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                 # Add now the reperaters
                 my $used_repeater_in_query = 0;
                 my @rep_in_query;
-                my %rep_def_mr_in_query;    #
+                my %rep_def_mr_in_query;
                 my %rep_undef_mr_in_query;
                 for my $oid ( oid_sort( keys %poll_rep_undefined_mr ) ) {
                     last if $used_repeater_in_query == $free_repeater_in_query;
@@ -1477,7 +1476,6 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                     $query_timeout = $snmp_getbulk_timeout if $query_timeout > $snmp_getbulk_timeout;
                     $host          = "$snmp_cid\@$hostip:$snmp_port:$query_timeout:1:$backoff:$snmp_ver";
                     @ret           = snmpgetbulk( $host, $used_nrepeater_in_query, $max_repetitions_in_query_ww, @oid_in_query );
-
                 }
 
                 my $snmpquery_timestamp = time();
@@ -1513,7 +1511,6 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                         $SNMP_Session::errmsg = '';
                     }
                 }
-
                 for my $oidval ( @ret ) {
                     deeph_insert_oidval_h( $oidval, \%deep_h );
                 }
@@ -1521,6 +1518,8 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                     my $oid       = $poid . ".0";
                     my $nonrepval = deeph_find_leaf( $oid, \%deep_h );
                     if ( not defined $nonrepval ) {
+
+                        #                        $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
                         $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
                     }
                     delete $poll_nrep{$poid};
@@ -1866,6 +1865,7 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                 $snmpvars{Device}     = $device;
                 $snmpvars{RemotePort} = $data_in{port} // 161;                                                      # Default to 161 if not specified
                 $snmpvars{DestHost}   = ( defined $data_in{ip} and $data_in{ip} ne '' ) ? $data_in{ip} : $device;
+
                 #my $snmp_try_timeout = $data_in{snmp_getbulk_timeout};
                 #$snmpvars{Timeout}       = ( $snmp_try_timeout // $g{snmp_getbulk_timeout} ) * 1000000;
                 $snmpvars{Timeout}       = 4_000_000;
@@ -1934,8 +1934,6 @@ EOF
 
                 $! = 0;    # Reset system errno before calling new() (?!)
                 my @nonreps = ();
-
-                #$session->update( %snmpvars ) if defined $session;
                 my $session = new SNMP::Session( %snmpvars );
 
                 if ( ( not defined $session ) ) {
@@ -2268,19 +2266,17 @@ sub check_forks {
     }
 }
 
-sub check_forks2 {
+sub check_forks3 {
     for my $fork ( keys %{ $g{forks} } ) {
         my $pid = $g{forks}{$fork}{pid};
         if ( !kill 0, $pid ) {
             do_log( "Fork $fork with pid $pid died, cleaning up", INFO );
+
             #close $g{forks}{$fork}{CS} or do_log( "Closing child socket failed: $!", 2 );
             #delete $g{forks}{$fork};
         }
     }
 }
-
-
-
 
 # Subroutine to send an error message back to the parent process
 sub send_data {
@@ -2318,6 +2314,27 @@ sub deeph_insert_oidval_h {
     my @keys = split /\./, $oid;
     push @keys, '';    # add a key (empty) that will store the value
     dive_val( $deep_href //= {}, @keys ) = $val;
+}
+
+sub deeph_insert_oidval_h2 {
+    my ( $oidvals_aref, $deep_href ) = @_;
+    $deep_href //= {};
+
+    # Loop over each pair [$oid, $val] in the array reference
+    for my $pair ( @$oidvals_aref ) {
+        my ( $oid, $val ) = @$pair;
+
+        # Remove leading dot from OID if present
+        $oid = substr( $oid, 1 ) if substr( $oid, 0, 1 ) eq '.';
+
+        # Split OID into keys
+        my @keys = split /\./, $oid;
+        push @keys, '';    # Add an empty key to store the value
+
+        # Use dive_val to set the value in the deep hash
+        dive_val( $deep_href, @keys ) = $val;
+    }
+    return $deep_href;
 }
 
 sub deeph_insert_oidkey_h {
@@ -2429,8 +2446,6 @@ sub snmpgetbulk ($$$@) {
 
     @retvals = ();
     $session = &snmpopen( $host, 0, \@vars );
-
-    #$session = &snmpopen($hostip, $snmp_cid, $snmp_port, $query_timeout, 1, $backoff, $snmp_ver , 0, \@vars );
     if ( !defined( $session ) ) {
         carp "SNMPGETBULK Problem for $host\n"
             unless ( $SNMP_Session::suppress_warnings > 1 );
@@ -2630,106 +2645,7 @@ sub snmpopen ($$$) {
     }
     return $::session;
 }
-#
-# Adapted with minimal changes
-#
-sub snmpopen1 ($$$) {
-    my ( $session,                   $session_host, $session_version, $session_lhost, $session_ipv4only, $host, $type, $vars ) = @_;
-    my ( $session_return_array_refs, $session_return_hash_refs );
-    my ( $nhost,                     $port,    $community, $lhost, $lport, $nlhost );
-    my ( $timeout,                   $retries, $backoff,   $version );
-    my $v4onlystr;
 
-    $type      = 0 if ( !defined( $type ) );
-    $community = "public";
-    $nlhost    = "";
-
-    ( $community, $host ) = ( $1, $2 ) if ( $host =~ /^(.*)@([^@]+)$/ );
-
-    # We can't split on the : character because a numeric IPv6
-    # address contains a variable number of :'s
-    my $opts;
-    if ( ( $host =~ /^(\[.*\]):(.*)$/ ) or ( $host =~ /^(\[.*\])$/ ) ) {
-
-        # Numeric IPv6 address between []
-        ( $host, $opts ) = ( $1, $2 );
-    } else {
-
-        # Hostname or numeric IPv4 address
-        ( $host, $opts ) = split( ':', $host, 2 );
-    }
-    ( $port, $timeout, $retries, $backoff, $version, $v4onlystr ) = split( ':', $opts, 6 )
-        if ( defined( $opts ) and ( length $opts > 0 ) );
-    undef( $version ) if ( defined( $version ) and length( $version ) <= 0 );
-    $v4onlystr = ""  unless defined $v4onlystr;
-    $version   = '1' unless defined $version;
-    if ( defined( $port ) and ( $port =~ /^([^!]*)!(.*)$/ ) ) {
-        ( $port, $lhost ) = ( $1, $2 );
-        $nlhost = $lhost;
-        ( $lhost, $lport ) = ( $1, $2 ) if ( $lhost =~ /^(.*)!(.*)$/ );
-        undef( $lhost ) if ( defined( $lhost ) and ( length( $lhost ) <= 0 ) );
-        undef( $lport ) if ( defined( $lport ) and ( length( $lport ) <= 0 ) );
-    }
-    undef( $port ) if ( defined( $port ) and length( $port ) <= 0 );
-    $port  = 162 if ( $type == 1 and !defined( $port ) );
-    $nhost = "$community\@$host";
-    $nhost .= ":" . $port if ( defined( $port ) );
-
-    if (   ( !defined( $session ) )
-        or ( $session_host ne $nhost )
-        or ( $session_version ne $version )
-        or ( $session_lhost ne $nlhost )
-        or ( $session_ipv4only ne $v4onlystr ) )
-    {
-        if ( defined( $session ) ) {
-            $session->close();
-            undef $session;
-            undef $session_host;
-            undef $session_version;
-            undef $session_lhost;
-            undef $session_ipv4only;
-        }
-        $session
-            = ( $version =~ /^2c?$/i )
-            ? SNMPv2c_Session->open( $host, $community, $port, $SNMP_Session::max_pdu_len, $lport, undef, $lhost, ( $v4onlystr eq 'v4only' ) ? 1 : 0 )
-            : SNMP_Session->open( $host, $community, $port, $SNMP_Session::max_pdu_len, $lport, undef, $lhost, ( $v4onlystr eq 'v4only' )    ? 1 : 0 );
-        ( $session_host = $nhost, $session_version = $version, $session_lhost = $nlhost, $session_ipv4only = $v4onlystr ) if defined( $session );
-    }
-    if ( defined( $session ) ) {
-        if ( ref $vars->[0] eq 'HASH' ) {
-            my $opts = shift @$vars;
-            foreach $type ( keys %$opts ) {
-                if ( $type eq 'return_array_refs' ) {
-                    $session_return_array_refs = $opts->{$type};
-                } elsif ( $type eq 'return_hash_refs' ) {
-                    $session_return_hash_refs = $opts->{$type};
-                } else {
-                    if ( exists $session->{$type} ) {
-                        if ( $type eq 'timeout' ) {
-                            $session->set_timeout( $opts->{$type} );
-                        } elsif ( $type eq 'retries' ) {
-                            $session->set_retries( $opts->{$type} );
-                        } elsif ( $type eq 'backoff' ) {
-                            $session->set_backoff( $opts->{$type} );
-                        } else {
-                            $session->{$type} = $opts->{$type};
-                        }
-                    } else {
-                        carp "SNMPopen Unknown SNMP Option Key '$type'\n"
-                            unless ( $SNMP_Session::suppress_warnings > 1 );
-                    }
-                }
-            }
-        }
-        $session->set_timeout( $timeout )
-            if ( defined( $timeout ) and ( length( $timeout ) > 0 ) );
-        $session->set_retries( $retries )
-            if ( defined( $retries ) and ( length( $retries ) > 0 ) );
-        $session->set_backoff( $backoff )
-            if ( defined( $backoff ) and ( length( $backoff ) > 0 ) );
-    }
-    return $session;
-}
 #
 # A restricted snmpget.
 #
@@ -2755,11 +2671,17 @@ sub snmpget ($@) {
             ( $binding, $bindings ) = decode_sequence( $bindings );
             ( $oid,     $value )    = decode_by_template( $binding, "%O%@" );
             my $tempo = pretty_print( $value );
+
+            #print $tempo;
             push @retvals, $tempo;
         }
+
+        #        print join( ' ', @retvals );;
         return wantarray ? @retvals : $retvals[0];
     }
     $var = join( ' ', @vars );
+
+    #print ($var);
     carp "SNMPGET Problem for $var on $host\n"
         unless ( $SNMP_Session::suppress_warnings > 1 );
     return wantarray ? @retvals : undef;
