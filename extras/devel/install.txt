@@ -1,0 +1,177 @@
+main
+ ├─ check_options
+ │    └─ Validates default values in %option, skips CODE references, checks against valid values, and exits with errors if defaults are invalid.
+ ├─ prompt_option('perl_version')
+ │    ├─ Fetch configuration for 'perl_version' from %option:
+ │    │    ├─ desc    => 'Check Perl Version'
+ │    │    └─ default => $min_perl_version
+ │    ├─ Validate using check_perl_version($min_perl_version):
+ │    │    ├─ Log the current Perl version ($]) and the minimum required version ($min_perl_version)
+ │    │    ├─ Compare $] with $min_perl_version
+ │    │    ├─ Log 'OK' if the requirement is met or 'FAIL' if not
+ │    │    └─ Return 1 if the requirement is met, or 0 if it is not
+ │    └─ Use the default value ($min_perl_version) if valid (check returns 1), or return undef if invalid (check returns 0)
+ ├─ read_config
+ │    ├─ If 'config.txt' exists:
+ │    │    ├─ Open the file or exit on error.
+ │    │    ├─ Read each line:
+ │    │         ├─ Split into key-value pairs (`key=value`).
+ │    │         ├─ Trim value and store in `%config_old` (use `undef` for empty values).
+ │    │    └─ Close the file.
+ │    ├─ If `$debug` is enabled:
+ │    │    └─ Print all key-value pairs from `%config_old` (empty values shown as '').
+ ├─ $silent_config = prompt_option('default_yes', 'Proceed with recommended setup?')
+ │    ├─ Fetch config: default => 'y', valids => ['y', 'n']
+ │    ├─ Prompt user: 'Proceed with recommended setup?' (default: 'y')
+ │    ├─ Validate input:
+ │    │    ├─ If valid: Return input or default.
+ │    │    └─ If invalid: Re-prompt until valid.
+ │    └─ Return validated response.
+ ├─ $os_distribution = get_os_distribution()
+ │    ├─ Log: "Getting OS distribution..." to indicate the start of detection.
+ │    ├─ Call `get_os_from_os_release_ID()`:
+ │    │    ├─ Define `/etc/os-release` as the target file.
+ │    │    ├─ Check if `/etc/os-release` exists:
+ │    │    │    ├─ Open the file for reading or die with an error message.
+ │    │    │    ├─ Read the file line by line:
+ │    │    │    │    ├─ Look for a line matching `ID="value"` or `ID=value`.
+ │    │    │    │    └─ If found, close the file and return the extracted value.
+ │    │    │    └─ Close the file after reading.
+ │    │    ├─ Return `undef` if the file does not exist or the `ID` key is not found.
+ │    ├─ If `get_os_from_os_release_ID()` returns `undef`:
+ │    │    ├─ Initialize `%distribution_matches` to track potential OS matches.
+ │    │    ├─ Iterate through `keys %distribution_files`:
+ │    │    │    ├─ For each distribution, initialize a match counter (`$matches`).
+ │    │    │    ├─ Iterate through the list of files for the distribution:
+ │    │    │    │    ├─ Check if each file exists.
+ │    │    │    │    └─ Increment `$matches` for each existing file.
+ │    │    │    └─ Store results in `%distribution_matches` as `[matches, total_files]`.
+ │    │    ├─ Print the match count for each distribution.
+ │    │    ├─ Sort distributions based on:
+ │    │    │    ├─ Number of matching files (descending).
+ │    │    │    └─ Number of total files to match (ascending for ties).
+ │    │    └─ Select the best match as `$os`, or die with "Unable to determine OS distribution" if no match is found.
+ │    ├─ Log the discovered OS with: "Found: $os".
+ │    └─ Return `$os` as the detected operating system distribution.
+ ├─ $package_manager = get_package_manager($os_distribution)
+ │    ├─ Log: "Getting '$os_distribution' package manager..." to indicate the start of detection.
+ │    ├─ Iterate through the list of alternative package managers for `$os_distribution`:
+ │    │    ├─ For each `$pkg_manager`:
+ │    │    │    ├─ Check if the command exists using `command_exists($pkg_manager)`.
+ │    │    │    ├─ If valid:
+ │    │    │    │    ├─ Log: "Found: $pkg_manager".
+ │    │    │    │    └─ Return `$pkg_manager`.
+ │    ├─ If no valid package manager is found:
+ │    │    └─ Die with: "No suitable package manager found for $os_distribution".
+ │    └─ Return the name of the detected package manager.
+
+
+├─ prompt_option('test_prerequisites_install')
+│    ├─ Fetch configuration for 'test_prerequisites_install' from %option:
+│    │    ├─ desc           => 'Evaluate prerequisites installation.'
+│    │    ├─ pre            => 'snmp_session_installed && snmp_utilities_installed || snmp_session_installed'
+│    ├─ Evaluate the `pre` condition:
+│    │    ├─ Resolve the precondition components:
+│    │    │    ├─ `snmp_session_installed`:
+│    │    │    │    ├─ desc   => 'Is SNMP Session installed?'
+│    │    │    │    ├─ check  => Call `check_package('SNMP_Session')`.
+│    │    │    │    ├─ fix    => Call `prompt_option('prompt_snmp_session_install')` if not installed:
+│    │    │    │    │    └─ Execute `snmp_session_install`:
+│    │    │    │    │         ├─ desc    => 'Install the SNMP Session package'
+│    │    │    │    │         ├─ default => 'SNMP_Session'
+│    │    │    │    │         ├─ check   => Call `check_package('SNMP_Session')`.
+│    │    │    │    │         ├─ fix     => Call `install_package('SNMP_Session')` if not installed.
+│    │    │    │    │         └─ Return success after installation.
+│    │    │    ├─ `snmp_utilities_installed`:
+│    │    │    │    ├─ desc   => 'Is SNMP utilities installed?'
+│    │    │    │    ├─ check  => Call `check_package('SNMP utilities')`.
+│    │    │    │    ├─ fix    => Call `prompt_option('prompt_snmp_utilities_install')` if not installed:
+│    │    │    │    │    └─ Execute `snmp_utilities_install`:
+│    │    │    │    │         ├─ desc    => 'Install the SNMP utilities package'
+│    │    │    │    │         ├─ default => 'SNMP utilities'
+│    │    │    │    │         ├─ check   => Call `check_package('SNMP utilities')`.
+│    │    │    │    │         ├─ fix     => Call `install_package('SNMP utilities')` if not installed.
+│    │    │    │    │         └─ Return success after installation.
+│    │    └─ Call `evaluate_expression(pre)`:
+│    │         ├─ Pass the `pre` string to `evaluate_expression`.
+│    │         └─ Evaluate the expression recursively:
+│    │             ├─ Call `evaluate_parenthesis_expression(pre)`:
+│    │             │    ├─ If no parentheses exist, call `evaluate_mathematical_expression(pre)` directly.
+│    │             │    ├─ Extract the innermost parenthesized expression (if any).
+│    │             │    ├─ Call `evaluate_mathematical_expression(innermost)` to compute the result:
+│    │             │    │    ├─ Handle recognized mathematical functions (e.g., `sqrt`, `sin`, `cos`).
+│    │             │    │    ├─ Translate logical operators (`and`, `or`) to Perl syntax (`&&`, `||`).
+│    │             │    │    ├─ Convert Unicode mathematical symbols to ASCII equivalents (e.g., `π -> pi`, `≤ -> <=`).
+│    │             │    │    ├─ Replace factorials (e.g., `n!`) with their calculated values.
+│    │             │    │    ├─ Handle absolute values (`|x|`) correctly, avoiding conflicts with bitwise operators.
+│    │             │    │    └─ Perform all transformations and return the final evaluated result.
+│    │             │    ├─ Replace the evaluated expression in the parent expression.
+│    │             │    └─ Repeat until no parentheses remain, then evaluate the final expression.
+│    │             └─ Evaluate the final expression using `evaluate_mathematical_expression`.
+│    │    └─ Use the result of `evaluate_expression(pre)`:
+│    │         ├─ If true (1): Return success for 'test_prerequisites_install'.
+│    │         └─ If false (0): Return failure or handle accordingly.
+│    └─ Return the evaluated result of the `pre` condition (1 or 0).
+
+
+ ├─ prompt_option('required_prerequisites_installed')
+ │    ├─ Checks if required packages are installed.
+ │    └─ If not installed, prints a failure message.
+ ├─ prompt_option('install_folder')
+ │    └─ Prompts the user to specify an installation directory.
+ ├─ prompt_option('username')
+ │    ├─ Prompts for the username.
+ │    └─ Checks if the username is valid.
+ │        └─ If invalid, prints a failure message and exits.
+ ├─ prompt_option('is_install_folder_perms_valid')
+ │    └─ Checks if the installation folder permissions are valid.
+ ├─ prompt_option('collaboration')
+ │    └─ Prompts for collaboration-related setup.
+ ├─ prompt_option('git_http_clone_url')
+ │    └─ Retrieves the Git clone URL for HTTP.
+ └─ write_config(\%config_new)
+      └─ Writes the updated configuration options to a file.
+
+
+main
+ ├─ check_options
+ ├─ prompt_option('perl_version')
+ │    ├─ check => sub { return check_perl_version() }
+ │    ├─ fix   => sub { fix_perl_version() }
+ ├─ read_config
+ ├─ prompt_option('collaboration')
+ │    ├─ git_installed
+ │    │    ├─ desc   => 'Is git installed?'
+ │    │    ├─ check  => sub { return check_package('git') }
+ │    │    ├─ fix    => sub { prompt_option('prompt_git_install') }
+ │    │    └─ valids => [0, 1]
+ │    ├─ use_git
+ │    │    ├─ use_git_auth
+ │    │    │    ├─ check_git_auth_status
+ │    │    │    │    └─ desc   => 'Are Git credentials set up?'
+ │    │    │    │    └─ check  => sub { return check_git_credentials() }
+ │    │    │    │    └─ fix    => sub { fix_git_credentials() }
+ │    │    │    ├─ check_git_local_config_me
+ │    │    │    │    └─ check  => sub { return check_user_git_config() }
+ │    │    │    │    └─ fix    => sub { fix_user_git_config() }
+ │    │    ├─ git_http_no_auth_status
+ │    │         ├─ check => sub { return check_git_http() }
+ │    │         ├─ fix   => sub { fix_git_http() }
+ ├─ prompt_option('install_folder')
+ │    ├─ check => sub { return check_directory_validity() }
+ │    ├─ fix   => sub { fix_directory_permissions() }
+ ├─ configure_git
+ │    ├─ setup_git_user_info
+ │    ├─ check_and_prompt_configure_ssh_key
+ │    │    ├─ check => sub { return check_ssh_key_existence() }
+ │    │    ├─ fix   => sub { fix_ssh_key_setup() }
+ │    ├─ setup_git_token_authentication
+ │    │    ├─ check => sub { return check_git_token_validity() }
+ │    │    ├─ fix   => sub { fix_git_token_errors() }
+ │    ├─ clone_repository
+ │         ├─ check => sub { return check_repository_status() }
+ │         ├─ fix   => sub { fix_repository_issues() }
+ └─ write_config
+      ├─ check => sub { return check_config_syntax() }
+      ├─ fix   => sub { fix_config_syntax() }
+
