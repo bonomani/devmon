@@ -13,7 +13,6 @@ require Exporter;
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
 # Modules
 use strict;
 use dm_config qw(FATAL ERROR WARN INFO DEBUG TRACE);
@@ -32,7 +31,7 @@ use vars qw(%g);
 
 # Global array and hash by descending priority/severity
 my %colors      = ( 'red' => 6, 'yellow' => 5, 'clear' => 4, 'purple' => 3, 'green' => 2, 'blue' => 1 );
-my @color_order = sort { $colors{ $b } <=> $colors{ $a } } keys %colors;
+my @color_order = sort { $colors{$b} <=> $colors{$a} } keys %colors;
 my $color_list  = join '|', @color_order;
 
 # Speed hash for trans_speed conversions
@@ -48,37 +47,36 @@ my %speeds = (
 # Main test subroutine; parse data and feed it to the individual
 # test-specific subs
 sub tests {
-    @{ $g{ test_results } } = ();    # Our outgoing message queue
-
-    # Timestamp
-    $g{ testtime } = time;
+    @{ $g{test_results} } = ();    # Our outgoing message queue
+                                   # Timestamp
+    $g{testtime} = time;
     do_log( 'Performing tests', INFO );
 
     # Now go through each device and perform the test logic it needs
-    for my $device ( sort keys %{ $g{ devices } } ) {
+    for my $device ( sort keys %{ $g{devices} } ) {
 
         #my $oids = {};
-        my $oids = \%{ $g{ devices }{ $device }{ oids } };
+        my $oids = \%{ $g{devices}{$device}{oids} };
 
         # Check to see if this device was unreachable in xymon
         # If so skip device
-        next if !defined $g{ xymon_color }{ $device } or $g{ xymon_color }{ $device } ne 'green';
+        next if !defined $g{xymon_color}{$device} or $g{xymon_color}{$device} ne 'green';
 
         # Get template-specific variables
-        my $vendor = $g{ devices }{ $device }{ vendor };
-        my $model  = $g{ devices }{ $device }{ model };
-        my $tests  = $g{ devices }{ $device }{ tests };
+        my $vendor = $g{devices}{$device}{vendor};
+        my $model  = $g{devices}{$device}{model};
+        my $tests  = $g{devices}{$device}{tests};
 
         # If our tests = 'all', create a string with all the tests in it
         if ( $tests eq 'all' ) {
-            $tests = join ',', keys %{ $g{ templates }{ $vendor }{ $model }{ tests } };
+            $tests = join ',', keys %{ $g{templates}{$vendor}{$model}{tests} };
         }
 
         # If we have a !, remove tests from all tests
         elsif ( substr( $tests, 0, 1 ) eq '!' ) {
-            my %valid_tests = %{ $g{ templates }{ $vendor }{ $model }{ tests } };
+            my %valid_tests = %{ $g{templates}{$vendor}{$model}{tests} };
             foreach my $notest ( split /,/, substr( $tests, 1 ) ) {
-                delete( $valid_tests{ $notest } );
+                delete( $valid_tests{$notest} );
             }
             $tests = join ',', keys %valid_tests;
         }
@@ -86,7 +84,7 @@ sub tests {
             my $valid_tests = '';
             for my $dev_test ( split ',', $tests ) {
                 my $dev_test_found = 0;
-                for my $tmpl_test ( keys %{ $g{ templates }{ $vendor }{ $model }{ tests } } ) {
+                for my $tmpl_test ( keys %{ $g{templates}{$vendor}{$model}{tests} } ) {
                     if ( $tmpl_test eq $dev_test ) {
                         $dev_test_found = 1;
                         if ( $valid_tests eq '' ) {
@@ -104,14 +102,13 @@ sub tests {
 
         # Separate tests, perform individual test logic
         for my $test ( split /,/, $tests ) {
-
-            do_log( "Starting test for $test on device $device", DEBUG ) if $g{ debug };
+            do_log( "Starting test for $test on device $device", DEBUG ) if $g{debug};
 
             # Hash shortcut
-            my $tmpl = \%{ $g{ templates }{ $vendor }{ $model }{ tests }{ $test } };
+            my $tmpl = \%{ $g{templates}{$vendor}{$model}{tests}{$test} };
 
             # custom threshold pointer
-            my $thr = \%{ $g{ devices }{ $device }{ thresh }{ $test } };
+            my $thr = \%{ $g{devices}{$device}{thresh}{$test} };
 
             # Create our oids hash that will be populated by both snmp
             # data and transformed data.  This is done to keep me
@@ -119,44 +116,44 @@ sub tests {
             oid_hash( $oids, $device, $tmpl, $thr );
 
             # Perform the transform
-            for my $oid ( @{ $tmpl->{ sorted_oids } } ) {
-                next if !$oids->{ $oid }{ transform };
+            for my $oid ( @{ $tmpl->{sorted_oids} } ) {
+                next if !$oids->{$oid}{transform};
                 transform( $device, $oids, $oid );
 
                 # Do some debug if requested
-                if ( $g{ debug } ) {
-                    my $oid_h = \%{ $oids->{ $oid } };
-                    if ( $oid_h->{ repeat } and ( defined $oid_h->{ val } and %{ $oid_h->{ val } } ) ) {
+                if ( $g{debug} ) {
+                    my $oid_h = \%{ $oids->{$oid} };
+                    if ( $oid_h->{repeat} and ( defined $oid_h->{val} and %{ $oid_h->{val} } ) ) {
                         my $line;
-                    LEAF: for my $leaf ( sort keys %{ $oid_h->{ val } } ) {
-                            if ( $g{ trace } ) {
-                                $line = "i:$leaf v:" . ( $oid_h->{ val }{ $leaf } // "undef" );
-                                $line .= " c:$oid_h->{color}{$leaf}" if ( ref( $oid_h->{ color } ) eq 'HASH' && defined $oid_h->{ color }{ $leaf } );
-                                $line .= " e:$oid_h->{error}{$leaf}" if ( ref( $oid_h->{ color } ) eq 'HASH' && defined $oid_h->{ error }{ $leaf } );
-                                $line .= " m:$oid_h->{msg}{$leaf}"   if ( ref( $oid_h->{ color } ) eq 'HASH' && defined $oid_h->{ msg }{ $leaf } );
-                                $line .= " t:$oid_h->{time}{$leaf}"  if ( ref( $oid_h->{ color } ) eq 'HASH' && defined $oid_h->{ time }{ $leaf } );
+                    LEAF: for my $leaf ( sort keys %{ $oid_h->{val} } ) {
+                            if ( $g{trace} ) {
+                                $line = "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
+                                $line .= " c:$oid_h->{color}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{color}{$leaf} );
+                                $line .= " e:$oid_h->{error}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{error}{$leaf} );
+                                $line .= " m:$oid_h->{msg}{$leaf}"   if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{msg}{$leaf} );
+                                $line .= " t:$oid_h->{time}{$leaf}"  if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{time}{$leaf} );
                                 do_log( "$line", TRACE );
                             }
                             else {
-                                $line .= "$leaf:" . ( $oid_h->{ val }{ $leaf } // "undef" ) . " ";
+                                $line .= "$leaf:" . ( $oid_h->{val}{$leaf} // "undef" ) . " ";
                             }
                         }
-                        if ( not $g{ trace } ) {
+                        if ( not $g{trace} ) {
                             do_log( "$line", DEBUG );
                         }
                     }
                     else {
                         my $line;
-                        if ( $g{ trace } ) {
-                            $line = "v:" . ( $oid_h->{ val } // "undef" );
-                            $line .= " c:$oid_h->{color}" if defined $oid_h->{ color };
-                            $line .= " e:$oid_h->{error}" if defined $oid_h->{ error };
-                            $line .= " m:$oid_h->{msg}"   if defined $oid_h->{ msg };
-                            $line .= " t:$oid_h->{time}"  if defined $oid_h->{ time };
+                        if ( $g{trace} ) {
+                            $line = "v:" . ( $oid_h->{val} // "undef" );
+                            $line .= " c:$oid_h->{color}" if defined $oid_h->{color};
+                            $line .= " e:$oid_h->{error}" if defined $oid_h->{error};
+                            $line .= " m:$oid_h->{msg}"   if defined $oid_h->{msg};
+                            $line .= " t:$oid_h->{time}"  if defined $oid_h->{time};
                             do_log( "$line", TRACE );
                         }
                         else {
-                            $line = ( $oid_h->{ val } // "undef" );
+                            $line = ( $oid_h->{val} // "undef" );
                             do_log( "$line", DEBUG );
                         }
                     }
@@ -167,13 +164,12 @@ sub tests {
             my $msg = render_msg( $device, $tmpl, $test, $oids );
 
             # Add the message to our outgoing queue!
-            push @{ $g{ test_results } }, $msg if defined $msg;
-
+            push @{ $g{test_results} }, $msg if defined $msg;
         }
     }
 
     # Finish timestamp
-    $g{ testtime } = time - $g{ testtime };
+    $g{testtime} = time - $g{testtime};
 }
 
 # Create a oid hash ref that will eventually contain all gathered
@@ -182,137 +178,134 @@ sub oid_hash {
     my ( $oids, $device, $tmpl, $thr ) = @_;
 
     # Hash shortcuts
-    my $snmp = \%{ $oids->{ snmp_polled } };
+    my $snmp = \%{ $oids->{snmp_polled} };
 
     # First clean the hash: delete all but keep the val struct of repeater
     my %rep_val_keys;
-    for my $oid ( keys %{ $tmpl->{ oids } } ) {
-        if ( $oids->{ $oid }{ repeat } ) {
-            for my $rep_val_key ( keys %{ $oids->{ $oid }{ val } } ) {
-                $rep_val_keys{ $oid }{ val }{ $rep_val_key } = undef;
-                $rep_val_keys{ $oid }{ repeat } = $oids->{ $oid }{ repeat };
+    for my $oid ( keys %{ $tmpl->{oids} } ) {
+        if ( $oids->{$oid}{repeat} ) {
+            for my $rep_val_key ( keys %{ $oids->{$oid}{val} } ) {
+                $rep_val_keys{$oid}{val}{$rep_val_key} = undef;
+                $rep_val_keys{$oid}{repeat} = $oids->{$oid}{repeat};
             }
         }
-        delete $oids->{ $oid };
+        delete $oids->{$oid};
     }
 
     # For now we will copy the data from the template and snmp
     # Copy the data even if the OID is already cached during a preceeding test.
     # In the current test, the thresholds or the exceptions might be different.
-    for my $oid ( keys %{ $tmpl->{ oids } } ) {
+    for my $oid ( keys %{ $tmpl->{oids} } ) {
 
         # Don't hash an OID more than once
-        next if exists $oids->{ $oid };
+        next if exists $oids->{$oid};
 
         # Put all the info we got on the oid in (sans transform data)
         # in the oid/no s hash ref
         # First we do threshold data
-
-        if ( defined $tmpl->{ oids }{ $oid }{ threshold } ) {
-            $oids->{ $oid }{ threshold } = $tmpl->{ oids }{ $oid }{ threshold };
-            for my $cust_thresh_color ( keys %{ $thr->{ $oid } } ) {
-                $oids->{ $oid }{ threshold }{ $cust_thresh_color } = $thr->{ $oid }{ $cust_thresh_color };
+        if ( defined $tmpl->{oids}{$oid}{threshold} ) {
+            $oids->{$oid}{threshold} = $tmpl->{oids}{$oid}{threshold};
+            for my $cust_thresh_color ( keys %{ $thr->{$oid} } ) {
+                $oids->{$oid}{threshold}{$cust_thresh_color} = $thr->{$oid}{$cust_thresh_color};
             }
         }
-        elsif ( defined $oids->{ $oid }{ threshold } ) {
-            delete $oids->{ $oid }{ threshold };    # Remove old definition
+        elsif ( defined $oids->{$oid}{threshold} ) {
+            delete $oids->{$oid}{threshold};    # Remove old definition
         }
 
         # Then exceptions
-        if ( defined $tmpl->{ oids }{ $oid }{ exceptions } ) {
-            $oids->{ $oid }{ except } = $tmpl->{ oids }{ $oids }{ exceptions };
+        if ( defined $tmpl->{oids}{$oid}{exceptions} ) {
+            $oids->{$oid}{except} = $tmpl->{oids}{$oids}{exceptions};
         }
-        elsif ( defined $oids->{ $oid }{ except } ) {
-            delete $oids->{ $oid }{ except };       # Remove old definition
+        elsif ( defined $oids->{$oid}{except} ) {
+            delete $oids->{$oid}{except};       # Remove old definition
         }
 
         # We don't have transform data yet, mark it for later and skip
-        if ( defined $tmpl->{ oids }{ $oid }{ trans_type } ) {
-            $oids->{ $oid }{ transform }   = 1;
-            $oids->{ $oid }{ trans_type }  = $tmpl->{ oids }{ $oid }{ trans_type };
-            $oids->{ $oid }{ trans_data }  = $tmpl->{ oids }{ $oid }{ trans_data };
-            $oids->{ $oid }{ trans_edata } = $tmpl->{ oids }{ $oid }{ trans_edata } if defined $tmpl->{ oids }{ $oid }{ trans_edata };
+        if ( defined $tmpl->{oids}{$oid}{trans_type} ) {
+            $oids->{$oid}{transform}   = 1;
+            $oids->{$oid}{trans_type}  = $tmpl->{oids}{$oid}{trans_type};
+            $oids->{$oid}{trans_data}  = $tmpl->{oids}{$oid}{trans_data};
+            $oids->{$oid}{trans_edata} = $tmpl->{oids}{$oid}{trans_edata} if defined $tmpl->{oids}{$oid}{trans_edata};
 
             # add to transform keys if something previoulsy discovered
-            unless ( %{ $snmp } ) {
-                for my $oid_key ( keys %{ $rep_val_keys{ $oid } } ) {
-                    $oids->{ $oid }{ $oid_key } = $rep_val_keys{ $oid }{ $oid_key };
+            unless ( %{$snmp} ) {
+                for my $oid_key ( keys %{ $rep_val_keys{$oid} } ) {
+                    $oids->{$oid}{$oid_key} = $rep_val_keys{$oid}{$oid_key};
                 }
             }
             next;
         }
-        my $num    = $tmpl->{ oids }{ $oid }{ number };    # this is the numerical oid (1.3.5...) ?!? we dont need it...
-        my $repeat = $tmpl->{ oids }{ $oid }{ repeat };
-        $oids->{ $oid }{ transform } = 0;                  #why?
-        $oids->{ $oid }{ repeat }    = $repeat;
+        my $num    = $tmpl->{oids}{$oid}{number};    # this is the numerical oid (1.3.5...) ?!? we dont need it...
+        my $repeat = $tmpl->{oids}{$oid}{repeat};
+        $oids->{$oid}{transform} = 0;                #why?
+        $oids->{$oid}{repeat}    = $repeat;
 
         # If this is a repeater, iterate through its leaves and assign values
         # Apply thresholds
-        if ( %{ $snmp } ) {
-            if ( defined $snmp->{ $num }{ val } ) {
+        if ( %{$snmp} ) {
+            if ( defined $snmp->{$num}{val} ) {
                 if ($repeat) {
-                    for my $leaf ( keys %{ $snmp->{ $num }{ val } } ) {
+                    for my $leaf ( keys %{ $snmp->{$num}{val} } ) {
 
                         # If we have a non-numeric leaf, make sure to keep track of this!
                         # Store this as a type '2' repeater
-                        $oids->{ $oid }{ repeat }        = 2 if $leaf !~ /^[+-]?(?:\d+\.?\d*|\d*\.\d+)$/;
-                        $oids->{ $oid }{ val }{ $leaf }  = $snmp->{ $num }{ val }{ $leaf };
-                        $oids->{ $oid }{ time }{ $leaf } = $snmp->{ $num }{ time }{ $leaf };
+                        $oids->{$oid}{repeat}      = 2 if $leaf !~ /^[+-]?(?:\d+\.?\d*|\d*\.\d+)$/;
+                        $oids->{$oid}{val}{$leaf}  = $snmp->{$num}{val}{$leaf};
+                        $oids->{$oid}{time}{$leaf} = $snmp->{$num}{time}{$leaf};
                     }
-                    delete $oids->{ $oid }{ error };
-                    delete $oids->{ $oid }{ color };
-                    delete $oids->{ $oid }{ msg };
+                    delete $oids->{$oid}{error};
+                    delete $oids->{$oid}{color};
+                    delete $oids->{$oid}{msg};
                 }
                 else {
-                    $oids->{ $oid }{ val }  = $snmp->{ $num }{ val };
-                    $oids->{ $oid }{ time } = $snmp->{ $num }{ time };
-                    delete $oids->{ $oid }{ color };
-                    delete $oids->{ $oid }{ msg };
-                    delete $oids->{ $oid }{ error };
+                    $oids->{$oid}{val}  = $snmp->{$num}{val};
+                    $oids->{$oid}{time} = $snmp->{$num}{time};
+                    delete $oids->{$oid}{color};
+                    delete $oids->{$oid}{msg};
+                    delete $oids->{$oid}{error};
                 }
             }
             else {
                 do_log( "No SNMP answer for '$oid' on '$device' (see notests) ", INFO );
-                $oids->{ $oid }{ val }   = undef;
-                $oids->{ $oid }{ color } = "clear";
-                $oids->{ $oid }{ msg }   = "No SNMP answer for $oid";
-                $oids->{ $oid }{ time }  = time;
+                $oids->{$oid}{val}   = undef;
+                $oids->{$oid}{color} = "clear";
+                $oids->{$oid}{msg}   = "No SNMP answer for $oid";
+                $oids->{$oid}{time}  = time;
             }
         }
         else {
-
             # No snmp answer
             if ($repeat) {
-                if ( defined $rep_val_keys{ $oid }{ repeat } ) {
-                    $oids->{ $oid }{ repeat } = $rep_val_keys{ $oid }{ repeat };
+                if ( defined $rep_val_keys{$oid}{repeat} ) {
+                    $oids->{$oid}{repeat} = $rep_val_keys{$oid}{repeat};
 
                     # Add keys if something previoulsy discovered
-                    for my $leaf ( keys %{ $rep_val_keys{ $oid }{ val } } ) {
-                        $oids->{ $oid }{ val }{ $leaf } = undef;
-                        delete $oids->{ $oid }{ time }{ $leaf };
-                        delete $oids->{ $oid }{ color }{ $leaf };
-                        delete $oids->{ $oid }{ error }{ $leaf };    # not needed, just to be sure
+                    for my $leaf ( keys %{ $rep_val_keys{$oid}{val} } ) {
+                        $oids->{$oid}{val}{$leaf} = undef;
+                        delete $oids->{$oid}{time}{$leaf};
+                        delete $oids->{$oid}{color}{$leaf};
+                        delete $oids->{$oid}{error}{$leaf};    # not needed, just to be sure
                     }
-                    $oids->{ $oid }{ time }  = time;
-                    $oids->{ $oid }{ color } = "clear";
-                    $oids->{ $oid }{ msg }   = "No SNMP answer";
+                    $oids->{$oid}{time}  = time;
+                    $oids->{$oid}{color} = "clear";
+                    $oids->{$oid}{msg}   = "No SNMP answer";
                 }
                 else {
-
                     # nothing was previously defined, so we dont know any leaf, we treat it as nonrep
-                    $oids->{ $oid }{ val }   = undef;              # already undef, but just to be sure!
-                    $oids->{ $oid }{ time }  = time;
-                    $oids->{ $oid }{ color } = "clear";
-                    $oids->{ $oid }{ msg }   = "No SNMP answer";
-                    delete $oids->{ $oid }{ error };
+                    $oids->{$oid}{val}   = undef;              # already undef, but just to be sure!
+                    $oids->{$oid}{time}  = time;
+                    $oids->{$oid}{color} = "clear";
+                    $oids->{$oid}{msg}   = "No SNMP answer";
+                    delete $oids->{$oid}{error};
                 }
             }
             else {
-                $oids->{ $oid }{ val }   = undef;
-                $oids->{ $oid }{ color } = "clear";
-                $oids->{ $oid }{ time }  = time;
-                $oids->{ $oid }{ msg }   = "No SNMP answer";
-                delete $oids->{ $oid }{ error };
+                $oids->{$oid}{val}   = undef;
+                $oids->{$oid}{color} = "clear";
+                $oids->{$oid}{time}  = time;
+                $oids->{$oid}{msg}   = "No SNMP answer";
+                delete $oids->{$oid}{error};
             }
         }
         apply_threshold( $oids, $oid );
@@ -325,16 +318,16 @@ sub transform {
     my ( $device, $oids, $oid ) = @_;
 
     # Shortcut to our snmp data
-    my $trans_type = $oids->{ $oid }{ trans_type };
-    my $trans_data = $oids->{ $oid }{ trans_data };
+    my $trans_type = $oids->{$oid}{trans_type};
+    my $trans_data = $oids->{$oid}{trans_data};
 
     # Make sure we inherit repeatability from previous types
     my $trans_sub = "trans_" . $trans_type;
     no strict 'refs';
-    do_log( "Doing $trans_type transform on $device/$oid", DEBUG ) if $g{ debug };
+    do_log( "Doing $trans_type transform on $device/$oid", DEBUG ) if $g{debug};
     if ( defined &$trans_sub ) {
         eval {
-            local $SIG{ ALRM } = sub { die "Timeout\n" };
+            local $SIG{ALRM} = sub { die "Timeout\n" };
             alarm 5;
             &$trans_sub( $device, $oids, $oid );
             alarm 0;
@@ -349,7 +342,6 @@ sub transform {
         }
     }
     else {
-
         # Theoretically we should never get here, but whatever
         do_log( "Undefined transform type '$trans_type' found for $device", ERROR )
             and return;
@@ -362,24 +354,24 @@ sub trans_delta {
     my ( $device, $oids, $oid ) = @_;
 
     # Hash shortcuts
-    my $hist  = \%{ $g{ hist }{ $device } };
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $hist  = \%{ $g{hist}{$device} };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our transform options
     my ( $dep_oid, $limit ) = ( $1, $2 || 0 )
-        if $oid_h->{ trans_data } =~ /\{(.+)\}(?:\s+:\s*(\d+))?/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+        if $oid_h->{trans_data} =~ /\{(.+)\}(?:\s+:\s*(\d+))?/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Initialize history
     my $keep_dep_hist_cycle = 1;    #number historical value to retain
-    if ( $g{ current_cycle } == 1 ) {
-        if ( exists $hist->{ oid }{ $dep_oid }{ keep_hist_count } ) {
-            if ( $hist->{ oid }{ $dep_oid }{ keep_hist_count } < $keep_dep_hist_cycle ) {
-                $hist->{ oid }{ $dep_oid }{ keep_hist_count } = $keep_dep_hist_cycle;
+    if ( $g{current_cycle} == 1 ) {
+        if ( exists $hist->{oid}{$dep_oid}{keep_hist_count} ) {
+            if ( $hist->{oid}{$dep_oid}{keep_hist_count} < $keep_dep_hist_cycle ) {
+                $hist->{oid}{$dep_oid}{keep_hist_count} = $keep_dep_hist_cycle;
             }
         }
         else {
-            $hist->{ oid }{ $dep_oid }{ keep_hist_count } = $keep_dep_hist_cycle;
+            $hist->{oid}{$dep_oid}{keep_hist_count} = $keep_dep_hist_cycle;
         }
     }
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -390,40 +382,39 @@ sub trans_delta {
 
     # Check our parent oids for any errors
     if ( not validate_deps( $device, $oids, $oid, [ $dep_oid ], '^[-+]?\d+(\.\d+)?$' ) ) {
-        do_log( "Delta transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{ debug };
+        do_log( "Delta transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
         return;
     }
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
-
-    LEAF: for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+    if ( $oid_h->{repeat} ) {
+    LEAF: for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-
-            my $this_data = $dep_oid_h->{ val }{ $leaf };
-            my $this_time = $dep_oid_h->{ time }{ $leaf };
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            my $this_data = $dep_oid_h->{val}{$leaf};
+            my $this_time = $dep_oid_h->{time}{$leaf};
 
             # Check if we have history, return delta if so
-            if (( exists $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } )
-                and (  ( $hist->{ oid }{ $dep_oid }{ hists }{ $leaf }->[ -1 ] != $g{ current_cycle } )
-                    or ( scalar @{ $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } } > $keep_dep_hist_cycle ) )
+            if (
+                ( exists $hist->{oid}{$dep_oid}{hists}{$leaf} )
+                and (  ( $hist->{oid}{$dep_oid}{hists}{$leaf}->[ -1 ] != $g{current_cycle} )
+                    or ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } > $keep_dep_hist_cycle ) )
                 )
             {
                 my $last_cycle;
-                if ( $hist->{ oid }{ $dep_oid }{ hists }{ $leaf }->[ -1 ] == $g{ current_cycle } ) {
+                if ( $hist->{oid}{$dep_oid}{hists}{$leaf}->[ -1 ] == $g{current_cycle} ) {
 
                     # the last history is the current cycle, take the next previous
-                    $last_cycle = ${ $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } }[ -2 ];
+                    $last_cycle = ${ $hist->{oid}{$dep_oid}{hists}{$leaf} }[ -2 ];
                 }
                 else {
-                    $last_cycle = ${ $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } }[ -1 ];
+                    $last_cycle = ${ $hist->{oid}{$dep_oid}{hists}{$leaf} }[ -1 ];
                 }
-                my $last_data = $hist->{ oid }{ $dep_oid }{ hist }{ $last_cycle }{ val }{ $leaf };
+                my $last_data = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{val}{$leaf};
                 if ( defined $last_data ) {
-                    my $last_time = $hist->{ oid }{ $dep_oid }{ hist }{ $last_cycle }{ time }{ $leaf };
+                    my $last_time = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{time}{$leaf};
                     my $delta;
 
                     # Check for counter wrap
@@ -449,13 +440,13 @@ sub trans_delta {
                         }
                         else {
                             do_log( "Data type too large for leaf $leaf of $dep_oid on $device.", WARN );
-                            $oid_h->{ val }{ $leaf }   = 'Too large';
-                            $oid_h->{ time }{ $leaf }  = time;
-                            $oid_h->{ color }{ $leaf } = 'yellow';
-                            $oid_h->{ error }{ $leaf } = 1;
+                            $oid_h->{val}{$leaf}   = 'Too large';
+                            $oid_h->{time}{$leaf}  = time;
+                            $oid_h->{color}{$leaf} = 'yellow';
+                            $oid_h->{error}{$leaf} = 1;
                             next LEAF;
                         }
-                        do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG ) if $g{ debug };
+                        do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG ) if $g{debug};
 
                         # Otherwise do normal delta calc
                     }
@@ -465,36 +456,34 @@ sub trans_delta {
                     }
 
                     # Round delta to two decimal places
-                    $delta                    = sprintf "%.2f", $delta;
-                    $oid_h->{ val }{ $leaf }  = $delta;
-                    $oid_h->{ time }{ $leaf } = time;
+                    $delta                = sprintf "%.2f", $delta;
+                    $oid_h->{val}{$leaf}  = $delta;
+                    $oid_h->{time}{$leaf} = time;
                 }
                 else {
-
                     # No history; throw wait message
-                    $oid_h->{ val }{ $leaf }   = 'wait';
-                    $oid_h->{ time }{ $leaf }  = time;
-                    $oid_h->{ color }{ $leaf } = 'clear';
-                    $oid_h->{ msg }{ $leaf }   = 'wait';
+                    $oid_h->{val}{$leaf}   = 'wait';
+                    $oid_h->{time}{$leaf}  = time;
+                    $oid_h->{color}{$leaf} = 'clear';
+                    $oid_h->{msg}{$leaf}   = 'wait';
                 }
             }
             else {
-
                 # No history; throw wait message
-                $oid_h->{ val }{ $leaf }   = 'wait';
-                $oid_h->{ time }{ $leaf }  = time;
-                $oid_h->{ color }{ $leaf } = 'clear';
-                $oid_h->{ msg }{ $leaf }   = 'wait';
+                $oid_h->{val}{$leaf}   = 'wait';
+                $oid_h->{time}{$leaf}  = time;
+                $oid_h->{color}{$leaf} = 'clear';
+                $oid_h->{msg}{$leaf}   = 'wait';
             }
 
             # Store history and delete expired
-            if ( ( !exists $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } ) or ( $hist->{ oid }{ $dep_oid }{ hists }{ $leaf }->[ -1 ] != $g{ current_cycle } ) ) {
-                $hist->{ oid }{ $dep_oid }{ hist }{ $g{ current_cycle } }->{ val }{ $leaf }  = $this_data;
-                $hist->{ oid }{ $dep_oid }{ hist }{ $g{ current_cycle } }->{ time }{ $leaf } = $this_time;
-                push( @{ $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } }, $g{ current_cycle } );
-                if ( ( defined $hist->{ oid }{ $dep_oid }{ keep_hist_count } ) and ( scalar @{ $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } } - 1 ) > $hist->{ oid }{ $dep_oid }{ keep_hist_count } ) {
-                    my $expired_hist_cycle = shift( @{ $hist->{ oid }{ $dep_oid }{ hists }{ $leaf } } );
-                    delete( $hist->{ oid }{ $dep_oid }{ hist }{ $expired_hist_cycle } );
+            if ( ( !exists $hist->{oid}{$dep_oid}{hists}{$leaf} ) or ( $hist->{oid}{$dep_oid}{hists}{$leaf}->[ -1 ] != $g{current_cycle} ) ) {
+                $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{val}{$leaf}  = $this_data;
+                $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{time}{$leaf} = $this_time;
+                push( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} }, $g{current_cycle} );
+                if ( ( defined $hist->{oid}{$dep_oid}{keep_hist_count} ) and ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
+                    my $expired_hist_cycle = shift( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } );
+                    delete( $hist->{oid}{$dep_oid}{hist}{$expired_hist_cycle} );
                 }
             }
         }
@@ -502,26 +491,27 @@ sub trans_delta {
         # Otherwise we are a single entry datum
     }
     else {
-        my $this_data = $dep_oid_h->{ val };
-        my $this_time = $dep_oid_h->{ time };
+        my $this_data = $dep_oid_h->{val};
+        my $this_time = $dep_oid_h->{time};
 
         # Check if we have history, return delta if so
-        if (( exists $hist->{ oid }{ $dep_oid }{ hists } )
-            and (  ( $hist->{ oid }{ $dep_oid }{ hists }->[ -1 ] != $g{ current_cycle } )
-                or ( scalar @{ $hist->{ oid }{ $dep_oid }{ hists } } > $keep_dep_hist_cycle ) )
+        if (
+            ( exists $hist->{oid}{$dep_oid}{hists} )
+            and (  ( $hist->{oid}{$dep_oid}{hists}->[ -1 ] != $g{current_cycle} )
+                or ( scalar @{ $hist->{oid}{$dep_oid}{hists} } > $keep_dep_hist_cycle ) )
             )
         {
             my $last_cycle;
-            if ( $hist->{ oid }{ $dep_oid }{ hists }->[ -1 ] == $g{ current_cycle } ) {
+            if ( $hist->{oid}{$dep_oid}{hists}->[ -1 ] == $g{current_cycle} ) {
 
                 # the last history is the current cycle, take the next previous
-                $last_cycle = ${ $hist->{ oid }{ $dep_oid }{ hists } }[ -2 ];
+                $last_cycle = ${ $hist->{oid}{$dep_oid}{hists} }[ -2 ];
             }
             else {
-                $last_cycle = ${ $hist->{ oid }{ $dep_oid }{ hists } }[ -1 ];
+                $last_cycle = ${ $hist->{oid}{$dep_oid}{hists} }[ -1 ];
             }
-            my $last_data = $hist->{ oid }{ $dep_oid }{ hist }{ $last_cycle }{ val };
-            my $last_time = $hist->{ oid }{ $dep_oid }{ hist }{ $last_cycle }{ time };
+            my $last_data = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{val};
+            my $last_time = $hist->{oid}{$dep_oid}{hist}{$last_cycle}{time};
             my $delta;
 
             # Check for counter wrap
@@ -545,45 +535,40 @@ sub trans_delta {
                 }
                 else {
                     do_log( "Data type too large for $dep_oid on $device.", ERROR );
-
-                    $oid_h->{ val }   = undef;
-                    $oid_h->{ time }  = time;
-                    $oid_h->{ color } = 'clear';
-                    $oid_h->{ msg }   = 'Too large';
+                    $oid_h->{val}   = undef;
+                    $oid_h->{time}  = time;
+                    $oid_h->{color} = 'clear';
+                    $oid_h->{msg}   = 'Too large';
                     return;
                 }
-
                 do_log( "Counterwrap on $oid on $device (this: $this_data last: $last_data delta: $delta", DEBUG )
-                    if $g{ debug };
+                    if $g{debug};
 
                 # Otherwise do normal delta calc
             }
             else {
                 $delta = ( $this_data - $last_data ) / ( $this_time - $last_time );
             }
-
-            $delta           = sprintf "%.2f", $delta;
-            $oid_h->{ val }  = $delta;
-            $oid_h->{ time } = time;
-
+            $delta         = sprintf "%.2f", $delta;
+            $oid_h->{val}  = $delta;
+            $oid_h->{time} = time;
         }
         else {
-
             # No history; throw wait message
-            $oid_h->{ val }   = 'wait';
-            $oid_h->{ time }  = time;
-            $oid_h->{ color } = 'clear';
-            $oid_h->{ msg }   = 'wait';
+            $oid_h->{val}   = 'wait';
+            $oid_h->{time}  = time;
+            $oid_h->{color} = 'clear';
+            $oid_h->{msg}   = 'wait';
         }
 
         # Store history if needed
-        if ( ( !exists $hist->{ oid }{ $dep_oid }{ hists } ) or ( $hist->{ oid }{ $dep_oid }{ hists }->[ -1 ] != $g{ current_cycle } ) ) {
-            $hist->{ oid }{ $dep_oid }{ hist }{ $g{ current_cycle } }->{ val }  = $this_data;
-            $hist->{ oid }{ $dep_oid }{ hist }{ $g{ current_cycle } }->{ time } = $this_time;
-            push( @{ $hist->{ oid }{ $dep_oid }{ hists } }, $g{ current_cycle } );
-            if ( ( scalar @{ $hist->{ oid }{ $dep_oid }{ hists } } - 1 ) > $hist->{ oid }{ $dep_oid }{ keep_hist_count } ) {
-                my $expired_hist_cycle = shift( @{ $hist->{ oid }{ $dep_oid }{ hists } } );
-                delete( $hist->{ oid }{ $dep_oid }{ hist }{ $expired_hist_cycle } );
+        if ( ( !exists $hist->{oid}{$dep_oid}{hists} ) or ( $hist->{oid}{$dep_oid}{hists}->[ -1 ] != $g{current_cycle} ) ) {
+            $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{val}  = $this_data;
+            $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{time} = $this_time;
+            push( @{ $hist->{oid}{$dep_oid}{hists} }, $g{current_cycle} );
+            if ( ( scalar @{ $hist->{oid}{$dep_oid}{hists} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
+                my $expired_hist_cycle = shift( @{ $hist->{oid}{$dep_oid}{hists} } );
+                delete( $hist->{oid}{$dep_oid}{hist}{$expired_hist_cycle} );
             }
         }
     }
@@ -593,8 +578,8 @@ sub trans_delta {
 # Do mathmatical translations ###############################################
 sub trans_math {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h     = \%{ $oids->{ $oid } };
-    my $expr      = $oid_h->{ trans_data };
+    my $oid_h     = \%{ $oids->{$oid} };
+    my $expr      = $oid_h->{trans_data};
     my $precision = 2;
 
     # Extract our optional precision argument
@@ -614,7 +599,7 @@ sub trans_math {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids, '^[-+]?\d+(\.\d+)?$' ) ) {
-        do_log( "Math transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{ debug };
+        do_log( "Math transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
         return;
     }
 
@@ -622,81 +607,80 @@ sub trans_math {
     # expression, since they are constant (i.e. not leaf dependent)
     my @repeaters;
     for my $dep_oid (@dep_oids) {
-        push @repeaters, $dep_oid and next if $oids->{ $dep_oid }{ repeat };
-        if ( ( defined $oids->{ $dep_oid }{ error } ) and ( $oids->{ $dep_oid }{ error } ) ) {
-            $oid_h->{ val }   = $oids->{ $dep_oid }{ val } if defined $oids->{ $dep_oid }{ val };
-            $oid_h->{ color } = $oids->{ $dep_oid }{ color };
-            $oid_h->{ msg }   = $oids->{ $dep_oid }{ msg } if defined $oids->{ $dep_oid }{ msg };
-            $oid_h->{ error } = 1;
+        push @repeaters, $dep_oid and next if $oids->{$dep_oid}{repeat};
+        if ( ( defined $oids->{$dep_oid}{error} ) and ( $oids->{$dep_oid}{error} ) ) {
+            $oid_h->{val}   = $oids->{$dep_oid}{val} if defined $oids->{$dep_oid}{val};
+            $oid_h->{color} = $oids->{$dep_oid}{color};
+            $oid_h->{msg}   = $oids->{$dep_oid}{msg} if defined $oids->{$dep_oid}{msg};
+            $oid_h->{error} = 1;
             return;
         }
         $expr =~ s/\{$dep_oid\}/$oids->{$dep_oid}{val}/g;
     }
 
     # Handle repeater-type oids
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
         my @dep_val;
         for ( my $i = 0 ; $i <= $#repeaters ; $i++ ) {
             $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
         }
-        for my $leaf ( keys %{ $oids->{ $oid_h->{ pri_oid } }{ val } } ) {
+        for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) ) {
+            if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) ) {
                 next;
             }
 
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
             undef @dep_val;
-            for (@repeaters) { push @dep_val, $oids->{ $_ }{ val }{ $leaf } }
+            for (@repeaters) { push @dep_val, $oids->{$_}{val}{$leaf} }
 
             # Do our eval and set our time
             my $result = eval($expr);
-            $oid_h->{ time }{ $leaf } = time;
+            $oid_h->{time}{$leaf} = time;
             if ($@) {
                 chomp $@;
                 if ( $@ =~ /^Illegal division by zero/ ) {
-                    $oid_h->{ val }{ $leaf }   = 'NaN';
-                    $oid_h->{ color }{ $leaf } = 'clear';
-                    $oid_h->{ msg }{ $leaf }   = '';
+                    $oid_h->{val}{$leaf}   = 'NaN';
+                    $oid_h->{color}{$leaf} = 'clear';
+                    $oid_h->{msg}{$leaf}   = '';
                 }
                 else {
                     do_log( "Failed eval for TRANS_MATH on $oid.$leaf: $expr ($@)", ERROR );
-                    $oid_h->{ val }{ $leaf }   = undef;
-                    $oid_h->{ color }{ $leaf } = 'clear';
-                    $oid_h->{ msg }{ $leaf }   = $@;
+                    $oid_h->{val}{$leaf}   = undef;
+                    $oid_h->{color}{$leaf} = 'clear';
+                    $oid_h->{msg}{$leaf}   = $@;
                 }
             }
             else {
                 $result = sprintf $print_mask, $result;
-                $oid_h->{ val }{ $leaf } = $result;
+                $oid_h->{val}{$leaf} = $result;
             }
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-
         # All of our non-reps were substituted earlier, so we can just eval
         my $result = eval $expr;
         if ($@) {
             chomp $@;
             if ( $@ =~ /^Illegal division by zero/ ) {
-                $oid_h->{ val }   = 'NaN';
-                $oid_h->{ color } = 'clear';
-                $oid_h->{ msg }   = '';
+                $oid_h->{val}   = 'NaN';
+                $oid_h->{color} = 'clear';
+                $oid_h->{msg}   = '';
             }
             else {
                 do_log( "Failed eval for TRANS_MATH on $oid: $expr ($@)", ERROR );
-                $oid_h->{ val }   = undef;
-                $oid_h->{ color } = 'clear';
-                $oid_h->{ msg }   = $@;
+                $oid_h->{val}   = undef;
+                $oid_h->{color} = 'clear';
+                $oid_h->{msg}   = $@;
             }
         }
         else {
-            $result         = sprintf $print_mask, $result;
-            $oid_h->{ val } = $result;
+            $result       = sprintf $print_mask, $result;
+            $oid_h->{val} = $result;
         }
     }
 
@@ -709,7 +693,7 @@ sub trans_math {
 # The statistic is one of 'min', 'avg', 'max', 'cnt' or 'sum'.
 sub trans_statistic {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid,   $dep_oid_h, @leaf,   $leaf );
     my ( $statistic, $val,       $result, $count );
 
@@ -724,9 +708,9 @@ sub trans_statistic {
     );
 
     # Extract the parent oid from the expression.
-    ( $dep_oid, $statistic ) = $oid_h->{ trans_data } =~ /^\{(.+)\}\s+(\S+)$/;
+    ( $dep_oid, $statistic ) = $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\S+)$/;
     $statistic = lc $statistic;
-    $dep_oid_h = \%{ $oids->{ $dep_oid } };
+    $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -738,63 +722,62 @@ sub trans_statistic {
     # Do not use function validate_deps. It will make this oid to be of the
     # repeater-type if the parent oid is of the repeater-type. The code section
     # below is inspired on the relevant parts of function validate_deps.
-    $oid_h->{ repeat } = 0;       # Make a leaf-type oid
-    $oid_h->{ val }    = undef;
+    $oid_h->{repeat} = 0;       # Make a leaf-type oid
+    $oid_h->{val}    = undef;
 
     # Check all the leaves of a repeater-type oid for an error condition. If
     # one is found, propagate the error condition to the result oid.
-    if ( $dep_oid_h->{ repeat } ) {
-        if ( scalar keys %{ $dep_oid_h->{ val } } ) {
-            for $leaf ( keys %{ $dep_oid_h->{ val } } ) {
-                $val = $dep_oid_h->{ val }{ $leaf };
+    if ( $dep_oid_h->{repeat} ) {
+        if ( scalar keys %{ $dep_oid_h->{val} } ) {
+            for $leaf ( keys %{ $dep_oid_h->{val} } ) {
+                $val = $dep_oid_h->{val}{$leaf};
                 if ( !defined $val ) {
-                    $oid_h->{ val }   = 'parent value n/a';
-                    $oid_h->{ color } = 'clear';
+                    $oid_h->{val}   = 'parent value n/a';
+                    $oid_h->{color} = 'clear';
                     last;
                 }
                 elsif ( $val eq 'wait' ) {
-                    $oid_h->{ val }   = 'wait';
-                    $oid_h->{ color } = 'clear';
-                    $oid_h->{ msg }   = 'msg';
+                    $oid_h->{val}   = 'wait';
+                    $oid_h->{color} = 'clear';
+                    $oid_h->{msg}   = 'msg';
                     last;
                 }
-                elsif ( $dep_oid_h->{ error }{ $leaf } ) {
-                    $oid_h->{ val }   = 'inherited';
-                    $oid_h->{ color } = 'clear';
+                elsif ( $dep_oid_h->{error}{$leaf} ) {
+                    $oid_h->{val}   = 'inherited';
+                    $oid_h->{color} = 'clear';
                     last;
                 }
                 elsif ( $statistic ne 'cnt' and $val !~ m/^[-+]?\d+(?:\.\d+)?$/ ) {
-                    $oid_h->{ val }   = 'Regex mismatch';
-                    $oid_h->{ color } = 'clear';
+                    $oid_h->{val}   = 'Regex mismatch';
+                    $oid_h->{color} = 'clear';
                     last;
                 }
             }
         }
         else {
-
             # there is no leaf, so they are undefined
-            $oid_h->{ val }   = 'parent value n/a';
-            $oid_h->{ color } = 'clear';
+            $oid_h->{val}   = 'parent value n/a';
+            $oid_h->{color} = 'clear';
         }
     }
     else {
-        if ( $dep_oid_h->{ error } ) {
-            $oid_h->{ val }   = $dep_oid_h->{ val };
-            $oid_h->{ color } = $dep_oid_h->{ color };
+        if ( $dep_oid_h->{error} ) {
+            $oid_h->{val}   = $dep_oid_h->{val};
+            $oid_h->{color} = $dep_oid_h->{color};
         }
     }
-    if ( defined $oid_h->{ val } ) {
-        $oid_h->{ time }  = time;
-        $oid_h->{ error } = 1;
+    if ( defined $oid_h->{val} ) {
+        $oid_h->{time}  = time;
+        $oid_h->{error} = 1;
     }
 
     # bypass if we already have an error code
-    if ( !defined $oid_h->{ error } ) {
+    if ( !defined $oid_h->{error} ) {
 
         # The parent oid is a repeater-type oid. Determine the requested statistic
         # from this list.
-        if ( $dep_oid_h->{ repeat } ) {
-            @leaf  = keys %{ $dep_oid_h->{ val } };
+        if ( $dep_oid_h->{repeat} ) {
+            @leaf  = keys %{ $dep_oid_h->{val} };
             $count = scalar @leaf;
             if ( $statistic eq 'cnt' ) {
                 $result = $count;
@@ -803,28 +786,27 @@ sub trans_statistic {
                 $result = undef;
             }
             else {
-
                 # Extract the first value of the list. This value is a nice starting
                 # value to determine the minimum and the maximum.
                 $leaf   = shift @leaf;
-                $result = $dep_oid_h->{ val }{ $leaf };
+                $result = $dep_oid_h->{val}{$leaf};
                 for $leaf (@leaf) {
-                    $val = $dep_oid_h->{ val }{ $leaf };
-                    &{ $comp{ $statistic } };    # Perform statistical computation
+                    $val = $dep_oid_h->{val}{$leaf};
+                    &{ $comp{$statistic} };    # Perform statistical computation
                 }
                 $result = $result / $count if $statistic eq 'avg';
             }
-            $oid_h->{ val }  = $result;
-            $oid_h->{ time } = time;
+            $oid_h->{val}  = $result;
+            $oid_h->{time} = time;
 
             # The parent oid is a non-repeater-type oid. The computation of the
             # statistic is trivial in this case.
         }
         else {
-            $oid_h->{ val }  = $dep_oid_h->{ val };
-            $oid_h->{ val }  = 1 if $statistic eq 'cnt';
-            $oid_h->{ time } = $dep_oid_h->{ time };
-            $oid_h->{ msg }  = $dep_oid_h->{ msg };
+            $oid_h->{val}  = $dep_oid_h->{val};
+            $oid_h->{val}  = 1 if $statistic eq 'cnt';
+            $oid_h->{time} = $dep_oid_h->{time};
+            $oid_h->{msg}  = $dep_oid_h->{msg};
         }
     }
     apply_threshold( $oids, $oid );
@@ -833,10 +815,10 @@ sub trans_statistic {
 # Get substring of dependent oid ############################################
 sub trans_substr {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid, $offset, $length ) = ( $1, $2, $3 )
-        if $oid_h->{ trans_data } =~ /^\{(.+)\}\s+(\d+)\s*(\d*)$/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+        if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\d+)\s*(\d*)$/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
     $length = undef if $length eq '';
 
     # Define our primary oid
@@ -849,31 +831,31 @@ sub trans_substr {
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+    if ( $oid_h->{repeat} ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             # Do string substitution
-            my $string = $dep_oid_h->{ val }{ $leaf };
+            my $string = $dep_oid_h->{val}{$leaf};
             if ( defined $length ) {
-                $oid_h->{ val }{ $leaf } = substr $string, $offset, $length;
+                $oid_h->{val}{$leaf} = substr $string, $offset, $length;
             }
             else {
-                $oid_h->{ val }{ $leaf } = substr $string, $offset;
+                $oid_h->{val}{$leaf} = substr $string, $offset;
             }
         }
 
         # Otherwise we are a non-repeater oid
     }
     else {
-        my $string = $dep_oid_h->{ val };
+        my $string = $dep_oid_h->{val};
         if ( defined $length ) {
-            $oid_h->{ val } = substr $string, $offset, $length;
+            $oid_h->{val} = substr $string, $offset, $length;
         }
         else {
-            $oid_h->{ val } = substr $string, $offset;
+            $oid_h->{val} = substr $string, $offset;
         }
     }
 
@@ -883,10 +865,10 @@ sub trans_substr {
 
 sub trans_pack {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid, $type, $seperator ) = ( $1, $2, $3 || '' )
-        if $oid_h->{ trans_data } =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+        if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -900,26 +882,25 @@ sub trans_pack {
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
 
         # Unpack ze data
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-
-            my @packed = split $seperator, $dep_oid_h->{ val }{ $leaf };
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            my @packed = split $seperator, $dep_oid_h->{val}{$leaf};
             my $val    = pack $type, @packed;
-            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", DEBUG ) if $g{ debug };
-            $oid_h->{ val }{ $leaf } = $val;
+            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", DEBUG ) if $g{debug};
+            $oid_h->{val}{$leaf} = $val;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-        my $packed = $dep_oid_h->{ val };
+        my $packed = $dep_oid_h->{val};
         my @vars   = pack $type, $packed;
-        $oid_h->{ val } = join $seperator, @vars;
+        $oid_h->{val} = join $seperator, @vars;
     }
 
     # Apply thresholds
@@ -929,10 +910,10 @@ sub trans_pack {
 # Translate hex or octal data into decimal ##################################
 sub trans_unpack {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
     my ( $dep_oid, $type, $seperator ) = ( $1, $2, $3 || '' )
-        if $oid_h->{ trans_data } =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+        if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(\S+)(?:\s+"(.+)")?/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -946,24 +927,24 @@ sub trans_unpack {
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
 
         # Unpack ze data
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-            my $packed = $dep_oid_h->{ val }{ $leaf };
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            my $packed = $dep_oid_h->{val}{$leaf};
             my @vars   = unpack $type, $packed;
-            $oid_h->{ val }{ $leaf } = join $seperator, @vars;
+            $oid_h->{val}{$leaf} = join $seperator, @vars;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-        my $packed = $dep_oid_h->{ val };
+        my $packed = $dep_oid_h->{val};
         my @vars   = unpack $type, $packed;
-        $oid_h->{ val } = join $seperator, @vars;
+        $oid_h->{val} = join $seperator, @vars;
     }
 
     # Apply thresholds
@@ -973,12 +954,12 @@ sub trans_unpack {
 # Translate hex or octal data into decimal ##################################
 sub trans_convert {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our translation options
     my ( $dep_oid, $type, $pad ) = ( $1, lc $2, $3 )
-        if $oid_h->{ trans_data } =~ /^\{(.+)\}\s+(hex|oct)\s*(\d*)$/i;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+        if $oid_h->{trans_data} =~ /^\{(.+)\}\s+(hex|oct)\s*(\d*)$/i;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -992,25 +973,25 @@ sub trans_convert {
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
 
         # Do our conversions
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-            my $val = $dep_oid_h->{ val }{ $leaf };
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            my $val = $dep_oid_h->{val}{$leaf};
             my $int;
             if   ( $type eq 'oct' ) { $int = oct $val }
             else                    { $int = hex $val }
             $int = sprintf '%' . "$pad.$pad" . 'd', $int if $pad ne '';
-            $oid_h->{ val }{ $leaf } = $int;
+            $oid_h->{val}{$leaf} = $int;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-        my $val = $dep_oid_h->{ val };
+        my $val = $dep_oid_h->{val};
         my $int;
         if ( $type eq 'oct' ) {
             $int = oct $val;
@@ -1019,7 +1000,7 @@ sub trans_convert {
             $int = hex $val;
         }
         $int = sprintf '%' . "$pad.$pad" . 'd', $int if $pad ne '';
-        $oid_h->{ val } = $int;
+        $oid_h->{val} = $int;
     }
 
     # Apply thresholds
@@ -1030,8 +1011,8 @@ sub trans_convert {
 # WiP: Not used at alli, not working
 sub trans_eval {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
-    my $expr  = $oid_h->{ trans_data };
+    my $oid_h = \%{ $oids->{$oid} };
+    my $expr  = $oid_h->{trans_data};
 
     # Extract all our our parent oids from the expression, first
     my @dep_oids = $expr =~ /\{(.+?)\}/g;
@@ -1044,58 +1025,57 @@ sub trans_eval {
     # expression, since they are constant (i.e. not leaf dependent)
     my @repeaters;
     for my $dep_oid (@dep_oids) {
-        push @repeaters, $dep_oid and next if $oids->{ $dep_oid }{ repeat };
+        push @repeaters, $dep_oid and next if $oids->{$dep_oid}{repeat};
         $expr =~ s/\{$dep_oid\}/$oids->{$dep_oid}{val}/g;
     }
 
     # Handle repeater-type oids
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
         for ( my $i = 0 ; $i <= $#repeaters ; $i++ ) {
             $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
         }
-        for my $leaf ( keys %{ $oids->{ $oid_h->{ pri_oid } }{ val } } ) {
+        for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
             # Skip if we got a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
             my @dep_val;
-            for (@repeaters) { push @dep_val, $oids->{ $_ }{ val }{ $leaf } }
+            for (@repeaters) { push @dep_val, $oids->{$_}{val}{$leaf} }
 
             # Do our eval and set our time
             my $result = eval($expr);
-            $oid_h->{ time }{ $leaf } = time;
+            $oid_h->{time}{$leaf} = time;
             if ( $@ =~ /^Undefined subroutine/ ) {
                 $result = 0;
             }
             elsif ($@) {
                 do_log( "Failed eval for TRANS_EVAL on $oid.$leaf: $expr ($@)", WARN );
-                $oid_h->{ val }{ $leaf }   = 'Failed eval';
-                $oid_h->{ color }{ $leaf } = 'clear';
-                $oid_h->{ error }{ $leaf } = 1;
+                $oid_h->{val}{$leaf}   = 'Failed eval';
+                $oid_h->{color}{$leaf} = 'clear';
+                $oid_h->{error}{$leaf} = 1;
                 next;
             }
-            $oid_h->{ val }{ $leaf } = $result;
+            $oid_h->{val}{$leaf} = $result;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-
         # All of our non-reps were substituted earlier, so we can just eval
         my $result = eval $expr;
-        $oid_h->{ time } = time;
+        $oid_h->{time} = time;
         if ( $@ =~ /^Undefined subroutine/ ) {
             $result = 0;
         }
         elsif ($@) {
             do_log( "Failed eval for TRANS_STR on $oid: $expr ($@)", WARN );
-            $oid_h->{ val }   = 'Failed eval';
-            $oid_h->{ color } = 'clear';
-            $oid_h->{ error } = 1;
+            $oid_h->{val}   = 'Failed eval';
+            $oid_h->{color} = 'clear';
+            $oid_h->{error} = 1;
         }
-        $oid_h->{ val } = $result;
+        $oid_h->{val} = $result;
     }
 
     # Now apply our threshold to this data
@@ -1105,110 +1085,107 @@ sub trans_eval {
 # Get the best color of one or more oids ################################
 sub trans_best {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract all our our parent oids from the expression, first
-    my @dep_oids = $oid_h->{ trans_data } =~ /\{(.+?)\}/g;
+    my @dep_oids = $oid_h->{trans_data} =~ /\{(.+?)\}/g;
 
     # define primary oid
     my $pri_oid_is_defined = define_pri_oid( $oids, $oid, \@dep_oids );
     if ($pri_oid_is_defined) {
 
         # Use a non-repeater type if we havent set it yet
-        $oid_h->{ repeat } ||= 0;
-        my $pri_oid = $oid_h->{ pri_oid };
+        $oid_h->{repeat} ||= 0;
+        my $pri_oid = $oid_h->{pri_oid};
 
         # Do repeater-type oids
-        if ( $oid_h->{ repeat } ) {
+        if ( $oid_h->{repeat} ) {
 
             # check first if we have a global color (not HASH but set directly) as we should not or we have an globale error
-            if ( ref $oids->{ $pri_oid }{ color } ne 'HASH' ) {
-                $oid_h->{ color } = $oids->{ $pri_oid }{ color };
-                $oid_h->{ msg }   = $oids->{ $pri_oid }{ msg } if defined $oids->{ $pri_oid }{ msg };
+            if ( ref $oids->{$pri_oid}{color} ne 'HASH' ) {
+                $oid_h->{color} = $oids->{$pri_oid}{color};
+                $oid_h->{msg}   = $oids->{$pri_oid}{msg} if defined $oids->{$pri_oid}{msg};
             }
             else {
-                for my $leaf ( keys %{ $oids->{ $oid_h->{ pri_oid } }{ val } } ) {
+                for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
                     # Go through each parent oid for this leaf
                     for my $dep_oid (@dep_oids) {
-                        my $dep_oid_h = \%{ $oids->{ $dep_oid } };
-                        if ( $dep_oid_h->{ repeat } and ( ref $dep_oid_h->{ color } eq 'HASH' ) ) {
-                            if ( !defined $oid_h->{ color }{ $leaf }
-                                or $colors{ $dep_oid_h->{ color }{ $leaf } } < $colors{ $oid_h->{ color }{ $leaf } } )
+                        my $dep_oid_h = \%{ $oids->{$dep_oid} };
+                        if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
+                            if ( !defined $oid_h->{color}{$leaf}
+                                or $colors{ $dep_oid_h->{color}{$leaf} } < $colors{ $oid_h->{color}{$leaf} } )
                             {
-                                $oid_h->{ val }{ $leaf }   = $dep_oid_h->{ val }{ $leaf };
-                                $oid_h->{ color }{ $leaf } = $dep_oid_h->{ color }{ $leaf };
-                                if ( ( exists $dep_oid_h->{ msg } ) and ( defined $dep_oid_h->{ msg }{ $leaf } ) and ( $dep_oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                    $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg }{ $leaf };
+                                $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
+                                $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
+                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
+                                    $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                 }
                                 else {
-                                    if ( ( exists $oid_h->{ msg } ) and ( exists $oid_h->{ msg }{ $leaf } ) ) {
-                                        delete $oid_h->{ msg }{ $leaf };
-                                        delete $oid_h->{ msg } unless %{ $oid_h->{ msg } };
+                                    if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
+                                        delete $oid_h->{msg}{$leaf};
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
-                            elsif ( $dep_oid_h->{ color }{ $leaf } eq $oid_h->{ color }{ $leaf } ) {
+                            elsif ( $dep_oid_h->{color}{$leaf} eq $oid_h->{color}{$leaf} ) {
 
                                 #$oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
-                                if ( defined $dep_oid_h->{ val }{ $leaf } and ( $dep_oid_h->{ val }{ $leaf } ne '' ) ) {
-                                    if ( ( defined $oid_h->{ val }{ $leaf } ) and ( $oid_h->{ val }{ $leaf } ne '' ) and $oid_h->{ val }{ $leaf } ne $dep_oid_h->{ val }{ $leaf } ) {
-                                        $oid_h->{ val }{ $leaf } .= "|" . $dep_oid_h->{ val }{ $leaf };
+                                if ( defined $dep_oid_h->{val}{$leaf} and ( $dep_oid_h->{val}{$leaf} ne '' ) ) {
+                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val}{$leaf} ) {
+                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
                                     }
                                     else {
-                                        $oid_h->{ val }{ $leaf } = $dep_oid_h->{ val }{ $leaf };
+                                        $oid_h->{val}{$leaf} = $dep_oid_h->{val}{$leaf};
                                     }
                                 }
-                                if ( ( exists $dep_oid_h->{ msg } ) and ( defined $dep_oid_h->{ msg }{ $leaf } ) and ( $dep_oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                    if ( ( exists $oid_h->{ msg } ) and ( defined $oid_h->{ msg }{ $leaf } ) and ( $oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                        $oid_h->{ msg }{ $leaf } .= " & " . $dep_oid_h->{ msg }{ $leaf };
+                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
+                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
+                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
                                     }
                                     else {
-                                        $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg }{ $leaf };
+                                        $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
                         }
                         else {
-
-                            if ( !defined $oid_h->{ color }{ $leaf }
-                                or $colors{ $dep_oid_h->{ color } } < $colors{ $oid_h->{ color }{ $leaf } } )
+                            if ( !defined $oid_h->{color}{$leaf}
+                                or $colors{ $dep_oid_h->{color} } < $colors{ $oid_h->{color}{$leaf} } )
                             {
-                                $oid_h->{ val }{ $leaf }   = $dep_oid_h->{ val };
-                                $oid_h->{ color }{ $leaf } = $dep_oid_h->{ color };
-                                if ( ( defined $dep_oid_h->{ msg } and $dep_oid_h->{ msg } ne '' ) ) {
-                                    $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg };
+                                $oid_h->{val}{$leaf}   = $dep_oid_h->{val};
+                                $oid_h->{color}{$leaf} = $dep_oid_h->{color};
+                                if ( ( defined $dep_oid_h->{msg} and $dep_oid_h->{msg} ne '' ) ) {
+                                    $oid_h->{msg}{$leaf} = $dep_oid_h->{msg};
                                 }
                                 else {
-                                    if ( ( exists $oid_h->{ msg } ) and ( exists $oid_h->{ msg }{ $leaf } ) ) {
-                                        delete $oid_h->{ msg }{ $leaf };
-                                        delete $oid_h->{ msg } unless %{ $oid_h->{ msg } };
+                                    if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
+                                        delete $oid_h->{msg}{$leaf};
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
-                            elsif ( $dep_oid_h->{ color } eq $oid_h->{ color }{ $leaf } ) {
-
-                                if ( defined $dep_oid_h->{ val } and ( $dep_oid_h->{ val } ne '' ) ) {
-                                    if ( ( defined $oid_h->{ val }{ $leaf } ) and ( $oid_h->{ val }{ $leaf } ne '' ) and $oid_h->{ val }{ $leaf } ne $dep_oid_h->{ val } ) {
-                                        $oid_h->{ val }{ $leaf } .= "|" . $dep_oid_h->{ val };
+                            elsif ( $dep_oid_h->{color} eq $oid_h->{color}{$leaf} ) {
+                                if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
+                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val} ) {
+                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val};
                                     }
                                     else {
-                                        $oid_h->{ val }{ $leaf } = $dep_oid_h->{ val };
+                                        $oid_h->{val}{$leaf} = $dep_oid_h->{val};
                                     }
                                 }
-
-                                if ( ( defined $dep_oid_h->{ msg } and $dep_oid_h->{ msg } ne '' ) ) {
-                                    if ( ( exists $oid_h->{ msg } ) and ( defined $oid_h->{ msg }{ $leaf } ) and ( $oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                        $oid_h->{ msg }{ $leaf } .= " & " . $dep_oid_h->{ msg };
+                                if ( ( defined $dep_oid_h->{msg} and $dep_oid_h->{msg} ne '' ) ) {
+                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
+                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
                                     }
                                     else {
-                                        $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg };
+                                        $oid_h->{msg}{$leaf} = $dep_oid_h->{msg};
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
                         }
                     }
@@ -1218,47 +1195,42 @@ sub trans_best {
             # Otherwise we are a single entry datum
         }
         else {
-
             for my $dep_oid (@dep_oids) {
-
-                my $dep_oid_h = \%{ $oids->{ $dep_oid } };
-
-                if ( !defined $oid_h->{ color }
-                    or $colors{ $dep_oid_h->{ color } } < $colors{ $oid_h->{ color } } )
+                my $dep_oid_h = \%{ $oids->{$dep_oid} };
+                if ( !defined $oid_h->{color}
+                    or $colors{ $dep_oid_h->{color} } < $colors{ $oid_h->{color} } )
                 {
                     #$oid_h->{val}        = $dep_oid_h_val;
-                    $oid_h->{ val }   = $dep_oid_h->{ val };
-                    $oid_h->{ color } = $dep_oid_h->{ color };
-                    $oid_h->{ msg }   = $dep_oid_h->{ msg };
-                    $oid_h->{ time }  = time;
+                    $oid_h->{val}   = $dep_oid_h->{val};
+                    $oid_h->{color} = $dep_oid_h->{color};
+                    $oid_h->{msg}   = $dep_oid_h->{msg};
+                    $oid_h->{time}  = time;
                 }
-                elsif ( $dep_oid_h->{ color } eq $oid_h->{ color } ) {
-
-                    if ( defined $dep_oid_h->{ val } and ( $dep_oid_h->{ val } ne '' ) ) {
-                        if ( ( defined $oid_h->{ val } ) and ( $oid_h->{ val } ne '' ) and $oid_h->{ val } ne $dep_oid_h->{ val } ) {
-                            $oid_h->{ val } .= "|" . $dep_oid_h->{ val };
+                elsif ( $dep_oid_h->{color} eq $oid_h->{color} ) {
+                    if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
+                        if ( ( defined $oid_h->{val} ) and ( $oid_h->{val} ne '' ) and $oid_h->{val} ne $dep_oid_h->{val} ) {
+                            $oid_h->{val} .= "|" . $dep_oid_h->{val};
                         }
                         else {
-                            $oid_h->{ val } = $dep_oid_h->{ val };
+                            $oid_h->{val} = $dep_oid_h->{val};
                         }
                     }
-
-                    if ( defined $dep_oid_h->{ msg } and ( $dep_oid_h->{ msg } ne '' ) ) {
-                        if ( ( defined $oid_h->{ msg } ) and ( $oid_h->{ msg } ne '' ) and ( index( $oid_h->{ msg }, $dep_oid_h->{ msg } ) == -1 ) ) {
-                            $oid_h->{ msg } .= " & " . $dep_oid_h->{ msg };
+                    if ( defined $dep_oid_h->{msg} and ( $dep_oid_h->{msg} ne '' ) ) {
+                        if ( ( defined $oid_h->{msg} ) and ( $oid_h->{msg} ne '' ) and ( index( $oid_h->{msg}, $dep_oid_h->{msg} ) == -1 ) ) {
+                            $oid_h->{msg} .= " & " . $dep_oid_h->{msg};
                         }
                         else {
-                            $oid_h->{ msg } = $dep_oid_h->{ msg };
+                            $oid_h->{msg} = $dep_oid_h->{msg};
                         }
                     }
-                    $oid_h->{ time } = time;
+                    $oid_h->{time} = time;
                 }
             }
         }
     }
     else {
-        $oid_h->{ color } = "clear";
-        $oid_h->{ msg }   = "Primary OID not defined";
+        $oid_h->{color} = "clear";
+        $oid_h->{msg}   = "Primary OID not defined";
     }
     apply_threshold( $oids, $oid );
 }
@@ -1266,108 +1238,106 @@ sub trans_best {
 # Get the worst color of one or more oids ##################################
 sub trans_worst {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract all our our parent oids from the expression, first
-    my @dep_oids = $oid_h->{ trans_data } =~ /\{(.+?)\}/g;
+    my @dep_oids = $oid_h->{trans_data} =~ /\{(.+?)\}/g;
 
     # define primary oid
     my $pri_oid_is_defined = define_pri_oid( $oids, $oid, \@dep_oids );
-
     if ($pri_oid_is_defined) {
 
         # Use a non-repeater type if we havent set it yet
-        $oid_h->{ repeat } ||= 0;
-        my $pri_oid = $oid_h->{ pri_oid };
+        $oid_h->{repeat} ||= 0;
+        my $pri_oid = $oid_h->{pri_oid};
 
         # Do repeater-type oids
-        if ( $oid_h->{ repeat } ) {
+        if ( $oid_h->{repeat} ) {
 
             # check first if we have a global color (not HASH but set directly) as we should not or we have an globale error
-            if ( ref $oids->{ $pri_oid }{ color } ne 'HASH' ) {
-                $oid_h->{ color } = $oids->{ $pri_oid }{ color };
-                $oid_h->{ msg }   = $oids->{ $pri_oid }{ msg } if defined $oids->{ $pri_oid }{ msg };
+            if ( ref $oids->{$pri_oid}{color} ne 'HASH' ) {
+                $oid_h->{color} = $oids->{$pri_oid}{color};
+                $oid_h->{msg}   = $oids->{$pri_oid}{msg} if defined $oids->{$pri_oid}{msg};
             }
             else {
-
-                for my $leaf ( keys %{ $oids->{ $oid_h->{ pri_oid } }{ val } } ) {
+                for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
                     # Go through each parent oid for this leaf
                     for my $dep_oid (@dep_oids) {
-                        my $dep_oid_h = \%{ $oids->{ $dep_oid } };
-                        if ( $dep_oid_h->{ repeat } and ( ref $dep_oid_h->{ color } eq 'HASH' ) ) {
-                            if (   not defined $dep_oid_h->{ color }{ $leaf }
-                                or not defined $oid_h->{ color }{ $leaf }
-                                or $colors{ $dep_oid_h->{ color }{ $leaf } } > $colors{ $oid_h->{ color }{ $leaf } } )
+                        my $dep_oid_h = \%{ $oids->{$dep_oid} };
+                        if ( $dep_oid_h->{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
+                            if (   not defined $dep_oid_h->{color}{$leaf}
+                                or not defined $oid_h->{color}{$leaf}
+                                or $colors{ $dep_oid_h->{color}{$leaf} } > $colors{ $oid_h->{color}{$leaf} } )
                             {
-                                $oid_h->{ val }{ $leaf }   = $dep_oid_h->{ val }{ $leaf };
-                                $oid_h->{ color }{ $leaf } = $dep_oid_h->{ color }{ $leaf };
-                                if ( ( exists $dep_oid_h->{ msg } ) and ( defined $dep_oid_h->{ msg }{ $leaf } ) and ( $dep_oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                    $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg }{ $leaf };
+                                $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
+                                $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
+                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
+                                    $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                 }
                                 else {
-                                    if ( ( exists $oid_h->{ msg } ) and ( exists $oid_h->{ msg }{ $leaf } ) ) {
-                                        delete $oid_h->{ msg }{ $leaf };
-                                        delete $oid_h->{ msg } unless %{ $oid_h->{ msg } };
+                                    if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
+                                        delete $oid_h->{msg}{$leaf};
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
-                            elsif ( $dep_oid_h->{ color }{ $leaf } eq $oid_h->{ color }{ $leaf } ) {
-                                if ( defined $dep_oid_h->{ val }{ $leaf } and ( $dep_oid_h->{ val }{ $leaf } ne '' ) ) {
-                                    if ( ( defined $oid_h->{ val }{ $leaf } ) and ( $oid_h->{ val }{ $leaf } ne '' ) and $oid_h->{ val }{ $leaf } ne $dep_oid_h->{ val }{ $leaf } ) {
-                                        $oid_h->{ val }{ $leaf } .= "|" . $dep_oid_h->{ val }{ $leaf };
+                            elsif ( $dep_oid_h->{color}{$leaf} eq $oid_h->{color}{$leaf} ) {
+                                if ( defined $dep_oid_h->{val}{$leaf} and ( $dep_oid_h->{val}{$leaf} ne '' ) ) {
+                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val}{$leaf} ) {
+                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
                                     }
                                     else {
-                                        $oid_h->{ val }{ $leaf } = $dep_oid_h->{ val }{ $leaf };
+                                        $oid_h->{val}{$leaf} = $dep_oid_h->{val}{$leaf};
                                     }
                                 }
-                                if ( ( exists $dep_oid_h->{ msg } ) and ( defined $dep_oid_h->{ msg }{ $leaf } ) and ( $dep_oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                    if ( ( exists $oid_h->{ msg } ) and ( defined $oid_h->{ msg }{ $leaf } ) and ( $oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                        $oid_h->{ msg }{ $leaf } .= " & " . $dep_oid_h->{ msg }{ $leaf };
+                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
+                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
+                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
                                     }
                                     else {
-                                        $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg }{ $leaf };
+                                        $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
                         }
                         else {
-                            if ( !defined $oid_h->{ color }{ $leaf }
-                                or $colors{ $dep_oid_h->{ color } } > $colors{ $oid_h->{ color }{ $leaf } } )
+                            if ( !defined $oid_h->{color}{$leaf}
+                                or $colors{ $dep_oid_h->{color} } > $colors{ $oid_h->{color}{$leaf} } )
                             {
-                                $oid_h->{ val }{ $leaf }   = $dep_oid_h->{ val };
-                                $oid_h->{ color }{ $leaf } = $dep_oid_h->{ color };
-                                if ( ( defined $dep_oid_h->{ msg } and $dep_oid_h->{ msg } ne '' ) ) {
-                                    $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg };
+                                $oid_h->{val}{$leaf}   = $dep_oid_h->{val};
+                                $oid_h->{color}{$leaf} = $dep_oid_h->{color};
+                                if ( ( defined $dep_oid_h->{msg} and $dep_oid_h->{msg} ne '' ) ) {
+                                    $oid_h->{msg}{$leaf} = $dep_oid_h->{msg};
                                 }
                                 else {
-                                    if ( ( exists $oid_h->{ msg } ) and ( exists $oid_h->{ msg }{ $leaf } ) ) {
-                                        delete $oid_h->{ msg }{ $leaf };
-                                        delete $oid_h->{ msg } unless %{ $oid_h->{ msg } };
+                                    if ( ( exists $oid_h->{msg} ) and ( exists $oid_h->{msg}{$leaf} ) ) {
+                                        delete $oid_h->{msg}{$leaf};
+                                        delete $oid_h->{msg} unless %{ $oid_h->{msg} };
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
-                            elsif ( $dep_oid_h->{ color } eq $oid_h->{ color }{ $leaf } ) {
-                                if ( defined $dep_oid_h->{ val } and ( $dep_oid_h->{ val } ne '' ) ) {
-                                    if ( ( defined $oid_h->{ val }{ $leaf } ) and ( $oid_h->{ val }{ $leaf } ne '' ) and $oid_h->{ val }{ $leaf } ne $dep_oid_h->{ val } ) {
-                                        $oid_h->{ val }{ $leaf } .= "|" . $dep_oid_h->{ val };
+                            elsif ( $dep_oid_h->{color} eq $oid_h->{color}{$leaf} ) {
+                                if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
+                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val} ) {
+                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val};
                                     }
                                     else {
-                                        $oid_h->{ val }{ $leaf } = $dep_oid_h->{ val };
+                                        $oid_h->{val}{$leaf} = $dep_oid_h->{val};
                                     }
                                 }
-                                if ( ( defined $dep_oid_h->{ msg } and $dep_oid_h->{ msg } ne '' ) ) {
-                                    if ( ( exists $oid_h->{ msg } ) and ( defined $oid_h->{ msg }{ $leaf } ) and ( $oid_h->{ msg }{ $leaf } ne '' ) ) {
-                                        $oid_h->{ msg }{ $leaf } .= " & " . $dep_oid_h->{ msg };
+                                if ( ( defined $dep_oid_h->{msg} and $dep_oid_h->{msg} ne '' ) ) {
+                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
+                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
                                     }
                                     else {
-                                        $oid_h->{ msg }{ $leaf } = $dep_oid_h->{ msg };
+                                        $oid_h->{msg}{$leaf} = $dep_oid_h->{msg};
                                     }
                                 }
-                                $oid_h->{ time }{ $leaf } = time;
+                                $oid_h->{time}{$leaf} = time;
                             }
                         }
                     }
@@ -1378,45 +1348,44 @@ sub trans_worst {
         }
         else {
             for my $dep_oid (@dep_oids) {
-                my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+                my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
                 # Skip if there was a dependency error for this parent oid leaf
                 # and if it is disable (blue)
-                next if ( $dep_oid_h->{ error } && $dep_oid_h->{ color } eq 'blue' );
-
-                if ( !defined $oid_h->{ color }
-                    or $colors{ $dep_oid_h->{ color } } > $colors{ $oid_h->{ color } } )
+                next if ( $dep_oid_h->{error} && $dep_oid_h->{color} eq 'blue' );
+                if ( !defined $oid_h->{color}
+                    or $colors{ $dep_oid_h->{color} } > $colors{ $oid_h->{color} } )
                 {
-                    $oid_h->{ val }   = $dep_oid_h->{ val };
-                    $oid_h->{ color } = $dep_oid_h->{ color };
-                    $oid_h->{ msg }   = $dep_oid_h->{ msg };
-                    $oid_h->{ time }  = time;
+                    $oid_h->{val}   = $dep_oid_h->{val};
+                    $oid_h->{color} = $dep_oid_h->{color};
+                    $oid_h->{msg}   = $dep_oid_h->{msg};
+                    $oid_h->{time}  = time;
                 }
-                elsif ( $dep_oid_h->{ color } eq $oid_h->{ color } ) {
-                    if ( defined $dep_oid_h->{ val } and ( $dep_oid_h->{ val } ne '' ) ) {
-                        if ( ( defined $oid_h->{ val } ) and ( $oid_h->{ val } ne '' ) and $oid_h->{ val } ne $dep_oid_h->{ val } ) {
-                            $oid_h->{ val } .= "|" . $dep_oid_h->{ val };
+                elsif ( $dep_oid_h->{color} eq $oid_h->{color} ) {
+                    if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
+                        if ( ( defined $oid_h->{val} ) and ( $oid_h->{val} ne '' ) and $oid_h->{val} ne $dep_oid_h->{val} ) {
+                            $oid_h->{val} .= "|" . $dep_oid_h->{val};
                         }
                         else {
-                            $oid_h->{ val } = $dep_oid_h->{ val };
+                            $oid_h->{val} = $dep_oid_h->{val};
                         }
                     }
-                    if ( defined $dep_oid_h->{ msg } and ( $dep_oid_h->{ msg } ne '' ) ) {
-                        if ( ( defined $oid_h->{ msg } ) and ( $oid_h->{ msg } ne '' ) and ( index( $oid_h->{ msg }, $dep_oid_h->{ msg } ) == -1 ) ) {
-                            $oid_h->{ msg } .= " & " . $dep_oid_h->{ msg };
+                    if ( defined $dep_oid_h->{msg} and ( $dep_oid_h->{msg} ne '' ) ) {
+                        if ( ( defined $oid_h->{msg} ) and ( $oid_h->{msg} ne '' ) and ( index( $oid_h->{msg}, $dep_oid_h->{msg} ) == -1 ) ) {
+                            $oid_h->{msg} .= " & " . $dep_oid_h->{msg};
                         }
                         else {
-                            $oid_h->{ msg } = $dep_oid_h->{ msg };
+                            $oid_h->{msg} = $dep_oid_h->{msg};
                         }
                     }
-                    $oid_h->{ time } = time;
+                    $oid_h->{time} = time;
                 }
             }
         }
     }
     else {
-        $oid_h->{ color } = "clear";
-        $oid_h->{ msg }   = "Primary OID not defined";
+        $oid_h->{color} = "clear";
+        $oid_h->{msg}   = "Primary OID not defined";
     }
 
     # Now apply our threshold to this data
@@ -1426,11 +1395,11 @@ sub trans_worst {
 # Return an (x days,)? hh:mm:ss date timestamp ##############################
 sub trans_elapsed {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our transform options
-    my $dep_oid   = $1 if $oid_h->{ trans_data } =~ /^\{(.+)\}$/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+    my $dep_oid   = $1 if $oid_h->{trans_data} =~ /^\{(.+)\}$/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -1445,12 +1414,12 @@ sub trans_elapsed {
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+    if ( $oid_h->{repeat} ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if there was a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-            my $s = $dep_oid_h->{ val }{ $leaf };
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            my $s = $dep_oid_h->{val}{$leaf};
             my $d = int( $s / 86400 );
             $s %= 86400;
             my $h = int( $s / 3600 );
@@ -1458,13 +1427,13 @@ sub trans_elapsed {
             my $m = int( $s / 60 );
             $s %= 60;
             my $elapsed = sprintf "%s%-2.2d:%-2.2d:%-2.2d", ( $d ? ( $d == 1 ? '1 day, ' : "$d days, " ) : '' ), $h, $m, $s;
-            $oid_h->{ val }{ $leaf } = $elapsed;
+            $oid_h->{val}{$leaf} = $elapsed;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-        my $s = $dep_oid_h->{ val };
+        my $s = $dep_oid_h->{val};
         my $d = int( $s / 86400 );
         $s %= 86400;
         my $h = int( $s / 3600 );
@@ -1472,7 +1441,7 @@ sub trans_elapsed {
         my $m = int( $s / 60 );
         $s %= 60;
         my $elapsed = sprintf "%s%-2.2d:%-2.2d:%-2.2d", ( $d ? ( $d == 1 ? '1 day, ' : "$d days, " ) : '' ), $h, $m, $s;
-        $oid_h->{ val } = $elapsed;
+        $oid_h->{val} = $elapsed;
     }
     apply_threshold( $oids, $oid );
 }
@@ -1481,11 +1450,11 @@ sub trans_elapsed {
 # WIP Not Used at all, not working
 sub trans_date {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our transform options
-    my $dep_oid   = $1 if $oid_h->{ trans_data } =~ /^\{(.+)\}$/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+    my $dep_oid   = $1 if $oid_h->{trans_data} =~ /^\{(.+)\}$/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Validate our dependencies
     validate_deps( $device, $oids, $oid, [ $dep_oid ], '^\d+(\.\d+)?$' )
@@ -1493,38 +1462,30 @@ sub trans_date {
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
-
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+    if ( $oid_h->{repeat} ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if there was a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             #next if $oid_h->{error}{$leaf};
-
-            my ( $s, $m, $h, $d, $o, $y ) = localtime( $dep_oid_h->{ val }{ $leaf } );
-
+            my ( $s, $m, $h, $d, $o, $y ) = localtime( $dep_oid_h->{val}{$leaf} );
             my $date = sprintf "%d-%-2.2d-%-2.2d, %-2.2d:%-2.2d:%-2.2d", $y + 1900, $o + 1, $d, $h, $m, $s;
-
-            $oid_h->{ val }{ $leaf }   = $date;
-            $oid_h->{ time }{ $leaf }  = time;
-            $oid_h->{ color }{ $leaf } = $dep_oid_h->{ color }{ $leaf };
-            $oid_h->{ msg }{ $leaf }   = $dep_oid_h->{ msg }{ $leaf };
-
+            $oid_h->{val}{$leaf}   = $date;
+            $oid_h->{time}{$leaf}  = time;
+            $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
+            $oid_h->{msg}{$leaf}   = $dep_oid_h->{msg}{$leaf};
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-
-        my ( $s, $m, $h, $d, $o, $y ) = localtime( $dep_oid_h->{ val } );
-
+        my ( $s, $m, $h, $d, $o, $y ) = localtime( $dep_oid_h->{val} );
         my $date = sprintf "%d-%-2.2d-%-2.2d, %-2.2d:%-2.2d:%-2.2d", $y + 1900, $o + 1, $d, $h, $m, $s;
-
-        $oid_h->{ val }   = $date;
-        $oid_h->{ time }  = time;
-        $oid_h->{ color } = $dep_oid_h->{ color };
-        $oid_h->{ msg }   = $dep_oid_h->{ msg };
+        $oid_h->{val}   = $date;
+        $oid_h->{time}  = time;
+        $oid_h->{color} = $dep_oid_h->{color};
+        $oid_h->{msg}   = $dep_oid_h->{msg};
     }
 }
 
@@ -1533,34 +1494,33 @@ sub trans_date {
 # at 1, and increment by 1.
 sub trans_set {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
-
+    my $oid_h = \%{ $oids->{$oid} };
     my ( @Fields, $leaf );
 
     # Do not use the functions define_pri_oid and validate_deps. As there are no parent OIDs, only
     # constant values, it will have nothing to define or validate and it will generate a
     # leaf-type OID.
-    $oid_h->{ repeat } = 1;     # Make a repeater-type OID
-    $oid_h->{ val }    = {};    # Empty set of leafes
-    $oid_h->{ time }   = {};
+    $oid_h->{repeat} = 1;     # Make a repeater-type OID
+    $oid_h->{val}    = {};    # Empty set of leafes
+    $oid_h->{time}   = {};
 
     #@Fields = split( /\s*,\s*/, $oid_h->{trans_data} );
-    @Fields = split /,(?=(?:[^"]*"[^"]*")*[^"]*$)/, $oid_h->{ trans_data };
+    @Fields = split /,(?=(?:[^"]*"[^"]*")*[^"]*$)/, $oid_h->{trans_data};
     for ( $leaf = 1 ; $leaf <= @Fields ; $leaf++ ) {
-        $oid_h->{ val }{ $leaf }  = $Fields[ $leaf - 1 ];
-        $oid_h->{ time }{ $leaf } = time;
-    }                           # of for
+        $oid_h->{val}{$leaf}  = $Fields[ $leaf - 1 ];
+        $oid_h->{time}{$leaf} = time;
+    }                         # of for
     apply_threshold( $oids, $oid );
 }
 
 # Convert value to its appropriate bps-speed ################################
 sub trans_speed {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our single dependant oid
-    my $dep_oid   = $1 if $oid_h->{ trans_data } =~ /^\{(.+)\}$/;
-    my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+    my $dep_oid   = $1 if $oid_h->{trans_data} =~ /^\{(.+)\}$/;
+    my $dep_oid_h = \%{ $oids->{$dep_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -1574,36 +1534,36 @@ sub trans_speed {
         or return;
 
     # Handle repeater-type oids
-    if ( $oid_h->{ repeat } ) {
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+    if ( $oid_h->{repeat} ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if there was a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-            my $bps = int $dep_oid_h->{ val }{ $leaf };
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            my $bps = int $dep_oid_h->{val}{$leaf};
 
             # Get largest speed type
             my $speed = 1;    # Start low: 1 bps
             $speed *= 1000 while abs($bps) >= ( $speed * 1000 );
-            my $unit = $speeds{ $speed };
+            my $unit = $speeds{$speed};
 
             # Measure to 2 decimal places
             my $new_speed = sprintf '%.2f %s', $bps / $speed, $unit;
-            $oid_h->{ val }{ $leaf } = $new_speed;
+            $oid_h->{val}{$leaf} = $new_speed;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-        my $bps = $dep_oid_h->{ val };
+        my $bps = $dep_oid_h->{val};
 
         # Get largest speed type
         my $speed = 1;    # Start low: 1 bps
         $speed *= 1000 while abs($bps) >= ( $speed * 1000 );
-        my $unit = $speeds{ $speed };
+        my $unit = $speeds{$speed};
 
         # Measure to 2 decimal places
         my $new_speed = sprintf '%.2f %s', $bps / $speed, $unit;
-        $oid_h->{ val } = $new_speed;
+        $oid_h->{val} = $new_speed;
     }
     apply_threshold( $oids, $oid );
 }
@@ -1611,13 +1571,13 @@ sub trans_speed {
 # C-style 'case', with ranges ##############################################
 sub trans_switch {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h      = \%{ $oids->{ $oid } };
-    my $trans_data = \%{ $oid_h->{ trans_edata } };
-    my $dep_oid    = $trans_data->{ dep_oid };
-    my $dep_oid_h  = \%{ $oids->{ $dep_oid } };
-    my $cases      = \%{ $trans_data->{ cases } };
-    my $case_nums  = \@{ $trans_data->{ case_nums } };
-    my $default    = $trans_data->{ default } if defined $trans_data->{ default };
+    my $oid_h      = \%{ $oids->{$oid} };
+    my $trans_data = \%{ $oid_h->{trans_edata} };
+    my $dep_oid    = $trans_data->{dep_oid};
+    my $dep_oid_h  = \%{ $oids->{$dep_oid} };
+    my $cases      = \%{ $trans_data->{cases} };
+    my $case_nums  = \@{ $trans_data->{case_nums} };
+    my $default    = $trans_data->{default} if defined $trans_data->{default};
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $dep_oid ] ) ) {
@@ -1631,17 +1591,16 @@ sub trans_switch {
     # one as this one is global, for the rest we should do it later
     # can be switch dependecies we have to do it for each leaf individually
     validate_deps( $device, $oids, $oid, [ $dep_oid ] ) or return;
-
-    if ( $oid_h->{ repeat } ) {
-        for my $leaf ( keys %{ $dep_oid_h->{ val } } ) {
+    if ( $oid_h->{repeat} ) {
+        for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if there was a dependency error for this leaf
-            next if ( ( ( exists $oid_h->{ error } ) and ( ref $oid_h->{ error } ne 'HASH' ) ) or ( ( exists $oid_h->{ error }{ $leaf } ) and $oid_h->{ error }{ $leaf } ) );
-            my $val = $dep_oid_h->{ val }{ $leaf };
+            next if ( ( ( exists $oid_h->{error} ) and ( ref $oid_h->{error} ne 'HASH' ) ) or ( ( exists $oid_h->{error}{$leaf} ) and $oid_h->{error}{$leaf} ) );
+            my $val = $dep_oid_h->{val}{$leaf};
             my $num;
             for my $case (@$case_nums) {
-                my $if   = $cases->{ $case }{ if };
-                my $type = $cases->{ $case }{ type };
+                my $if   = $cases->{$case}{if};
+                my $type = $cases->{$case}{type};
                 if ( $type eq 'num' ) { $num = $case and last if $val == $if; next }
                 if ( $type eq 'gt' )  { $num = $case and last if $val > $if;  next }
                 if ( $type eq 'gte' ) { $num = $case and last if $val >= $if; next }
@@ -1658,7 +1617,7 @@ sub trans_switch {
             my $then;
             my $then_default;
             if ( defined $num ) {
-                $then         = $cases->{ $num }{ then };
+                $then         = $cases->{$num}{then};
                 $then_default = $default;
             }
             elsif ( defined $default ) {
@@ -1666,20 +1625,20 @@ sub trans_switch {
             }
             while ( $then =~ /\{(\S+)\}/g ) {
                 my $dep_oid   = $1;
-                my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+                my $dep_oid_h = \%{ $oids->{$dep_oid} };
                 my $dep_val;
                 my $dep_error;
                 my $dep_color;
                 my $dep_msg;
-                if ( $oids->{ $dep_oid }{ repeat } and ( ref $dep_oid_h->{ color } eq 'HASH' ) ) {
-                    $dep_val   = $dep_oid_h->{ val }{ $leaf };
-                    $dep_color = $dep_oid_h->{ color }{ $leaf };
-                    $dep_msg   = $dep_oid_h->{ msg }{ $leaf } if ( ( exists $dep_oid_h->{ msg } ) and ( defined $dep_oid_h->{ msg }{ $leaf } ) );
+                if ( $oids->{$dep_oid}{repeat} and ( ref $dep_oid_h->{color} eq 'HASH' ) ) {
+                    $dep_val   = $dep_oid_h->{val}{$leaf};
+                    $dep_color = $dep_oid_h->{color}{$leaf};
+                    $dep_msg   = $dep_oid_h->{msg}{$leaf} if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) );
                 }
                 else {
-                    $dep_val   = $dep_oid_h->{ val };
-                    $dep_color = $dep_oid_h->{ color };
-                    $dep_msg   = $dep_oid_h->{ msg } if ( ( exists $dep_oid_h->{ msg } ) and ( defined $dep_oid_h->{ msg } ) );
+                    $dep_val   = $dep_oid_h->{val};
+                    $dep_color = $dep_oid_h->{color};
+                    $dep_msg   = $dep_oid_h->{msg} if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg} ) );
                 }
                 if ( !defined $dep_val ) {
                     if ( defined $then_default ) {
@@ -1688,7 +1647,6 @@ sub trans_switch {
                         next;
                     }
                     else {
-
                         # We should never be here with an undef val as it
                         # should be alread treated
                         $dep_val = undef;
@@ -1696,43 +1654,42 @@ sub trans_switch {
                     }
                 }
                 elsif ( $dep_val eq 'wait' ) {
-                    $oid_h->{ color }{ $leaf } = 'clear';
-                    $oid_h->{ msg }{ $leaf }   = 'wait';
+                    $oid_h->{color}{$leaf} = 'clear';
+                    $oid_h->{msg}{$leaf}   = 'wait';
                     last;
                 }
                 else {
-
                     # Find de worst color
-                    if ( !defined $oid_h->{ color }{ $leaf }
-                        or $colors{ $dep_color } > $colors{ $oid_h->{ color }{ $leaf } } )
+                    if ( !defined $oid_h->{color}{$leaf}
+                        or $colors{$dep_color} > $colors{ $oid_h->{color}{$leaf} } )
                     {
-                        $oid_h->{ color }{ $leaf } = $dep_color;
-                        $oid_h->{ msg }{ $leaf }   = $dep_msg;
+                        $oid_h->{color}{$leaf} = $dep_color;
+                        $oid_h->{msg}{$leaf}   = $dep_msg;
                     }
-                    elsif ( $oid_h->{ color }{ $leaf } eq $dep_color ) {
+                    elsif ( $oid_h->{color}{$leaf} eq $dep_color ) {
                         if ( defined $dep_msg ) {
-                            if ( defined $oid_h->{ msg }{ $leaf } and $oid_h->{ msg }{ $leaf } ne '' ) {
-                                $oid_h->{ msg }{ $leaf } .= " & " . $dep_msg;
+                            if ( defined $oid_h->{msg}{$leaf} and $oid_h->{msg}{$leaf} ne '' ) {
+                                $oid_h->{msg}{$leaf} .= " & " . $dep_msg;
                             }
                             else {
-                                $oid_h->{ msg }{ $leaf } = $dep_msg;
+                                $oid_h->{msg}{$leaf} = $dep_msg;
                             }
                         }
                     }
                 }
                 $then =~ s/\{$dep_oid\}/$dep_val/g;
             }
-            $oid_h->{ val }{ $leaf } = $then;
+            $oid_h->{val}{$leaf} = $then;
         }
 
         # Otherwise non repeater
     }
     else {
-        my $val = $dep_oid_h->{ val };
+        my $val = $dep_oid_h->{val};
         my $num;
         for my $case (@$case_nums) {
-            my $if   = $cases->{ $case }{ if };
-            my $type = $cases->{ $case }{ type };
+            my $if   = $cases->{$case}{if};
+            my $type = $cases->{$case}{type};
             if ( $type eq 'num' ) { $num = $case and last if $val == $if; next }
             if ( $type eq 'gt' )  { $num = $case and last if $val > $if;  next }
             if ( $type eq 'gte' ) { $num = $case and last if $val >= $if; next }
@@ -1746,11 +1703,10 @@ sub trans_switch {
             if ( $type eq 'str' ) { $num = $case and last if $val eq $if;   next }
             if ( $type eq 'reg' ) { $num = $case and last if $val =~ /$if/; next }
         }
-
         my $then;
         my $then_default;
         if ( defined $num ) {
-            $then         = $cases->{ $num }{ then };
+            $then         = $cases->{$num}{then};
             $then_default = $default;
         }
         elsif ( defined $default ) {
@@ -1758,12 +1714,12 @@ sub trans_switch {
         }
         while ( $then =~ /\{(\S+)\}/g ) {
             my $dep_oid   = $1;
-            my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+            my $dep_oid_h = \%{ $oids->{$dep_oid} };
             my $dep_val;
             my $dep_error;
             my $dep_color;
             my $dep_msg;
-            if ( $oids->{ $dep_oid }{ repeat } ) {
+            if ( $oids->{$dep_oid}{repeat} ) {
                 do_log( "Cant switch to a repeater OID when using a non-repeater source OID for trans_switch on $oid", WARN );
                 $dep_val   = undef;
                 $dep_error = 1;
@@ -1771,9 +1727,9 @@ sub trans_switch {
                 $dep_msg   = 'Wrong parent OID: it should not be a repeater';
             }
             else {
-                $dep_val   = $dep_oid_h->{ val };
-                $dep_color = $dep_oid_h->{ color };
-                $dep_msg   = $dep_oid_h->{ msg };
+                $dep_val   = $dep_oid_h->{val};
+                $dep_color = $dep_oid_h->{color};
+                $dep_msg   = $dep_oid_h->{msg};
             }
             if ( !defined $dep_val ) {
                 if ( defined $then_default ) {
@@ -1782,38 +1738,37 @@ sub trans_switch {
                     next;
                 }
                 else {
-
                     # We should never be here with an undef val as it
                     last;
                 }
             }
             elsif ( $dep_val eq 'wait' ) {
-                $oid_h->{ color } = 'clear';
-                $oid_h->{ msg }   = 'wait';
+                $oid_h->{color} = 'clear';
+                $oid_h->{msg}   = 'wait';
             }
             elsif ($dep_error) {
 
                 # Find de worst color
-                if ( !defined $oid_h->{ color }
-                    or $colors{ $dep_color } > $colors{ $oid_h->{ color } } )
+                if ( !defined $oid_h->{color}
+                    or $colors{$dep_color} > $colors{ $oid_h->{color} } )
                 {
-                    $oid_h->{ color } = $dep_color;
-                    $oid_h->{ msg }   = $dep_msg;
+                    $oid_h->{color} = $dep_color;
+                    $oid_h->{msg}   = $dep_msg;
                 }
-                elsif ( $oid_h->{ color } eq $dep_color ) {
+                elsif ( $oid_h->{color} eq $dep_color ) {
                     if ( defined $dep_msg ) {
-                        if ( defined $oid_h->{ msg } and $oid_h->{ msg } ne '' ) {
-                            $oid_h->{ msg } .= " & " . $dep_msg;
+                        if ( defined $oid_h->{msg} and $oid_h->{msg} ne '' ) {
+                            $oid_h->{msg} .= " & " . $dep_msg;
                         }
                         else {
-                            $oid_h->{ msg } = $dep_msg;
+                            $oid_h->{msg} = $dep_msg;
                         }
                     }
                 }
             }
             $then =~ s/\{$dep_oid\}/$dep_val/g;
         }
-        $oid_h->{ val } = $then;
+        $oid_h->{val} = $then;
     }
     apply_threshold( $oids, $oid );
 }
@@ -1821,11 +1776,10 @@ sub trans_switch {
 # Regular expression substitutions #########################################
 sub trans_regsub {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h      = \%{ $oids->{ $oid } };
-    my $trans_data = $oid_h->{ trans_data };
+    my $oid_h      = \%{ $oids->{$oid} };
+    my $trans_data = $oid_h->{trans_data};
     my ( $main_oid, $expr ) = ( $1, $2, )
         if $trans_data =~ /^\{(.+)\}\s*(\/.+\/.*\/[eg]*)$/;
-
     my ( $src_expr, $trg_expr ) = ( $1, $2 )
         if $expr =~ /^(.+)\/(.*)/;
 
@@ -1842,7 +1796,7 @@ sub trans_regsub {
 
     # Validate our dependencies
     if ( not validate_deps( $device, $oids, $oid, \@dep_oids ) ) {
-        do_log( "Regsub transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{ debug };
+        do_log( "Regsub transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
         return;
     }
 
@@ -1850,53 +1804,52 @@ sub trans_regsub {
     # expression, since they are constant (i.e. not leaf dependent)
     my @repeaters;
     for my $dep_oid (@dep_oids) {
-        push @repeaters, $dep_oid and next if $oids->{ $dep_oid }{ repeat };
+        push @repeaters, $dep_oid and next if $oids->{$dep_oid}{repeat};
         $expr =~ s/\{$dep_oid\}/$oids->{$dep_oid}{val}/g;
     }
 
     # See if we are a repeating variable type datum
     # (such as that generated by snmpwalking a table)
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
 
         # Map the names of our repeater oids to a position on a placeholder array
         for ( my $i = 0 ; $i <= $#repeaters ; $i++ ) {
             $expr =~ s/\{$repeaters[$i]\}/\$dep_val[$i]/g;
         }
-        for my $leaf ( keys %{ $oids->{ $oid_h->{ pri_oid } }{ val } } ) {
+        for my $leaf ( keys %{ $oids->{ $oid_h->{pri_oid} }{val} } ) {
 
             # Skip if there was a dependency error for this leaf
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             # Update our dep_val values so that when we eval the expression it
             # will use the values of the proper leaf of the parent repeater oids
             my @dep_val;
-            for (@repeaters) { push @dep_val, $oids->{ $_ }{ val }{ $leaf } }
-            my $exp_val = $oids->{ $main_oid }{ val }{ $leaf };
+            for (@repeaters) { push @dep_val, $oids->{$_}{val}{$leaf} }
+            my $exp_val = $oids->{$main_oid}{val}{$leaf};
             my $result;
             $result = eval "\$exp_val =~ s$expr";
             if ($@) {
                 do_log( "Failed eval for REGSUB transform on leaf $leaf of $oid on $device ($@)", ERROR );
-                $oid_h->{ val }{ $leaf }   = 'Failed eval';
-                $oid_h->{ color }{ $leaf } = 'clear';
+                $oid_h->{val}{$leaf}   = 'Failed eval';
+                $oid_h->{color}{$leaf} = 'clear';
                 next;
             }
-            $oid_h->{ val }{ $leaf } = $exp_val;
+            $oid_h->{val}{$leaf} = $exp_val;
         }
 
         # Otherwise we are a single entry datum
     }
     else {
-
         # All of our non-reps were substituted earlier, so we can just eval
-        my $exp_val = $oids->{ $main_oid }{ val };
+        my $exp_val = $oids->{$main_oid}{val};
         my $result  = eval "\$exp_val =~ s$expr";
         if ($@) {
             do_log( "Failed eval for REGSUB transform on $oid on $device ($@)", WARN );
-            $oid_h->{ val }   = 'Failed eval';
-            $oid_h->{ color } = 'clear';
+            $oid_h->{val}   = 'Failed eval';
+            $oid_h->{color} = 'clear';
             return;
         }
-        $oid_h->{ val } = $exp_val;
+        $oid_h->{val} = $exp_val;
     }
 
     # Now apply our threshold to this data
@@ -1909,10 +1862,10 @@ sub trans_regsub {
 # the source OID values that should be a subset of the indexes of the target OID
 sub trans_chain {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract all our our parent oids from the expression, first
-    my ( $src_oid, $trg_oid ) = $oid_h->{ trans_data } =~ /\{(.+?)\}/g;
+    my ( $src_oid, $trg_oid ) = $oid_h->{trans_data} =~ /\{(.+?)\}/g;
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $src_oid ] ) ) {
@@ -1928,63 +1881,61 @@ sub trans_chain {
 
     # Canvalidate_deps( $device, $oids, $oid, [$src_oid], '^\.?(\d+\.)*\d+$' )
     #    or return;
-
-    my $src_h = \%{ $oids->{ $src_oid } };
-    my $trg_h = \%{ $oids->{ $trg_oid } };
+    my $src_h = \%{ $oids->{$src_oid} };
+    my $trg_h = \%{ $oids->{$trg_oid} };
 
     # Our target MUST be a repeater type oid
-    if ( !$trg_h->{ repeat } ) {
+    if ( !$trg_h->{repeat} ) {
         do_log( "Trying to chain a non-repeater target on $device ($@)", WARN );
-        $oid_h->{ repeat } = 0;
-        $oid_h->{ val }    = 'Failed chain';
-        $oid_h->{ time }   = time;
-        $oid_h->{ color }  = 'clear';
-
+        $oid_h->{repeat} = 0;
+        $oid_h->{val}    = 'Failed chain';
+        $oid_h->{time}   = time;
+        $oid_h->{color}  = 'clear';
     }
 
     # If our target is a repeater, and our source is a non-repeater,
     # then our transform oid will consequently be a non-repeater
-    if ( !$src_h->{ repeat } ) {
-        $oid_h->{ repeat } = 0;
-        my $sub_oid = $src_h->{ val };
-        my $trg_val = $trg_h->{ val }{ $sub_oid };
+    if ( !$src_h->{repeat} ) {
+        $oid_h->{repeat} = 0;
+        my $sub_oid = $src_h->{val};
+        my $trg_val = $trg_h->{val}{$sub_oid};
         if ( !defined $trg_val ) {
-            $oid_h->{ val }   = undef;
-            $oid_h->{ time }  = time;
-            $oid_h->{ color } = defined $trg_h->{ color }           ? $trg_h->{ color }           : "clear";
-            $oid_h->{ msg }   = defined $trg_h->{ msg }{ $sub_oid } ? $trg_h->{ msg }{ $sub_oid } : "Parent value n/a";
+            $oid_h->{val}   = undef;
+            $oid_h->{time}  = time;
+            $oid_h->{color} = defined $trg_h->{color}         ? $trg_h->{color}         : "clear";
+            $oid_h->{msg}   = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "Parent value n/a";
         }
-        $oid_h->{ val }   = $trg_val;
-        $oid_h->{ time }  = $trg_h->{ time }{ $sub_oid };
-        $oid_h->{ color } = $trg_h->{ color }{ $sub_oid };
+        $oid_h->{val}   = $trg_val;
+        $oid_h->{time}  = $trg_h->{time}{$sub_oid};
+        $oid_h->{color} = $trg_h->{color}{$sub_oid};
 
         # Both source and target are repeaters.  Go go go!
     }
     else {
-        for my $leaf ( keys %{ $src_h->{ val } } ) {
+        for my $leaf ( keys %{ $src_h->{val} } ) {
 
             # Skip if our source oid is freaky-deaky
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             # Our oid sub leaf
-            my $sub_oid = $src_h->{ val }{ $leaf };
-            my $trg_val = $trg_h->{ val }{ $sub_oid };
+            my $sub_oid = $src_h->{val}{$leaf};
+            my $trg_val = $trg_h->{val}{$sub_oid};
             if ( !defined $trg_val ) {
-                $oid_h->{ val }{ $leaf }  = undef;
-                $oid_h->{ time }{ $leaf } = time;
-                if ( ref $oid_h->{ color } eq 'HASH' ) {
-                    $oid_h->{ color }{ $leaf } = defined $trg_h->{ color }{ $sub_oid } ? $trg_h->{ color }{ $sub_oid } : "clear";
+                $oid_h->{val}{$leaf}  = undef;
+                $oid_h->{time}{$leaf} = time;
+                if ( ref $oid_h->{color} eq 'HASH' ) {
+                    $oid_h->{color}{$leaf} = defined $trg_h->{color}{$sub_oid} ? $trg_h->{color}{$sub_oid} : "clear";
                 }
-                if ( ref $oid_h->{ msg } eq 'HASH' ) {
-                    $oid_h->{ msg }{ $leaf } = defined $trg_h->{ msg }{ $sub_oid } ? $trg_h->{ msg }{ $sub_oid } : "";    # should be "parent n/a"
+                if ( ref $oid_h->{msg} eq 'HASH' ) {
+                    $oid_h->{msg}{$leaf} = defined $trg_h->{msg}{$sub_oid} ? $trg_h->{msg}{$sub_oid} : "";    # should be "parent n/a"
                 }
                 next;
             }
-            $oid_h->{ val }{ $leaf }   = $trg_val;
-            $oid_h->{ time }{ $leaf }  = $trg_h->{ time }{ $sub_oid };
-            $oid_h->{ color }{ $leaf } = $trg_h->{ color }{ $sub_oid };
+            $oid_h->{val}{$leaf}   = $trg_val;
+            $oid_h->{time}{$leaf}  = $trg_h->{time}{$sub_oid};
+            $oid_h->{color}{$leaf} = $trg_h->{color}{$sub_oid};
         }
-        $oid_h->{ repeat } = 1;
+        $oid_h->{repeat} = 1;
     }
 
     # Apply thresholds
@@ -2001,8 +1952,8 @@ sub trans_chain {
 #       l{+}   : pad from right with + . Length is detected automatically
 sub trans_coltre {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h          = \%{ $oids->{ $oid } };
-    my $expr           = $oid_h->{ trans_data };
+    my $oid_h          = \%{ $oids->{$oid} };
+    my $expr           = $oid_h->{trans_data};
     my $separator      = '';
     my $padding_type   = 'l';
     my $padding_length = 'auto';
@@ -2027,83 +1978,82 @@ sub trans_coltre {
     # Validate our dependencies, have to do them seperately
     validate_deps( $device, $oids, $oid, [ $src_oid ], '^\.?(\d+\.)*\d+' ) and validate_deps( $device, $oids, $oid, [ $trg_oid ] )
         or return;
-    my $src_h = \%{ $oids->{ $src_oid } };
-    my $trg_h = \%{ $oids->{ $trg_oid } };
+    my $src_h = \%{ $oids->{$src_oid} };
+    my $trg_h = \%{ $oids->{$trg_oid} };
     if ( $padding_char ne '' ) {
         if ( $padding_length eq 'auto' ) {
             my $maxlength = 0;
             my %value_length;
-            while ( my ( $key, $value ) = each %{ $trg_h->{ val } } ) {
-                $value_length{ $key } = length($value);
-                if ( $maxlength < $value_length{ $key } ) {
-                    $maxlength = $value_length{ $key };
+            while ( my ( $key, $value ) = each %{ $trg_h->{val} } ) {
+                $value_length{$key} = length($value);
+                if ( $maxlength < $value_length{$key} ) {
+                    $maxlength = $value_length{$key};
                 }
             }
             while ( my ( $key, $value ) = each %value_length ) {
                 if ( $padding_type eq 'l' ) {
-                    $trg_h->{ val }{ $key } = $padding_char x ( $maxlength - $value_length{ $key } ) . $trg_h->{ val }{ $key };
+                    $trg_h->{val}{$key} = $padding_char x ( $maxlength - $value_length{$key} ) . $trg_h->{val}{$key};
                 }
                 else {
-                    $trg_h->{ val }{ $key } .= $padding_char x ( $maxlength - $value_length{ $key } );
+                    $trg_h->{val}{$key} .= $padding_char x ( $maxlength - $value_length{$key} );
                 }
             }
         }
         else {
-            while ( my ( $key, $value ) = each %{ $trg_h->{ val } } ) {
+            while ( my ( $key, $value ) = each %{ $trg_h->{val} } ) {
                 if ( $padding_type eq 'l' ) {
-                    $trg_h->{ val }{ $key }
-                        = $padding_char x ( $padding_length - length( $trg_h->{ val }{ $key } ) ) . $trg_h->{ val }{ $key };
+                    $trg_h->{val}{$key}
+                        = $padding_char x ( $padding_length - length( $trg_h->{val}{$key} ) ) . $trg_h->{val}{$key};
                 }
                 else {
-                    $trg_h->{ val }{ $key } .= $padding_char x ( $padding_length - length( $trg_h->{ val }{ $key } ) );
+                    $trg_h->{val}{$key} .= $padding_char x ( $padding_length - length( $trg_h->{val}{$key} ) );
                 }
             }
         }
     }
 
     # Our source MUST be a repeater type oid
-    if ( !$trg_h->{ repeat } ) {
+    if ( !$trg_h->{repeat} ) {
         do_log( "Trying to COLTRE a non-repeater 1rst oid on $device ($@)", WARN );
-        $oid_h->{ repeat } = 0;
-        $oid_h->{ val }    = 'Failed coltre';
-        $oid_h->{ time }   = time;
-        $oid_h->{ color }  = 'clear';
+        $oid_h->{repeat} = 0;
+        $oid_h->{val}    = 'Failed coltre';
+        $oid_h->{time}   = time;
+        $oid_h->{color}  = 'clear';
 
         # Our target MUST be a repeater type oid
     }
-    elsif ( !$trg_h->{ repeat } ) {
+    elsif ( !$trg_h->{repeat} ) {
         do_log( "Trying to COLTRE a non-repeater 2nd oid on $device ($@)", WARN );
-        $oid_h->{ repeat } = 0;
-        $oid_h->{ val }    = 'Failed coltre';
-        $oid_h->{ time }   = time;
-        $oid_h->{ color }  = 'yellow';
+        $oid_h->{repeat} = 0;
+        $oid_h->{val}    = 'Failed coltre';
+        $oid_h->{time}   = time;
+        $oid_h->{color}  = 'yellow';
 
         # Both source and target are repeaters.  Go go go!
     }
     else {
         my $isfirst = 1;
-        for my $leaf ( sort { $src_h->{ val }{ $a } <=> $src_h->{ val }{ $b } } keys %{ $src_h->{ val } } ) {
+        for my $leaf ( sort { $src_h->{val}{$a} <=> $src_h->{val}{$b} } keys %{ $src_h->{val} } ) {
 
             # Skip if our source oid is freaky-deaky
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
             #TODO CHECK $oid_h->{val}{$src_h}{val}{$leaf}} if it exist
             if ($isfirst) {
-                $oid_h->{ val }{ $leaf } = $trg_h->{ val }{ $leaf };
+                $oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
                 $isfirst = 0;
             }
             else {
-                if ( defined $oid_h->{ val }{ $src_h->{ val }{ $leaf } } ) {
-                    $oid_h->{ val }{ $leaf } = $oid_h->{ val }{ $src_h->{ val }{ $leaf } } . $separator . $trg_h->{ val }{ $leaf };
+                if ( defined $oid_h->{val}{ $src_h->{val}{$leaf} } ) {
+                    $oid_h->{val}{$leaf} = $oid_h->{val}{ $src_h->{val}{$leaf} } . $separator . $trg_h->{val}{$leaf};
                 }
                 else {
-                    $oid_h->{ val }{ $leaf } = $trg_h->{ val }{ $leaf };
+                    $oid_h->{val}{$leaf} = $trg_h->{val}{$leaf};
                 }
-
             }
-            $oid_h->{ color }{ $leaf } = $trg_h->{ color }{ $leaf };
+            $oid_h->{color}{$leaf} = $trg_h->{color}{$leaf};
         }
-        $oid_h->{ repeat } = 1;
+        $oid_h->{repeat} = 1;
     }
 
     # Apply thresholds
@@ -2115,8 +2065,8 @@ sub trans_coltre {
 # This operator schould be combined with the chain operator
 sub trans_sort {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
-    my $expr  = $oid_h->{ trans_data };
+    my $oid_h = \%{ $oids->{$oid} };
+    my $expr  = $oid_h->{trans_data};
     my $sort  = 'txt';
 
     # Extract our optional arguments (NOT WORKING ONLY DEFAULT "TXT")
@@ -2131,78 +2081,75 @@ sub trans_sort {
         # We should always ave a primary oid with this transform, so make a fatal error
         log_fatal("FATAL TEST: Device '$device' do not have any defined primary oid for oid '$oid'");
     }
-
-    do_log( "Transforming $src_oid to $oid via 'sort' transform", DEBUG ) if $g{ debug };
+    do_log( "Transforming $src_oid to $oid via 'sort' transform", DEBUG ) if $g{debug};
 
     # This transform should probably only work for repeater sources
-    my $src_h = \%{ $oids->{ $src_oid } };
-    if ( !$src_h->{ repeat } ) {
+    my $src_h = \%{ $oids->{$src_oid} };
+    if ( !$src_h->{repeat} ) {
         do_log( "Trying to SORT a non-repeater source on $device ($@)", WARN );
         return;
     }
     else {
-
         # Tag the target as a repeater
-        $oid_h->{ repeat } = 2;
+        $oid_h->{repeat} = 2;
         if ( $sort eq 'txt' ) {
             my $pad        = 1;
-            my @oid_sorted = defined $src_h->{ val } ? oid_sort( keys %{ $src_h->{ val } } ) : ();
+            my @oid_sorted = defined $src_h->{val} ? oid_sort( keys %{ $src_h->{val} } ) : ();
             if (@oid_sorted) {
                 for my $leaf (@oid_sorted) {
 
                     # Skip if our source oid is freaky-deaky
-                    next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-                    $oid_h->{ val }{ $leaf } = $pad++;
+                    next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+                    $oid_h->{val}{$leaf} = $pad++;
                 }
             }
             else {
-
                 # The list is empty, treat it as a non repeater
-                $oid_h->{ val }   = undef;
-                $oid_h->{ time }  = $src_h->{ time }  if defined $src_h->{ time };
-                $oid_h->{ color } = $src_h->{ color } if defined $src_h->{ color };
-                $oid_h->{ msg }   = $src_h->{ msg }   if defined $src_h->{ msg };
+                $oid_h->{val}   = undef;
+                $oid_h->{time}  = $src_h->{time}  if defined $src_h->{time};
+                $oid_h->{color} = $src_h->{color} if defined $src_h->{color};
+                $oid_h->{msg}   = $src_h->{msg}   if defined $src_h->{msg};
             }
         }
         elsif ( $sort eq 'num' ) {
             my $pad = 1;
-            for my $leaf ( sort { $src_h->{ val }{ $a } <=> $src_h->{ val }{ $b } } keys %{ $src_h->{ val } } ) {
+            for my $leaf ( sort { $src_h->{val}{$a} <=> $src_h->{val}{$b} } keys %{ $src_h->{val} } ) {
 
                 # Skip if our source oid is freaky-deaky
-                next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+                next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
                 # Our oid sub leaf
                 if ( !defined $leaf ) {
-                    $oid_h->{ val }{ $leaf }   = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
-                    $oid_h->{ time }{ $leaf }  = time;
-                    $oid_h->{ color }{ $leaf } = 'yellow';
-                    $oid_h->{ error }{ $leaf } = 1;
+                    $oid_h->{val}{$leaf}   = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
+                    $oid_h->{time}{$leaf}  = time;
+                    $oid_h->{color}{$leaf} = 'yellow';
+                    $oid_h->{error}{$leaf} = 1;
                     next;
                 }
-                $oid_h->{ val }{ $leaf }   = $pad++;
-                $oid_h->{ time }{ $leaf }  = $src_h->{ time }{ $leaf };
-                $oid_h->{ color }{ $leaf } = $src_h->{ color }{ $leaf };
-                $oid_h->{ error }{ $leaf } = $src_h->{ error }{ $leaf };
+                $oid_h->{val}{$leaf}   = $pad++;
+                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf};
+                $oid_h->{color}{$leaf} = $src_h->{color}{$leaf};
+                $oid_h->{error}{$leaf} = $src_h->{error}{$leaf};
             }
         }
         else {
-            for my $leaf ( keys %{ $src_h->{ val } } ) {
+            for my $leaf ( keys %{ $src_h->{val} } ) {
 
                 # Skip if our source oid is freaky-deaky
-                next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+                next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
                 # Our oid sub leaf
                 if ( !defined $leaf ) {
-                    $oid_h->{ val }{ $leaf }   = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
-                    $oid_h->{ time }{ $leaf }  = time;
-                    $oid_h->{ color }{ $leaf } = 'yellow';
-                    $oid_h->{ error }{ $leaf } = 1;
+                    $oid_h->{val}{$leaf}   = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
+                    $oid_h->{time}{$leaf}  = time;
+                    $oid_h->{color}{$leaf} = 'yellow';
+                    $oid_h->{error}{$leaf} = 1;
                     next;
                 }
-                $oid_h->{ val }{ $leaf }   = $leaf;
-                $oid_h->{ time }{ $leaf }  = $src_h->{ time }{ $leaf };
-                $oid_h->{ color }{ $leaf } = $src_h->{ color }{ $leaf };
-                $oid_h->{ error }{ $leaf } = $src_h->{ error }{ $leaf };
+                $oid_h->{val}{$leaf}   = $leaf;
+                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf};
+                $oid_h->{color}{$leaf} = $src_h->{color}{$leaf};
+                $oid_h->{error}{$leaf} = $src_h->{error}{$leaf};
             }
         }
     }
@@ -2223,11 +2170,10 @@ sub trans_index {
 
     # As this transform only work on hash keys (and as keys are keep between runs: save the current structure, before validation and recover it if validation fail: should be better to do this in the validation sub
     # my $oid_h = \%{ $oids->{$oid} };
-    my $old_oid_h = dclone $oids->{ $oid };    # we have to make a real copy (deep)
-
-    # Extract our parent oids from the expression, first
-    my ($src_oid) = $oids->{ $oid }{ trans_data } =~ /^\{(.+)\}$/;
-    my $src_h = \%{ $oids->{ $src_oid } };
+    my $old_oid_h = dclone $oids->{$oid};                        # we have to make a real copy (deep)
+                                                                 # Extract our parent oids from the expression, first
+    my ($src_oid) = $oids->{$oid}{trans_data} =~ /^\{(.+)\}$/;
+    my $src_h     = \%{ $oids->{$src_oid} };
 
     # Define our primary oid
     if ( not define_pri_oid( $oids, $oid, [ $src_oid ] ) ) {
@@ -2238,53 +2184,52 @@ sub trans_index {
 
     # we do not validate our dependencies as we are working on index
     if ( not validate_deps( $device, $oids, $oid, [ $src_oid ] ) ) {
-        do_log( "Index transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{ debug };
+        do_log( "Index transform on $device/$oid do not have valid dependencies: skipping", DEBUG ) if $g{debug};
 
         # We can use old keys of val stored in current oid, if they exist (normally should)
-        if ( defined $old_oid_h->{ val } ) {
+        if ( defined $old_oid_h->{val} ) {
             do_log( "Recover index transform as it was previously defined", INFO );
-            $src_h = $old_oid_h;             # use iteself as it has save its key and we dont have them from the dependent oid
-            $oids->{ $oid } = $old_oid_h;    # copy back the saved hash
+            $src_h = $old_oid_h;           # use iteself as it has save its key and we dont have them from the dependent oid
+            $oids->{$oid} = $old_oid_h;    # copy back the saved hash
         }
         else {
             return;
         }
     }
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # This transform should probably only work for repeater sources
-    if ( !$src_h->{ repeat } ) {
+    if ( !$src_h->{repeat} ) {
         do_log( "Trying to index a non-repeater source on $device ($@)", ERROR );
         return;
     }
     else {
-
         # Tag the target as a repeater
-        $oid_h->{ repeat } = 2;
-        if ( defined $src_h->{ val } ) {
-            for my $leaf ( keys %{ $src_h->{ val } } ) {
+        $oid_h->{repeat} = 2;
+        if ( defined $src_h->{val} ) {
+            for my $leaf ( keys %{ $src_h->{val} } ) {
 
                 # Skip if our source oid is freaky-deaky
-                next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
+                next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
 
                 # Our oid sub leaf
                 if ( !defined $leaf ) {
-                    $oid_h->{ val }{ $leaf }   = undef;
-                    $oid_h->{ time }{ $leaf }  = $src_h->{ time }{ $leaf } if defined $src_h->{ time }{ $leaf };                                        # should always be defined, just to be sure
-                    $oid_h->{ color }{ $leaf } = defined $src_h->{ color }{ $leaf } ? $src_h->{ color }{ $leaf } : 'clear';
-                    $oid_h->{ msg }{ $leaf }   = $src_h->{ msg }{ $leaf } if ( ( exists $src_h->{ msg } ) and ( defined $src_h->{ msg }{ $leaf } ) );
+                    $oid_h->{val}{$leaf}   = undef;
+                    $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf};                                      # should always be defined, just to be sure
+                    $oid_h->{color}{$leaf} = defined $src_h->{color}{$leaf} ? $src_h->{color}{$leaf} : 'clear';
+                    $oid_h->{msg}{$leaf}   = $src_h->{msg}{$leaf} if ( ( exists $src_h->{msg} ) and ( defined $src_h->{msg}{$leaf} ) );
                     next;
                 }
-                $oid_h->{ val }{ $leaf }   = $leaf;
-                $oid_h->{ time }{ $leaf }  = $src_h->{ time }{ $leaf } if defined $src_h->{ time }{ $leaf };                                            # should always be defined, just to be sure
-                $oid_h->{ color }{ $leaf } = defined $src_h->{ color }{ $leaf } ? $src_h->{ color }{ $leaf } : 'green';
-                $oid_h->{ msg }{ $leaf }   = $src_h->{ msg }{ $leaf } if ( ( exists $src_h->{ msg } ) and ( defined $src_h->{ msg }{ $leaf } ) );
+                $oid_h->{val}{$leaf}   = $leaf;
+                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf};                                          # should always be defined, just to be sure
+                $oid_h->{color}{$leaf} = defined $src_h->{color}{$leaf} ? $src_h->{color}{$leaf} : 'green';
+                $oid_h->{msg}{$leaf}   = $src_h->{msg}{$leaf} if ( ( exists $src_h->{msg} ) and ( defined $src_h->{msg}{$leaf} ) );
             }
         }
         else {
-            $oid_h->{ time }  = $src_h->{ time } if defined $src_h->{ time };
-            $oid_h->{ color } = defined $src_h->{ color } ? $src_h->{ color } : 'clear';
-            $oid_h->{ msg }   = $src_h->{ msg } if defined $src_h->{ msg };
+            $oid_h->{time}  = $src_h->{time} if defined $src_h->{time};
+            $oid_h->{color} = defined $src_h->{color} ? $src_h->{color} : 'clear';
+            $oid_h->{msg}   = $src_h->{msg} if defined $src_h->{msg};
         }
     }
 
@@ -2299,10 +2244,10 @@ sub trans_index {
 # column matches the provided regex
 sub trans_match {
     my ( $device, $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Extract our parent oids from the expression, first
-    my $trans_data = $oid_h->{ trans_data };
+    my $trans_data = $oid_h->{trans_data};
     my ( $src_oid, $expr ) = ( $1, $2 )
         if $trans_data =~ /^\{(\S+)\}\s+(\/.+\/)$/;
 
@@ -2315,71 +2260,70 @@ sub trans_match {
 
     # Validate our dependencies
     # Cannot validate dependencies as it has not the same hash keys as our result
-    my $src_h = \%{ $oids->{ $src_oid } };
+    my $src_h = \%{ $oids->{$src_oid} };
 
     # This transform should probably only work for repeater sources
-    if ( !$src_h->{ repeat } ) {
+    if ( !$src_h->{repeat} ) {
         do_log( "Trying to index a non-repeater source on $device ($@)", WARN );
         return;
     }
-    elsif ( defined $src_h->{ error } and ( ref $src_h->{ error } ne ref {} ) and $src_h->{ error } == 1 ) {
-        $oid_h->{ color }  = $src_h->{ color };
-        $oid_h->{ msg }    = $src_h->{ msg };
-        $oid_h->{ time }   = $src_h->{ time };
-        $oid_h->{ repeat } = $src_h->{ repeat };
+    elsif ( defined $src_h->{error} and ( ref $src_h->{error} ne ref {} ) and $src_h->{error} == 1 ) {
+        $oid_h->{color}  = $src_h->{color};
+        $oid_h->{msg}    = $src_h->{msg};
+        $oid_h->{time}   = $src_h->{time};
+        $oid_h->{repeat} = $src_h->{repeat};
     }
     else {
-
         # Tag the target as a repeater
-        $oid_h->{ repeat } = 2;
+        $oid_h->{repeat} = 2;
         my $idx          = 1;
-        my @sorted_leafs = oid_sort( keys %{ $src_h->{ val } } );
+        my @sorted_leafs = oid_sort( keys %{ $src_h->{val} } );
         for my $leaf (@sorted_leafs) {
 
             # Skip if our source oid is freaky-deaky
-            next if ( ( exists $oid_h->{ error } ) and ( exists $oid_h->{ error }{ $leaf } ) and ( $oid_h->{ error }{ $leaf } ) );
-            next if ( not defined $src_h->{ val }{ $leaf } );
+            next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
+            next if ( not defined $src_h->{val}{$leaf} );
             my $res;
-            my $val    = $src_h->{ val }{ $leaf };
+            my $val    = $src_h->{val}{$leaf};
             my $result = eval "\$res = \$val =~ m$expr";
             if ($@) {
                 do_log( "Failed eval for MATCH transform on leaf $leaf of $oid on $device ($@)", WARN );
-                $oid_h->{ val }{ $leaf }   = 'Failed eval';
-                $oid_h->{ time }{ $leaf }  = time;
-                $oid_h->{ color }{ $leaf } = 'clear';
+                $oid_h->{val}{$leaf}   = 'Failed eval';
+                $oid_h->{time}{$leaf}  = time;
+                $oid_h->{color}{$leaf} = 'clear';
                 next;
             }
             do_log( "$val matched $expr, assigning new row $idx from old row $leaf", DEBUG )
-                if $g{ debug } and $res;
+                if $g{debug} and $res;
             next unless $res;
             if ( !defined $leaf ) {
-                $oid_h->{ val }{ $idx }   = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
-                $oid_h->{ time }{ $idx }  = time;
-                $oid_h->{ color }{ $idx } = 'clear';
+                $oid_h->{val}{$idx}   = 'SHOULD NEVER ARRIVE: CAN BE REMOVED';
+                $oid_h->{time}{$idx}  = time;
+                $oid_h->{color}{$idx} = 'clear';
                 next;
             }
-            $oid_h->{ val }{ $idx }   = $leaf;
-            $oid_h->{ time }{ $idx }  = $src_h->{ time }{ $leaf };
-            $oid_h->{ color }{ $idx } = $src_h->{ color }{ $leaf };
+            $oid_h->{val}{$idx}   = $leaf;
+            $oid_h->{time}{$idx}  = $src_h->{time}{$leaf};
+            $oid_h->{color}{$idx} = $src_h->{color}{$leaf};
             $idx++;
         }
 
         # Treat undefined leaf as error
-        if ( defined $oid_h->{ val } ) {
-            for my $leaf ( keys %{ $oid_h->{ val } } ) {
-                if ( not defined $oid_h->{ val }{ $leaf } ) {
+        if ( defined $oid_h->{val} ) {
+            for my $leaf ( keys %{ $oid_h->{val} } ) {
+                if ( not defined $oid_h->{val}{$leaf} ) {
                     if ( $idx == 1 ) {
-                        $oid_h->{ color }{ $leaf } = 'yellow';
-                        $oid_h->{ msg }{ $leaf }   = 'parent value n/a';
-                        $oid_h->{ error }{ $leaf } = 1;
-                        $oid_h->{ time }{ $leaf }  = time;
+                        $oid_h->{color}{$leaf} = 'yellow';
+                        $oid_h->{msg}{$leaf}   = 'parent value n/a';
+                        $oid_h->{error}{$leaf} = 1;
+                        $oid_h->{time}{$leaf}  = time;
                     }
                     else {
-                        delete $oid_h->{ val }{ $leaf };
-                        delete $oid_h->{ color }{ $leaf };
-                        delete $oid_h->{ msg }{ $leaf };
-                        delete $oid_h->{ time }{ $leaf };
-                        delete $oid_h->{ error }{ $leaf };
+                        delete $oid_h->{val}{$leaf};
+                        delete $oid_h->{color}{$leaf};
+                        delete $oid_h->{msg}{$leaf};
+                        delete $oid_h->{time}{$leaf};
+                        delete $oid_h->{error}{$leaf};
                     }
                 }
             }
@@ -2395,14 +2339,14 @@ sub render_msg {
     my ( $device, $tmpl, $test, $oids ) = @_;
 
     # Hash shortcut
-    my $msg_template = $tmpl->{ msg };
-    my $dev          = \%{ $g{ devices }{ $device } };
+    my $msg_template = $tmpl->{msg};
+    my $dev          = \%{ $g{devices}{$device} };
     my $xymonname    = $device;
     $xymonname =~ s/\./,/g;
-    do_log( "Rendering $test message for $device", DEBUG ) if $g{ debug };
+    do_log( "Rendering $test message for $device", DEBUG ) if $g{debug};
 
     # Build readable timestamp
-    my $now = $g{ xymondateformat } ? strftime( $g{ xymondateformat }, localtime ) : scalar(localtime);
+    my $now = $g{xymondateformat} ? strftime( $g{xymondateformat}, localtime ) : scalar(localtime);
 
     # No message template?
     if ( !defined $msg_template ) {
@@ -2410,8 +2354,8 @@ sub render_msg {
 
         # Do we have a xymon color, and if so, is it green?
     }
-    elsif ( defined $g{ xymon_color }{ $device }
-        and $g{ xymon_color }{ $device } ne 'green' )
+    elsif ( defined $g{xymon_color}{$device}
+        and $g{xymon_color}{$device} ne 'green' )
     {
         return "status $xymonname.$test clear $now\n\nXymon reports this device is unreachable.\nSuspending this test until reachability is restored\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
     }
@@ -2430,25 +2374,22 @@ sub render_msg {
     # in a line
     my %alarm_oids;
     while ( $msg_template =~ /\{([a-zA-z0-9-_.]+?)\.(?:color|errors)\}/g ) {
-        $alarm_oids{ $1 } = ();
+        $alarm_oids{$1} = ();
     }
 
     # Loop over the alarm oid and best/worst dependency (the oid is used
     # in a best/worst transform) and if a best/worst transform exist on the same
     # line, the oid do not have to raise an alarm, so mark it with 'cwc'
     my %no_global_wcolor;
-
 ALARM_OID: foreach my $alarm_oid ( keys %alarm_oids ) {
-        $no_global_wcolor{ $alarm_oid } = undef;
-
-        foreach my $dep_tt_oid ( @{ $tmpl->{ oids }{ $alarm_oid }{ sorted_oids_thresh_infls } } ) {
-            if ( exists $alarm_oids{ $dep_tt_oid } ) {
+        $no_global_wcolor{$alarm_oid} = undef;
+        foreach my $dep_tt_oid ( @{ $tmpl->{oids}{$alarm_oid}{sorted_oids_thresh_infls} } ) {
+            if ( exists $alarm_oids{$dep_tt_oid} ) {
 
                 # Mark this oid has not having to participate in the
                 # worst color computation
-                do_log( "$alarm_oid of $test on $device do not compute worst color ", TRACE ) if $g{ debug };
-
-                $no_global_wcolor{ $alarm_oid } = 1;
+                do_log( "$alarm_oid of $test on $device do not compute worst color ", TRACE ) if $g{debug};
+                $no_global_wcolor{$alarm_oid} = 1;
                 next ALARM_OID;
             }
         }
@@ -2467,23 +2408,23 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     my ( $opt, $val ) = ( $1, $2 ) if $optval =~ /(\w+)(?:\((.+)\))?/;
                     ( $opt, $val ) = ( $1, $2 ) if $optval =~ /^(\w+)=(\w+)$/;
                     $val = 1 if !defined $val;
-                    push @{ $t_opts{ $opt } }, $val;
+                    push @{ $t_opts{$opt} }, $val;
                 }
             }
 
             # Add our html header if necessary
-            if ( defined $t_opts{ nonhtml } || defined $t_opts{ plain } ) {
+            if ( defined $t_opts{nonhtml} || defined $t_opts{plain} ) {
                 $table = '';
             }
             else {
-                my $border = ( defined $t_opts{ border } ) ? $t_opts{ border }[ 0 ] : 1;
-                my $pad    = ( defined $t_opts{ pad } )    ? $t_opts{ pad }[ 0 ]    : 5;
+                my $border = ( defined $t_opts{border} ) ? $t_opts{border}[ 0 ] : 1;
+                my $pad    = ( defined $t_opts{pad} )    ? $t_opts{pad}[ 0 ]    : 5;
                 $table = "<table border=$border cellpadding=$pad>\n";
             }
 
             # Check for rrd options
-            if ( defined $t_opts{ rrd } ) {
-            RRDSET: for my $rrd_data ( @{ $t_opts{ rrd } } ) {
+            if ( defined $t_opts{rrd} ) {
+            RRDSET: for my $rrd_data ( @{ $t_opts{rrd} } ) {
                     my ( $header, $name, $all, $dir, $pri, $do_max );
                     my @datasets;
                     for my $rrd_opt ( split /\s*;\s*/, $rrd_data ) {
@@ -2506,12 +2447,12 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             push @datasets, $1;
                         }
                     }
-                    $name                   = $test if !defined $name;
-                    $rrd{ $name }{ pri }    = $pri    || 'pri';
-                    $rrd{ $name }{ dir }    = $dir    || 0;
-                    $rrd{ $name }{ all }    = $all    || 0;
-                    $rrd{ $name }{ do_max } = $do_max || 0;
-                    @{ $rrd{ $name }{ leaves } } = ();
+                    $name               = $test if !defined $name;
+                    $rrd{$name}{pri}    = $pri    || 'pri';
+                    $rrd{$name}{dir}    = $dir    || 0;
+                    $rrd{$name}{all}    = $all    || 0;
+                    $rrd{$name}{do_max} = $do_max || 0;
+                    @{ $rrd{$name}{leaves} } = ();
                     for (@datasets) {
                         my ( $ds, $oid, $type, $time, $min, $max ) = split /:/;
                         $ds   = $oid    if !defined $ds;
@@ -2520,10 +2461,10 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         $min  = 0       if !defined $min  or $min eq '';
                         $max  = 'U'     if !defined $max  or $max eq '';
                         $header .= "DS:$ds:$type:$time:$min:$max ";
-                        push @{ $rrd{ $name }{ oids } }, $oid;
+                        push @{ $rrd{$name}{oids} }, $oid;
                     }
                     chop $header;
-                    $rrd{ $name }{ header } = $header;
+                    $rrd{$name}{header} = $header;
                 }
             }
             next;
@@ -2536,11 +2477,11 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             if ( $line !~ /\{(.+?)\}/ ) {
 
                 # Format the line accordingly
-                if ( defined $t_opts{ nonhtml } ) {
+                if ( defined $t_opts{nonhtml} ) {
                     $table .= "$line\n";
                     $line =~ s/\|/:/g;
                 }
-                elsif ( defined $t_opts{ plain } ) {
+                elsif ( defined $t_opts{plain} ) {
                     $table .= "$line\n";
                     $line =~ s/\|/ /g;
                 }
@@ -2556,11 +2497,11 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             my %alarm1;
 
             # Replace our separaters with html
-            if ( defined $t_opts{ nonhtml } ) {
+            if ( defined $t_opts{nonhtml} ) {
                 $line =~ s/\|>/|/g;    # Remove right-align indicator
                 $line =~ s/\|/:/g;
             }
-            elsif ( defined $t_opts{ plain } ) {
+            elsif ( defined $t_opts{plain} ) {
                 $line =~ s/\|>/|/g;    # Remove right-align indicator
                 $line =~ s/\|/ /g;
             }
@@ -2582,7 +2523,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             $pri =~ s/\..*//;
 
             # Make sure our primary OID is a repeater
-            if ( !$oids->{ $pri }{ repeat } ) {
+            if ( !$oids->{$pri}{repeat} ) {
                 do_log( "Primary OID $pri in $test table is a non-repeater", ERROR );
                 $msg .= "&yellow primary OID $pri in table is a non-repeater\n";
                 $worst_color = 'yellow';
@@ -2595,24 +2536,23 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             # numerically or alpha: try to make someting that match if graphs are used:
             # graph used the pri oid so this sort option do not feel weel when graphing
             my @table_leaves = ();
-
-            if ( exists $t_opts{ sort }[ 0 ] ) {
-                if ( ( defined $t_opts{ sort }[ 0 ] ) and ( defined $oids->{ $t_opts{ sort }[ 0 ] }{ val } ) ) {
-                    my %temphash = %{ $oids->{ $t_opts{ sort }[ 0 ] }{ val } };
-                    @table_leaves = sort { $temphash{ $a } <=> $temphash{ $b } } keys %temphash;
+            if ( exists $t_opts{sort}[ 0 ] ) {
+                if ( ( defined $t_opts{sort}[ 0 ] ) and ( defined $oids->{ $t_opts{sort}[ 0 ] }{val} ) ) {
+                    my %temphash = %{ $oids->{ $t_opts{sort}[ 0 ] }{val} };
+                    @table_leaves = sort { $temphash{$a} <=> $temphash{$b} } keys %temphash;
                 }
 
                 # If the primary oids leaves are non-numeric, then we can't sort it
                 # numerically, we'll have to resort to a cmp
             }
-            elsif ( $oids->{ $pri }{ repeat } == 2 ) {
-                my @unsorted = keys %{ $oids->{ $pri }{ val } };
+            elsif ( $oids->{$pri}{repeat} == 2 ) {
+                my @unsorted = keys %{ $oids->{$pri}{val} };
                 @table_leaves = leaf_sort( \@unsorted );
 
                 # Otherwise sort them numerically ascending
             }
             else {
-                @table_leaves = sort { $a <=> $b } keys %{ $oids->{ $pri }{ val } };
+                @table_leaves = sort { $a <=> $b } keys %{ $oids->{$pri}{val} };
             }
 
             # Now go through all oid vals, using the primary's leaves
@@ -2624,17 +2564,17 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 my $alarm_int;
 
                 # Do some alarm logic
-                my $pri_val = $leaf eq '#' ? 'undef' : $oids->{ $pri }{ val }{ $leaf };
-                my $alarm   = 1;                                                          # Alarm by default
+                my $pri_val = $leaf eq '#' ? 'undef' : $oids->{$pri}{val}{$leaf};
+                my $alarm   = 1;                                                    # Alarm by default
                 my $a_val
-                    = $dev->{ except }{ $test }{ $pri }{ alarm }
-                    || $dev->{ except }{ all }{ $pri }{ alarm }
-                    || $tmpl->{ oids }{ $pri }{ except }{ alarm };
+                    = $dev->{except}{$test}{$pri}{alarm}
+                    || $dev->{except}{all}{$pri}{alarm}
+                    || $tmpl->{oids}{$pri}{except}{alarm};
                 $alarm = ( $pri_val =~ /^(?:$a_val)$/ ) ? 1 : 0 if defined $a_val;
                 my $na_val
-                    = $dev->{ except }{ $test }{ $pri }{ noalarm }
-                    || $dev->{ except }{ all }{ $pri }{ noalarm }
-                    || $tmpl->{ oids }{ $pri }{ except }{ noalarm };
+                    = $dev->{except}{$test}{$pri}{noalarm}
+                    || $dev->{except}{all}{$pri}{noalarm}
+                    || $tmpl->{oids}{$pri}{except}{noalarm};
                 $alarm = 0 if ( defined $na_val ) and ( defined $pri_val ) and ( $pri_val =~ /^(?:$na_val)$/ );
 
                 # Now go through all the oids in our table row and replace them
@@ -2643,7 +2583,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     # Chop off any flags and store them for later
                     my $oid   = $root;
                     my $flag  = $1 if $oid =~ s/\.(.+)$//;
-                    my $oid_h = \%{ $oids->{ $oid } };
+                    my $oid_h = \%{ $oids->{$oid} };
 
                     # Get our oid vars
                     my $val;
@@ -2651,25 +2591,25 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     if ( $leaf eq '#' ) {
                         $val = 'NoOID';
                     }
-                    elsif ( $oid_h->{ repeat } ) {
-                        $val = $oid_h->{ val }{ $leaf } if defined $oid_h->{ val }{ $leaf };
+                    elsif ( $oid_h->{repeat} ) {
+                        $val = $oid_h->{val}{$leaf} if defined $oid_h->{val}{$leaf};
                     }
                     else {
-                        $val = $oid_h->{ val } if defined $oid_h->{ val };
+                        $val = $oid_h->{val} if defined $oid_h->{val};
                     }
-                    if ( exists $oid_h->{ color } ) {
-                        if ( ref $oid_h->{ color } eq 'HASH' ) {
-                            $color = defined $oid_h->{ color }{ $leaf } ? $oid_h->{ color }{ $leaf } : 'blue';
+                    if ( exists $oid_h->{color} ) {
+                        if ( ref $oid_h->{color} eq 'HASH' ) {
+                            $color = defined $oid_h->{color}{$leaf} ? $oid_h->{color}{$leaf} : 'blue';
                         }
                         else {
-                            $color = defined $oid_h->{ color } ? $oid_h->{ color } : 'blue';
+                            $color = defined $oid_h->{color} ? $oid_h->{color} : 'blue';
                         }
                     }
                     else {
                         $color = 'blue';
                     }
                     if ( !defined $val ) {
-                        do_log( "Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", TRACE ) if $g{ trace };
+                        do_log( "Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", TRACE ) if $g{trace};
                         $val = 'NoOID';
                     }
 
@@ -2678,13 +2618,13 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     # oid matches, if it is an 'only' type, ONLY include
                     # this leaf row if the data matches
                     my $ignore
-                        = $dev->{ except }{ $test }{ $oid }{ ignore }
-                        || $dev->{ except }{ all }{ $oid }{ ignore }
-                        || $tmpl->{ oids }{ $oid }{ except }{ ignore };
+                        = $dev->{except}{$test}{$oid}{ignore}
+                        || $dev->{except}{all}{$oid}{ignore}
+                        || $tmpl->{oids}{$oid}{except}{ignore};
                     my $only
-                        = $dev->{ except }{ $test }{ $oid }{ only }
-                        || $dev->{ except }{ all }{ $oid }{ only }
-                        || $tmpl->{ oids }{ $oid }{ except }{ only };
+                        = $dev->{except}{$test}{$oid}{only}
+                        || $dev->{except}{all}{$oid}{only}
+                        || $tmpl->{oids}{$oid}{except}{only};
                     next T_LEAF if defined $ignore and $val =~ /^(?:$ignore)$/;
                     next T_LEAF if defined $only   and $val !~ /^(?:$only)$/;
 
@@ -2696,13 +2636,13 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Add our primary key to our rrd set, if needed
                         for my $name ( keys %rrd ) {
-                            $rrd{ $name }{ pri } = $oid if $rrd{ $name }{ pri } eq 'pri';
+                            $rrd{$name}{pri} = $oid if $rrd{$name}{pri} eq 'pri';
 
                             # This condition looks incorrect. We should not remove rrds if alerting
                             # is disabled for this leaf. If the user doesn't want a graph, they probably
                             # don't want this leaf in the table, they should set 'ignore' instead of 'noalarm'
                             # add to list, but check we're not pushing multiple times
-                            push @{ $rrd{ $name }{ leaves } }, $leaf unless grep { $_ eq $leaf } @{ $rrd{ $name }{ leaves } };
+                            push @{ $rrd{$name}{leaves} }, $leaf unless grep { $_ eq $leaf } @{ $rrd{$name}{leaves} };
                         }
 
                         # If this is our primary oid, and we are have an alarm
@@ -2717,15 +2657,14 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     if ( defined $flag ) {
                         my $oid_msg;
                         if ( $leaf eq '#' ) {
-                            $oid_msg = parse_deps( $oids, $oid_h->{ msg }, $leaf ) if defined $oid_h->{ msg };
+                            $oid_msg = parse_deps( $oids, $oid_h->{msg}, $leaf ) if defined $oid_h->{msg};
                         }
-                        elsif ( $oid_h->{ color } eq "red" or $oid_h->{ color } eq "yellow" or $oid_h->{ color } eq "green" or $oid_h->{ color } eq "clear" or $oid_h->{ color } eq "blue" ) {
-                            $oid_msg = parse_deps( $oids, $oid_h->{ msg }, $leaf ) if defined $oid_h->{ msg };
+                        elsif ( $oid_h->{color} eq "red" or $oid_h->{color} eq "yellow" or $oid_h->{color} eq "green" or $oid_h->{color} eq "clear" or $oid_h->{color} eq "blue" ) {
+                            $oid_msg = parse_deps( $oids, $oid_h->{msg}, $leaf ) if defined $oid_h->{msg};
                         }
                         else {
-                            $oid_msg = parse_deps( $oids, $oid_h->{ msg }{ $leaf }, $leaf ) if defined $oid_h->{ msg }{ $leaf };
+                            $oid_msg = parse_deps( $oids, $oid_h->{msg}{$leaf}, $leaf ) if defined $oid_h->{msg}{$leaf};
                         }
-
                         if ( $flag eq 'color' ) {
 
                             # Honor the 'alarm' exceptions
@@ -2733,8 +2672,8 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                             # If this test has a worse color, use it for the global color
                             # but verify first that this test should compute the worst color
-                            if ( ( defined $oid_msg ) and ( not $no_global_wcolor{ $oid } ) and ( $oid_msg ne '' ) ) {
-                                $worst_color = $color if ( not defined $worst_color ) or ( $colors{ $worst_color } < $colors{ $color } );
+                            if ( ( defined $oid_msg ) and ( not $no_global_wcolor{$oid} ) and ( $oid_msg ne '' ) ) {
+                                $worst_color = $color if ( not defined $worst_color ) or ( $colors{$worst_color} < $colors{$color} );
                             }
 
                             # Display threshold messages if we get the msg flag
@@ -2749,35 +2688,32 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         }
                         elsif ( $flag eq 'errors' or $flag eq 'error' ) {
                             $row_data =~ s/\{$root\}//;
-
                             next if $color eq 'green' or $color eq 'blue';
 
                             # If this test has a worse color, use it for the global color
                             # but verify first that this test should compute the worst color
-                            if ( $no_global_wcolor{ $oid } ) {
+                            if ( $no_global_wcolor{$oid} ) {
                                 do_log( "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", DEBUG );
 
                                 # Get oid msg and replace any inline oid dependencies
                             }
                             else {
-
                                 $oid_msg = parse_deps( $oids, $oid_msg, $leaf );
 
                                 # If the message is an empty string it means that we dont want to raise an error
                                 if ( ( defined $oid_msg ) and ( $oid_msg ne '' ) ) {
-                                    $worst_color = $color if ( not defined $worst_color ) or ( $colors{ $worst_color } < $colors{ $color } );
+                                    $worst_color = $color if ( not defined $worst_color ) or ( $colors{$worst_color} < $colors{$color} );
 
                                     # Now add it to our msg
                                     my $error_key = "&$color $oid_msg";
-                                    $errors{ $error_key } = undef;
+                                    $errors{$error_key} = undef;
                                 }
                             }
 
                             # Display color threshold value
                         }
                         elsif ( $flag =~ /^thresh$/i ) {
-                            my $thresh = $oid_h->{ thresh }{ $leaf };
-
+                            my $thresh = $oid_h->{thresh}{$leaf};
                             $thresh = 'Undef' if !defined $thresh;
                             $row_data =~ s/\{$root\}/$thresh/;
 
@@ -2786,7 +2722,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         elsif ( $flag =~ /^thresh\:(\w+)$/i or $flag =~ /^threshold\.(\w+)$/i ) {
                             my $threshold_color = lc $1;
                             my $threshold       = '';
-                            for my $limit ( keys %{ $oid_h->{ threshold }{ $threshold_color } } ) {
+                            for my $limit ( keys %{ $oid_h->{threshold}{$threshold_color} } ) {
                                 if ( $threshold eq '' ) {
                                     $threshold = $limit;
                                 }
@@ -2812,21 +2748,21 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                 # add the primary repeater to our alarm header if we are
                 # alarming on it; Wrap our header at 60 chars
-                if ( !defined $t_opts{ noalarmsmsg } and $alarm and $leaf ne '#' and defined $alarm_int ) {
-                    $alarm1{ $alarm_int } = undef;
+                if ( !defined $t_opts{noalarmsmsg} and $alarm and $leaf ne '#' and defined $alarm_int ) {
+                    $alarm1{$alarm_int} = undef;
                 }
 
                 # Finished with this row (signified by the primary leaf id)
-                if ( defined $t_opts{ nonhtml } || defined $t_opts{ plain } ) {
+                if ( defined $t_opts{nonhtml} || defined $t_opts{plain} ) {
                     $table .= "$row_data\n";
                 }
                 else {
                     $table .= "<tr><td>$row_data</td></tr>\n";
                 }
             }
-            $table .= "</table>\n" if ( !defined $t_opts{ nonhtml } && !defined $t_opts{ plain } );
+            $table .= "</table>\n" if ( !defined $t_opts{nonhtml} && !defined $t_opts{plain} );
             $alarm_ints = '';
-            if ( !defined $t_opts{ noalarmsmsg } and %alarm1 ) {
+            if ( !defined $t_opts{noalarmsmsg} and %alarm1 ) {
                 for my $alarm1_key ( sort { $a cmp $b } keys %alarm1 ) {
                     $alarm_ints =~ s/(.{60,}),$/$1)\nAlarming on (/;
                     $alarm_ints .= "$alarm1_key,";
@@ -2834,7 +2770,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             }
 
             # If we are display alarms, fix the message up to look nice
-            if ( !defined $t_opts{ noalarmsmsg } ) {
+            if ( !defined $t_opts{noalarmsmsg} ) {
                 if ( $alarm_ints ne '' ) {
                     $alarm_ints =~ s/(.+),/Alarming on ($1)\n/s;
                 }
@@ -2844,7 +2780,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             }
 
             # Put the alarm ints on bottom if requested to do so
-            if ( defined $t_opts{ alarmsonbottom } ) {
+            if ( defined $t_opts{alarmsonbottom} ) {
                 $msg = join '', ( $msg, $table, $alarm_ints );
             }
             else {
@@ -2855,20 +2791,20 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
             for my $name ( keys %rrd ) {
                 my $set_data  = '';
                 my $temp_data = '';
-                my $dir       = $rrd{ $name }{ dir };
-                my $pri       = $rrd{ $name }{ pri };
-                my $do_max    = $rrd{ $name }{ do_max };
+                my $dir       = $rrd{$name}{dir};
+                my $pri       = $rrd{$name}{pri};
+                my $do_max    = $rrd{$name}{do_max};
                 do_log( "Couldn't fetch primary oid for rrd set $name", WARN )
                     and next
                     if $pri eq 'pri';
-                my $header = "<!--DEVMON RRD: $name $dir $do_max\n" . $rrd{ $name }{ header };
-                for my $leaf ( @{ $rrd{ $name }{ leaves } } ) {
-                    next if not defined $oids->{ $pri }{ val }{ $leaf };
-                    my $pri_val = $oids->{ $pri }{ val }{ $leaf };
+                my $header = "<!--DEVMON RRD: $name $dir $do_max\n" . $rrd{$name}{header};
+                for my $leaf ( @{ $rrd{$name}{leaves} } ) {
+                    next if not defined $oids->{$pri}{val}{$leaf};
+                    my $pri_val = $oids->{$pri}{val}{$leaf};
                     $pri_val =~ s/\s*//g;
                     $temp_data = '';
-                    for my $oid ( @{ $rrd{ $name }{ oids } } ) {
-                        my $val = $oids->{ $oid }{ val }{ $leaf };
+                    for my $oid ( @{ $rrd{$name}{oids} } ) {
+                        my $val = $oids->{$oid}{val}{$leaf};
                         if ( defined $val ) {
                             $val = ( $val =~ /^[+-]?\d+(\.\d+)?/ ) ? int $val : 'U';
                         }
@@ -2879,7 +2815,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
                     if ( $temp_data =~ /^(U:)+/ ) {
                         do_log( "Text values in data for rrd repeater, dropping rrd for $pri_val", WARN )
-                            if $g{ debug };
+                            if $g{debug};
                         next;
                     }
                     $set_data .= "$pri_val ";
@@ -2901,12 +2837,12 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 # Chop off any flags and store them for later
                 my $oid   = $root;
                 my $flag  = $1 if $oid =~ s/\.(.+)$//;
-                my $oid_h = \%{ $oids->{ $oid } };
+                my $oid_h = \%{ $oids->{$oid} };
                 $flag = '' if !defined $flag;
 
                 # Get our oid vars
-                my $val   = $oid_h->{ val };
-                my $color = $oid_h->{ color };
+                my $val   = $oid_h->{val};
+                my $color = $oid_h->{color};
                 $val   = 'NoOID' if !defined $val;
                 $color = 'clear' if !defined $color;
 
@@ -2914,7 +2850,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 # place holder with flag data, if not, just replace
                 # it with the oid value
                 if ( $flag ne '' ) {
-                    my $oid_msg = parse_deps( $oids, $oid_h->{ msg }, undef );
+                    my $oid_msg = parse_deps( $oids, $oid_h->{msg}, undef );
                     if ( $flag eq 'color' ) {
 
                         # Honor the 'alarm' exceptions
@@ -2922,10 +2858,10 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # If this test has a worse color, use it for the global color
                         # but verify first that this test should compute the worst color
-                        if ( ( defined $oid_msg ) and ( not $no_global_wcolor{ $oid } ) and ( $oid_msg ne '' ) ) {
+                        if ( ( defined $oid_msg ) and ( not $no_global_wcolor{$oid} ) and ( $oid_msg ne '' ) ) {
                             $worst_color = $color
                                 if !defined $worst_color
-                                or $colors{ $worst_color } < $colors{ $color };
+                                or $colors{$worst_color} < $colors{$color};
                         }
 
                         # Display threshold messages if we get the msg flag
@@ -2947,7 +2883,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # If this test has a worse color, use it for the global color
                         # but verify first that this test should compute the worst color
-                        if ( $no_global_wcolor{ $oid } ) {
+                        if ( $no_global_wcolor{$oid} ) {
                             do_log( "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", INFO );
 
                             # Get oid msg and replace any inline oid dependencies
@@ -2956,18 +2892,18 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             if ( defined $oid_msg and $oid_msg ne '' ) {
                                 $worst_color = $color
                                     if !defined $worst_color
-                                    or $colors{ $worst_color } < $colors{ $color };
+                                    or $colors{$worst_color} < $colors{$color};
 
                                 # Now add it to our msg
                                 my $error_key = "&$color $oid_msg";
-                                $errors{ $error_key } = undef;
+                                $errors{$error_key} = undef;
                             }
                         }
 
                         # Display color threshold value
                     }
                     elsif ( $flag =~ /^thresh$/i ) {
-                        my $thresh = $oid_h->{ thresh };
+                        my $thresh = $oid_h->{thresh};
                         $thresh = 'Undef' if !defined $thresh;
                         $line =~ s/\{$root\}/$thresh/;
 
@@ -2976,7 +2912,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     elsif ( $flag =~ /^thresh:($color_list)$/i or $flag =~ /^threshold\.(\w+)$/i ) {
                         my $threshold_color = lc $1;
                         my $threshold       = '';
-                        for my $limit ( keys %{ $oid_h->{ threshold }{ $threshold_color } } ) {
+                        for my $limit ( keys %{ $oid_h->{threshold}{$threshold_color} } ) {
                             if ( $threshold eq '' ) {
                                 $threshold = $limit;
                             }
@@ -2994,7 +2930,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                     }
                 }
                 else {
-                    my $val = $oid_h->{ val };
+                    my $val = $oid_h->{val};
                     $val = "NoOID" if !defined $val;
                     $line =~ s/\{$root\}/$val/;
                 }
@@ -3041,36 +2977,35 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 sub leaf_sort {
     my %cache;
     my ($list) = @_;
-    return sort { ( $cache{ $a } ||= pack "w*", split /\./, $a ) cmp( $cache{ $b } ||= pack "w*", split /\./, $b ) } @$list;
+    return sort { ( $cache{$a} ||= pack "w*", split /\./, $a ) cmp( $cache{$b} ||= pack "w*", split /\./, $b ) } @$list;
 }
 
 # Check alarm exceptions to see if a given oid should be
 # alarmed against.  Return true if it should be ignored.
 sub check_alarms {
     my ( $tmpl, $dev, $test, $oid, $val ) = @_;
-    if ( defined $dev->{ except }{ $test }{ $oid }{ noalarm } ) {
-        my $match = $dev->{ except }{ $test }{ $oid }{ noalarm };
+    if ( defined $dev->{except}{$test}{$oid}{noalarm} ) {
+        my $match = $dev->{except}{$test}{$oid}{noalarm};
         return 1 if $val =~ /^(?:$match)$/;
     }
-    elsif ( defined $dev->{ except }{ all }{ $oid }{ noalarm } ) {
-        my $match = $dev->{ except }{ all }{ $oid }{ noalarm };
+    elsif ( defined $dev->{except}{all}{$oid}{noalarm} ) {
+        my $match = $dev->{except}{all}{$oid}{noalarm};
         return 1 if $val =~ /^(?:$match)$/;
     }
-    elsif ( defined $tmpl->{ oids }{ $oid }{ except }{ noalarm } ) {
-        my $match = $tmpl->{ oids }{ $oid }{ except }{ noalarm };
+    elsif ( defined $tmpl->{oids}{$oid}{except}{noalarm} ) {
+        my $match = $tmpl->{oids}{$oid}{except}{noalarm};
         return 1 if $val =~ /^(?:$match)$/;
     }
-
-    if ( defined $dev->{ except }{ $test }{ $oid }{ alarm } ) {
-        my $match = $dev->{ except }{ $test }{ $oid }{ alarm };
+    if ( defined $dev->{except}{$test}{$oid}{alarm} ) {
+        my $match = $dev->{except}{$test}{$oid}{alarm};
         return 1 if $val !~ /^(?:$match)$/;
     }
-    elsif ( defined $dev->{ except }{ all }{ $oid }{ alarm } ) {
-        my $match = $dev->{ except }{ all }{ $oid }{ alarm };
+    elsif ( defined $dev->{except}{all}{$oid}{alarm} ) {
+        my $match = $dev->{except}{all}{$oid}{alarm};
         return 1 if $val !~ /^(?:$match)$/;
     }
-    elsif ( defined $tmpl->{ oids }{ $oid }{ except }{ alarm } ) {
-        my $match = $tmpl->{ oids }{ $oid }{ except }{ alarm };
+    elsif ( defined $tmpl->{oids}{$oid}{except}{alarm} ) {
+        my $match = $tmpl->{oids}{$oid}{except}{alarm};
         return 1 if $val !~ /^(?:$match)$/;
     }
 }
@@ -3091,7 +3026,7 @@ sub parse_deps {
     # Go through all the oids that we depend on
     for my $dep_oid ( $msg =~ /\{(.+?)\}/g ) {
         my $oid   = $dep_oid;
-        my $oid_h = \%{ $oids->{ $oid } };
+        my $oid_h = \%{ $oids->{$oid} };
         my $val;
 
         # See if our oid has any flags appended
@@ -3103,16 +3038,15 @@ sub parse_deps {
 
             # Evaluate flag type
             if ( $flag eq 'color' ) {
-                $val = "&" . $oid_h->{ color }{ $leaf } . " ";
+                $val = "&" . $oid_h->{color}{$leaf} . " ";
             }
             elsif ( $flag eq 'msg' ) {
-                my $depmsg = $oid_h->{ msg }{ $leaf };
+                my $depmsg = $oid_h->{msg}{$leaf};
                 $val = parse_deps( $oids, $depmsg, $leaf, $depth );
             }
             else {
-                $val = $oid_h->{ val }{ $leaf };
+                $val = $oid_h->{val}{$leaf};
             }
-
             if ( !defined $val ) {
                 do_log( "Missing msg data for $dep_oid on leaf $leaf", WARN );
                 $val = 'Undef';
@@ -3121,17 +3055,16 @@ sub parse_deps {
             # Not a repeater
         }
         else {
-
             # Evaluate flag type
             if ( $flag eq 'color' ) {
-                $val = "&" . $oid_h->{ color } . " ";
+                $val = "&" . $oid_h->{color} . " ";
             }
             elsif ( $flag eq 'msg' ) {
-                my $depmsg = $oid_h->{ msg };
+                my $depmsg = $oid_h->{msg};
                 $val = parse_deps( $oids, $depmsg, undef, $depth );
             }
             else {
-                $val = $oid_h->{ val };
+                $val = $oid_h->{val};
             }
             if ( !defined $val ) {
                 do_log( "Missing msg data for $dep_oid", WARN );
@@ -3146,39 +3079,34 @@ sub parse_deps {
 # Apply thresholds to a supplied repeater oid, save in the oids hash
 sub apply_threshold {
     my ( $oids, $oid ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
-    if ( $oid_h->{ repeat } and defined $oid_h->{ val } and not( defined $oid_h->{ color } and ( ref $oid_h->{ color } ne 'HASH' ) ) ) {
-
-    APTHRLEAF: for my $leaf ( keys %{ $oid_h->{ val } } ) {
+    my $oid_h = \%{ $oids->{$oid} };
+    if ( $oid_h->{repeat} and defined $oid_h->{val} and not( defined $oid_h->{color} and ( ref $oid_h->{color} ne 'HASH' ) ) ) {
+    APTHRLEAF: for my $leaf ( keys %{ $oid_h->{val} } ) {
             my %oid_r;
-            $oid_r{ val }    = \$oid_h->{ val }{ $leaf };
-            $oid_r{ color }  = \$oid_h->{ color }{ $leaf };
-            $oid_r{ msg }    = \$oid_h->{ msg }{ $leaf };
-            $oid_r{ error }  = \$oid_h->{ error }{ $leaf };
-            $oid_r{ thresh } = \$oid_h->{ thresh }{ $leaf };
-            if ( !defined ${ $oid_r{ color } } ) {
-
-                ${ $oid_r{ color } } = 'green';
+            $oid_r{val}    = \$oid_h->{val}{$leaf};
+            $oid_r{color}  = \$oid_h->{color}{$leaf};
+            $oid_r{msg}    = \$oid_h->{msg}{$leaf};
+            $oid_r{error}  = \$oid_h->{error}{$leaf};
+            $oid_r{thresh} = \$oid_h->{thresh}{$leaf};
+            if ( !defined ${ $oid_r{color} } ) {
+                ${ $oid_r{color} } = 'green';
             }
-
-            if ( defined ${ $oid_r{ val } } ) {
-
-                my $oid_val                 = ${ $oid_r{ val } };
-                my $thresh_confidence_level = 0;                    # 7 Exact match, 6 Interval match, 5 smart-match,
-                                                                    # 4 Negative smart-match, 3 Negative match, 2 Colored_Automatch
-                                                                    # 1 Automatch
-
-                # Apply template thresholds
-                if ( exists $oid_h->{ threshold } ) {
-                    my $thresh_h = \%{ $oid_h->{ threshold } };
-                    apply_thresh_element( $thresh_h, \%oid_r, $oid_r{ color }, \$thresh_confidence_level );
+            if ( defined ${ $oid_r{val} } ) {
+                my $oid_val                 = ${ $oid_r{val} };
+                my $thresh_confidence_level = 0;                  # 7 Exact match, 6 Interval match, 5 smart-match,
+                                                                  # 4 Negative smart-match, 3 Negative match, 2 Colored_Automatch
+                                                                  # 1 Automatch
+                                                                  # Apply template thresholds
+                if ( exists $oid_h->{threshold} ) {
+                    my $thresh_h = \%{ $oid_h->{threshold} };
+                    apply_thresh_element( $thresh_h, \%oid_r, $oid_r{color}, \$thresh_confidence_level );
                 }
             }
-            my $color = ${ $oid_r{ color } };
+            my $color = ${ $oid_r{color} };
             if ( $color eq 'green' ) {
             }
             elsif ( $color eq 'clear' ) {
-                ${ $oid_r{ error } } = 1;
+                ${ $oid_r{error} } = 1;
             }
             elsif ( $color eq 'blue' ) {
             }
@@ -3189,61 +3117,57 @@ sub apply_threshold {
             else {
                 do_log( "Invalid color '${$oid_r{color}}' of '$oid'.'$leaf' ", ERROR );
             }
-            delete $oid_h->{ thresh }{ $leaf } unless ( defined ${ $oid_r{ thresh } } );
-            delete $oid_h->{ msg }{ $leaf }    unless ( defined ${ $oid_r{ msg } } );
-            delete $oid_h->{ error }{ $leaf }  unless ( defined ${ $oid_r{ error } } );
+            delete $oid_h->{thresh}{$leaf} unless ( defined ${ $oid_r{thresh} } );
+            delete $oid_h->{msg}{$leaf}    unless ( defined ${ $oid_r{msg} } );
+            delete $oid_h->{error}{$leaf}  unless ( defined ${ $oid_r{error} } );
         }
-        delete $oid_h->{ thresh } unless ( %{ $oid_h->{ thresh } } );
-        delete $oid_h->{ msg }    unless ( %{ $oid_h->{ msg } } );
-        delete $oid_h->{ error }  unless ( %{ $oid_h->{ error } } );
+        delete $oid_h->{thresh} unless ( %{ $oid_h->{thresh} } );
+        delete $oid_h->{msg}    unless ( %{ $oid_h->{msg} } );
+        delete $oid_h->{error}  unless ( %{ $oid_h->{error} } );
     }
     else {
-
         my %oid_r;
         my $oid_val;
-        $oid_r{ val }    = \$oid_h->{ val };
-        $oid_r{ color }  = \$oid_h->{ color };
-        $oid_r{ msg }    = \$oid_h->{ msg };
-        $oid_r{ error }  = \$oid_h->{ error };
-        $oid_r{ thresh } = \$oid_h->{ thresh };
-
-        if ( ( not $oid_h->{ repeat } ) and ( defined ${ $oid_r{ val } } ) ) {
+        $oid_r{val}    = \$oid_h->{val};
+        $oid_r{color}  = \$oid_h->{color};
+        $oid_r{msg}    = \$oid_h->{msg};
+        $oid_r{error}  = \$oid_h->{error};
+        $oid_r{thresh} = \$oid_h->{thresh};
+        if ( ( not $oid_h->{repeat} ) and ( defined ${ $oid_r{val} } ) ) {
 
             # more precise threshold means more confidence
             my $thresh_confidence_level = 0;    # 7 Exact match, 6 Interval match, 5 smart match,
                                                 # 4 Negative smart match, 3 Negative match, 2 Colored_Automatch
                                                 # 1 Automatch
                                                 # default values
-
-            if ( !defined ${ $oid_r{ color } } ) {
-                ${ $oid_r{ color } } = 'green';
+            if ( !defined ${ $oid_r{color} } ) {
+                ${ $oid_r{color} } = 'green';
             }
-            my $oid_color = ${ $oid_r{ color } };
+            my $oid_color = ${ $oid_r{color} };
 
             # Apply template thresholds
-            if ( exists $oid_h->{ threshold } ) {
-                my $thresh_h = \%{ $oid_h->{ threshold } };
+            if ( exists $oid_h->{threshold} ) {
+                my $thresh_h = \%{ $oid_h->{threshold} };
                 apply_thresh_element( $thresh_h, \%oid_r, \$oid_color, \$thresh_confidence_level );
             }
         }
-        delete $oid_h->{ thresh } unless ( defined ${ $oid_r{ thresh } } );
-        delete $oid_h->{ msg }    unless ( defined ${ $oid_r{ msg } } );
-        delete $oid_h->{ error }  unless ( defined ${ $oid_r{ error } } );
-
-        if ( not defined $oid_h->{ color } or $oid_h->{ color } eq 'clear' ) {
-            $oid_h->{ error } = 1;
+        delete $oid_h->{thresh} unless ( defined ${ $oid_r{thresh} } );
+        delete $oid_h->{msg}    unless ( defined ${ $oid_r{msg} } );
+        delete $oid_h->{error}  unless ( defined ${ $oid_r{error} } );
+        if ( not defined $oid_h->{color} or $oid_h->{color} eq 'clear' ) {
+            $oid_h->{error} = 1;
             return;
         }
-        elsif ( $oid_h->{ color } eq 'green' ) {
+        elsif ( $oid_h->{color} eq 'green' ) {
             return;
         }
-        elsif ( $oid_h->{ color } eq 'blue' ) {
+        elsif ( $oid_h->{color} eq 'blue' ) {
             return;
         }
-        elsif ( $oid_h->{ color } eq 'yellow' ) {
+        elsif ( $oid_h->{color} eq 'yellow' ) {
             return;
         }
-        elsif ( $oid_h->{ color } eq 'red' ) {
+        elsif ( $oid_h->{color} eq 'red' ) {
             return;
         }
         do_log( "Invalid color '$oid_h->{color}' of '$oid'", ERROR );
@@ -3252,29 +3176,29 @@ sub apply_threshold {
 
 sub apply_thresh_element {
     my ( $thresh_h, $oid_r_ref, $oid_color_ref, $thresh_confidence_level_ref ) = @_;
-    my %oid_r                   = %{ $oid_r_ref };
-    my $oid_color               = ${ $oid_color_ref };
-    my $thresh_confidence_level = ${ $thresh_confidence_level_ref };
+    my %oid_r                   = %{$oid_r_ref};
+    my $oid_color               = ${$oid_color_ref};
+    my $thresh_confidence_level = ${$thresh_confidence_level_ref};
 COLOR: for my $color (@color_order) {
-        next unless defined $thresh_h->{ $color };
-    TRH_LIST: for my $thresh_list ( keys %{ $thresh_h->{ $color } } ) {
+        next unless defined $thresh_h->{$color};
+    TRH_LIST: for my $thresh_list ( keys %{ $thresh_h->{$color} } ) {
             my $thresh_msg;
-            $thresh_msg = $thresh_h->{ $color }{ $thresh_list } if defined $thresh_h->{ $color }{ $thresh_list };
+            $thresh_msg = $thresh_h->{$color}{$thresh_list} if defined $thresh_h->{$color}{$thresh_list};
 
             # Split our comma-delimited thresholds up
             for my $thresh ( split /\s*,\s*/, $thresh_list ) {
 
                 # check if the value to test is a num
-                if ( ${ $oid_r{ val } } ne 'NaN' and looks_like_number( ${ $oid_r{ val } } ) ) {
+                if ( ${ $oid_r{val} } ne 'NaN' and looks_like_number( ${ $oid_r{val} } ) ) {
 
                     # Look for a simple numeric threshold, without a comparison operator.
                     # This is the most common threshold definition and handling it separately
                     # results in a significant performance improvement.
                     if ( $thresh_confidence_level < 6 and looks_like_number($thresh) ) {
-                        if ( ${ $oid_r{ val } } >= $thresh ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                        if ( ${ $oid_r{val} } >= $thresh ) {
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 6;
                             next TRH_LIST;
                         }
@@ -3283,46 +3207,47 @@ COLOR: for my $color (@color_order) {
                     }
                     elsif ( $thresh =~ /^(>|<|>=|<=|=|!)\s*([+-]?\d+(?:\.\d+)?)$/ ) {
                         my ( $op, $limit ) = ( $1, $2 );
-                        if (( $thresh_confidence_level < 6 )
-                            and (  ( $op eq '>' and ${ $oid_r{ val } } > $limit )
-                                or ( $op eq '>=' and ${ $oid_r{ val } } >= $limit )
-                                or ( $op eq '<'  and ${ $oid_r{ val } } < $limit )
-                                or ( $op eq '<=' and ${ $oid_r{ val } } <= $limit ) )
+                        if (
+                            ( $thresh_confidence_level < 6 )
+                            and (  ( $op eq '>' and ${ $oid_r{val} } > $limit )
+                                or ( $op eq '>=' and ${ $oid_r{val} } >= $limit )
+                                or ( $op eq '<'  and ${ $oid_r{val} } < $limit )
+                                or ( $op eq '<=' and ${ $oid_r{val} } <= $limit ) )
                             )
                         {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 6;
                             next TRH_LIST;
                         }
-                        elsif ( $thresh_confidence_level < 7 and $op eq '=' and ${ $oid_r{ val } } == $limit ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                        elsif ( $thresh_confidence_level < 7 and $op eq '=' and ${ $oid_r{val} } == $limit ) {
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 7;
                             last COLOR;
                         }
-                        elsif ( $thresh_confidence_level < 3 and $op eq '!' and ${ $oid_r{ val } } != $limit ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                        elsif ( $thresh_confidence_level < 3 and $op eq '!' and ${ $oid_r{val} } != $limit ) {
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 3;
                             next TRH_LIST;
                         }
                     }
                     elsif ( $thresh eq '_AUTOMATCH_' ) {
                         if ( $thresh_confidence_level < 2 and $oid_color eq $color ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 2;
                             next TRH_LIST;
                         }
                         elsif ( $thresh_confidence_level < 1 ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 1;
                             next TRH_LIST;
                         }
@@ -3332,17 +3257,17 @@ COLOR: for my $color (@color_order) {
                 }
                 elsif ( $thresh =~ /^!\s*(.+)/ ) {
                     my $neg_thresh = $1;
-                    if ( $thresh_confidence_level < 4 and ${ $oid_r{ val } } !~ /$neg_thresh/ ) {
-                        ${ $oid_r{ color } }  = $color;
-                        ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                        ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                    if ( $thresh_confidence_level < 4 and ${ $oid_r{val} } !~ /$neg_thresh/ ) {
+                        ${ $oid_r{color} }  = $color;
+                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 4;
                         next TRH_LIST;
                     }
-                    elsif ( $thresh_confidence_level < 3 and ${ $oid_r{ val } } ne $neg_thresh ) {
-                        ${ $oid_r{ color } }  = $color;
-                        ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                        ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                    elsif ( $thresh_confidence_level < 3 and ${ $oid_r{val} } ne $neg_thresh ) {
+                        ${ $oid_r{color} }  = $color;
+                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 3;
                         next TRH_LIST;
                     }
@@ -3350,35 +3275,34 @@ COLOR: for my $color (@color_order) {
                     # Its not numeric or negated, it must be string based
                 }
                 else {
-
                     # Do our automatching for blank thresholds
                     if ( $thresh eq '_AUTOMATCH_' ) {
                         if ( $thresh_confidence_level < 2 and $oid_color eq $color ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 2;
                             next TRH_LIST;
                         }
                         elsif ( $thresh_confidence_level < 1 ) {
-                            ${ $oid_r{ color } }  = $color;
-                            ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                            ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                            ${ $oid_r{color} }  = $color;
+                            ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                            ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                             $thresh_confidence_level = 1;
                             next TRH_LIST;
                         }
                     }
-                    elsif ( $thresh_confidence_level < 7 and ${ $oid_r{ val } } eq $thresh ) {
-                        ${ $oid_r{ color } }  = $color;
-                        ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                        ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                    elsif ( $thresh_confidence_level < 7 and ${ $oid_r{val} } eq $thresh ) {
+                        ${ $oid_r{color} }  = $color;
+                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 7;
                         next COLOR;
                     }
-                    elsif ( $thresh_confidence_level < 5 and ${ $oid_r{ val } } =~ /$thresh/ ) {
-                        ${ $oid_r{ color } }  = $color;
-                        ${ $oid_r{ thresh } } = $thresh     if defined $thresh;
-                        ${ $oid_r{ msg } }    = $thresh_msg if defined $thresh_msg;
+                    elsif ( $thresh_confidence_level < 5 and ${ $oid_r{val} } =~ /$thresh/ ) {
+                        ${ $oid_r{color} }  = $color;
+                        ${ $oid_r{thresh} } = $thresh     if defined $thresh;
+                        ${ $oid_r{msg} }    = $thresh_msg if defined $thresh_msg;
                         $thresh_confidence_level = 5;
                         next TRH_LIST;
                     }
@@ -3390,25 +3314,25 @@ COLOR: for my $color (@color_order) {
 
 sub define_pri_oid {
     my ( $oids, $oid, $dep_arr ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Go through our parent oid array, if there are any repeaters
     # set the first one as the primary OID and set the repeat type
     # but very first that it is not already defined as a leaf
     my $pri_oid;
     for my $dep_oid (@$dep_arr) {
-        if ( $oids->{ $dep_oid }{ repeat } ) {
+        if ( $oids->{$dep_oid}{repeat} ) {
             $pri_oid = $dep_oid;
             last;
         }
         else {
-            $oid_h->{ pri_oid } = $dep_oid if not defined $oid_h->{ pri_oid };
-            $pri_oid            = $dep_oid if not defined $pri_oid;
+            $oid_h->{pri_oid} = $dep_oid if not defined $oid_h->{pri_oid};
+            $pri_oid          = $dep_oid if not defined $pri_oid;
         }
     }
     if ( defined $pri_oid ) {
-        $oid_h->{ pri_oid } = $pri_oid;
-        $oid_h->{ repeat }  = $oids->{ $pri_oid }{ repeat };
+        $oid_h->{pri_oid} = $pri_oid;
+        $oid_h->{repeat}  = $oids->{$pri_oid}{repeat};
         return 1;    # Success
     }
     else {
@@ -3419,122 +3343,122 @@ sub define_pri_oid {
 # Validate oid dependencies
 sub validate_deps {
     my ( $device, $oids, $oid, $dep_arr, $regex ) = @_;
-    my $oid_h = \%{ $oids->{ $oid } };
+    my $oid_h = \%{ $oids->{$oid} };
 
     # Return witout error if we do not have any dependant oids
     unless ( scalar @$dep_arr ) {
-        $oid_h->{ repeat } = 0;
-        $oid_h->{ time }   = time;
+        $oid_h->{repeat} = 0;
+        $oid_h->{time}   = time;
         return 1;
     }
 
     # if repeater type is not set, it because there are not any dependecies
-    my $pri_oid = $oid_h->{ pri_oid };
+    my $pri_oid = $oid_h->{pri_oid};
     if ( not defined $pri_oid ) {
         return 1;    # Success to validate nothing!
     }
 
     # Check first if we have a global error
     for my $dep_oid (@$dep_arr) {
-        if ( ( ref $oids->{ $dep_oid }{ error } ne 'HASH' ) and ( defined $oids->{ $dep_oid }{ error } ) and $oids->{ $dep_oid }{ error } ) {
-            $oid_h->{ color } = 'clear';
-            $oid_h->{ msg }   = $oids->{ $dep_oid }{ msg }  if defined $oids->{ $dep_oid }{ msg };
-            $oid_h->{ time }  = $oids->{ $dep_oid }{ time } if defined $oids->{ $dep_oid }{ time };
-            $oid_h->{ error } = 1;
+        if ( ( ref $oids->{$dep_oid}{error} ne 'HASH' ) and ( defined $oids->{$dep_oid}{error} ) and $oids->{$dep_oid}{error} ) {
+            $oid_h->{color} = 'clear';
+            $oid_h->{msg}   = $oids->{$dep_oid}{msg}  if defined $oids->{$dep_oid}{msg};
+            $oid_h->{time}  = $oids->{$dep_oid}{time} if defined $oids->{$dep_oid}{time};
+            $oid_h->{error} = 1;
             return 0;
         }
     }
     my $deps_valid = 0;
 
     # repeater
-    if ( $oid_h->{ repeat } ) {
+    if ( $oid_h->{repeat} ) {
 
         # Parse our parent OIDs
-    LEAF: for my $leaf ( keys %{ $oids->{ $pri_oid }{ val } } ) {
+    LEAF: for my $leaf ( keys %{ $oids->{$pri_oid}{val} } ) {
             my $leaf_deps_valid = 0;
             my $time;
 
             # The time is take from the pri_oid value, if it exist
-            if ( exists $oid_h->{ pri_oid } and $oid_h->{ pri_oid } ) {
-                $time = ref $oids->{ $pri_oid }{ time } eq ref {} ? $oids->{ $pri_oid }{ time }{ $leaf } : $oids->{ $pri_oid }{ time };
+            if ( exists $oid_h->{pri_oid} and $oid_h->{pri_oid} ) {
+                $time = ref $oids->{$pri_oid}{time} eq ref {} ? $oids->{$pri_oid}{time}{$leaf} : $oids->{$pri_oid}{time};
             }
             else {
                 $time = time;
             }
-            $oid_h->{ time }{ $leaf } = $time;
+            $oid_h->{time}{$leaf} = $time;
             for my $dep_oid (@$dep_arr) {
-                my $dep_oid_h = \%{ $oids->{ $dep_oid } };
+                my $dep_oid_h = \%{ $oids->{$dep_oid} };
                 my $dep_val;
                 my $dep_error;
                 my $dep_color;
                 my $dep_msg;
-                if ( $dep_oid_h->{ repeat } ) {
-                    if ( ( exists $dep_oid_h->{ error } ) and ( defined $dep_oid_h->{ error }{ $leaf } ) and ( $dep_oid_h->{ error }{ $leaf } ) ) {
+                if ( $dep_oid_h->{repeat} ) {
+                    if ( ( exists $dep_oid_h->{error} ) and ( defined $dep_oid_h->{error}{$leaf} ) and ( $dep_oid_h->{error}{$leaf} ) ) {
                         $dep_error = 1;
                     }
-                    $dep_val   = $dep_oid_h->{ val }{ $leaf };
-                    $dep_color = defined $dep_oid_h->{ color }{ $leaf } ? $dep_oid_h->{ color }{ $leaf } : "clear";
-                    $dep_msg   = $dep_oid_h->{ msg }{ $leaf } if ( defined $dep_oid_h->{ msg } ) and ( $dep_oid_h->{ msg }{ $leaf } );
+                    $dep_val   = $dep_oid_h->{val}{$leaf};
+                    $dep_color = defined $dep_oid_h->{color}{$leaf} ? $dep_oid_h->{color}{$leaf} : "clear";
+                    $dep_msg   = $dep_oid_h->{msg}{$leaf} if ( defined $dep_oid_h->{msg} ) and ( $dep_oid_h->{msg}{$leaf} );
                 }
                 else {
-                    if ( ( defined $dep_oid_h->{ error } ) and $dep_oid_h->{ error } ) {
+                    if ( ( defined $dep_oid_h->{error} ) and $dep_oid_h->{error} ) {
                         $dep_error = 1;
                     }
-                    $dep_color = $dep_oid_h->{ color };
-                    $dep_msg   = $dep_oid_h->{ msg } if defined $dep_oid_h->{ msg };
+                    $dep_color = $dep_oid_h->{color};
+                    $dep_msg   = $dep_oid_h->{msg} if defined $dep_oid_h->{msg};
                 }
                 if ( !defined $dep_val ) {
 
                     # We should never be here with an undef val as it
                     # should be alread treated: severity increase to yellow
-                    $oid_h->{ val }{ $leaf }   = undef;
-                    $oid_h->{ color }{ $leaf } = $dep_color;
-                    $oid_h->{ error }{ $leaf } = 1;
-                    $oid_h->{ msg }{ $leaf }   = $dep_msg if defined $dep_msg;
+                    $oid_h->{val}{$leaf}   = undef;
+                    $oid_h->{color}{$leaf} = $dep_color;
+                    $oid_h->{error}{$leaf} = 1;
+                    $oid_h->{msg}{$leaf}   = $dep_msg if defined $dep_msg;
                     next LEAF;
                 }
                 elsif ( defined $dep_val and $dep_val eq 'wait' ) {
-                    $oid_h->{ val }{ $leaf }   = 'wait';
-                    $oid_h->{ color }{ $leaf } = 'clear';
-                    $oid_h->{ error }{ $leaf } = 1;
-                    $oid_h->{ msg }{ $leaf }   = 'wait';
+                    $oid_h->{val}{$leaf}   = 'wait';
+                    $oid_h->{color}{$leaf} = 'clear';
+                    $oid_h->{error}{$leaf} = 1;
+                    $oid_h->{msg}{$leaf}   = 'wait';
                     next LEAF;
                 }
                 elsif ($dep_error) {
-                    if ( !defined $oid_h->{ color }{ $leaf } or ( $colors{ $dep_color } > $colors{ $oid_h->{ color }{ $leaf } } ) ) {
-                        $oid_h->{ val }{ $leaf }   = $dep_val;
-                        $oid_h->{ color }{ $leaf } = $dep_color;
-                        $oid_h->{ msg }{ $leaf }   = $dep_msg if defined $dep_msg;
+                    if ( !defined $oid_h->{color}{$leaf} or ( $colors{$dep_color} > $colors{ $oid_h->{color}{$leaf} } ) ) {
+                        $oid_h->{val}{$leaf}   = $dep_val;
+                        $oid_h->{color}{$leaf} = $dep_color;
+                        $oid_h->{msg}{$leaf}   = $dep_msg if defined $dep_msg;
                     }
-                    elsif ( $oid_h->{ color }{ $leaf } eq $dep_color ) {
+                    elsif ( $oid_h->{color}{$leaf} eq $dep_color ) {
 
                         # in case of error we should have an undefined value but let it like that for now
                         # until we handle properly error info
                         if ( defined $dep_val and ( $dep_val ne '' ) ) {
-                            if ( ( defined $oid_h->{ val }{ $leaf } ) and ( $oid_h->{ val }{ $leaf } ne '' ) and $oid_h->{ val }{ $leaf } ne $dep_val ) {
-                                $oid_h->{ val }{ $leaf } .= "|" . $dep_val;
+                            if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_val ) {
+                                $oid_h->{val}{$leaf} .= "|" . $dep_val;
                             }
                             else {
-                                $oid_h->{ val }{ $leaf } = $dep_val;
+                                $oid_h->{val}{$leaf} = $dep_val;
                             }
                         }
                         if ( defined $dep_msg ) {
-                            if ( defined $oid_h->{ msg }{ $leaf } and $oid_h->{ msg }{ $leaf } ne '' ) {
-                                $oid_h->{ msg }{ $leaf } .= " & " . $dep_msg;
+                            if ( defined $oid_h->{msg}{$leaf} and $oid_h->{msg}{$leaf} ne '' ) {
+                                $oid_h->{msg}{$leaf} .= " & " . $dep_msg;
                             }
                             else {
-                                $oid_h->{ msg }{ $leaf } = $dep_msg;
+                                $oid_h->{msg}{$leaf} = $dep_msg;
                             }
                         }
                     }
-                    $oid_h->{ error }{ $leaf } = 1;
+                    $oid_h->{error}{$leaf} = 1;
                     next;
                 }
                 elsif ( defined $regex and $dep_val !~ /$regex/ ) {
                     do_log( "$dep_val mismatch $regex for dependent oid $dep_oid, leaf $leaf}", ERROR );
-                    $oid_h->{ val }{ $leaf }   = "$dep_val mismatch $regex";
-                    $oid_h->{ color }{ $leaf } = 'yellow';
-                    $oid_h->{ error }{ $leaf } = 1;
+                    $oid_h->{val}{$leaf}   = "$dep_val mismatch $regex";
+                    $oid_h->{color}{$leaf} = 'yellow';
+                    $oid_h->{error}{$leaf} = 1;
                     next LEAF;
                 }
                 else {
@@ -3547,7 +3471,6 @@ sub validate_deps {
                 $deps_valid = 1;
             }
             else {
-
                 # Throw one error message per leaf, to prevent log bloat
                 do_log( "'No valid dep for leaf '$leaf' on '$device'", DEBUG );
             }
@@ -3556,11 +3479,10 @@ sub validate_deps {
         # Non repeater or repaeter without a valid index of leaf for the (dependant) pri oid (so treated a non-repeater)
     }
     else {
-
         # preprocess time base on the pri oid
         my $time;
-        if ( defined $oids->{ $pri_oid }{ time } ) {
-            $time = $oids->{ $pri_oid }{ time };
+        if ( defined $oids->{$pri_oid}{time} ) {
+            $time = $oids->{$pri_oid}{time};
         }
         else {
             $time = time;
@@ -3568,64 +3490,64 @@ sub validate_deps {
 
         # Parse our parent oids
         for my $dep_oid (@$dep_arr) {
-            my $dep_val = $oids->{ $dep_oid }{ val };
-            if ( !defined $oids->{ $dep_oid }{ val } ) {
-                $oid_h->{ val } = undef;
-                if ( defined $oids->{ $dep_oid }{ color } ) {
-                    $oid_h->{ color } = $oids->{ $dep_oid }{ color };
+            my $dep_val = $oids->{$dep_oid}{val};
+            if ( !defined $oids->{$dep_oid}{val} ) {
+                $oid_h->{val} = undef;
+                if ( defined $oids->{$dep_oid}{color} ) {
+                    $oid_h->{color} = $oids->{$dep_oid}{color};
                 }
                 else {
-                    $oid_h->{ color } = "clear";
+                    $oid_h->{color} = "clear";
                 }
-                if ( defined $oids->{ $dep_oid }{ msg } ) {
-                    $oid_h->{ msg } = $oids->{ $dep_oid }{ msg };
+                if ( defined $oids->{$dep_oid}{msg} ) {
+                    $oid_h->{msg} = $oids->{$dep_oid}{msg};
                 }
                 else {
-                    $oid_h->{ msg } = 'parent value n/a';
+                    $oid_h->{msg} = 'parent value n/a';
                 }
-                $oid_h->{ error } = 1;
+                $oid_h->{error} = 1;
             }
             elsif ( $dep_val eq 'wait' ) {
-                $oid_h->{ val }   = 'wait';
-                $oid_h->{ color } = 'clear';
-                $oid_h->{ error } = 1;
-                $oid_h->{ msg }   = 'wait';
+                $oid_h->{val}   = 'wait';
+                $oid_h->{color} = 'clear';
+                $oid_h->{error} = 1;
+                $oid_h->{msg}   = 'wait';
             }
-            elsif ( $oids->{ $dep_oid }{ error } ) {
+            elsif ( $oids->{$dep_oid}{error} ) {
 
                 # Find de worst color
-                if ( !defined $oid_h->{ color }
-                    or $colors{ $oids->{ $dep_oid }{ color } } > $colors{ $oid_h->{ color } } )
+                if ( !defined $oid_h->{color}
+                    or $colors{ $oids->{$dep_oid}{color} } > $colors{ $oid_h->{color} } )
                 {
-                    $oid_h->{ val }   = $oids->{ $dep_oid }{ val };
-                    $oid_h->{ color } = $oids->{ $dep_oid }{ color };
-                    $oid_h->{ msg }   = $oids->{ $dep_oid }{ msg };
+                    $oid_h->{val}   = $oids->{$dep_oid}{val};
+                    $oid_h->{color} = $oids->{$dep_oid}{color};
+                    $oid_h->{msg}   = $oids->{$dep_oid}{msg};
                 }
-                elsif ( $oid_h->{ color } eq $oids->{ $dep_oid }{ color } ) {
-                    if ( defined $oids->{ $dep_oid }{ val } and ( $oids->{ $dep_oid }{ val } ne '' ) ) {
-                        if ( ( defined $oid_h->{ val } ) and ( $oid_h->{ val } ne '' ) and $oid_h->{ val } ne $oids->{ $dep_oid }{ val } ) {
-                            $oid_h->{ val } .= "|" . $oids->{ $dep_oid }{ val };
+                elsif ( $oid_h->{color} eq $oids->{$dep_oid}{color} ) {
+                    if ( defined $oids->{$dep_oid}{val} and ( $oids->{$dep_oid}{val} ne '' ) ) {
+                        if ( ( defined $oid_h->{val} ) and ( $oid_h->{val} ne '' ) and $oid_h->{val} ne $oids->{$dep_oid}{val} ) {
+                            $oid_h->{val} .= "|" . $oids->{$dep_oid}{val};
                         }
                         else {
-                            $oid_h->{ val } = $oids->{ $dep_oid }{ val };
+                            $oid_h->{val} = $oids->{$dep_oid}{val};
                         }
                     }
-                    if ( defined $oids->{ $dep_oid }{ msg } ) {
-                        if ( defined $oid_h->{ msg } and $oid_h->{ msg } ne '' ) {
-                            $oid_h->{ msg } .= " & " . $oids->{ $dep_oid }{ msg };
+                    if ( defined $oids->{$dep_oid}{msg} ) {
+                        if ( defined $oid_h->{msg} and $oid_h->{msg} ne '' ) {
+                            $oid_h->{msg} .= " & " . $oids->{$dep_oid}{msg};
                         }
                         else {
-                            $oid_h->{ msg } = $oids->{ $dep_oid }{ msg };
+                            $oid_h->{msg} = $oids->{$dep_oid}{msg};
                         }
                     }
                 }
-                $oid_h->{ error } = 1;
+                $oid_h->{error} = 1;
             }
             elsif ( defined $regex and $dep_val !~ /$regex/ ) {
-                $oid_h->{ val }   = "$dep_val mismatch(=~) $regex";
-                $oid_h->{ time }  = time;
-                $oid_h->{ color } = 'yellow';
-                $oid_h->{ error } = 1;
+                $oid_h->{val}   = "$dep_val mismatch(=~) $regex";
+                $oid_h->{time}  = time;
+                $oid_h->{color} = 'yellow';
+                $oid_h->{error} = 1;
             }
             else {
                 $deps_valid = 1;
