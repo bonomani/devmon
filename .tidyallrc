@@ -2,12 +2,21 @@
  
 [PerlTidy]
 select = lib/dm_snmp.pm
+select = lib/dm_snmp_utils.pm
+select = lib/dm_snmp_net_snmp_c.pm
+select = lib/dm_snmp_snmp_session.pm
 select = lib/dm_tests.pm
 select = lib/dm_config.pm
 select = lib/dm_templates.pm
 select = lib/dm_msg.pm
+
 select = devmon
-argv = -l=0 -i=4 -ci=4 -ce -cbl='else elsif continue' -ple -cblx -se -vt=2 -cti=0 -pt=0 -bt=1 -sbt=1 -bbt=1 -nsfs -nolq -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+;argv = -l=0 -i=4 -ci=4 -ce -cbl='else elsif continue' -ple -cblx -se -vt=2 -cti=0 -pt=0 -bt=1 -sbt=1 -bbt=1 -nsfs -nolq -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+;argv = -l=0 -i=4 -ci=4 -nce -cbl='else elsif continue' -ple -se -vt=2 -cti=0 -pt=1 -bt=1 -sbt=0 -bbt=1 -nsfs -nolq -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+;argv = -l=0 -i=4 -ci=4 -nce -cbl='else elsif continue' -ple -se -vt=2 -cti=0 -pt=1 -bt=1 -sbt=0 -bbt=1 -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+argv = -l=0 -i=4 -ci=4 -nce -cbl='else elsif continue' -ple -se -vt=2 -cti=0 -pt=1 -bt=0 -sbt=0 -bbt=0 -wbb="% + - * / x != == >= <= =~ !~ < > | & = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x="
+
+
  
 ;[PerlCritic]
 ;select = modules/dm*.pm
