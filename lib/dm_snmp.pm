@@ -79,8 +79,9 @@ sub poll_devices {
             chomp $device;
             $g{xymon_color}{$device} = 'green';
         }
-        close($sock);
+        close( $sock );
     }
+
     # Build our query hash
     $g{numsnmpdevs} = $g{numdevs};
 QUERYHASH: for my $device ( sort keys %{ $g{devices} } ) {
@@ -1519,7 +1520,7 @@ DEVICE: while ( 1 ) {    # We should never leave this loop
                     my $nonrepval = deeph_find_leaf( $oid, \%deep_h );
                     if ( not defined $nonrepval ) {
 
-                                                $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
+                        $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
                         $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID";
                     }
                     delete $poll_nrep{$poid};

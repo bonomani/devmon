@@ -1,0 +1,18 @@
+{UpTime.color}<b>Uptime</b>        : {UpTime.msg} 
+   hrSystemUptime: {hrSystemUptime100Txt} (wrap to 0 after 497 days)
+   sysUpTime     : {sysUpTime100Txt} (wrap to 0 after 497 days)
+   
+{LoadAverage.color}CPU Load Average: {LoadAverageInt}%
+
+<table summary="devmon:cpu_dm Graph"><tr><td><A HREF="/xymon-cgi/showgraph.sh?host={sysHostname}&amp;service=devmon:cpu_dm&amp;graph_width=576&amp;graph_height=120&amp;first={LoadAverageIndex}&amp;count=1&amp;disp={sysHostname}&amp;nostale&amp;color=green&amp;action=menu"><IMG align="middle" BORDER=0 SRC="/xymon-cgi/showgraph.sh?host={sysHostname}&amp;service=devmon:cpu_dm&amp;graph_width=576&amp;graph_height=120&amp;first={LoadAverageIndex}&amp;count=1&amp;disp={sysHostname}&amp;nostale&amp;color=green&amp;graph=hourly&amp;action=view" ALT="xymongraph devmon:cpu_dm"></A></td><td><td align="center" valign="top"><a href="/xymon-cgi/showgraph.sh?host={sysHostname}&amp;service=devmon:cpu_dm&amp;graph_width=576&amp;graph_height=120&amp;first={LoadAverageIndex}&amp;count=1&amp;disp={sysHostname}&amp;nostale&amp;color=green&amp;graph=custom&amp;action=selzoom"><img src="/xymon/gifs/zoom.gif" border=0 alt="Zoom graph" style='padding: 3px'></a></td></tr></table>
+
+{sysDescr}
+
+<!--DEVMON RRD: cpu_dm 0 0
+DS:ds0:GAUGE:600:0:U
+System {LoadAverage}
+-->
+
+TABLE:noalarmsmsg,rrd(DS:ds0:hrProcessorLoad:GAUGE; )
+CPU|Load
+{CPUIndex}|{hrProcessorLoad.color}{hrProcessorLoad}%{hrProcessorLoad.errors}
