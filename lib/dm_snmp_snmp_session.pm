@@ -62,6 +62,7 @@ sub new {
         varbind_errors  => [],                                                        # Array to store varbind error array references
         session         => undef,
     };
+    { no strict 'refs'; ${"${lib}::suppress_warnings"} = !$self->{debug}; }
     return bless $self, $class;
 }
 
@@ -207,9 +208,7 @@ sub _handle_snmp_error {
     my $session = $self->{session};
     my $oid;
 
-    #my $errmsg_value = snmp_errmsg();
     my $snmp_errmsg = snmp_errmsg();
-    print Dumper($snmp_errmsg);
     if ( defined $code ) {
 
         # If a code is provided, look up the error message from the object's error_messages hash.
