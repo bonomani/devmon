@@ -128,10 +128,13 @@ sub tests {
                     LEAF: for my $leaf ( sort keys %{ $oid_h->{val} } ) {
                             if ( $g{trace} ) {
                                 $line = "i:$leaf v:" . ( $oid_h->{val}{$leaf} // "undef" );
-                                $line .= " c:$oid_h->{color}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{color}{$leaf} );
-                                $line .= " e:$oid_h->{error}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{error}{$leaf} );
-                                $line .= " m:$oid_h->{msg}{$leaf}"   if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{msg}{$leaf} );
-                                $line .= " t:$oid_h->{time}{$leaf}"  if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{time}{$leaf} );
+                                $line .= " c:$oid_h->{color}{$leaf}"
+                                    if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{color}{$leaf} );
+                                $line .= " e:$oid_h->{error}{$leaf}"
+                                    if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{error}{$leaf} );
+                                $line .= " m:$oid_h->{msg}{$leaf}" if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{msg}{$leaf} );
+                                $line .= " t:$oid_h->{time}{$leaf}"
+                                    if ( ref( $oid_h->{color} ) eq 'HASH' && defined $oid_h->{time}{$leaf} );
                                 do_log( "$line", TRACE );
                             }
                             else {
@@ -446,7 +449,8 @@ sub trans_delta {
                             $oid_h->{error}{$leaf} = 1;
                             next LEAF;
                         }
-                        do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG ) if $g{debug};
+                        do_log( "Counterwrap on $oid.$leaf on $device (this: $this_data last: $last_data delta: $delta", DEBUG )
+                            if $g{debug};
 
                         # Otherwise do normal delta calc
                     }
@@ -477,11 +481,14 @@ sub trans_delta {
             }
 
             # Store history and delete expired
-            if ( ( !exists $hist->{oid}{$dep_oid}{hists}{$leaf} ) or ( $hist->{oid}{$dep_oid}{hists}{$leaf}->[ -1 ] != $g{current_cycle} ) ) {
+            if ( ( !exists $hist->{oid}{$dep_oid}{hists}{$leaf} ) or ( $hist->{oid}{$dep_oid}{hists}{$leaf}->[ -1 ] != $g{current_cycle} ) )
+            {
                 $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{val}{$leaf}  = $this_data;
                 $hist->{oid}{$dep_oid}{hist}{ $g{current_cycle} }->{time}{$leaf} = $this_time;
                 push( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} }, $g{current_cycle} );
-                if ( ( defined $hist->{oid}{$dep_oid}{keep_hist_count} ) and ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} ) {
+                if (    ( defined $hist->{oid}{$dep_oid}{keep_hist_count} )
+                    and ( scalar @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } - 1 ) > $hist->{oid}{$dep_oid}{keep_hist_count} )
+                {
                     my $expired_hist_cycle = shift( @{ $hist->{oid}{$dep_oid}{hists}{$leaf} } );
                     delete( $hist->{oid}{$dep_oid}{hist}{$expired_hist_cycle} );
                 }
@@ -891,7 +898,10 @@ sub trans_pack {
             next if ( ( exists $oid_h->{error} ) and ( exists $oid_h->{error}{$leaf} ) and ( $oid_h->{error}{$leaf} ) );
             my @packed = split $seperator, $dep_oid_h->{val}{$leaf};
             my $val    = pack $type, @packed;
-            do_log( "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ", DEBUG ) if $g{debug};
+            do_log(
+                "Transformed $dep_oid_h->{val}{$leaf}, first val $packed[0], to $val via pack transform type $type, seperator $seperator ",
+                DEBUG
+            ) if $g{debug};
             $oid_h->{val}{$leaf} = $val;
         }
 
@@ -1118,7 +1128,10 @@ sub trans_best {
                             {
                                 $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
                                 $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
-                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
+                                if (    ( exists $dep_oid_h->{msg} )
+                                    and ( defined $dep_oid_h->{msg}{$leaf} )
+                                    and ( $dep_oid_h->{msg}{$leaf} ne '' ) )
+                                {
                                     $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                 }
                                 else {
@@ -1130,21 +1143,41 @@ sub trans_best {
                                 $oid_h->{time}{$leaf} = time;
                             }
                             elsif ( $dep_oid_h->{color}{$leaf} eq $oid_h->{color}{$leaf} ) {
+                                if ( defined $dep_oid_h->{val}{$leaf} && $dep_oid_h->{val}{$leaf} ne '' ) {
+                                    if ( defined $oid_h->{val}{$leaf} && $oid_h->{val}{$leaf} ne '' ) {
 
-                                #$oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
-                                if ( defined $dep_oid_h->{val}{$leaf} and ( $dep_oid_h->{val}{$leaf} ne '' ) ) {
-                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val}{$leaf} ) {
-                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
+                                        # Split the existing value into an array
+                                        my @existing_values = split /\|/, $oid_h->{val}{$leaf};
+
+                                        # Check if $dep_oid_h->{val}{$leaf} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{val}{$leaf} } @existing_values ) {
+
+                                            # Append the value with "|" if it's not already in the list
+                                            $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
+                                        }
                                     }
                                     else {
+                                        # Assign the value directly if it's not defined or is empty
                                         $oid_h->{val}{$leaf} = $dep_oid_h->{val}{$leaf};
                                     }
                                 }
-                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
-                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
-                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
+
+                                # Handle the 'msg' field
+                                if ( exists $dep_oid_h->{msg} && defined $dep_oid_h->{msg}{$leaf} && $dep_oid_h->{msg}{$leaf} ne '' ) {
+                                    if ( exists $oid_h->{msg} && defined $oid_h->{msg}{$leaf} && $oid_h->{msg}{$leaf} ne '' ) {
+
+                                        # Split the existing message into an array
+                                        my @existing_msgs = split / & /, $oid_h->{msg}{$leaf};
+
+                                        # Check if $dep_oid_h->{msg}{$leaf} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{msg}{$leaf} } @existing_msgs ) {
+
+                                            # Append the message with " & " if it's not already in the list
+                                            $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
+                                        }
                                     }
                                     else {
+                                        # Assign the message directly if it's not defined or is empty
                                         $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                     }
                                 }
@@ -1169,19 +1202,43 @@ sub trans_best {
                                 $oid_h->{time}{$leaf} = time;
                             }
                             elsif ( $dep_oid_h->{color} eq $oid_h->{color}{$leaf} ) {
-                                if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
-                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val} ) {
-                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val};
+
+                                # Handle the 'val' field
+                                if ( defined $dep_oid_h->{val} && $dep_oid_h->{val} ne '' ) {
+                                    if ( defined $oid_h->{val}{$leaf} && $oid_h->{val}{$leaf} ne '' ) {
+
+                                        # Split the existing value into an array
+                                        my @existing_values = split /\|/, $oid_h->{val}{$leaf};
+
+                                        # Check if $dep_oid_h->{val} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{val} } @existing_values ) {
+
+                                            # Append the value with "|" if it's not already in the list
+                                            $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val};
+                                        }
                                     }
                                     else {
+                                        # Assign the value directly if it's not defined or is empty
                                         $oid_h->{val}{$leaf} = $dep_oid_h->{val};
                                     }
                                 }
-                                if ( ( defined $dep_oid_h->{msg} and $dep_oid_h->{msg} ne '' ) ) {
-                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
-                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
+
+                                # Handle the 'msg' field
+                                if ( defined $dep_oid_h->{msg} && $dep_oid_h->{msg} ne '' ) {
+                                    if ( defined $oid_h->{msg}{$leaf} && $oid_h->{msg}{$leaf} ne '' ) {
+
+                                        # Split the existing message into an array
+                                        my @existing_msgs = split / & /, $oid_h->{msg}{$leaf};
+
+                                        # Check if $dep_oid_h->{msg} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{msg} } @existing_msgs ) {
+
+                                            # Append the message with " & " if it's not already in the list
+                                            $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
+                                        }
                                     }
                                     else {
+                                        # Assign the message directly if it's not defined or is empty
                                         $oid_h->{msg}{$leaf} = $dep_oid_h->{msg};
                                     }
                                 }
@@ -1207,19 +1264,43 @@ sub trans_best {
                     $oid_h->{time}  = time;
                 }
                 elsif ( $dep_oid_h->{color} eq $oid_h->{color} ) {
-                    if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
-                        if ( ( defined $oid_h->{val} ) and ( $oid_h->{val} ne '' ) and $oid_h->{val} ne $dep_oid_h->{val} ) {
-                            $oid_h->{val} .= "|" . $dep_oid_h->{val};
+
+                    # Handle the 'val' field
+                    if ( defined $dep_oid_h->{val} && $dep_oid_h->{val} ne '' ) {
+                        if ( defined $oid_h->{val} && $oid_h->{val} ne '' ) {
+
+                            # Split the existing value into an array
+                            my @existing_values = split /\|/, $oid_h->{val};
+
+                            # Check if $dep_oid_h->{val} is already in the list
+                            unless ( grep { $_ eq $dep_oid_h->{val} } @existing_values ) {
+
+                                # Append the value with "|" if it's not already in the list
+                                $oid_h->{val} .= "|" . $dep_oid_h->{val};
+                            }
                         }
                         else {
+                            # Assign the value directly if it's not defined or is empty
                             $oid_h->{val} = $dep_oid_h->{val};
                         }
                     }
-                    if ( defined $dep_oid_h->{msg} and ( $dep_oid_h->{msg} ne '' ) ) {
-                        if ( ( defined $oid_h->{msg} ) and ( $oid_h->{msg} ne '' ) and ( index( $oid_h->{msg}, $dep_oid_h->{msg} ) == -1 ) ) {
-                            $oid_h->{msg} .= " & " . $dep_oid_h->{msg};
+
+                    # Handle the 'msg' field
+                    if ( defined $dep_oid_h->{msg} && $dep_oid_h->{msg} ne '' ) {
+                        if ( defined $oid_h->{msg} && $oid_h->{msg} ne '' ) {
+
+                            # Split the existing message into an array
+                            my @existing_msgs = split / & /, $oid_h->{msg};
+
+                            # Check if $dep_oid_h->{msg} is already in the list
+                            unless ( grep { $_ eq $dep_oid_h->{msg} } @existing_msgs ) {
+
+                                # Append the message with " & " if it's not already in the list
+                                $oid_h->{msg} .= " & " . $dep_oid_h->{msg};
+                            }
                         }
                         else {
+                            # Assign the message directly if it's not defined or is empty
                             $oid_h->{msg} = $dep_oid_h->{msg};
                         }
                     }
@@ -1272,7 +1353,10 @@ sub trans_worst {
                             {
                                 $oid_h->{val}{$leaf}   = $dep_oid_h->{val}{$leaf};
                                 $oid_h->{color}{$leaf} = $dep_oid_h->{color}{$leaf};
-                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
+                                if (    ( exists $dep_oid_h->{msg} )
+                                    and ( defined $dep_oid_h->{msg}{$leaf} )
+                                    and ( $dep_oid_h->{msg}{$leaf} ne '' ) )
+                                {
                                     $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                 }
                                 else {
@@ -1284,19 +1368,43 @@ sub trans_worst {
                                 $oid_h->{time}{$leaf} = time;
                             }
                             elsif ( $dep_oid_h->{color}{$leaf} eq $oid_h->{color}{$leaf} ) {
-                                if ( defined $dep_oid_h->{val}{$leaf} and ( $dep_oid_h->{val}{$leaf} ne '' ) ) {
-                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val}{$leaf} ) {
-                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
+
+                                # Handle the 'val' field
+                                if ( defined $dep_oid_h->{val}{$leaf} && $dep_oid_h->{val}{$leaf} ne '' ) {
+                                    if ( defined $oid_h->{val}{$leaf} && $oid_h->{val}{$leaf} ne '' ) {
+
+                                        # Split the existing value into an array
+                                        my @existing_values = split /\|/, $oid_h->{val}{$leaf};
+
+                                        # Check if $dep_oid_h->{val}{$leaf} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{val}{$leaf} } @existing_values ) {
+
+                                            # Append the value with "|" if it's not already in the list
+                                            $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val}{$leaf};
+                                        }
                                     }
                                     else {
+                                        # Assign the value directly if it's not defined or is empty
                                         $oid_h->{val}{$leaf} = $dep_oid_h->{val}{$leaf};
                                     }
                                 }
-                                if ( ( exists $dep_oid_h->{msg} ) and ( defined $dep_oid_h->{msg}{$leaf} ) and ( $dep_oid_h->{msg}{$leaf} ne '' ) ) {
-                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
-                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
+
+                                # Handle the 'msg' field
+                                if ( exists $dep_oid_h->{msg} && defined $dep_oid_h->{msg}{$leaf} && $dep_oid_h->{msg}{$leaf} ne '' ) {
+                                    if ( exists $oid_h->{msg} && defined $oid_h->{msg}{$leaf} && $oid_h->{msg}{$leaf} ne '' ) {
+
+                                        # Split the existing message into an array
+                                        my @existing_msgs = split / & /, $oid_h->{msg}{$leaf};
+
+                                        # Check if $dep_oid_h->{msg}{$leaf} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{msg}{$leaf} } @existing_msgs ) {
+
+                                            # Append the message with " & " if it's not already in the list
+                                            $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg}{$leaf};
+                                        }
                                     }
                                     else {
+                                        # Assign the message directly if it's not defined or is empty
                                         $oid_h->{msg}{$leaf} = $dep_oid_h->{msg}{$leaf};
                                     }
                                 }
@@ -1321,19 +1429,43 @@ sub trans_worst {
                                 $oid_h->{time}{$leaf} = time;
                             }
                             elsif ( $dep_oid_h->{color} eq $oid_h->{color}{$leaf} ) {
-                                if ( defined $dep_oid_h->{val} and ( $dep_oid_h->{val} ne '' ) ) {
-                                    if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_oid_h->{val} ) {
-                                        $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val};
+
+                                # Handle the 'val' field
+                                if ( defined $dep_oid_h->{val} && $dep_oid_h->{val} ne '' ) {
+                                    if ( defined $oid_h->{val}{$leaf} && $oid_h->{val}{$leaf} ne '' ) {
+
+                                        # Split the existing value into an array
+                                        my @existing_values = split /\|/, $oid_h->{val}{$leaf};
+
+                                        # Check if $dep_oid_h->{val} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{val} } @existing_values ) {
+
+                                            # Append the value with "|" if it's not already in the list
+                                            $oid_h->{val}{$leaf} .= "|" . $dep_oid_h->{val};
+                                        }
                                     }
                                     else {
+                                        # Assign the value directly if it's not defined or is empty
                                         $oid_h->{val}{$leaf} = $dep_oid_h->{val};
                                     }
                                 }
-                                if ( ( defined $dep_oid_h->{msg} and $dep_oid_h->{msg} ne '' ) ) {
-                                    if ( ( exists $oid_h->{msg} ) and ( defined $oid_h->{msg}{$leaf} ) and ( $oid_h->{msg}{$leaf} ne '' ) ) {
-                                        $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
+
+                                # Handle the 'msg' field
+                                if ( defined $dep_oid_h->{msg} && $dep_oid_h->{msg} ne '' ) {
+                                    if ( defined $oid_h->{msg}{$leaf} && $oid_h->{msg}{$leaf} ne '' ) {
+
+                                        # Split the existing message into an array
+                                        my @existing_msgs = split / & /, $oid_h->{msg}{$leaf};
+
+                                        # Check if $dep_oid_h->{msg} is already in the list
+                                        unless ( grep { $_ eq $dep_oid_h->{msg} } @existing_msgs ) {
+
+                                            # Append the message with " & " if it's not already in the list
+                                            $oid_h->{msg}{$leaf} .= " & " . $dep_oid_h->{msg};
+                                        }
                                     }
                                     else {
+                                        # Assign the message directly if it's not defined or is empty
                                         $oid_h->{msg}{$leaf} = $dep_oid_h->{msg};
                                     }
                                 }
@@ -1371,7 +1503,8 @@ sub trans_worst {
                         }
                     }
                     if ( defined $dep_oid_h->{msg} and ( $dep_oid_h->{msg} ne '' ) ) {
-                        if ( ( defined $oid_h->{msg} ) and ( $oid_h->{msg} ne '' ) and ( index( $oid_h->{msg}, $dep_oid_h->{msg} ) == -1 ) ) {
+                        if ( ( defined $oid_h->{msg} ) and ( $oid_h->{msg} ne '' ) and ( index( $oid_h->{msg}, $dep_oid_h->{msg} ) == -1 ) )
+                        {
                             $oid_h->{msg} .= " & " . $dep_oid_h->{msg};
                         }
                         else {
@@ -1595,7 +1728,9 @@ sub trans_switch {
         for my $leaf ( keys %{ $dep_oid_h->{val} } ) {
 
             # Skip if there was a dependency error for this leaf
-            next if ( ( ( exists $oid_h->{error} ) and ( ref $oid_h->{error} ne 'HASH' ) ) or ( ( exists $oid_h->{error}{$leaf} ) and $oid_h->{error}{$leaf} ) );
+            next
+                if ( ( ( exists $oid_h->{error} ) and ( ref $oid_h->{error} ne 'HASH' ) )
+                or ( ( exists $oid_h->{error}{$leaf} ) and $oid_h->{error}{$leaf} ) );
             my $val = $dep_oid_h->{val}{$leaf};
             my $num;
             for my $case (@$case_nums) {
@@ -1668,10 +1803,20 @@ sub trans_switch {
                     }
                     elsif ( $oid_h->{color}{$leaf} eq $dep_color ) {
                         if ( defined $dep_msg ) {
-                            if ( defined $oid_h->{msg}{$leaf} and $oid_h->{msg}{$leaf} ne '' ) {
-                                $oid_h->{msg}{$leaf} .= " & " . $dep_msg;
+                            if ( defined $oid_h->{msg}{$leaf} && $oid_h->{msg}{$leaf} ne '' ) {
+
+                                # Split the existing message into an array
+                                my @existing_msgs = split / & /, $oid_h->{msg}{$leaf};
+
+                                # Check if $dep_msg is already in the list
+                                unless ( grep { $_ eq $dep_msg } @existing_msgs ) {
+
+                                    # Append the message with " & " if it's not already in the list
+                                    $oid_h->{msg}{$leaf} .= " & " . $dep_msg;
+                                }
                             }
                             else {
+                                # Assign the message directly if it's not defined or is empty
                                 $oid_h->{msg}{$leaf} = $dep_msg;
                             }
                         }
@@ -1757,10 +1902,20 @@ sub trans_switch {
                 }
                 elsif ( $oid_h->{color} eq $dep_color ) {
                     if ( defined $dep_msg ) {
-                        if ( defined $oid_h->{msg} and $oid_h->{msg} ne '' ) {
-                            $oid_h->{msg} .= " & " . $dep_msg;
+                        if ( defined $oid_h->{msg} && $oid_h->{msg} ne '' ) {
+
+                            # Split the existing message into an array
+                            my @existing_msgs = split / & /, $oid_h->{msg};
+
+                            # Check if $dep_msg is already in the list
+                            unless ( grep { $_ eq $dep_msg } @existing_msgs ) {
+
+                                # Append the message with " & " if it's not already in the list
+                                $oid_h->{msg} .= " & " . $dep_msg;
+                            }
                         }
                         else {
+                            # Assign the message directly if it's not defined or is empty
                             $oid_h->{msg} = $dep_msg;
                         }
                     }
@@ -2168,8 +2323,8 @@ sub trans_sort {
 sub trans_index {
     my ( $device, $oids, $oid ) = @_;
 
-    # As this transform only work on hash keys (and as keys are keep between runs: save the current structure, before validation and recover it if validation fail: should be better to do this in the validation sub
-    # my $oid_h = \%{ $oids->{$oid} };
+# As this transform only work on hash keys (and as keys are keep between runs: save the current structure, before validation and recover it if validation fail: should be better to do this in the validation sub
+# my $oid_h = \%{ $oids->{$oid} };
     my $old_oid_h = dclone $oids->{$oid};                        # we have to make a real copy (deep)
                                                                  # Extract our parent oids from the expression, first
     my ($src_oid) = $oids->{$oid}{trans_data} =~ /^\{(.+)\}$/;
@@ -2214,14 +2369,15 @@ sub trans_index {
 
                 # Our oid sub leaf
                 if ( !defined $leaf ) {
-                    $oid_h->{val}{$leaf}   = undef;
-                    $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf};                                      # should always be defined, just to be sure
+                    $oid_h->{val}{$leaf}  = undef;
+                    $oid_h->{time}{$leaf} = $src_h->{time}{$leaf}
+                        if defined $src_h->{time}{$leaf};    # should always be defined, just to be sure
                     $oid_h->{color}{$leaf} = defined $src_h->{color}{$leaf} ? $src_h->{color}{$leaf} : 'clear';
                     $oid_h->{msg}{$leaf}   = $src_h->{msg}{$leaf} if ( ( exists $src_h->{msg} ) and ( defined $src_h->{msg}{$leaf} ) );
                     next;
                 }
                 $oid_h->{val}{$leaf}   = $leaf;
-                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf};                                          # should always be defined, just to be sure
+                $oid_h->{time}{$leaf}  = $src_h->{time}{$leaf} if defined $src_h->{time}{$leaf}; # should always be defined, just to be sure
                 $oid_h->{color}{$leaf} = defined $src_h->{color}{$leaf} ? $src_h->{color}{$leaf} : 'green';
                 $oid_h->{msg}{$leaf}   = $src_h->{msg}{$leaf} if ( ( exists $src_h->{msg} ) and ( defined $src_h->{msg}{$leaf} ) );
             }
@@ -2350,14 +2506,16 @@ sub render_msg {
 
     # No message template?
     if ( !defined $msg_template ) {
-        return "status $xymonname.$test clear $now\n\nCould not locate template for this device.\nPlease check devmon logs.\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
+        return
+"status $xymonname.$test clear $now\n\nCould not locate template for this device.\nPlease check devmon logs.\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
 
         # Do we have a xymon color, and if so, is it green?
     }
     elsif ( defined $g{xymon_color}{$device}
         and $g{xymon_color}{$device} ne 'green' )
     {
-        return "status $xymonname.$test clear $now\n\nXymon reports this device is unreachable.\nSuspending this test until reachability is restored\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
+        return
+"status $xymonname.$test clear $now\n\nXymon reports this device is unreachable.\nSuspending this test until reachability is restored\n\n<a href='https://github.com/bonomani/devmon'>Devmon $g{version}</a> running on $g{nodename}\n";
     }
 
     # Our outbound message
@@ -2609,7 +2767,8 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         $color = 'blue';
                     }
                     if ( !defined $val ) {
-                        do_log( "Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", TRACE ) if $g{trace};
+                        do_log( "Undefined value for $oid in test $test on $device, BREAKING CHANGE: Row is not ignore anymore", TRACE )
+                            if $g{trace};
                         $val = 'NoOID';
                     }
 
@@ -2636,12 +2795,9 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
 
                         # Add our primary key to our rrd set, if needed
                         for my $name ( keys %rrd ) {
-                            $rrd{$name}{pri} = $oid if $rrd{$name}{pri} eq 'pri';
 
-                            # This condition looks incorrect. We should not remove rrds if alerting
-                            # is disabled for this leaf. If the user doesn't want a graph, they probably
-                            # don't want this leaf in the table, they should set 'ignore' instead of 'noalarm'
-                            # add to list, but check we're not pushing multiple times
+                            # As usually not set, the first oid will be the primary oid for rrd
+                            $rrd{$name}{pri} = $oid if $rrd{$name}{pri} eq 'pri';
                             push @{ $rrd{$name}{leaves} }, $leaf unless grep { $_ eq $leaf } @{ $rrd{$name}{leaves} };
                         }
 
@@ -2659,7 +2815,12 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         if ( $leaf eq '#' ) {
                             $oid_msg = parse_deps( $oids, $oid_h->{msg}, $leaf ) if defined $oid_h->{msg};
                         }
-                        elsif ( $oid_h->{color} eq "red" or $oid_h->{color} eq "yellow" or $oid_h->{color} eq "green" or $oid_h->{color} eq "clear" or $oid_h->{color} eq "blue" ) {
+                        elsif ($oid_h->{color} eq "red"
+                            or $oid_h->{color} eq "yellow"
+                            or $oid_h->{color} eq "green"
+                            or $oid_h->{color} eq "clear"
+                            or $oid_h->{color} eq "blue" )
+                        {
                             $oid_msg = parse_deps( $oids, $oid_h->{msg}, $leaf ) if defined $oid_h->{msg};
                         }
                         else {
@@ -2693,7 +2854,12 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                             # If this test has a worse color, use it for the global color
                             # but verify first that this test should compute the worst color
                             if ( $no_global_wcolor{$oid} ) {
-                                do_log( "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", DEBUG );
+                                do_log(
+                                    "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{'
+                                        . "$oid.errors" . '}'
+                                        . " in 'message' template",
+                                    DEBUG
+                                );
 
                                 # Get oid msg and replace any inline oid dependencies
                             }
@@ -2794,7 +2960,7 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                 my $dir       = $rrd{$name}{dir};
                 my $pri       = $rrd{$name}{pri};
                 my $do_max    = $rrd{$name}{do_max};
-                do_log( "Couldn't fetch primary oid for rrd set $name", WARN )
+                do_log( "Couldn't fetch primary oid for rrd set $name", INFO )
                     and next
                     if $pri eq 'pri';
                 my $header = "<!--DEVMON RRD: $name $dir $do_max\n" . $rrd{$name}{header};
@@ -2884,7 +3050,12 @@ MSG_LINE: for my $line ( split /\n/, $msg_template ) {
                         # If this test has a worse color, use it for the global color
                         # but verify first that this test should compute the worst color
                         if ( $no_global_wcolor{$oid} ) {
-                            do_log( "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{' . "$oid.errors" . '}' . " in 'message' template", INFO );
+                            do_log(
+                                "$oid of $test on $device is overwritten by Worst/Best Transform: remove " . '{'
+                                    . "$oid.errors" . '}'
+                                    . " in 'message' template",
+                                INFO
+                            );
 
                             # Get oid msg and replace any inline oid dependencies
                         }
@@ -3432,21 +3603,42 @@ sub validate_deps {
                     }
                     elsif ( $oid_h->{color}{$leaf} eq $dep_color ) {
 
-                        # in case of error we should have an undefined value but let it like that for now
-                        # until we handle properly error info
-                        if ( defined $dep_val and ( $dep_val ne '' ) ) {
-                            if ( ( defined $oid_h->{val}{$leaf} ) and ( $oid_h->{val}{$leaf} ne '' ) and $oid_h->{val}{$leaf} ne $dep_val ) {
-                                $oid_h->{val}{$leaf} .= "|" . $dep_val;
+                        # Handle the 'val' field
+                        if ( defined $dep_val && $dep_val ne '' ) {
+                            if ( defined $oid_h->{val}{$leaf} && $oid_h->{val}{$leaf} ne '' ) {
+
+                                # Split the existing value into an array
+                                my @existing_values = split /\|/, $oid_h->{val}{$leaf};
+
+                                # Check if $dep_val is already in the list
+                                unless ( grep { $_ eq $dep_val } @existing_values ) {
+
+                                    # Append the value with "|" if it's not already in the list
+                                    $oid_h->{val}{$leaf} .= "|" . $dep_val;
+                                }
                             }
                             else {
+                                # Assign the value directly if it's not defined or is empty
                                 $oid_h->{val}{$leaf} = $dep_val;
                             }
                         }
+
+                        # Handle the 'msg' field
                         if ( defined $dep_msg ) {
-                            if ( defined $oid_h->{msg}{$leaf} and $oid_h->{msg}{$leaf} ne '' ) {
-                                $oid_h->{msg}{$leaf} .= " & " . $dep_msg;
+                            if ( defined $oid_h->{msg}{$leaf} && $oid_h->{msg}{$leaf} ne '' ) {
+
+                                # Split the existing message into an array
+                                my @existing_msgs = split / & /, $oid_h->{msg}{$leaf};
+
+                                # Check if $dep_msg is already in the list
+                                unless ( grep { $_ eq $dep_msg } @existing_msgs ) {
+
+                                    # Append the message with " & " if it's not already in the list
+                                    $oid_h->{msg}{$leaf} .= " & " . $dep_msg;
+                                }
                             }
                             else {
+                                # Assign the message directly if it's not defined or is empty
                                 $oid_h->{msg}{$leaf} = $dep_msg;
                             }
                         }
@@ -3524,19 +3716,43 @@ sub validate_deps {
                     $oid_h->{msg}   = $oids->{$dep_oid}{msg};
                 }
                 elsif ( $oid_h->{color} eq $oids->{$dep_oid}{color} ) {
-                    if ( defined $oids->{$dep_oid}{val} and ( $oids->{$dep_oid}{val} ne '' ) ) {
-                        if ( ( defined $oid_h->{val} ) and ( $oid_h->{val} ne '' ) and $oid_h->{val} ne $oids->{$dep_oid}{val} ) {
-                            $oid_h->{val} .= "|" . $oids->{$dep_oid}{val};
+
+                    # Handle the 'val' field
+                    if ( defined $oids->{$dep_oid}{val} && $oids->{$dep_oid}{val} ne '' ) {
+                        if ( defined $oid_h->{val} && $oid_h->{val} ne '' ) {
+
+                            # Split the existing value into an array
+                            my @existing_values = split /\|/, $oid_h->{val};
+
+                            # Check if $oids->{$dep_oid}{val} is already in the list
+                            unless ( grep { $_ eq $oids->{$dep_oid}{val} } @existing_values ) {
+
+                                # Append the value with "|" if it's not already in the list
+                                $oid_h->{val} .= "|" . $oids->{$dep_oid}{val};
+                            }
                         }
                         else {
+                            # Assign the value directly if it's not defined or is empty
                             $oid_h->{val} = $oids->{$dep_oid}{val};
                         }
                     }
+
+                    # Handle the 'msg' field
                     if ( defined $oids->{$dep_oid}{msg} ) {
-                        if ( defined $oid_h->{msg} and $oid_h->{msg} ne '' ) {
-                            $oid_h->{msg} .= " & " . $oids->{$dep_oid}{msg};
+                        if ( defined $oid_h->{msg} && $oid_h->{msg} ne '' ) {
+
+                            # Split the existing message into an array
+                            my @existing_msgs = split / & /, $oid_h->{msg};
+
+                            # Check if $oids->{$dep_oid}{msg} is already in the list
+                            unless ( grep { $_ eq $oids->{$dep_oid}{msg} } @existing_msgs ) {
+
+                                # Append the message with " & " if it's not already in the list
+                                $oid_h->{msg} .= " & " . $oids->{$dep_oid}{msg};
+                            }
                         }
                         else {
+                            # Assign the message directly if it's not defined or is empty
                             $oid_h->{msg} = $oids->{$dep_oid}{msg};
                         }
                     }

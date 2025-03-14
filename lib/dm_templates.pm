@@ -627,7 +627,10 @@ LINE: while ( my $line = shift @text ) {
             $func_type eq 'convert' and do {
                 $temp =~ s/^\{\S+\}\s+(hex|oct)(?:\s*\d*)//i;
                 my ($type) = ($1);    #??
-                do_log( "CONVERT transform uses only a single oid, a valid conversion type & an option pad length at $trans_file, line $l_num", ERROR )
+                do_log(
+                    "CONVERT transform uses only a single oid, a valid conversion type & an option pad length at $trans_file, line $l_num",
+                    ERROR
+                    )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -678,7 +681,10 @@ LINE: while ( my $line = shift @text ) {
                 $temp =~ s/:\s*\d+\s*$//;
                 $temp =~ s/\{\S+\}|\s\.\s|\s+x\s+|\*|\+|\/|-|\^|%|\||&|<=?|>=?|!?=|or|and|\|\||$$|\d+(?:\.\d+)?|\(|\)//g;
                 $temp =~ s/\s*//;
-                do_log( "MATH transform uses only math/numeric symbols and an optional precision number, $temp did not pass, at $trans_file, line $l_num", ERROR )
+                do_log(
+"MATH transform uses only math/numeric symbols and an optional precision number, $temp did not pass, at $trans_file, line $l_num",
+                    ERROR
+                    )
                     and next LINE
                     unless $temp eq '';    # Check if temp is not empty
                                            #if $temp !~ /^\s*$/;
@@ -688,7 +694,8 @@ LINE: while ( my $line = shift @text ) {
                 $temp =~ s/^\{\S+\}\s+(\S+)(\s+.+)?//;
                 my $type       = $1;
                 my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
-                do_log( "PACK transform uses only a single oid,an encode type, and an optional seperator at $trans_file, line $l_num", ERROR )
+                do_log( "PACK transform uses only a single oid,an encode type, and an optional seperator at $trans_file, line $l_num",
+                    ERROR )
                     and next LINE
                     if $temp ne '';
                 do_log( "No encode type at $trans_file, line $l_num", ERROR )
@@ -740,7 +747,8 @@ LINE: while ( my $line = shift @text ) {
             };
             $func_type eq 'substr' and do {
                 $temp =~ s/^\{\S+\}\s+\d+(?:$|\s+\d+)//;
-                do_log( "SUBSTR transform uses only a single oid, a numeric offset and an optional shift value at $trans_file, line $l_num", ERROR )
+                do_log( "SUBSTR transform uses only a single oid, a numeric offset and an optional shift value at $trans_file, line $l_num",
+                    ERROR )
                     and next LINE
                     if $temp ne '';
                 last CASE;
@@ -795,7 +803,8 @@ LINE: while ( my $line = shift @text ) {
                     }
                     $temp2 .= $val;
                 }
-                do_log( "SWITCH transform uses a comma delimited list of values in 'case = value' format at $trans_file, line $l_num", ERROR )
+                do_log( "SWITCH transform uses a comma delimited list of values in 'case = value' format at $trans_file, line $l_num",
+                    ERROR )
                     and next LINE
                     if $temp2 ne '';
                 last CASE;
@@ -804,7 +813,8 @@ LINE: while ( my $line = shift @text ) {
                 $temp =~ s/^\{\S+\}\s+(\S+)(?:\s+.+)?//;
                 my $type       = $1;
                 my $validChars = 'aAbBcCdDfFhHiIjJlLnNsSvVuUwxZ';
-                do_log( "UNPACK transform uses only a single oid,a decode type, and an optional seperator at $trans_file, line $l_num", ERROR )
+                do_log( "UNPACK transform uses only a single oid,a decode type, and an optional seperator at $trans_file, line $l_num",
+                    ERROR )
                     and next LINE
                     if $temp ne '';
                 do_log( "No decode type at $trans_file, line $l_num", ERROR )
@@ -923,7 +933,8 @@ sub calc_template_test_deps {
                             next COLOR;
                         }
                     }
-                    $tmpl->{new_oids}{$oid}{threshold}{$color}{$thresh} = $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold}{$color}{$thresh};
+                    $tmpl->{new_oids}{$oid}{threshold}{$color}{$thresh}
+                        = $tmpl->{file}{$thresh_file}{oids}{$oid}{threshold}{$color}{$thresh};
                 }
             }
         }
