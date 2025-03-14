@@ -3096,7 +3096,7 @@ sub daemonize {
     # Write the PID file
     #    write_pid();
     # Main logic of the daemon
-    do_log( "Daemon started successfully", 'INFO' );
+    do_log( "Daemon started successfully", INFO );
 }
 
 # Daemonize: go to daemon mode and fork into background

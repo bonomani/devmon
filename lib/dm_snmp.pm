@@ -878,12 +878,9 @@ DEVICE: while (1) {    # We should never leave this loop
             authpass    => $data_in{authpass},
             privproto   => $data_in{privproto},
             privpass    => $data_in{privpass},
-
-            #                debug       => $g{debug},
-            debug => 1,
+            debug       => $g{debug},
         );
 
-        #my $session;
         # Check SNMP engine and initialize session
         if ( $g{snmpeng} eq 'auto' || $g{snmpeng} eq 'SNMP' ) {
 
@@ -1218,7 +1215,6 @@ DEVICE: while (1) {    # We should never leave this loop
                 $data_out{oids}{snmp_input}{sgbmomr1}              = $sgbmomr1 if defined $sgbmomr1;
                 $data_out{oids}{snmp_input}{sgbmomr2}              = $sgbmomr2 if defined $sgbmomr2;
 
-                #                    $data_out{oids}{snmp_input}{sgbmomr100}            = $sgbmomr100 if defined $sgbmomr100;
                 # TODO: We could insert those result in our deep_h, not to poll them again
             }
             if ($use_getnext) {
@@ -1709,7 +1705,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         my $message = "Decreasing max_getbulk_responses from $max_getbulk_responses to $response_count";
                         $data_out{snmp_msg}{ ++$snmp_msg_count }
                             = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
-                        $max_getbulk_responses = $response_count;
+                        $max_getbulk_responses--; #= $response_count;
                         $data_out{oids}{snmp_input}{max_getbulk_responses} = $response_count;
                     }
                     else {
@@ -1903,7 +1899,6 @@ DEVICE: while (1) {    # We should never leave this loop
                     $idx = 0;
                 }
 
-                #print "$current_query_branch_cnt $idx $max_repetitions_in_query\n";
                 if ( $current_query_branch_cnt - $idx < $max_repetitions_in_query ) {
 
                     # Some agent dont honor max repetition for some oid so we have to confirm we got all
@@ -2307,25 +2302,6 @@ sub toOID_old(@) {
         push( @retvar, encode_oid( split( /\./, $var ) ) );
     }
     return @retvar;
-}
-
-sub merge_h_old {    # Stolen from Mash Merge Simple, Thanks!
-                     # shift unless ref $_[0]; # Take care of the case we're called like Hash::Merge::Simple->merge(...)
-    my ( $left, @right ) = @_;
-    return $left unless @right;
-    return merge_h( $left, merge_h(@right) ) if @right > 1;
-    my ($right) = @right;
-    my %merge = %$left;
-    for my $key ( keys %$right ) {
-        my ( $hr, $hl ) = map { ref $_->{$key} eq 'HASH' } $right, $left;
-        if ( $hr and $hl ) {
-            $merge{$key} = merge_h( $left->{$key}, $right->{$key} );
-        }
-        else {
-            $merge{$key} = $right->{$key};
-        }
-    }
-    return \%merge;
 }
 
 sub bigger_elem_idx {
