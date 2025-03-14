@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-our $VERSION = '0.25.01';
+our $VERSION = '0.25.03';
 
 #    Devmon: An SNMP data collecteor & page generator for the BigBrother &
 #    Hobbit network monitoring systems
@@ -9,7 +9,6 @@ our $VERSION = '0.25.01';
 #    the Free Software Foundation; either version 2 of the License, or
 #    (at your option) any later version.  Please see the file named
 #    'COPYING' that was included with the distrubition for more details.
-
 # Global Modules
 use strict;
 use warnings;
@@ -17,6 +16,7 @@ use warnings;
 # Devmon specific modules
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+
 #use lib "../lib";
 use dm_config;
 use dm_templates;
@@ -33,7 +33,6 @@ initialize($VERSION);
 do_log( "Entering poll loop", INFO );
 use vars qw(%g);
 *g = \%dm_config::g;
-
 while (1) {
     ++$g{current_cycle};
     do_log( "Current cycle: " . $g{current_cycle}, INFO );
@@ -53,5 +52,4 @@ while (1) {
     # Now send messages
     send_msgs();
     time_test();
-
 }

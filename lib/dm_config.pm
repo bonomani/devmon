@@ -391,6 +391,12 @@ sub initialize {
             'set'     => 0,
             'case'    => 0
         },
+        'snmp_disco_retries' => {
+            'default' => 2,
+            'regex'   => '\d+',
+            'set'     => 0,
+            'case'    => 0
+        },
         'snmp_try_small_maxcnt' => {    # 1 retry
             'default' => 2,
             'regex'   => '\d+',
@@ -500,7 +506,11 @@ sub initialize {
         }
     }
     else {
-        print( "Log dir '$dir' not found or not accessible by user '$g{user}' with permission '" . parent1_dir_perm_str($perm) . "' in parent folder, which should have permission '" . parent2_dir_perm_str($perm) . "'.\n" );
+        print(    "Log dir '$dir' not found or not accessible by user '$g{user}' with permission '"
+                . parent1_dir_perm_str($perm)
+                . "' in parent folder, which should have permission '"
+                . parent2_dir_perm_str($perm)
+                . "'.\n" );
         $config_is_valid = 0;
     }
 
@@ -528,7 +538,8 @@ sub initialize {
             }
             else {
                 my %seen;
-                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates", "$g{install_dir}/var/templates", "$g{install_dir}/templates";
+                push @templates_dir, grep { !$seen{$_}++ } "$valid_path/templates", "/var/share/$g{app_name}/templates",
+                    "$g{install_dir}/var/templates", "$g{install_dir}/templates";
             }
             if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
                 $db_filename = $g{db_file};
@@ -548,7 +559,8 @@ sub initialize {
             }
             else {
                 my %seen;
-                push @templates_dir, grep { !$seen{$_}++ } "/var/share/$g{app_name}/templates", "$g{install_dir}/var/templates", "$g{install_dir}/templates";
+                push @templates_dir, grep { !$seen{$_}++ } "/var/share/$g{app_name}/templates", "$g{install_dir}/var/templates",
+                    "$g{install_dir}/templates";
             }
             if ( index( $g{db_file}, '/' ) == -1 ) {    #check if it is a filename only
                 $db_filename = $g{db_file};
@@ -574,7 +586,13 @@ sub initialize {
         do_log( "Templates dir '$g{templates_dir}'", DEBUG );
     }
     else {
-        do_log( "Templates dir '" . ( join ' ', @templates_dir ) . "' not valid or not accessible by user '$g{user}' with permission '$perm'. The parent folder should have permission '" . parent1_dir_perm_str($perm) . "'.", ERROR );
+        do_log(
+            "Templates dir '"
+                . ( join ' ', @templates_dir )
+                . "' not valid or not accessible by user '$g{user}' with permission '$perm'. The parent folder should have permission '"
+                . parent1_dir_perm_str($perm) . "'.",
+            ERROR
+        );
         $config_is_valid = 0;
     }
 
@@ -589,7 +607,10 @@ sub initialize {
             if ( -e $g{db_file} ) {                                                  # check if file exists
                 $valid_path = find_file( $g{user}, $g{db_file}, $perm );
                 if ( defined $valid_path ) {
-                    do_log( "DB file found but not in your best db folder: $best_valid_db_dir, next discovery will not use it! Add 'DB_FILE=$valid_path' in your config file if you want remove this warning", WARN ) unless $valid_path eq ( $best_valid_db_dir . '/' . $db_filename );
+                    do_log(
+"DB file found but not in your best db folder: $best_valid_db_dir, next discovery will not use it! Add 'DB_FILE=$valid_path' in your config file if you want remove this warning",
+                        WARN
+                    ) unless $valid_path eq ( $best_valid_db_dir . '/' . $db_filename );
                     $g{db_file} = $valid_path;
                     do_log( "DB file '$g{db_file}'", DEBUG );
                     $config_is_valid = 1;
@@ -608,14 +629,25 @@ sub initialize {
                     last;
                 }
                 else {
-                    do_log( "DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service", DEBUG );
+                    do_log(
+"DB dir '$valid_path', but no db file for now. Use command './devmon -read' to discover your devices before running devmon as a service",
+                        DEBUG
+                    );
 
                     #$config_is_valid = 0;
                 }
             }
         }
         else {
-            do_log( "DB dir '" . ( join ' ', @db_dir ) . "'not valid or not accessible by user '$g{user}' with permission '" . parent1_dir_perm_str($perm) . "' in parent folder, which should have permission '" . parent2_dir_perm_str($perm) . "'.", ERROR );
+            do_log(
+                "DB dir '"
+                    . ( join ' ', @db_dir )
+                    . "'not valid or not accessible by user '$g{user}' with permission '"
+                    . parent1_dir_perm_str($perm)
+                    . "' in parent folder, which should have permission '"
+                    . parent2_dir_perm_str($perm) . "'.",
+                ERROR
+            );
 
             #$config_is_valid = 0;
         }
@@ -927,70 +959,71 @@ sub check_snmp_config {
         snmp    => \&check_snmp,
         session => \&check_snmp_session,
     );
-
-    # Validate the snmpeng option
     if ( $g{snmpeng} eq 'auto' ) {
 
-        # Try Net-SNMP first
-        if ( !$snmp_engines{snmp}->() ) {
+        # Try both Net-SNMP and SNMP_Session
+        my $net_snmp_ok     = $snmp_engines{snmp}->();
+        my $snmp_session_ok = $snmp_engines{session}->();
+        if ( $net_snmp_ok && $snmp_session_ok ) {
 
-            # Fallback to SNMP_Session
-            if ( !$snmp_engines{session}->() ) {
-                log_fatal( "ERROR CONF: Neither Net-SNMP nor SNMP_Session are installed. Exiting...", 1 );
-            }
+            # Both engines are available, keep 'auto'
+            do_log( "Both Net-SNMP and SNMP_Session are available. Keeping 'auto'.", INFO );
+        }
+        elsif ($net_snmp_ok) {
+
+            # Only Net-SNMP is available, use 'snmp'
+            do_log( "Net-SNMP $SNMP::VERSION is supported. Using 'snmp'.", INFO );
+            $g{snmpeng} = 'snmp';
+        }
+        elsif ($snmp_session_ok) {
+
+            # Only SNMP_Session is available, use 'session'
+            do_log( "SNMP_Session is available. Using 'session'.", INFO );
             $g{snmpeng} = 'session';
         }
         else {
-            eval { require SNMP_Session; };
-            if ($@) {
-                do_log( "SNMP_Session not installed: $@. Consider installing 'libsnmp-session-perl'", WARN );
-                $g{snmpeng} = 'snmp';
-            }
-            else {
-                do_log( "SNMP_Session $SNMP_Session::VERSION is also available, providing SNMPv1", INFO );
-            }
+            # Neither engine is available, log error and exit
+            log_fatal( "ERROR: Neither Net-SNMP nor SNMP_Session are installed. Exiting...", 1 );
         }
     }
     elsif ( exists $snmp_engines{ $g{snmpeng} } ) {
 
-        # Check the specified SNMP engine
+        # Check if the specified SNMP engine is available
         if ( !$snmp_engines{ $g{snmpeng} }->() ) {
-            log_fatal( "ERROR CONF: $g{snmpeng} engine is not installed. Exiting...", 1 );
+            log_fatal( "$g{snmpeng} engine is not installed. Exiting...", 1 );
         }
     }
     else {
-        log_fatal( "ERROR CONF: Invalid option for snmpeng: '$g{snmpeng}'. Valid options are 'auto', 'snmp', 'session'.", 1 );
+        log_fatal( "ERROR: Invalid snmpeng option: '$g{snmpeng}'. Valid options are 'auto', 'snmp', 'session'.", 1 );
     }
 }
 
-# Check if Net-SNMP is available and valid
 sub check_snmp {
     eval { require SNMP; };
     if ($@) {
-        do_log( "Net-SNMP not installed: $@. Install with 'apt install libsnmp-perl' or 'yum install net-snmp-perl'", WARN );
+        do_log( "Net-SNMP not installed. Install with 'apt install libsnmp-perl' or 'yum install net-snmp-perl'", WARN );
         return 0;
     }
-    do_log( "DEBUG: Installed Net-SNMP version is $SNMP::VERSION", DEBUG );
+    do_log( "Net-SNMP version $SNMP::VERSION is installed.", DEBUG );
 
-    # Handle different version scenarios
-    if ( $SNMP::VERSION lt '5.0903' ) {
-        if ( $SNMP::VERSION ge '5.09' ) {
-            do_log( "WARNING: Net-SNMP version $SNMP::VERSION is installed, which may have known bugs. " . "Consider upgrading to version 5.9.3 or later. It will not be used.", WARN );
-        }
-        else {
-            do_log( "ERROR: Net-SNMP version $SNMP::VERSION is too old and may not function correctly. " . "Upgrade to version 5.9.3 or later. It will not be used.", ERROR );
-        }
-        return 0;    # Skip using Net-SNMP
+    # Reject versions between 5.09 and 5.0902, allow all others
+    if ( $SNMP::VERSION ge '5.09' && $SNMP::VERSION le '5.0902' ) {
+        do_log( "Net-SNMP version $SNMP::VERSION is within the restricted range (5.09 to 5.0902). Upgrade to a version older or later.",
+            ERROR );
+        return 0;
     }
-    do_log( "Net-SNMP $SNMP::VERSION is installed and meets the requirements, providing SNMPv2c and SNMPv3", INFO );
-    return 1;        # Indicate success
+
+    # Indicate success for supported SNMP versions (v1, v2c, v3)
+    do_log( "Net-SNMP $SNMP::VERSION supports SNMPv1, SNMPv2c, and SNMPv3.", INFO );
+    return 1;
 }
 
 # Check if SNMP_Session is available
 sub check_snmp_session {
     eval { require SNMP_Session; };
     if ($@) {
-        do_log( "SNMP_Session not installed: $@. Install with 'apt install libsnmp-session-perl' or 'yum install perl-SNMP_Session.noarch'", WARN );
+        do_log( "SNMP_Session not installed: $@. Install with 'apt install libsnmp-session-perl' or 'yum install perl-SNMP_Session.noarch'",
+            WARN );
         return 0;
     }
     do_log( "SNMP_Session $SNMP_Session::VERSION is installed, providing SNMPv1 and SNMPv2c", INFO );
@@ -1641,7 +1674,13 @@ sub do_log {
         }
         my ( $sec, $frac ) = gettimeofday;
         my $dateISO8601 = strftime( '%Y-%m-%dT%H:%M:%S.' . ( sprintf "%03d", $frac / 1000 ) . '%z', localtime($sec) );
-        $msg = $dateISO8601 . "|" . ( sprintf "%-5s", $g{log_level}[ $verbosity ] ) . '|' . ( sprintf "%-9s", $package ) . '|' . ( sprintf "%5s", $$ ) . '|' . ( sprintf "%4s", $line ) . "|" . $msg;
+        $msg
+            = $dateISO8601 . "|"
+            . ( sprintf "%-5s", $g{log_level}[ $verbosity ] ) . '|'
+            . ( sprintf "%-9s", $package ) . '|'
+            . ( sprintf "%5s",  $$ ) . '|'
+            . ( sprintf "%4s",  $line ) . "|"
+            . $msg;
         my $matched = 1;
         if ( $g{log_match_ref} and not( @{ $g{log_match_ref} } == 1 and $g{log_match_ref}->[ 0 ] eq '' ) ) {
             $matched = 0;
@@ -2410,7 +2449,8 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                         $new_hosts{$host}{ver} = $snmpver;
                         --$hosts_left;
                         if ( $g{trace} ) {
-                            do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
+                            do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc",
+                                INFO );
                         }
                         else {
                             do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model}", INFO );
@@ -2491,8 +2531,8 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                                     # Don't bother if we don't have any hosts left to query
                                     next if $hosts_left < 1;
 
-                                    #do_log( "$hosts_left host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
-                                    # Zero out our data in and data out hashes
+#do_log( "$hosts_left host(s) left, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
+# Zero out our data in and data out hashes
                                     %snmp_input = ();
 
                                     # And query the devices that haven't yet responded
@@ -2508,13 +2548,19 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                                         # Skip if ip is not defined (name resolution)
                                         next if !defined $hosts_cfg{$host}{ip};
                                         if ( $g{trace} ) {
-                                            do_log( "Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass'", TRACE );
+                                            do_log(
+"Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass'",
+                                                TRACE
+                                            );
                                         }
                                         else {
-                                            do_log( "Trying valid host:$host, trying seclevel:'$seclevel', authproto:'$authproto', privproto:'$privproto'", INFO );
+                                            do_log(
+"Trying valid host:$host, trying seclevel:'$seclevel', authproto:'$authproto', privproto:'$privproto'",
+                                                INFO
+                                            );
                                         }
 
-                                        #do_log( "Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
+#do_log( "Trying valid host:$host, trying secname:'$secname', seclevel:'$seclevel', authproto:'$authproto', authpass:'$authpass', privproto:'$privproto', privpass:'$privpass' and snmp:v$snmpver", INFO );
                                         $snmp_input{$host}{authpass}         = $authpass;
                                         $snmp_input{$host}{authproto}        = $authproto;
                                         $snmp_input{$host}{cid}              = '';
@@ -2565,7 +2611,10 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                                             --$hosts_left;
 
                                             if ( $g{trace} ) {
-                                                do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc", INFO );
+                                                do_log(
+"Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model} with sysdesc=$sysdesc",
+                                                    INFO
+                                                );
                                             }
                                             else {
                                                 do_log( "Discovered $host as a $hosts_cfg{$host}{vendor} $hosts_cfg{$host}{model}", INFO );
@@ -2833,8 +2882,12 @@ OLDHOST: for my $host ( keys %snmp_input ) {
                 $excepts .= ',' if ( $excepts !~ /,$/ );
             }
             $excepts =~ s/,$//;
-            do_log( "$host $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", TRACE ) if $g{debug};
-            print HOSTFILE "$host\e$ip\e$port\e$resolution\e$vendor\e$model\e$ver\e$cid\e$secname\e$seclevel\e$authproto\e$authpass\e$privproto\e$privpass\e$tests\e$thresholds\e$excepts\n";
+            do_log(
+"$host $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts",
+                TRACE
+            ) if $g{debug};
+            print HOSTFILE
+"$host\e$ip\e$port\e$resolution\e$vendor\e$model\e$ver\e$cid\e$secname\e$seclevel\e$authproto\e$authpass\e$privproto\e$privpass\e$tests\e$thresholds\e$excepts\n";
         }
         close HOSTFILE;
     }
@@ -2917,8 +2970,14 @@ sub read_hosts {
         my $linenumber = 0;
     FILELINE: for my $line (<DBFILE>) {
             chomp $line;
-            my ( $name, $ip, $port, $resolution, $vendor, $model, $ver, $cid, $secname, $seclevel, $authproto, $authpass, $privproto, $privpass, $tests, $thresholds, $excepts ) = split /\e/, $line;
-            do_log( "DB $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts", TRACE ) if $g{debug};
+            my (
+                $name,     $ip,        $port,     $resolution, $vendor,   $model, $ver,        $cid, $secname,
+                $seclevel, $authproto, $authpass, $privproto,  $privpass, $tests, $thresholds, $excepts
+            ) = split /\e/, $line;
+            do_log(
+"DB $name $ip $port $resolution $vendor $model $ver $cid $secname $seclevel $authproto $authpass $privproto $privpass $tests $thresholds $excepts",
+                TRACE
+            ) if $g{debug};
             ++$linenumber;
 
             # Filter if requested
@@ -2993,9 +3052,56 @@ sub read_hosts {
     return %hosts;
 }
 
+sub daemonize {
+
+    # Skip daemonizing if running in the foreground
+    return if $g{foreground};
+
+    # Fork the process and exit the parent
+    if ( my $pid = do_fork() ) {
+        do_log( "Forking to background process $pid", 'INFO' );
+        exit 0;    # Parent exits
+    }
+
+    # Child process; disconnect from the terminal (setsid)
+    POSIX::setsid() or die "Cannot start a new session: $!";
+
+    # Prevent the process from acquiring a controlling terminal
+    $SIG{HUP} = 'IGNORE';
+    exit 0 if do_fork();    # Ensure no controlling terminal for the child
+
+    # Set file creation mask (umask)
+    umask 0;
+
+    # Close all file descriptors to avoid leaking open files
+    my $openmax = POSIX::sysconf(&POSIX::_SC_OPEN_MAX);
+    $openmax = 64 if !defined $openmax or $openmax < 0;
+    for my $i ( 0 .. $openmax ) { POSIX::close($i) }
+
+    # Open STDOUT and STDERR for logging
+    #    my $log_file = '/var/log/devmon/devmon.log';  # Log file location
+    open( STDOUT, '>>', $g{log_file} ) or die "Cannot redirect STDOUT to $g{log_file}: $!";
+    open( STDERR, '>>', $g{log_file} ) or die "Cannot redirect STDERR to $g{log_file}: $!";
+
+    # Set the process name for monitoring
+    $0 = 'devmon[main]';
+
+    # Set up signal handlers for termination and log reopening
+    $SIG{INT} = $SIG{QUIT} = $SIG{TERM} = \&quit;
+    $SIG{HUP} = \&reopen_log;
+
+    # Re-open the log file to ensure file descriptors are right
+    reopen_log();
+
+    # Write the PID file
+    #    write_pid();
+    # Main logic of the daemon
+    do_log( "Daemon started successfully", 'INFO' );
+}
+
 # Daemonize: go to daemon mode and fork into background
 # Much code shamelessly stolen from Proc::Daemon by Earl Hood
-sub daemonize {
+sub daemonize1 {
 
     #return if !$g{daemonize};
     return if $g{foreground};
@@ -3090,7 +3196,9 @@ sub user_has_file_permissions {
 
     # Test owner
     if ( $file_uid == $user_uid ) {
-        return 1 if ( $permissions eq 'r' && ( $mode & 0400 ) ) || ( $permissions eq 'rw' && ( $mode & 0400 ) && ( $mode & 0200 ) );    # 6 is for read-write(=rw)
+        return 1
+            if ( $permissions eq 'r' && ( $mode & 0400 ) )
+            || ( $permissions eq 'rw' && ( $mode & 0400 ) && ( $mode & 0200 ) );    # 6 is for read-write(=rw)
     }
 
     # Test groups
@@ -3344,7 +3452,8 @@ sub can_read_user_from_config {
             my $new_valid_config_file = normalize_and_verify_config_path( $configured_user, $config_file, @config_folders );
             if ( defined $new_valid_config_file ) {
                 if ( $valid_config_file ne $new_valid_config_file ) {
-                    die "The user '$configured_user' configured can read another config file found at: $new_valid_config_file. Check your permissions.";
+                    die
+"The user '$configured_user' configured can read another config file found at: $new_valid_config_file. Check your permissions.";
                 }
                 else {
                     $valid_user = $configured_user;
@@ -3364,13 +3473,15 @@ sub can_read_user_from_config {
         if ( defined $valid_config_file ) {
             my $configured_user = read_user_from_config_file($valid_config_file);
             if ( not defined $configured_user ) {
-                die "The current user '$current_user' MUST be configured in the config file '$valid_config_file' for a valid configuration.\n";
+                die
+"The current user '$current_user' MUST be configured in the config file '$valid_config_file' for a valid configuration.\n";
             }
             elsif ( $configured_user ne $current_user ) {
                 my $new_valid_config_file = normalize_and_verify_config_path( $configured_user, $config_file, @config_folders );
                 if ( defined $new_valid_config_file ) {
                     if ( $valid_config_file ne $new_valid_config_file ) {
-                        die "The user '$configured_user' configured can read another config file found at: $new_valid_config_file. Check your permissions.\n";
+                        die
+"The user '$configured_user' configured can read another config file found at: $new_valid_config_file. Check your permissions.\n";
                     }
                     else {
                         $valid_user = $configured_user;
@@ -3399,8 +3510,8 @@ sub can_read_user_from_config {
 sub can_read_config {
     my ($config_file) = @_;
     $g{user} = get_user_from_config($config_file) || $g{user};
-    my ($new_uid) = ( getpwnam( $g{user} ) )[ 2 ] // die "User '$g{user}' does not exist or cannot be switched to.\n";
-    my $current_uid = $<;                                                                                                  # Get the current UID
+    my ($new_uid)   = ( getpwnam( $g{user} ) )[ 2 ] // die "User '$g{user}' does not exist or cannot be switched to.\n";
+    my $current_uid = $<;    # Get the current UID
     return 1 if $current_uid == $new_uid;
     setuid($new_uid)          or die "Failed to set UID to $new_uid: $!";
     is_readable($config_file) or die "Config file '$config_file' is not readable with UID: '$new_uid'\n";
