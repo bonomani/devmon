@@ -1667,15 +1667,14 @@ DEVICE: while (1) {    # We should never leave this loop
                 }
                 my $errors = $session->get_errors();
                 for my $error (@$errors) {    # Loop through all errors
-                    #$data_out{snmp_msg}{ ++$snmp_msg_count }
-                    #    = build_snmp_log_message( $error, $process, $sub_process, $task );
+                                              #$data_out{snmp_msg}{ ++$snmp_msg_count }
+                                              #    = build_snmp_log_message( $error, $process, $sub_process, $task );
                     if ( defined $error->{code} && $error->{code} == SNMPERR_TIMEOUT ) {   # Normally should not occurs...as tested by xymon
                         $has_timed_out = 1;
                         last BULK_QUERY;
                     }
-                    $data_out{snmp_msg}{ ++$snmp_msg_count }                                 
-                        = build_snmp_log_message( $error, $process, $sub_process, $task );   
- 
+                    $data_out{snmp_msg}{ ++$snmp_msg_count }
+                        = build_snmp_log_message( $error, $process, $sub_process, $task );
                 }
                 if ($use_getnext) {
                     if ( $response_count eq 0 ) {
@@ -1705,11 +1704,12 @@ DEVICE: while (1) {    # We should never leave this loop
                         last BULK_QUERY;
                     }
                     elsif ( $response_count < $expected_response_count ) {
-                        #my $message = "Nb of responses: $response_count/$expected_response_count";#, decreasing max_getbulk_responses from: $max_getbulk_responses to: ".(--$max_getbulk_responses);
-                        #$data_out{snmp_msg}{ ++$snmp_msg_count }
-                        #    = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
-                        #$max_getbulk_responses--; #= $response_count;
-                        #$data_out{oids}{snmp_input}{max_getbulk_responses} = $max_getbulk_responses;
+
+#my $message = "Nb of responses: $response_count/$expected_response_count";#, decreasing max_getbulk_responses from: $max_getbulk_responses to: ".(--$max_getbulk_responses);
+#$data_out{snmp_msg}{ ++$snmp_msg_count }
+#    = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
+#$max_getbulk_responses--; #= $response_count;
+#$data_out{oids}{snmp_input}{max_getbulk_responses} = $max_getbulk_responses;
                     }
                     else {
                         my $message = "More getbulk responses:$response_count than expected $expected_response_count";
@@ -1901,7 +1901,6 @@ DEVICE: while (1) {    # We should never leave this loop
                 else {
                     $idx = 0;
                 }
-
                 if ( $current_query_branch_cnt - $idx < $max_repetitions_in_query ) {
 
                     # Some agent dont honor max repetition for some oid so we have to confirm we got all
