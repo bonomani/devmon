@@ -1667,16 +1667,19 @@ DEVICE: while (1) {    # We should never leave this loop
                 }
                 my $errors = $session->get_errors();
                 for my $error (@$errors) {    # Loop through all errors
-                    $data_out{snmp_msg}{ ++$snmp_msg_count }
-                        = build_snmp_log_message( $error, $process, $sub_process, $task );
+                    #$data_out{snmp_msg}{ ++$snmp_msg_count }
+                    #    = build_snmp_log_message( $error, $process, $sub_process, $task );
                     if ( defined $error->{code} && $error->{code} == SNMPERR_TIMEOUT ) {   # Normally should not occurs...as tested by xymon
                         $has_timed_out = 1;
                         last BULK_QUERY;
                     }
+                    $data_out{snmp_msg}{ ++$snmp_msg_count }                                 
+                        = build_snmp_log_message( $error, $process, $sub_process, $task );   
+ 
                 }
                 if ($use_getnext) {
                     if ( $response_count eq 0 ) {
-                        my $message = "Empty getnext responses (=0)";
+                        my $message = "Empty getnext responses";
                         $data_out{snmp_msg}{ ++$snmp_msg_count }
                             = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
                         last BULK_QUERY;
@@ -1696,17 +1699,17 @@ DEVICE: while (1) {    # We should never leave this loop
                 }
                 else {
                     if ( $response_count eq 0 ) {
-                        my $message = "Empty getbulk responses (=0)";
+                        my $message = "Empty getbulk responses";
                         $data_out{snmp_msg}{ ++$snmp_msg_count }
                             = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
                         last BULK_QUERY;
                     }
                     elsif ( $response_count < $expected_response_count ) {
-                        my $message = "Decreasing max_getbulk_responses from $max_getbulk_responses to $response_count";
-                        $data_out{snmp_msg}{ ++$snmp_msg_count }
-                            = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
-                        $max_getbulk_responses--; #= $response_count;
-                        $data_out{oids}{snmp_input}{max_getbulk_responses} = $response_count;
+                        #my $message = "Nb of responses: $response_count/$expected_response_count";#, decreasing max_getbulk_responses from: $max_getbulk_responses to: ".(--$max_getbulk_responses);
+                        #$data_out{snmp_msg}{ ++$snmp_msg_count }
+                        #    = build_snmp_log_message( undef, $process, $sub_process, $task, $message );
+                        #$max_getbulk_responses--; #= $response_count;
+                        #$data_out{oids}{snmp_input}{max_getbulk_responses} = $max_getbulk_responses;
                     }
                     else {
                         my $message = "More getbulk responses:$response_count than expected $expected_response_count";
@@ -1755,7 +1758,7 @@ DEVICE: while (1) {    # We should never leave this loop
                 my $nonrepval = deeph_find_leaf( $oid, \%deep_h );
                 if ( not defined $nonrepval ) {
                     $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
-                    $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No1 Such Object available on this agent at this OID";
+                    $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID (#1)";
                 }
                 delete $poll_nrep{$poid};
             }
@@ -1782,7 +1785,7 @@ DEVICE: while (1) {    # We should never leave this loop
                     for my $coid ( keys %{ $poll_rep_oid{$oid}{oids} } ) {    #eksf
                         if ( $oid eq $poll_rep_oid{$oid}{start} ) {
                             $data_out{oids}{snmp_input}{oids}{$coid}{nosuchobject} = undef;
-                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No2 Such Object available on this agent at this OID";
+                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID (#2)";
                             if ($use_getnext) {
                                 delete $poll_rep_undefined_mr{$coid};
                             }
@@ -1793,7 +1796,7 @@ DEVICE: while (1) {    # We should never leave this loop
                         and not exists $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} )
                     {
                         $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
-                        $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No3 Such Object available on this agent at this OID";
+                        $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID (#3)";
                     }
                 }
 
@@ -1864,12 +1867,12 @@ DEVICE: while (1) {    # We should never leave this loop
                     for my $coid ( keys %{ $poll_rep_oid{$oid}{oids} } ) {    #eksf
                         if ( $oid eq $poll_rep_oid{$oid}{start} ) {
                             $data_out{oids}{snmp_input}{oids}{$coid}{nosuchobject} = undef;
-                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No4 Such Object available on this agent at this OID";
+                            $data_out{snmp_msg}{ ++$snmp_msg_count } = "$coid = No Such Object available on this agent at this OID (#4)";
                         }
                     }
                     if ( !$branch_cnt and $is_try1 ) {                        # $branch_cnt =0 and $poll_rep_oid{$oid}{cnt} = 0
                         $data_out{oids}{snmp_input}{oids}{$oid}{nosuchobject} = undef;
-                        $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No5 Such Object available on this agent at this OID";
+                        $data_out{snmp_msg}{ ++$snmp_msg_count } = "$oid = No Such Object available on this agent at this OID (#5)";
                     }
                 }
             }
