@@ -207,7 +207,6 @@ sub _handle_snmp_error {
     my ( $host, $ip, $community, $request_id, $max_pdu_len, $timeout, $retries, $backoff, $message, $version );
     my $session = $self->{session};
     my $oid;
-
     my $snmp_errmsg = snmp_errmsg();
     if ( defined $code ) {
 
