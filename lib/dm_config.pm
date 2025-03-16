@@ -3059,7 +3059,7 @@ sub daemonize {
 
     # Fork the process and exit the parent
     if ( my $pid = do_fork() ) {
-        do_log( "Forking to background process $pid", 'INFO' );
+        do_log( "Forking to background process $pid", INFO );
         exit 0;    # Parent exits
     }
 
