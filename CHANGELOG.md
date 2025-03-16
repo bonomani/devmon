@@ -1,7 +1,4 @@
 # Changelog  
-Contributors of specific features/patches are listed in parenthesis next to the respective entry.
-
-# Changelog  
 **Contributors of specific features/patches are listed in parentheses next to the respective entry.**
 
 ## Devmon v0.25.03
