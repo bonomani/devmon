@@ -1,93 +1,106 @@
 # Changelog  
 Contributors of specific features/patches are listed in parenthesis next to the respective entry.
 
+# Changelog  
+**Contributors of specific features/patches are listed in parentheses next to the respective entry.**
+
+## Devmon v0.25.03
+- **New Features**:
+  - Merged all polling under the new partial retry algorithm:
+    - Added support for SNMPv3.
+    - Default use of Net-SNMP (10% speed gain).
+  - **Default Template**:
+    - Longest regex match first.
+- **Bug fixes**:
+  - Minor bug fixes.
+
 ## Devmon v0.25.01
-- Bug fixes:
-  - Stabilize snmp polling algo 
-  - Correctly describe Fan in extras/devmon-graphs.cfg (Jezzaaa)
-- New Template: Aten (Supermico IPMI interface) 
-- Authors: Project officially transfered by the original author (eschwim)  
+- **Bug fixes**:
+  - Stabilized SNMP polling algorithm.
+  - Corrected the description of the Fan in `extras/devmon-graphs.cfg` (Jezzaaa).
+- **New Template**:
+  - Added Aten (Supermicro IPMI interface).
+- **Authors**:
+  - Project officially transferred by the original author (eschwim).
 
 ## Devmon v0.24.03
-- Convert, simplify and update documentation in Markdown
-- Bug fixes:
-  - Discovery process sometime fails
+- Converted, simplified, and updated documentation to Markdown format.
+- **Bug fixes**:
+  - Fixed an issue where the discovery process sometimes failed.
 
 ## Devmon v0.23.09
-- **Right Table Alignment Feature**: (W. Nelis)
-- Bug fixes
+- **Right Table Alignment Feature**: (W. Nelis).
+- **Bug fixes**.
 
 ## Devmon v0.23.07
-- Enhanced SNMP Retry Logic
-  - Prevent memory leaks, by eliminating fork failures.
-  - Better control the SNMP oid walking process by using low level "snmpgetbulk" queries
-  - Speeds up monitoring, particularly for slower devices 
-  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) as new logic not 
-    implemented for NET-SNMP 
-- Bug fixes
-  
+- **Enhanced SNMP Retry Logic**:
+  - Prevented memory leaks by eliminating fork failures.
+  - Improved control of SNMP OID walking process using low-level `snmpgetbulk` queries.
+  - Increased monitoring speed, especially for slower devices.
+  - **Engine Transition**: Default engine switched to SNMP_Session (Pure Perl) as new logic is not implemented for NET-SNMP.
+- **Bug fixes**.
+
 ## Devmon v0.21.09
-- Stabilyze SNMPv3 (thanks to Stef Coene)
-- New command line option:
-  - Single device and single test: devmon -o 1.1.1.1=fan   
-  - Dont need to stop devmon anymore 
-  - Print result to sdtout and to xymon
-  - See devmon -?
-- Logging restructured (need more work)
-  - See discussion
-  - devmon -t[race] for very detailled info 
+- **Stabilized SNMPv3** (Thanks to Stef Coene).
+- **New Command Line Option**:
+  - Single device and test: `devmon -o 1.1.1.1=fan` 
+  - No need to stop Devmon anymore.
+  - Results printed to stdout and Xymon.
+  - See `devmon -?` for details.
+- **Logging Restructured** (Further work needed):
+  - See discussion.
+  - Use `devmon -t[race]` for detailed logs.
 
 ## Devmon v0.21.08
-- First SNMPv3 version (read install)
-- Update template for vmware7 (thanks to Roemer)
-- Update wiki (mainly for devmon dev)
-- Tidy code (start to have best practice)
-- Update logs
-- Bug fixes
+- First SNMPv3 version (refer to install instructions).
+- **Template Updates**:
+  - Updated template for VMware7 (Thanks to Roemer).
+- **Code Updates**:
+  - Tidied up code (beginning to follow best practices).
+  - Updated logs.
+- **Bug fixes**.
 
 ## Devmon v0.21.07
-- No new Feature, nor bug resolved
-- Move Wiki (Github Wikis are not indexed by Google)
-- Update README and CHANGELOG 
+- **No new features or bug fixes**.
+- Moved the Wiki (GitHub Wikis are not indexed by Google).
+- Updated README and CHANGELOG.
 
 ## Devmon v0.21.06
-- New features
-  - CPU revamp (Cisco, Huawei), mainly the "uptime" part
-    - Reboot cause analysis with a auto disable timer
-    - Better Uptime value, calculation with (snmp and system oid)
-  - Threshold automatch acccept multiple value
-     - We can have not multiple empty (automatch) threshold for an oid
-     - Empty threshold of the current color is prefered
-- Bug fixes
-  - MATH transform with constant (without other deps oids)
-  - TSWITCH calc
-  - Perl 5.28 compatibility (thanks to Stef Coene)
-  - Threshold calculation
-  - Custom threshold in hosts.cfg should overide other
-  - BEST threshold can override herited error
+- **New Features**:
+  - **CPU Revamp** (Cisco, Huawei), focusing mainly on the "uptime" part.
+    - Added reboot cause analysis with an auto-disable timer.
+    - Improved uptime value calculation with SNMP and system OID.
+  - **Threshold Automatch**: Now accepts multiple values.
+    - Allows multiple empty (automatch) thresholds for an OID.
+    - Prefers empty thresholds of the current color.
+- **Bug fixes**:
+  - Fixed issues with MATH transformation using constants (without other OID dependencies).
+  - Resolved issues with TSWITCH calculation.
+  - Fixed compatibility with Perl 5.28 (Thanks to Stef Coene).
+  - Corrected threshold calculation.
+  - Ensured custom thresholds in `hosts.cfg` override others.
+  - Allowed BEST thresholds to override inherited errors.
 
-## Devmon v0.16.12 
-- Changes since v0.3.1-beta1
-  - Fork Soureforge
-  - New release versioning
-    - Stay under 1 (we consider there is a room of improvement befer release 1.
-    - Date versioning v0.16.12.15 = 2016-12-15
-  - Modify "core" concept: Error propagation is the default 
-  - Improved User-Friendliness
-    - Error reporting
-    - Add new color 'Blue' color for test that are 'Disabled'
-  - New transforms SET, STATISTIC documented in docs/TEMPLATE for explanation (Thanks to W. Nelis)
-  - WIP transforms
-    - COLTRE: To collect data when there are "parent" oid values
-    - SORT  : To sort in an increasing order (str only)
-  - Update template: 
-    - Cisco
-      - Cisco r1800, r1900, r2800, r2900, sw2940, sw2950, sw2960, sw3750
-        sw3850, sw3650, swIE, rISR, asa
-    - Wmware
-    - esxi6
-    - Huawei             
-  - Add patch from many conributors  
+## Devmon v0.16.12
+- **Changes since v0.3.1-beta1**:
+  - Forked from SourceForge.
+  - New release versioning system: 
+    - Versioning under 1, as there is room for improvement before releasing version 1.
+    - Date-based versioning (e.g., v0.16.12.15 = 2016-12-15).
+  - Modified "core" concept: Error propagation is the default behavior.
+  - **Improved User-Friendliness**:
+    - Enhanced error reporting.
+    - Added new color "Blue" for tests that are "Disabled".
+  - **New Transforms**:
+    - `SET` and `STATISTIC` (documented in `docs/TEMPLATE`) (Thanks to W. Nelis).
+  - **Work In Progress** (WIP) Transforms:
+    - `COLTRE`: Collect data when there are "parent" OID values.
+    - `SORT`: Sort in increasing order (string only).
+  - **Template Updates**:
+    - Cisco: Added support for Cisco r1800, r1900, r2800, r2900, sw2940, sw2950, sw2960, sw3750, sw3850, sw3650, swIE, rISR, ASA.
+    - VMware: Added template for ESXi6.
+    - Huawei: Added template support.
+  - **Contributions**: Applied patches from many contributors.
 
 `PATCH                                                                     SForge Status Github Status`  
 `38 Template for cisco nexus 3500                                           open         fixed                  07.06.2018 07.06.2018`  
