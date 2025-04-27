@@ -3333,7 +3333,7 @@ sub get_group_ids_from_uid {
     # Get supplementary groups
     my %group_ids = ( $user_primary_gid => 1 );    # Use a hash to avoid duplicates
     setgrent();                                    # Start from the beginning of the group file
-    while ( ( my $gid, my $members ) = ( getgrent() )[ 1, 3 ] ) {
+    while ( ( my $gid, my $members ) = ( getgrent() )[ 2, 3 ] ) {
         my @members = split /,/, $members;
         if ( grep { $_ eq $user_name } @members ) {
             $group_ids{$gid} = 1;

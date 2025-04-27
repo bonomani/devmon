@@ -63,22 +63,57 @@ sub poll_devices {
     # we don't want to waste time querying devices that are down
     do_log( "Getting device status from Xymon at $g{dispserv}:$g{dispport}", INFO );
     %{ $g{xymon_color} } = ();
-    my $sock = IO::Socket::INET->new(
-        PeerAddr => $g{dispserv},
-        PeerPort => $g{dispport},
-        Proto    => 'tcp',
-        Timeout  => 5,
-    );
-    if ( defined $sock ) {
 
-        # Ask xymon for ssh, conn, http, telnet tests green on all devices
-        print $sock "xymondboard test=conn|ssh|http|telnet color=green fields=hostname";
+    # Function to send request, half-close, and receive response
+    sub send_request_and_receive {
+        my ($request) = @_;
+
+        # Initialize the socket connection using values from %g hash
+        my $sock = IO::Socket::INET->new(
+            PeerAddr => $g{dispserv},    # Xymon server IP from %g hash
+            PeerPort => $g{dispport},    # Port from %g hash
+            Proto    => 'tcp'
+        ) or die "Could not connect to server: $!\n";
+
+        # Send the request to the server
+        print $sock "$request\n";        # Automatically sends data over the socket
+
+        # Half-close the socket to stop sending data, but still receive
         shutdown( $sock, 1 );
-        while ( my $device = <$sock> ) {
-            chomp $device;
-            $g{xymon_color}{$device} = 'green';
+
+        # Read the response from the Xymon server
+        my $response   = '';
+        my $timeout    = 5;              # Timeout in seconds
+        my $start_time = time;
+        while ( my $line = <$sock> ) {
+            $response .= $line;                       # Append the response
+            last if time - $start_time > $timeout;    # Timeout condition
         }
-        close($sock);
+
+        # Close the socket after receiving the response
+        shutdown( $sock, 2 );                         # Fully close the socket (no more sending or receiving)
+        close($sock);                                 # Close the socket
+        return $response;
+    }
+
+    # Send the first request
+    my $response1 = send_request_and_receive("config xymonserver.cfg");
+
+    # Example to use the response and send a second request
+    my $conn = 'conn';    # default to "conn" column
+    if ( $response1 =~ /PINGCOLUMN="([^"]+)"/ ) {
+        $conn = $1;
+
+        # Send the second request using the extracted PINGCOLUMN
+        my $response2 = send_request_and_receive("xymondboard test=$conn|ssh|http|telnet color=green fields=hostname");
+
+        # Process the response (same as processing multiple lines from the socket)
+        # Split the response into lines and process each device
+        my @devices = split( "\n", $response2 );
+        foreach my $device (@devices) {
+            chomp $device;                         # Remove any trailing newline
+            $g{xymon_color}{$device} = 'green';    # Same result as the original code
+        }
     }
 
     # Build our query hash
@@ -88,7 +123,7 @@ QUERYHASH: for my $device ( sort keys %{ $g{devices} } ) {
         # Skip this device if we are running a Xymon server and the
         # server thinks that it isn't reachable
         if ( !defined $g{xymon_color}{$device} ) {
-            do_log( "$device hasn't any Xymon tests skipping SNMP: add at least one! conn, ssh,...", INFO );
+            do_log( "$device hasn't any Xymon tests skipping SNMP: add at least one! $conn, ssh,...", INFO );
             --$g{numsnmpdevs};
             next QUERYHASH;
         }
